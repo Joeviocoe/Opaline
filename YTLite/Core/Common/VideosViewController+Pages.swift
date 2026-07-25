@@ -70,15 +70,25 @@ extension VideosViewController {
             collectionView?.reloadData()
             return
         }
-        let itemPaths = mergeIntoLastSection(&newSections)
-        let insertStart = sections.count
-        sections.append(contentsOf: newSections)
-        collectionView?.performBatchUpdates {
+        guard let collectionView else {
+            _ = mergeIntoLastSection(&newSections)
+            sections.append(contentsOf: newSections)
+            return
+        }
+        // `sections` MUST be mutated inside the block. UIKit snapshots the
+        // item counts when `performBatchUpdates` is entered, so growing the
+        // array first makes its "before" and "after" snapshots identical
+        // while the announced inserts say otherwise — which iOS reports as
+        // "Invalid batch updates detected" and turns into a crash.
+        collectionView.performBatchUpdates {
+            let itemPaths = mergeIntoLastSection(&newSections)
+            let insertStart = sections.count
+            sections.append(contentsOf: newSections)
             if !itemPaths.isEmpty {
-                collectionView?.insertItems(at: itemPaths)
+                collectionView.insertItems(at: itemPaths)
             }
             if insertStart < sections.count {
-                collectionView?.insertSections(
+                collectionView.insertSections(
                     IndexSet(insertStart..<sections.count)
                 )
             }
