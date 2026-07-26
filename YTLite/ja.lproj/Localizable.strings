@@ -124,6 +124,11 @@
 /* The 1x playback speed */
 "player.speed.normal" = "標準";
 
+/* ===== Player: seek HUD ===== */
+
+/* Accumulated seek offset shown while tapping ±10s repeatedly; %1$@ = signed seconds, e.g. "-90" */
+"player.seek.offset" = "%1$@ 秒";
+
 /* ===== SponsorBlock ===== */
 
 /* Skip button; %1$@ = localized category name, e.g. "Skip Sponsor" */

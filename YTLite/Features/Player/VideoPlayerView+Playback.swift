@@ -49,7 +49,14 @@ extension VideoPlayerView {
         hideSkipButton()
         sponsorSegments = []
         seekBar.setSegments([])
+        seekBar.cancelScrubbing()
         speedOverlay.isHidden = true
+        hudWorkItem?.cancel()
+        hudLabel.alpha = 0
+        seekBurst.direction = 0
+        seekBurst.tapCount = 0
+        seekBurst.accumulated = 0
+        seekBurst.target = .invalid
     }
 
     func setSponsorSegments(
@@ -251,8 +258,12 @@ extension VideoPlayerView {
             return
         }
         let secs = CMTimeGetSeconds(time)
-        currentTimeLabel.text = formatTime(secs)
+        // While the user drags the thumb, `onScrubChanged` owns the label
+        // and the bar's fill/thumb — the periodic observer must not fight
+        // the finger with the actual playback position (issue: label was
+        // unreadable mid-scrub).
         if !seekBar.isScrubbing {
+            currentTimeLabel.text = formatTime(secs)
             seekBar.setProgress(secs / duration)
         }
         updateBuffer(at: time)

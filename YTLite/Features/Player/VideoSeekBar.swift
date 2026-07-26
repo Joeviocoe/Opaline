@@ -109,6 +109,17 @@ final class VideoSeekBar: UIControl {
         }
     }
 
+    /// Force-clears a stuck drag (e.g. the player detaches mid-scrub).
+    /// Does not fire `onScrubEnd` — there is no target to seek to.
+    func cancelScrubbing() {
+        guard isScrubbing else {
+            return
+        }
+        thumbView.transform = .identity
+        thumbView.isHidden = true
+        isScrubbing = false
+    }
+
     @objc
     private func handleTrackTap(
         _ gesture: UITapGestureRecognizer

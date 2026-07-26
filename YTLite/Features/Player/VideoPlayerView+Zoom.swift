@@ -73,7 +73,7 @@ extension VideoPlayerView {
                 min(max(proposed, 1), limit),
                 animated: false
             )
-            showZoomHUD()
+            showHUD(text: zoomHUDText())
         case .ended, .cancelled, .failed:
             finishPinch(endScale: gesture.scale)
         default:
@@ -85,7 +85,7 @@ extension VideoPlayerView {
         // Pinch-in while already at 100% keeps the old
         // exit-fullscreen shortcut.
         if pinchStartZoom <= 1.01, endScale < 0.8 {
-            hideZoomHUD(after: 0)
+            hideHUD(after: 0)
             delegate?.videoPlayerViewDidTapFullscreen(self)
             return
         }
@@ -93,8 +93,8 @@ extension VideoPlayerView {
         if snapped != videoZoom {
             setZoom(snapped, animated: true)
         }
-        showZoomHUD()
-        hideZoomHUD(after: 0.8)
+        showHUD(text: zoomHUDText())
+        hideHUD(after: 0.8)
     }
 
     /// Snap near-fit back to 100% and near-fill onto the exact
@@ -134,15 +134,6 @@ extension VideoPlayerView {
 
     // MARK: - Zoom HUD
 
-    private func showZoomHUD() {
-        if zoomLabel.superview == nil {
-            setupZoomLabel()
-        }
-        zoomHUDWorkItem?.cancel()
-        zoomLabel.text = zoomHUDText()
-        zoomLabel.alpha = 1
-    }
-
     private func zoomHUDText() -> String {
         let fill = fillZoom
         if fill > 1.01, abs(videoZoom - fill) < 0.01 {
@@ -151,32 +142,45 @@ extension VideoPlayerView {
         let percent = Int((videoZoom * 100).rounded())
         return "  \(percent)%  "
     }
+}
 
-    func hideZoomHUD(after delay: TimeInterval) {
-        zoomHUDWorkItem?.cancel()
+// MARK: - Shared HUD (zoom % and seek offset)
+
+extension VideoPlayerView {
+    func showHUD(text: String) {
+        if hudLabel.superview == nil {
+            setupHUDLabel()
+        }
+        hudWorkItem?.cancel()
+        hudLabel.text = text
+        hudLabel.alpha = 1
+    }
+
+    func hideHUD(after delay: TimeInterval) {
+        hudWorkItem?.cancel()
         let item = DispatchWorkItem { [weak self] in
             UIView.animate(withDuration: 0.2) {
-                self?.zoomLabel.alpha = 0
+                self?.hudLabel.alpha = 0
             }
         }
-        zoomHUDWorkItem = item
+        hudWorkItem = item
         DispatchQueue.main.asyncAfter(
             deadline: .now() + delay,
             execute: item
         )
     }
 
-    private func setupZoomLabel() {
-        addSubview(zoomLabel)
+    private func setupHUDLabel() {
+        addSubview(hudLabel)
         NSLayoutConstraint.activate([
-            zoomLabel.centerXAnchor.constraint(
+            hudLabel.centerXAnchor.constraint(
                 equalTo: centerXAnchor
             ),
-            zoomLabel.topAnchor.constraint(
+            hudLabel.topAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.topAnchor,
                 constant: 24
             ),
-            zoomLabel.heightAnchor.constraint(
+            hudLabel.heightAnchor.constraint(
                 equalToConstant: 28
             )
         ])

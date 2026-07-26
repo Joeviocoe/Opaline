@@ -187,25 +187,28 @@ final class VideoPlayerView: UIView {
     /// True while the current zoom came from auto zoom-to-fill,
     /// not a user pinch — auto re-fit may override it.
     var zoomIsAuto = false
-    var zoomHUDWorkItem: DispatchWorkItem?
     var readyObservation: NSKeyValueObservation?
 
-    let zoomLabel: UILabel = {
+    // MARK: - HUD (zoom % and accelerating-seek offset share one overlay)
+
+    var hudWorkItem: DispatchWorkItem?
+
+    let hudLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
-        label.font = UIFont.monospacedDigitSystemFont(
-            ofSize: 14,
-            weight: .semibold
-        )
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .semibold)
         label.textAlignment = .center
-        label.backgroundColor = UIColor.black
-            .withAlphaComponent(0.75)
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.75)
         label.layer.cornerRadius = 4
         label.layer.masksToBounds = true
         label.alpha = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+
+    /// Consecutive same-direction taps within `seekBurstWindow` accumulate
+    /// into a growing step (issue: flat 10s felt painful on long videos).
+    let seekBurst = SeekBurstState()
 
     // MARK: - State
 

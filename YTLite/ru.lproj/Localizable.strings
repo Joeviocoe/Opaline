@@ -79,6 +79,11 @@
 
 "player.speed.normal" = "Обычная";
 
+/* ===== Player: seek HUD ===== */
+
+/* Accumulated seek offset shown while tapping ±10s repeatedly; %1$@ = signed seconds, e.g. "-90" */
+"player.seek.offset" = "%1$@ с";
+
 /* ===== SponsorBlock ===== */
 
 "sponsorblock.skip" = "Пропустить: %1$@";
