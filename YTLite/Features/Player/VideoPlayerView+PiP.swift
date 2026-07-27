@@ -178,7 +178,10 @@ extension VideoPlayerView {
     /// iOS 12, so it is swapped out here rather than at the moment PiP is
     /// asked for — a fresh controller needs a beat to report itself usable.
     private func rebuildPlayerIfPoisoned() {
-        if #available(iOS 14.2, *) {
+        // Matches the detach in `enterBackgroundAudioMode()`: everything below
+        // iOS 15 still loses its layer to keep audio alive, and thus needs the
+        // swap — including 14.2–14.x, where auto-PiP already works.
+        if #available(iOS 15.0, *) {
             return
         }
         guard playerNeedsRebuildForPiP, !isPiPActive, isAutoPiPEnabled else {
