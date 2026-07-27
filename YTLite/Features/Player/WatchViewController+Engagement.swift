@@ -13,8 +13,16 @@ extension WatchViewController {
         )
         backgroundEnteredAt = Date()
         // Layer/PiP background handling lives in VideoPlayerView.
-        if !bgEnabled {
-            videoPlayerView?.player?.pause()
+        guard !bgEnabled else {
+            return
+        }
+        // Auto-PiP may still be starting — pausing now would kill it, so the
+        // decision waits a tick for the controller's real state.
+        DispatchQueue.main.async { [weak self] in
+            guard self?.videoPlayerView?.isPiPActive != true else {
+                return
+            }
+            self?.videoPlayerView?.player?.pause()
         }
     }
 
@@ -25,9 +33,6 @@ extension WatchViewController {
             Date().timeIntervalSince($0)
         } ?? 0
         backgroundEnteredAt = nil
-        if let player = videoPlayerView?.player {
-            videoPlayerView?.playerLayer.player = player
-        }
         if elapsed > 120, hasSeenPlaybackError {
             AppLog.player(
                 "foreground: URLs likely expired"

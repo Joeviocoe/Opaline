@@ -216,6 +216,8 @@ final class VideoPlayerView: UIView {
     var hideWorkItem: DispatchWorkItem?
     var controlsVisible = false
     var wasPlayingOnResign = false
+    /// True between requesting PiP and it reporting itself active.
+    var pipIsStarting = false
     var duration: Double = 0
     var rateObservation: NSKeyValueObservation?
     var statusObservation: NSKeyValueObservation?
