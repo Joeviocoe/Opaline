@@ -90,6 +90,20 @@ extension VideoPlayerView {
             return
         }
         wasPlayingOnResign = (player?.rate ?? 0) > 0
+        // The setting can be toggled without ever leaving the app, so the
+        // system flag is refreshed here rather than only in `setupPiP()`.
+        if #available(iOS 14.2, *) {
+            pipController?
+                .canStartPictureInPictureAutomaticallyFromInline = isAutoPiPEnabled
+        }
+        // iOS 26 starts PiP on backgrounding even with the flag set to false,
+        // so the controller itself is taken away for the transition and
+        // rebuilt on activation — the button keeps working, nothing can
+        // auto-start. Safe from iOS 15 on, where the layer is never detached
+        // and a rebuilt controller therefore stays usable.
+        if #available(iOS 15.0, *), !isAutoPiPEnabled {
+            pipController = nil
+        }
         startAutoPiPIfNeeded()
     }
 
@@ -129,6 +143,12 @@ extension VideoPlayerView {
     }
 
     private func enterBackgroundAudioMode() {
+        // iOS 15+ keeps background audio alive through
+        // `audiovisualBackgroundPlaybackPolicy`, so the layer never has to
+        // give up its player — and PiP survives, lock screen included.
+        if #available(iOS 15.0, *) {
+            return
+        }
         guard !isPiPActive, !willAutoPiP else {
             return
         }
@@ -255,10 +275,12 @@ extension VideoPlayerView: AVPictureInPictureControllerDelegate {
         restoreUserInterfaceForPictureInPictureStopWithCompletionHandler
             completionHandler: @escaping (Bool) -> Void
     ) {
-        // This callback means "put your own player UI back". Handing the
-        // player to a layer that no longer holds it makes AVKit stop
-        // playback, so the binding is restored before answering.
+        // This callback means "put your own player UI back": expand the panel
+        // so AVKit hands the picture to a layer that is actually on screen —
+        // restoring into a collapsed panel flashes the whole app black.
+        // Handing it to a layer without a player stops playback outright.
         wasPlayingOnResign = (player?.rate ?? 0) > 0
+        VideoRouter.shared.expandPanel()
         if playerLayer.player == nil {
             playerLayer.player = player
         }

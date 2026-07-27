@@ -35,6 +35,12 @@ final class VideoRouter {
         panel?.collapse(animated: true)
     }
 
+    /// Brings the full player back — used when PiP asks the app to restore
+    /// its own playback UI, which AVKit expects to be on screen.
+    func expandPanel() {
+        panel?.expand(animated: false)
+    }
+
     func clearCurrentWatch() {
         panel?.close()
     }

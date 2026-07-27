@@ -18,6 +18,12 @@ enum PlaybackBufferPolicy {
     ) {
         player.automaticallyWaitsToMinimizeStalling =
             waitsToMinimizeStalling
+        // Keeps audio going in the background without detaching the player
+        // from its layer — the detach is what breaks PiP (#28). Older iOS
+        // has no such policy and falls back to detaching.
+        if #available(iOS 15.0, *) {
+            player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+        }
     }
 }
 
