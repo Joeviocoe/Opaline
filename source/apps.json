@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.6.4",
+          "date": "2026-07-27T20:26:19Z",
+          "localizedDescription": "## Fixes\n\n*   **Picture-in-Picture** ([#28](https://github.com/verback2308/ytlite/issues/28)) — PiP now works the same on iPhone and iPad and follows the setting: turn it on and leaving the app moves the video into a floating window; leave it off and you get background audio as before. The player's PiP button always works regardless of the setting. The button no longer stops working after opening Control Center, and playback no longer pauses when returning from PiP to the mini player. On iOS 12, iOS can't keep background audio and PiP available at once, so the app rebuilds the player when PiP is needed again — you may notice a brief buffering pause after listening in the background. On iOS 14.2+ this doesn't happen\n*   **Bot check recovery** — when YouTube answers a playback request with a bot check, the app no longer fails with a generic error. It renews the session identity and retries once on its own, showing a short \"renewing session\" status; in most cases the video just starts. If the retry is blocked too, the message now says what actually happened\n*   **Related videos in landscape** ([#29](https://github.com/verback2308/ytlite/issues/29)) — the first card in the related-videos sidebar no longer slides under the navigation bar (visible on iOS 26 and on Mac with \"Designed for iPad\")\n*   **Seeking** — double-tap seeking now accelerates: consecutive taps in the same direction step 10s, 20s, 30s and then 60s each, so three taps cover a minute, and a fast burst counts every tap instead of losing the ones that land mid-seek. The time label no longer jumps back to the playing position while you drag the seek bar — it follows your finger until you let go\n*   **Feed crash** — fixed a crash when loading the next page of videos in a feed",
+          "downloadURL": "https://github.com/verback2308/ytlite/releases/download/1.6.4/YTLite_1.6.4.ipa",
+          "size": 4513178,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.6.3",
           "date": "2026-07-23T20:51:28Z",
           "localizedDescription": "## New Features\n- **Autoplay toggles** (#26) — autoplay can now be turned off in Settings, separately for \"Up Next\" suggestions and for mixes/playlists. With autoplay off, playback simply stops at the end of the video\n\n## Fixes\n- **More reliable new-video dots** (#13) — some channels never got a dot because YouTube's subscriptions feed omits part of the fresh uploads. Detection now uses a source that lists uploads in publication order, so dots no longer miss new videos. Also works in all interface languages now and respects the Show Shorts setting",
@@ -84,14 +92,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.6.3",
-      "versionDate": "2026-07-23T20:51:28Z",
-      "versionDescription": "## New Features\n- **Autoplay toggles** (#26) — autoplay can now be turned off in Settings, separately for \"Up Next\" suggestions and for mixes/playlists. With autoplay off, playback simply stops at the end of the video\n\n## Fixes\n- **More reliable new-video dots** (#13) — some channels never got a dot because YouTube's subscriptions feed omits part of the fresh uploads. Detection now uses a source that lists uploads in publication order, so dots no longer miss new videos. Also works in all interface languages now and respects the Show Shorts setting",
-      "downloadURL": "https://github.com/verback2308/ytlite/releases/download/1.6.3/YTLite_1.6.3.ipa",
+      "version": "1.6.4",
+      "versionDate": "2026-07-27T20:26:19Z",
+      "versionDescription": "## Fixes\n\n*   **Picture-in-Picture** ([#28](https://github.com/verback2308/ytlite/issues/28)) — PiP now works the same on iPhone and iPad and follows the setting: turn it on and leaving the app moves the video into a floating window; leave it off and you get background audio as before. The player's PiP button always works regardless of the setting. The button no longer stops working after opening Control Center, and playback no longer pauses when returning from PiP to the mini player. On iOS 12, iOS can't keep background audio and PiP available at once, so the app rebuilds the player when PiP is needed again — you may notice a brief buffering pause after listening in the background. On iOS 14.2+ this doesn't happen\n*   **Bot check recovery** — when YouTube answers a playback request with a bot check, the app no longer fails with a generic error. It renews the session identity and retries once on its own, showing a short \"renewing session\" status; in most cases the video just starts. If the retry is blocked too, the message now says what actually happened\n*   **Related videos in landscape** ([#29](https://github.com/verback2308/ytlite/issues/29)) — the first card in the related-videos sidebar no longer slides under the navigation bar (visible on iOS 26 and on Mac with \"Designed for iPad\")\n*   **Seeking** — double-tap seeking now accelerates: consecutive taps in the same direction step 10s, 20s, 30s and then 60s each, so three taps cover a minute, and a fast burst counts every tap instead of losing the ones that land mid-seek. The time label no longer jumps back to the playing position while you drag the seek bar — it follows your finger until you let go\n*   **Feed crash** — fixed a crash when loading the next page of videos in a feed",
+      "downloadURL": "https://github.com/verback2308/ytlite/releases/download/1.6.4/YTLite_1.6.4.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 4503804,
+      "size": 4513178,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -114,6 +122,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "YTLite 1.6.4 - BotCheck recovery, PiP discrepancy fix, UI/UX improvements",
+      "identifier": "release-1.6.4",
+      "caption": "Picture-in-Picture ([#28](https://github.com/verback2308/ytlite/issues/28)) — PiP now works the same on iPhone and iP…",
+      "date": "2026-07-27T20:26:19Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/ytlite/releases/tag/1.6.4"
+    },
     {
       "title": "YTLite 1.6.3 - Autoplay toggles, better channel notifications",
       "identifier": "release-1.6.3",
