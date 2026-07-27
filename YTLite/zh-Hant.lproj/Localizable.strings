@@ -34,8 +34,10 @@
 "player.status.loading" = "正在載入 %1$@...";
 /* Status label while the stream URL is being resolved */
 "player.status.resolving" = "正在解析串流...";
+"player.status.botCheckRetry" = "機器人驗證 — 正在更新工作階段並重試...";
 /* Shown when a video cannot be played at all */
 "player.error.playback" = "播放失敗。";
+"player.error.botCheck" = "YouTube 要求確認你不是機器人。請稍後再試。";
 /* Shown when switching video quality failed (playback continues) */
 "player.error.qualitySwitch" = "畫質切換失敗。";
 /* Shown when switching the audio track failed (playback continues) */

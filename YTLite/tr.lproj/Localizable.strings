@@ -34,8 +34,10 @@
 "player.status.loading" = "%1$@ yükleniyor...";
 /* Status label while the stream URL is being resolved */
 "player.status.resolving" = "Akış çözümleniyor...";
+"player.status.botCheckRetry" = "Bot kontrolü — oturum yenileniyor, yeniden deneniyor...";
 /* Shown when a video cannot be played at all */
 "player.error.playback" = "Oynatma başarısız oldu.";
+"player.error.botCheck" = "YouTube robot olmadığınızı doğrulamanızı istiyor. Birazdan tekrar deneyin.";
 /* Shown when switching video quality failed (playback continues) */
 "player.error.qualitySwitch" = "Kalite değişimi başarısız oldu.";
 /* Shown when switching the audio track failed (playback continues) */

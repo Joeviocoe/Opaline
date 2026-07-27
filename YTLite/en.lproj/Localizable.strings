@@ -34,8 +34,12 @@
 "player.status.loading" = "Loading %1$@...";
 /* Status label while the stream URL is being resolved */
 "player.status.resolving" = "Resolving stream...";
+/* Status label while a bot check is being retried with a fresh session */
+"player.status.botCheckRetry" = "Bot check — renewing session, retrying...";
 /* Shown when a video cannot be played at all */
 "player.error.playback" = "Playback failed.";
+/* Shown when YouTube answered the bot check and the retry failed too */
+"player.error.botCheck" = "YouTube asked to confirm you're not a bot. Try again in a moment.";
 /* Shown when switching video quality failed (playback continues) */
 "player.error.qualitySwitch" = "Quality switch failed.";
 /* Shown when switching the audio track failed (playback continues) */

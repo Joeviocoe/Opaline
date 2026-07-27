@@ -34,8 +34,10 @@
 "player.status.loading" = "%1$@を読み込み中...";
 /* Status label while the stream URL is being resolved */
 "player.status.resolving" = "ストリームを解決中...";
+"player.status.botCheckRetry" = "ボット確認 — セッションを更新して再試行しています...";
 /* Shown when a video cannot be played at all */
 "player.error.playback" = "再生に失敗しました。";
+"player.error.botCheck" = "YouTube がボットでないことの確認を求めています。しばらくしてからもう一度お試しください。";
 /* Shown when switching video quality failed (playback continues) */
 "player.error.qualitySwitch" = "画質の切り替えに失敗しました。";
 /* Shown when switching the audio track failed (playback continues) */

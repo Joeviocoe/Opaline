@@ -98,3 +98,24 @@ final class InnertubeSession {
         return body
     }
 }
+
+// MARK: - Visitor identity
+
+extension InnertubeSession {
+    /// Drops the persisted visitor identity and its paired visitor cookies so
+    /// the next request mints a fresh one. Called when /player answers the bot
+    /// check — a flagged identity would otherwise stay cached for the full TTL
+    /// and keep every source failing. Account cookies are left untouched.
+    static func invalidateVisitorIdentity() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: UserDefaultsKeys.Innertube.visitorData)
+        defaults.removeObject(forKey: UserDefaultsKeys.Innertube.visitorDataDate)
+        guard let base = URL(string: AppURLs.YouTube.base) else {
+            return
+        }
+        HTTPCookieStorage.shared.cookies(for: base)?
+            .filter { $0.name.hasPrefix("VISITOR_") }
+            .forEach(HTTPCookieStorage.shared.deleteCookie)
+        AppLog.innertube("visitor identity invalidated after bot check")
+    }
+}

@@ -30,8 +30,10 @@
 "player.status.loading" = "%1$@ wird geladen…";
 /* Status label while the stream URL is being resolved */
 "player.status.resolving" = "Stream wird aufgelöst…";
+"player.status.botCheckRetry" = "Bot-Prüfung – Sitzung wird erneuert, neuer Versuch...";
 /* Shown when a video cannot be played at all */
 "player.error.playback" = "Wiedergabe fehlgeschlagen.";
+"player.error.botCheck" = "YouTube möchte bestätigt haben, dass du kein Bot bist. Versuche es gleich noch einmal.";
 /* Shown when switching video quality failed (playback continues) */
 "player.error.qualitySwitch" = "Qualitätswechsel fehlgeschlagen.";
 /* Shown when switching the audio track failed (playback continues) */

@@ -22,7 +22,9 @@
 
 "player.status.loading" = "Загрузка %1$@...";
 "player.status.resolving" = "Получение потока...";
+"player.status.botCheckRetry" = "Проверка на бота — обновляю сессию, пробую снова...";
 "player.error.playback" = "Не удалось воспроизвести видео.";
+"player.error.botCheck" = "YouTube требует подтвердить, что вы не бот. Повторите попытку через минуту.";
 "player.error.qualitySwitch" = "Не удалось переключить качество.";
 "player.error.audioTrackSwitch" = "Не удалось переключить аудиодорожку.";
 

@@ -30,8 +30,10 @@
 "player.status.loading" = "Chargement de %1$@…";
 /* Status label while the stream URL is being resolved */
 "player.status.resolving" = "Résolution du flux…";
+"player.status.botCheckRetry" = "Vérification anti-robot — renouvellement de la session, nouvel essai...";
 /* Shown when a video cannot be played at all */
 "player.error.playback" = "Échec de la lecture.";
+"player.error.botCheck" = "YouTube demande de confirmer que vous n'êtes pas un robot. Réessayez dans un instant.";
 /* Shown when switching video quality failed (playback continues) */
 "player.error.qualitySwitch" = "Échec du changement de qualité.";
 /* Shown when switching the audio track failed (playback continues) */

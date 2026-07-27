@@ -69,6 +69,8 @@ enum APIError: Error {
     case unauthorized
     case forbidden
     case rateLimited
+    /// YouTube answered the "sign in to confirm you're not a bot" check.
+    case botCheck
     case serverError(code: Int)
     case transport(Error)
 

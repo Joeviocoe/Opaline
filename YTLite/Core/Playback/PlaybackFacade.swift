@@ -30,6 +30,8 @@ final class PlaybackFacade {
     let watchtimeTracker = WatchtimeTracker()
     var currentVideoId: String?
     weak var currentApiClient: WatchService?
+    /// Video that already burned its one silent bot-check retry.
+    var botCheckRetriedVideoId: String?
 }
 
 // MARK: - Public API
@@ -39,14 +41,15 @@ extension PlaybackFacade {
         videoId: String,
         apiClient: WatchService,
         cancellationToken: CancellationToken,
-        client: DirectPlaybackClient = .androidVR
+        client: DirectPlaybackClient = .androidVR,
+        statusKey: String = "player.status.resolving"
     ) {
         currentVideoId = videoId
         currentApiClient = apiClient
         let source = DefaultVideoSourceFactory(apiClient: apiClient)
             .make(kind: PlaybackSource.selected.sourceKind)
         activeVideoSource = source
-        context?.updateStatusLabel("player.status.resolving".localized)
+        context?.updateStatusLabel(statusKey.localized)
         source.loadPlayback(
             videoId: videoId,
             cancellation: cancellationToken
@@ -56,13 +59,14 @@ extension PlaybackFacade {
                       !cancellationToken.isCancelled else {
                     return
                 }
-                self.handlePrepared(result)
+                self.handlePrepared(result, cancellation: cancellationToken)
             }
         }
     }
 
     private func handlePrepared(
-        _ result: Result<PreparedPlayback, Error>
+        _ result: Result<PreparedPlayback, Error>,
+        cancellation: CancellationToken
     ) {
         switch result {
         case .success(let prepared):
@@ -75,8 +79,47 @@ extension PlaybackFacade {
             fetchWatchtimeAndTrack()
         case .failure(let error):
             AppLog.player("source playback failed: \(error)")
-            context?.showPlaybackError("player.error.playback".localized)
+            guard isBotCheck(error) else {
+                context?.showPlaybackError("player.error.playback".localized)
+                return
+            }
+            if !retryAfterBotCheck(cancellation: cancellation) {
+                context?.showPlaybackError("player.error.botCheck".localized)
+            }
         }
+    }
+
+    private func isBotCheck(_ error: Error) -> Bool {
+        guard let apiError = error as? APIError,
+              case .botCheck = apiError else {
+            return false
+        }
+        return true
+    }
+
+    /// Parsing the bot check already dropped the flagged visitor identity, so
+    /// one silent reload — fresh identity, whole source chain again — usually
+    /// just plays. Only ever retried once per video; then the user sees why.
+    private func retryAfterBotCheck(
+        cancellation: CancellationToken
+    ) -> Bool {
+        guard let videoId = currentVideoId,
+              let apiClient = currentApiClient,
+              botCheckRetriedVideoId != videoId,
+              !cancellation.isCancelled else {
+            return false
+        }
+        botCheckRetriedVideoId = videoId
+        AppLog.player("bot check — retrying with a fresh visitor identity")
+        // The label stays up for the whole retry — `start` would immediately
+        // overwrite anything set here with its own status.
+        start(
+            videoId: videoId,
+            apiClient: apiClient,
+            cancellationToken: cancellation,
+            statusKey: "player.status.botCheckRetry"
+        )
+        return true
     }
 
     func reset() {
@@ -84,5 +127,6 @@ extension PlaybackFacade {
         watchtimeTracker.stop()
         currentVideoId = nil
         currentApiClient = nil
+        botCheckRetriedVideoId = nil
     }
 }

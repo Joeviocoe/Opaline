@@ -89,6 +89,7 @@ extension InnertubeClient {
             visitorData: visitorData
         )
         let playerURL = "\(baseURL)/player\(client.playerURLSuffix)"
+        var hitBotCheck = false
         execute(
             urlString: playerURL,
             body: body,
@@ -98,11 +99,17 @@ extension InnertubeClient {
             logTag: "directPlayback(\(client))"
         ) { json -> DirectPlaybackInfo? in
             Self.parseDirectPlayback(
-                json: json,
-                videoId: videoId,
-                client: client
-            )
-        } completion: { completion($0) }
+                json: json, videoId: videoId, client: client
+            ) { hitBotCheck = true }
+        } completion: { result in
+            // A bot check is worth telling the user about — "playback failed"
+            // sends them hunting for a problem in the app.
+            if case .failure = result, hitBotCheck {
+                completion(.failure(APIError.botCheck))
+            } else {
+                completion(result)
+            }
+        }
     }
 
     /// Anonymous MWEB playback: POSTs /player with the mobile-web context +
@@ -218,56 +225,6 @@ extension InnertubeClient {
 }
 
 private extension InnertubeClient {
-    static func parseDirectPlayback(
-        json: [String: Any],
-        videoId: String,
-        client: DirectPlaybackClient
-    ) -> DirectPlaybackInfo? {
-        // Only the mweb source can finish ciphered URLs (it owns the
-        // watch-page player context the sig solve needs).
-        let json = client == .mweb
-            ? unwrappingSignatureCiphers(json)
-            : json
-        guard let info = parseDirectPlaybackInfo(json) else {
-            logDirectPlaybackError(
-                json: json,
-                videoId: videoId,
-                client: client
-            )
-            return nil
-        }
-        let hlsFlag = info.hlsManifestURL != nil
-        let progFlag = info.progressiveURL != nil
-        let avFlag = info.videoURL != nil && info.audioURL != nil
-        AppLog.innertube(
-            "directPlayback selected (\(client)) \(videoId): "
-                + "hls=\(hlsFlag) prog=\(progFlag) v+a=\(avFlag)"
-        )
-        return info
-    }
-
-    static func logDirectPlaybackError(
-        json: [String: Any],
-        videoId: String,
-        client: DirectPlaybackClient
-    ) {
-        if let errorObj = json["error"],
-           let data = try? JSONSerialization.data(
-               withJSONObject: errorObj,
-               options: .prettyPrinted
-           ),
-           let str = String(data: data, encoding: .utf8) {
-            AppLog.innertube(
-                "directPlayback error (\(client)): \(str)"
-            )
-        }
-        logPlayerDebug(
-            videoId: videoId,
-            contextName: client.description,
-            json: json
-        )
-    }
-
     func buildDirectPlaybackBody(
         videoId: String,
         client: DirectPlaybackClient,
