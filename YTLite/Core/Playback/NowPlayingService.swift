@@ -41,6 +41,11 @@ final class NowPlayingService {
         loadArtwork(url: metadata.artworkURL)
     }
 
+    /// Re-points the session at a replacement player for the same item.
+    func rebindPlayer(_ player: AVPlayer) {
+        self.player = player
+    }
+
     func updatePosition(_ position: TimeInterval) {
         // The lock screen advances elapsed time by itself from playbackRate;
         // rewriting the info dict on every 0.1s tick kept iOS 12 from ever

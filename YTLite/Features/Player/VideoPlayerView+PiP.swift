@@ -46,6 +46,21 @@ extension VideoPlayerView {
         return false
     }
 
+    /// Hands the current item to a replacement player and re-points every
+    /// observer at it. Used to escape the iOS 12 state where a player that
+    /// was detached from its layer can never enter PiP again (#28).
+    func replacePlayer(_ newPlayer: AVPlayer) {
+        removePeriodicObserver()
+        removePlayerObservers()
+        player = newPlayer
+        playerLayer.player = newPlayer
+        pipController = nil
+        addPeriodicObserver()
+        addPlayerObservers()
+        setupPiP()
+        updatePlayPauseIcon()
+    }
+
     func setupPiP() {
         setControlAvailability(
             pipButton,
@@ -118,6 +133,7 @@ extension VideoPlayerView {
             return
         }
         playerLayer.player = nil
+        playerNeedsRebuildForPiP = true
         if wasPlayingOnResign, let player, player.rate == 0 {
             player.play()
         }
@@ -135,18 +151,61 @@ extension VideoPlayerView {
         }
         // Re-evaluate the PiP setting (it may have changed in Settings).
         setupPiP()
+        rebuildPlayerIfPoisoned()
+    }
+
+    /// The background detach costs this player its ability to enter PiP on
+    /// iOS 12, so it is swapped out here rather than at the moment PiP is
+    /// asked for — a fresh controller needs a beat to report itself usable.
+    private func rebuildPlayerIfPoisoned() {
+        if #available(iOS 14.2, *) {
+            return
+        }
+        guard playerNeedsRebuildForPiP, !isPiPActive, isAutoPiPEnabled else {
+            return
+        }
+        playerNeedsRebuildForPiP = false
+        onNeedsFreshPlayer?()
     }
 
     @objc
     func pipTapped() {
-        guard let pip = pipController else {
+        if pipController?.isPictureInPictureActive == true {
+            pipController?.stopPictureInPicture()
             return
         }
-        if pip.isPictureInPictureActive {
-            pip.stopPictureInPicture()
-        } else {
-            pip.startPictureInPicture()
+        // With auto-PiP off nothing rebuilds the player on foregrounding, so
+        // a background-audio session leaves it unable to enter PiP. Pay that
+        // cost here instead — only when PiP is actually asked for.
+        if playerNeedsRebuildForPiP {
+            playerNeedsRebuildForPiP = false
+            onNeedsFreshPlayer?()
         }
+        startPiPWhenPossible()
+    }
+
+    /// A just-rebuilt player needs a moment before AVKit accepts a start, and
+    /// that wait covers the fresh item's buffering — hence the generous
+    /// budget. Polling because `isPictureInPicturePossible` is not KVO-safe
+    /// to observe from an extension without extra stored state.
+    private func startPiPWhenPossible(attempt: Int = 0) {
+        guard let pip = pipController, !pip.isPictureInPictureActive else {
+            return
+        }
+        guard attempt < 60 else {
+            AppLog.player("PiP: gave up waiting for a usable controller")
+            return
+        }
+        // `isPictureInPicturePossible` turns true before the rebuilt layer has
+        // drawn its first frame, and a start in that window is swallowed
+        // without a single delegate callback — wait for the picture as well.
+        guard pip.isPictureInPicturePossible, playerLayer.isReadyForDisplay else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                self?.startPiPWhenPossible(attempt: attempt + 1)
+            }
+            return
+        }
+        pip.startPictureInPicture()
     }
 }
 

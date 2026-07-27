@@ -28,6 +28,7 @@ final class VideoPlayerView: UIView {
 
     var onTimeUpdate: ((Double) -> Void)?
     var onSkipTapped: (() -> Void)?
+    var onNeedsFreshPlayer: (() -> Void)?
 
     var player: AVPlayer?
 
@@ -216,17 +217,16 @@ final class VideoPlayerView: UIView {
     var hideWorkItem: DispatchWorkItem?
     var controlsVisible = false
     var wasPlayingOnResign = false
-    /// True between requesting PiP and it reporting itself active.
     var pipIsStarting = false
+    var playerNeedsRebuildForPiP = false
     var duration: Double = 0
     var rateObservation: NSKeyValueObservation?
     var statusObservation: NSKeyValueObservation?
     var timeControlObservation: NSKeyValueObservation?
 
-    /// A mid-playback rebuffer can leave the player clock behind
-    /// the rendered media on older devices, so subtitles keyed to
-    /// `currentTime` lag by seconds until a seek realigns the
-    /// timebase (issue #14). Stall recovery schedules that seek.
+    /// A mid-playback rebuffer can leave the player clock behind the
+    /// rendered media on older devices, so subtitles keyed to `currentTime`
+    /// lag until a seek realigns the timebase (#14).
     let clockResync = ClockResyncState()
 
     override var safeAreaInsets: UIEdgeInsets {

@@ -64,6 +64,40 @@ extension WatchViewController {
         player.play()
     }
 
+    /// Moves the playing item onto a brand-new `AVPlayer`. The old one is
+    /// unusable for PiP once it has been detached from its layer on iOS 12,
+    /// and only a different player object clears that state (#28).
+    func replacePlayerPreservingPlayback() {
+        guard let playerView = videoPlayerView,
+              let old = playerView.player,
+              let item = old.currentItem
+        else {
+            return
+        }
+        let wasPlaying = old.rate > 0
+        let position = old.currentTime()
+        old.pause()
+        stopObservingPlayerItem(item)
+        old.replaceCurrentItem(with: nil)
+        // Reusing the item would throw: AVFoundation does not release its
+        // association with the old player synchronously.
+        let freshItem = AVPlayerItem(asset: item.asset)
+        PlaybackBufferPolicy.configure(item: freshItem)
+        startObservingPlayerItem(freshItem)
+        let fresh = AVPlayer(playerItem: freshItem)
+        PlaybackBufferPolicy.configure(
+            player: fresh,
+            waitsToMinimizeStalling: true
+        )
+        fresh.seek(to: position)
+        playerView.replacePlayer(fresh)
+        NowPlayingService.shared.rebindPlayer(fresh)
+        AppLog.player("player rebuilt to restore PiP")
+        if wasPlaying {
+            fresh.playImmediately(atRate: playerView.playbackSpeed)
+        }
+    }
+
     func getOrCreatePlayerView() -> VideoPlayerView {
         if let existing = videoPlayerView {
             return existing
@@ -82,6 +116,9 @@ extension WatchViewController {
         )
         playerView.onCCTapped = { [weak self] in
             self?.showSubtitlePicker()
+        }
+        playerView.onNeedsFreshPlayer = { [weak self] in
+            self?.replacePlayerPreservingPlayback()
         }
         return playerView
     }
