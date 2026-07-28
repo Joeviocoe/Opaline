@@ -125,18 +125,32 @@ final class NavChevronButton: UIView {
         alignToScreenEdge()
     }
 
+    /// The bar, not the window: in a sheet the bar covers only part of the
+    /// screen, and aligning to the window edge pushes the chevron outside
+    /// the sheet. Falls back to the window for a bar-less host.
+    private func alignmentContainer() -> UIView? {
+        var candidate: UIView? = superview
+        while let current = candidate {
+            if current is UINavigationBar {
+                return current
+            }
+            candidate = current.superview
+        }
+        return window
+    }
+
     private func alignToScreenEdge() {
-        guard let window else {
+        guard let container = alignmentContainer(), window != nil else {
             transform = .identity
             return
         }
         transform = .identity
         let shift: CGFloat
         if effectiveUserInterfaceLayoutDirection == .rightToLeft {
-            let right = convert(CGPoint(x: bounds.width, y: 0), to: window).x
-            shift = (window.bounds.width - Self.edgeInset) - right
+            let right = convert(CGPoint(x: bounds.width, y: 0), to: container).x
+            shift = (container.bounds.width - Self.edgeInset) - right
         } else {
-            shift = Self.edgeInset - convert(CGPoint.zero, to: window).x
+            shift = Self.edgeInset - convert(CGPoint.zero, to: container).x
         }
         if abs(shift) > 0.5 {
             transform = CGAffineTransform(translationX: shift, y: 0)

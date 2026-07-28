@@ -224,6 +224,10 @@
 "settings.homeLayout.grid" = "网格";
 "settings.homeLayout.rails" = "横向轨道";
 
+/* Notifications section */
+"settings.section.notifications" = "通知";
+"settings.row.notifications" = "通知";
+
 /* Cache rows */
 "settings.row.feedCache" = "动态缓存";
 "settings.row.feedCacheDuration" = "动态缓存时长";
@@ -381,3 +385,24 @@
 /* Alert after changing a language setting */
 "settings.language.restartTitle" = "需要重新启动";
 "settings.language.restartMessage" = "更改在重新启动应用后完全生效。";
+
+/* Notification settings screen (pushed from Settings > Home) */
+"settings.row.appUpdates" = "应用更新";
+"settings.footer.notifications" = "投递可能延迟 — iOS 会计划后台检查，但不会立即运行。";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "新版本可用：%@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "通知";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "暂无通知";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "全部标为已读";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "系统通知已关闭，因此警报可能无法在应用外送达。";
+"notifications.permissionBanner.enable" = "启用通知";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "打开";

@@ -220,6 +220,10 @@
 "settings.homeLayout.grid" = "Griglia semplice";
 "settings.homeLayout.rails" = "Corsie orizzontali";
 
+/* Notifications section */
+"settings.section.notifications" = "Notifiche";
+"settings.row.notifications" = "Notifiche";
+
 /* Cache rows */
 "settings.row.feedCache" = "Cache feed";
 "settings.row.feedCacheDuration" = "Durata cache feed";
@@ -377,3 +381,24 @@
 /* Alert after changing a language setting */
 "settings.language.restartTitle" = "Riavvio necessario";
 "settings.language.restartMessage" = "Le modifiche si applicano completamente dopo il riavvio dell'app.";
+
+/* Notification settings screen (pushed from Settings > Home) */
+"settings.row.appUpdates" = "Aggiornamenti app";
+"settings.footer.notifications" = "La consegna potrebbe essere ritardata — iOS pianifica i controlli in background e non li esegue immediatamente.";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "Aggiornamento disponibile: %@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "Notifiche";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "Nessuna notifica ancora";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "Segna tutto come letto";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "Le notifiche di sistema sono disattivate, quindi gli avvisi potrebbero non raggiungerti fuori dall'app.";
+"notifications.permissionBanner.enable" = "Attiva notifiche";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "Apri";

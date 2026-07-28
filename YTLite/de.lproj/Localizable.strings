@@ -218,6 +218,10 @@
 "settings.homeLayout.grid" = "Einfaches Raster";
 "settings.homeLayout.rails" = "Bereichs-Schienen";
 
+/* Notifications section */
+"settings.section.notifications" = "Benachrichtigungen";
+"settings.row.notifications" = "Benachrichtigungen";
+
 /* Cache rows */
 "settings.row.feedCache" = "Feed-Cache";
 "settings.row.feedCacheDuration" = "Feed-Cache-Dauer";
@@ -379,3 +383,24 @@
 /* Added during review merge */
 "sponsorblock.category.selfpromo.description" = "Wie „Sponsor“, aber für unbezahlte Werbung oder Eigenwerbung: Merchandise, Spenden oder Informationen über Kooperationen.";
 "sponsorblock.category.highlight.description" = "Der Teil des Videos, den die meisten suchen. Vergleichbar mit „Video beginnt bei x“-Kommentaren.";
+
+/* Notification settings screen */
+"settings.row.appUpdates" = "App-Updates";
+"settings.footer.notifications" = "Die Zustellung kann verzögert sein — iOS plant Hintergrundprüfungen und führt sie nicht sofort aus.";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "Update verfügbar: %@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "Benachrichtigungen";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "Noch keine Benachrichtigungen";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "Alle als gelesen markieren";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "Systembenachrichtigungen sind ausgeschaltet, daher könnten Sie Benachrichtigungen außerhalb der App nicht erhalten.";
+"notifications.permissionBanner.enable" = "Benachrichtigungen aktivieren";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "Öffnen";

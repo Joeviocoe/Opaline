@@ -224,6 +224,10 @@
 "settings.homeLayout.grid" = "グリッド";
 "settings.homeLayout.rails" = "シェルフレール";
 
+/* Notifications section */
+"settings.section.notifications" = "通知";
+"settings.row.notifications" = "通知";
+
 /* Cache rows */
 "settings.row.feedCache" = "フィードキャッシュ";
 "settings.row.feedCacheDuration" = "フィードキャッシュの期間";
@@ -381,3 +385,24 @@
 /* Alert after changing a language setting */
 "settings.language.restartTitle" = "再起動が必要です";
 "settings.language.restartMessage" = "変更はアプリの再起動後に完全に適用されます。";
+
+/* Notification settings screen (pushed from Settings > Home) */
+"settings.row.appUpdates" = "アプリの更新";
+"settings.footer.notifications" = "配信は遅延する可能性があります — iOSはバックグラウンドチェックをスケジュール設定していますが、すぐには実行しません。";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "更新可能: %@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "通知";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "まだ通知がありません";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "すべて既読にする";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "システム通知がオフになっているため、アラートはアプリ外に到達しない可能性があります。";
+"notifications.permissionBanner.enable" = "通知を有効にする";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "開く";

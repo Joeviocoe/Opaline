@@ -1,8 +1,12 @@
 import UIKit
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
+    /// A sign-in screen was asked for while the app ran in the background;
+    /// the decision is re-taken in `applicationDidBecomeActive`.
+    var deferredAuthPresentation = false
     private let dependencies = AppDependencies.live()
 
     func application(
@@ -14,6 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ThemeManager.shared.applyGlobal()
         BackgroundPlaybackService.apply()
         application.beginReceivingRemoteControlEvents()
+        configureLegacyBackgroundFetch(application)
+        UNUserNotificationCenter.current().delegate = self
         if ReturnYouTubeDislikeService.enabled {
             ReturnYouTubeDislikeService.shared.prepareIfNeeded()
         }
@@ -52,6 +58,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Auto theme can go stale in the background (schedule boundary or a
         // system appearance change while suspended).
         ThemeManager.shared.refreshAutoTheme()
+        UpdateNotificationService.shared.checkIfNeeded()
+        resolveDeferredAuthIfNeeded()
+    }
+
+    /// Legacy background fetch is kept as the single code path across iOS
+    /// 12…latest instead of BGTaskScheduler; deprecated on iOS 13+.
+    @available(iOS, deprecated: 13.0, message: "Single code path for iOS 12+.")
+    private func configureLegacyBackgroundFetch(_ application: UIApplication) {
+        application.setMinimumBackgroundFetchInterval(
+            UIApplication.backgroundFetchIntervalMinimum
+        )
+    }
+
+    /// The keychain is readable again now, so a "signed out" verdict reached
+    /// in the background can be re-checked before it costs the user a
+    /// pointless sign-in.
+    private func resolveDeferredAuthIfNeeded() {
+        guard deferredAuthPresentation else {
+            return
+        }
+        deferredAuthPresentation = false
+        if OAuthClient.shared.isSignedIn {
+            AppLog.auth("deferred sign-in dropped: token readable again")
+            UserProfileStore.shared.load()
+            showMain()
+        } else {
+            showAuth()
+        }
     }
 
     private func makeSplashViewController() -> SplashViewController {
@@ -72,6 +106,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func runMigrations() {
+        OAuthClient.shared.migrateKeychainAccessibilityIfNeeded()
         // Before the Auto source existed, android_vr was both the default and
         // an explicit picker choice, so stored values are indistinguishable
         // from "never touched it". Move them to Auto once; anyone re-picking

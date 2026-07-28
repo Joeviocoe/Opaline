@@ -70,6 +70,18 @@ enum AppURLs {
         static let youtubeV3 = "https://www.googleapis.com/youtube/v3"
     }
 
+    /// Release manifest used to detect newer app versions for the
+    /// in-app notification inbox ("app update available").
+    /// The value is a build setting (`APP_MANIFEST_URL` in
+    /// `Config/App.xcconfig` → `AppManifestURL` in Info.plist), so a fork
+    /// points at its own feed without touching code. Empty when the build
+    /// setting is missing — the poller then logs "bad manifest URL".
+    enum AppManifest {
+        static var source: String {
+            Bundle.main.object(forInfoDictionaryKey: "AppManifestURL") as? String ?? ""
+        }
+    }
+
     /// Remote GVS proof-of-origin (`pot`) provider — the `solver-server`'s
     /// `/get_pot` endpoint (BotGuard minting can't be done reliably on-device).
     /// `POST /get_pot {"content_binding": <videoId>}`.

@@ -226,6 +226,10 @@
 "settings.homeLayout.grid" = "Plain Grid";
 "settings.homeLayout.rails" = "Shelf Rails";
 
+/* Notifications section */
+"settings.section.notifications" = "Notifications";
+"settings.row.notifications" = "Notifications";
+
 /* Cache rows */
 "settings.row.feedCache" = "Feed Cache";
 "settings.row.feedCacheDuration" = "Feed Cache Duration";
@@ -383,3 +387,24 @@
 /* Alert after changing a language setting */
 "settings.language.restartTitle" = "Restart Required";
 "settings.language.restartMessage" = "Changes apply fully after restarting the app.";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "Update available: %@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "Notifications";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "No notifications yet";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "Mark All Read";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "System notifications are off, so alerts may not reach you outside the app.";
+"notifications.permissionBanner.enable" = "Enable Notifications";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "Open";
+
+/* Notification settings screen (pushed from Settings > Home) */
+"settings.row.appUpdates" = "App Updates";
+"settings.footer.notifications" = "Delivery may be delayed — iOS schedules background checks and does not run them immediately.";

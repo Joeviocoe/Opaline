@@ -166,6 +166,9 @@
 "settings.homeLayout.grid" = "Простая сетка";
 "settings.homeLayout.rails" = "Горизонтальные ленты";
 
+"settings.section.notifications" = "Уведомления";
+"settings.row.notifications" = "Уведомления";
+
 "settings.row.feedCache" = "Кэш ленты";
 "settings.row.feedCacheDuration" = "Срок кэша ленты";
 "settings.row.imageCache" = "Кэш изображений";
@@ -296,3 +299,17 @@
 "settings.language.system" = "Системный";
 "settings.language.restartTitle" = "Требуется перезапуск";
 "settings.language.restartMessage" = "Изменения полностью вступят в силу после перезапуска приложения.";
+
+"settings.row.appUpdates" = "Обновления приложения";
+"settings.footer.notifications" = "Доставка может быть отложена — iOS планирует фоновые проверки и не выполняет их немедленно.";
+
+/* ===== Notifications ===== */
+
+"notifications.update.title" = "Доступно обновление: %@";
+
+"notifications.title" = "Уведомления";
+"notifications.empty" = "Уведомлений нет";
+"notifications.markAllRead" = "Отметить всё как прочитанное";
+"notifications.permissionBanner.message" = "Системные уведомления отключены, поэтому оповещения могут не поступить вне приложения.";
+"notifications.permissionBanner.enable" = "Включить уведомления";
+"notifications.detail.openLink" = "Открыть";

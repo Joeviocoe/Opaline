@@ -3,6 +3,13 @@
 //   PRODUCT_BUNDLE_IDENTIFIER — any id your Apple account can provision
 //                               (the release id is applied by make_ipa.sh)
 //   DEVELOPMENT_TEAM — your Apple developer team id (Xcode: Settings → Accounts)
+//   APP_MANIFEST_URL — feed the update-notification check polls. Point it at a
+//                      file served from your own machine to test notifications;
+//                      release builds get the repository's feed written in by
+//                      the build workflow. `//` starts a comment in xcconfig,
+//                      so the scheme's slashes are split with `$()`, which
+//                      expands to nothing.
 
 PRODUCT_BUNDLE_IDENTIFIER = com.example.YourApp
 DEVELOPMENT_TEAM =
+APP_MANIFEST_URL = https:/$()/raw.githubusercontent.com/verback2308/ytlite/main/source/apps.json
