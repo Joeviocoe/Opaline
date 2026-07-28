@@ -145,9 +145,13 @@ extension VideoPlayerView {
                 equalTo: safe.trailingAnchor,
                 constant: -16
             ),
+            // Sit just above the time labels, not above the (much taller)
+            // fullscreen button — otherwise the bar rides ~18pt high, which on
+            // a short player (Slide Over) puts it right under the transport
+            // buttons while leaving a wide gap down to the timestamps.
             seekBar.bottomAnchor.constraint(
-                equalTo: fullscreenButton.topAnchor,
-                constant: -8
+                equalTo: currentTimeLabel.topAnchor,
+                constant: -4
             ),
             seekBar.heightAnchor.constraint(
                 equalToConstant: 20
