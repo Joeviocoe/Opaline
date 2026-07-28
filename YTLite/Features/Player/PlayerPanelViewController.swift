@@ -201,6 +201,8 @@ private extension PlayerPanelViewController {
         if player.rate == 0 {
             player.play()
         } else {
+            watchVC.videoPlayerView?
+                .multitaskPause.lastUserPause = CACurrentMediaTime()
             player.pause()
         }
         refreshMiniBar()

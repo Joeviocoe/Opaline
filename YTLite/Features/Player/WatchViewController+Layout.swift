@@ -121,6 +121,10 @@ extension WatchViewController {
         sidebarTrailingConstraint = sc.trailingAnchor.constraint(equalTo: safe.trailingAnchor)
         sidebarBottomConstraint = sc.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         sidebarWidthConstraint = sc.widthAnchor.constraint(equalToConstant: 340)
+        // Not required: mid-resize (e.g. dragged into a 320pt Slide Over) the
+        // landscape layout can still be active at a width the sidebar no longer
+        // fits, and UIKit would otherwise break arbitrary cell constraints.
+        sidebarWidthConstraint?.priority = UILayoutPriority(999)
         activateScrollConstraints()
     }
 

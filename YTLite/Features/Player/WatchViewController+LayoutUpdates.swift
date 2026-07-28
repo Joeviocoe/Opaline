@@ -16,9 +16,6 @@ extension WatchViewController {
         }
         relatedCollectionView.backgroundColor = ThemeManager.shared.background
         let expected = isLandscape ? landscapeRelatedLayout : portraitRelatedLayout
-        if relatedCollectionView.collectionViewLayout !== expected {
-            relatedCollectionView.setCollectionViewLayout(expected, animated: false)
-        }
         if !isLandscape { relatedCollectionView.alpha = 1 }
         view.bringSubviewToFront(playerContainer)
         view.bringSubviewToFront(sidebarContainer)
@@ -28,6 +25,11 @@ extension WatchViewController {
         }
         if relatedCollectionView.bounds.width > 0 {
             updateRelatedLayout(isLandscape: isLandscape, containerSize: resolved)
+        }
+        // Swap last: applying a layout that still carries the item size from
+        // the previous width makes the flow layout complain.
+        if relatedCollectionView.collectionViewLayout !== expected {
+            relatedCollectionView.setCollectionViewLayout(expected, animated: false)
         }
     }
 
@@ -108,7 +110,13 @@ extension WatchViewController {
         } else {
             relatedCollectionView.bounds.width
         }
-        let available = max(baseWidth - inset - spacing, 120)
+        // The collection view can still be at its pre-transition width — iOS
+        // also resizes the app off-screen for the multitasking snapshot — and
+        // items wider than it make the flow layout complain. The transition's
+        // completion pass re-runs this against the settled bounds.
+        let actual = relatedCollectionView.bounds.width
+        let width = actual > 0 ? min(baseWidth, actual) : baseWidth
+        let available = max(width - inset - spacing, 120)
         let itemWidth = floor(available / cols)
         let itemHeight = itemWidth * (9.0 / 16.0) + 92
         return CGSize(width: itemWidth, height: itemHeight)

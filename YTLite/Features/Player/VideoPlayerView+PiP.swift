@@ -169,6 +169,13 @@ extension VideoPlayerView {
         if playerLayer.player == nil, !isPiPActive {
             playerLayer.player = player
         }
+        // We are the frontmost app again: undo the multitasking pause.
+        if multitaskPause.systemPaused, !isPiPActive {
+            multitaskPause.systemPaused = false
+            if player.rate == 0 {
+                player.play()
+            }
+        }
         // Re-evaluate the PiP setting (it may have changed in Settings).
         setupPiP()
         rebuildPlayerIfPoisoned()

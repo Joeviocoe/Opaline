@@ -138,8 +138,9 @@ extension VideoPlayerView {
         rateObservation = player.observe(
             \.rate,
             options: [.new]
-        ) { [weak self] _, _ in
+        ) { [weak self] observed, _ in
             DispatchQueue.main.async {
+                self?.noteSystemPause(rate: observed.rate)
                 self?.updatePlayPauseIcon()
             }
         }
