@@ -21,6 +21,9 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
         }
     }
     var onClose: (() -> Void)?
+    /// The tab bar controller whose view hosts this panel. Not `parent` — the
+    /// panel is parented to the root container instead (issue #30).
+    weak var owner: MainTabBarController?
 
     init(watchVC: WatchViewController) {
         self.watchVC = watchVC
@@ -107,7 +110,7 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
         watchVC.videoPlayerView?.player?.pause()
         miniBar?.layer.removeAllAnimations()
         miniBar?.transform = .identity
-        guard let tabBarController = parent as? MainTabBarController else {
+        guard let tabBarController = owner else {
             onClose?()
             return
         }
@@ -198,6 +201,8 @@ private extension PlayerPanelViewController {
         if player.rate == 0 {
             player.play()
         } else {
+            watchVC.videoPlayerView?
+                .multitaskPause.lastUserPause = CACurrentMediaTime()
             player.pause()
         }
         refreshMiniBar()

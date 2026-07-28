@@ -50,7 +50,8 @@ final class VideoRouter {
         while let presented = root?.presentedViewController {
             root = presented
         }
-        return root as? MainTabBarController
+        return (root as? RootContainerViewController)?.mainTabBar
+            ?? root as? MainTabBarController
             ?? vc.tabBarController as? MainTabBarController
             ?? vc.navigationController?.tabBarController as? MainTabBarController
     }

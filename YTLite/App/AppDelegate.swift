@@ -107,8 +107,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func showMain() {
-        window?.rootViewController = MainTabBarController(
-            dependencies: dependencies
+        window?.rootViewController = makeMain(dependencies: dependencies)
+    }
+
+    private func makeMain(dependencies: AppDependencies) -> UIViewController {
+        RootContainerViewController(
+            mainTabBar: MainTabBarController(dependencies: dependencies)
         )
     }
 
@@ -124,7 +128,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             auth.onAuthorized = { [weak self] in
                 root.dismiss(animated: true)
                 UserProfileStore.shared.load()
-                self?.window?.rootViewController = MainTabBarController(
+                self?.window?.rootViewController = self?.makeMain(
                     dependencies: self?.dependencies ?? AppDependencies.live()
                 )
             }

@@ -10,16 +10,18 @@ class MainTabBarController: UITabBarController {
     private var miniPlayerBar: MiniPlayerBar?
     private var miniPlayerBarBottomConstraint: NSLayoutConstraint?
 
+    // The player panel is parented to `RootContainerViewController`, which
+    // forwards these to it directly — see the note there.
     override var childForStatusBarHidden: UIViewController? {
-        playerPanel ?? selectedViewController
+        selectedViewController
     }
 
     override var childForStatusBarStyle: UIViewController? {
-        playerPanel ?? selectedViewController
+        selectedViewController
     }
 
     override var childForHomeIndicatorAutoHidden: UIViewController? {
-        playerPanel ?? selectedViewController
+        selectedViewController
     }
 
     override var shouldAutorotate: Bool {
@@ -157,11 +159,17 @@ class MainTabBarController: UITabBarController {
         if let existing = playerPanel {
             removePlayerPanel(existing)
         }
-        addChild(panel)
-        panel.view.frame = view.bounds
+        // Parent the panel to the root container, never to self: a tab bar
+        // controller's children are its tabs (issue #30). UIKit requires a
+        // child's view to sit in its parent's hierarchy, so the panel view goes
+        // into the container's view — which is above ours, tab bar included.
+        let host: UIViewController = parent ?? self
+        host.addChild(panel)
+        panel.view.frame = host.view.bounds
         panel.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.insertSubview(panel.view, aboveSubview: tabBar)
-        panel.didMove(toParent: self)
+        host.view.addSubview(panel.view)
+        panel.didMove(toParent: host)
+        panel.owner = self
         playerPanel = panel
 
         miniPlayerBar?.removeFromSuperview()

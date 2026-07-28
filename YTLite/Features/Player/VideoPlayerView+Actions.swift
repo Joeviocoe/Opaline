@@ -111,6 +111,7 @@ extension VideoPlayerView {
             return
         }
         if player.rate > 0 {
+            multitaskPause.lastUserPause = CACurrentMediaTime()
             player.pause()
         } else {
             player.play()
