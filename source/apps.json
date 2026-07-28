@@ -131,7 +131,7 @@
   "tintColor": "FF0000",
   "news": [
     {
-      "title": "YTLite 1.6.5 - UI fixed & improvements",
+      "title": "YTLite 1.6.5 - UI fixes & improvements",
       "identifier": "release-1.6.5",
       "caption": "Empty tab bar segment — An extra, blank tab with no icon or title could appear next to Library after the app window w…",
       "date": "2026-07-28T13:31:41Z",
