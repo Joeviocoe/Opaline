@@ -19,6 +19,8 @@
 		<string>zh-Hans</string>
 		<string>zh-Hant</string>
 	</array>
+	<key>AppManifestURL</key>
+	<string>$(APP_MANIFEST_URL)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
@@ -35,6 +37,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>fetch</string>
 	</array>
 </dict>
 </plist>

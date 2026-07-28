@@ -224,6 +224,10 @@
 "settings.homeLayout.grid" = "Düz Izgara";
 "settings.homeLayout.rails" = "Raf Rayları";
 
+/* Notifications section */
+"settings.section.notifications" = "Bildirimler";
+"settings.row.notifications" = "Bildirimler";
+
 /* Cache rows */
 "settings.row.feedCache" = "Akış Önbelleği";
 "settings.row.feedCacheDuration" = "Akış Önbellek Süresi";
@@ -381,3 +385,24 @@
 /* Alert after changing a language setting */
 "settings.language.restartTitle" = "Yeniden Başlatma Gerekli";
 "settings.language.restartMessage" = "Değişiklikler uygulama yeniden başlatıldıktan sonra tam olarak uygulanır.";
+
+/* Notification settings screen (pushed from Settings > Home) */
+"settings.row.appUpdates" = "Uygulama Güncellemeleri";
+"settings.footer.notifications" = "Teslimat gecikebilir — iOS arka plan kontrolleri planlar, ancak bunları hemen çalıştırmaz.";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "Güncelleme mevcut: %@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "Bildirimler";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "Henüz bildirim yok";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "Tümünü okundu işaretle";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "Sistem bildirimleri kapalı, bu nedenle uyarılar uygulamanın dışında ulaşmayabilir.";
+"notifications.permissionBanner.enable" = "Bildirimleri Etkinleştir";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "Aç";

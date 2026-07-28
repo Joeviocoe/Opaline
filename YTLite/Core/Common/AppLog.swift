@@ -77,9 +77,17 @@ enum AppLog {
             return handle
         }
         let url = currentLogURL
-        if !FileManager.default.fileExists(atPath: url.path) {
+        // Without this the file defaults to `.complete` protection and every
+        // write from a locked device (background fetch) silently fails —
+        // which is exactly when the log matters most.
+        let unlockedOnce: [FileAttributeKey: Any] = [
+            .protectionKey: FileProtectionType.completeUntilFirstUserAuthentication
+        ]
+        if FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.setAttributes(unlockedOnce, ofItemAtPath: url.path)
+        } else {
             FileManager.default.createFile(
-                atPath: url.path, contents: nil
+                atPath: url.path, contents: nil, attributes: unlockedOnce
             )
         }
         guard let handle = FileHandle(
@@ -119,4 +127,5 @@ enum AppLog {
     static func ryd(_ msg: String) { log("RYD", msg) }
     static func poToken(_ msg: String) { log("PoToken", msg) }
     static func subscribe(_ msg: String) { log("Subscribe", msg) }
+    static func notifications(_ msg: String) { log("Notifications", msg) }
 }

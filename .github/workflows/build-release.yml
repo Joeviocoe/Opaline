@@ -38,7 +38,15 @@ jobs:
           swiftlint version
 
       - name: Configure local build settings
-        run: cp Config/Local.xcconfig.example Config/Local.xcconfig
+        run: |
+          cp Config/Local.xcconfig.example Config/Local.xcconfig
+          # Point the update-notification check at this repository's own
+          # feed, so a fork ships with its own without editing anything.
+          # `//` starts a comment in xcconfig — hence the `$()` splits.
+          sed -i '' '/^APP_MANIFEST_URL/d' Config/Local.xcconfig
+          printf 'APP_MANIFEST_URL = https:/$()/raw.githubusercontent.com/%s/main/source/apps.json\n' \
+            "$GITHUB_REPOSITORY" >> Config/Local.xcconfig
+          cat Config/Local.xcconfig
 
       - name: Compute release version
         id: version

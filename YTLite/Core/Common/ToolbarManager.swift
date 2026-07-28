@@ -1,6 +1,8 @@
 import UIKit
 
-private func resized(_ name: String, size: CGFloat) -> UIImage? {
+/// Nav-bar icons are PNG assets drawn at their point size and tinted by the
+/// bar; shared with `NotificationsBellButton`.
+func resizedNavBarIcon(_ name: String, size: CGFloat) -> UIImage? {
     guard let img = UIImage(named: name) else {
         return nil
     }
@@ -24,14 +26,14 @@ final class ToolbarManager {
 
     func install(in vc: UIViewController) {
         let searchBtn = UIBarButtonItem(
-            image: resized("icon_Magnifyingglass", size: 22),
+            image: resizedNavBarIcon("icon_Magnifyingglass", size: 22),
             style: .plain,
             target: vc,
             action: #selector(UIViewController.toolbarOpenSearch)
         )
 
         let settingsBtn = UIBarButtonItem(
-            image: resized("icon_Gear", size: 22),
+            image: resizedNavBarIcon("icon_Gear", size: 22),
             style: .plain,
             target: vc,
             action: #selector(UIViewController.toolbarOpenSettings)
@@ -43,6 +45,10 @@ final class ToolbarManager {
         )
 
         vc.navigationItem.rightBarButtonItems = [profileBtn, settingsBtn, searchBtn]
+        vc.navigationItem.leftBarButtonItem = makeBellButton(
+            target: vc,
+            action: #selector(UIViewController.toolbarOpenNotifications)
+        )
         NotificationCenter.default.addObserver(
             vc,
             selector: #selector(UIViewController.toolbarRefreshProfileButton),
@@ -54,6 +60,12 @@ final class ToolbarManager {
     private func makeProfileButton(target: AnyObject, action: Selector) -> UIBarButtonItem {
         let button = ProfileAvatarButton()
         button.refresh()
+        button.addTarget(target, action: action, for: .touchUpInside)
+        return UIBarButtonItem(customView: button)
+    }
+
+    private func makeBellButton(target: AnyObject, action: Selector) -> UIBarButtonItem {
+        let button = NotificationsBellButton()
         button.addTarget(target, action: action, for: .touchUpInside)
         return UIBarButtonItem(customView: button)
     }
@@ -70,6 +82,11 @@ extension UIViewController {
             return
         }
         navigationController?.pushViewController(searchVC, animated: true)
+    }
+
+    @objc
+    func toolbarOpenNotifications() {
+        NotificationsViewController.present(from: self)
     }
 
     @objc
@@ -171,6 +188,15 @@ extension AppDelegate {
     func showAuth() {
         DispatchQueue.main.async { [weak self] in
             guard let window = self?.window else {
+                return
+            }
+            // A background fetch can start the app while the device is
+            // locked, where "signed out" may just mean the keychain was
+            // unreadable. Nobody is looking at the UI anyway — re-decide
+            // once the app is actually shown.
+            guard UIApplication.shared.applicationState != .background else {
+                self?.deferredAuthPresentation = true
+                AppLog.auth("sign-in deferred: app is in the background")
                 return
             }
             let auth = AuthViewController()

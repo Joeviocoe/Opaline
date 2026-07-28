@@ -15,6 +15,7 @@ final class SettingsViewController: UIViewController {
         case imageCacheEnabled, imageCacheDays
         case clearCache, rydEnabled
         case sponsorBlockEnabled, sponsorBlockSettings
+        case notificationSettings
         case playbackSource
         case solverEndpoint
         case shareLog
@@ -88,6 +89,11 @@ final class SettingsViewController: UIViewController {
                 rows: [.homeLayout]
             ),
             Section(
+                header: "settings.section.notifications".localized,
+                footer: nil,
+                rows: [.notificationSettings]
+            ),
+            Section(
                 header: "settings.section.ryd".localized,
                 footer: rydFooter,
                 rows: [.rydEnabled]
@@ -105,7 +111,10 @@ final class SettingsViewController: UIViewController {
             Section(
                 header: "settings.section.debug".localized,
                 footer: "settings.footer.debug".localized,
-                rows: [.playbackSource, .solverEndpoint, .shareLog]
+                rows: [
+                    .playbackSource, .solverEndpoint,
+                    .shareLog
+                ]
             ),
             Section(header: nil, footer: appVersionFooter, rows: [])
         ]
@@ -372,6 +381,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return makeDisclosureCell(
                 "settings.row.sponsorblockSettings".localized
             )
+        case .notificationSettings:
+            return makeDisclosureCell("settings.row.notifications".localized)
         case .shareLog:
             return makeDisclosureCell("settings.row.shareLog".localized)
         case .playbackSource:
@@ -393,7 +404,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         let handlers = [
             handleDebugSelection, handleThemeSelection,
             handleLanguageSelection, handleAutoDubSelection,
-            handleGeneralSelection
+            handleNotificationsSelection, handleGeneralSelection
         ]
         _ = handlers.first { $0(row) }
     }

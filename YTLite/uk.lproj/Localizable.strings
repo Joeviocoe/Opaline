@@ -166,6 +166,9 @@
 "settings.homeLayout.grid" = "Проста сітка";
 "settings.homeLayout.rails" = "Горизонтальні стрічки";
 
+"settings.section.notifications" = "Сповіщення";
+"settings.row.notifications" = "Сповіщення";
+
 "settings.row.feedCache" = "Кеш стрічки";
 "settings.row.feedCacheDuration" = "Строк кешу стрічки";
 "settings.row.imageCache" = "Кеш зображень";
@@ -296,3 +299,17 @@
 "settings.language.system" = "Системна";
 "settings.language.restartTitle" = "Потрібен перезапуск";
 "settings.language.restartMessage" = "Зміни повністю набудуть чинності після перезапуску застосунку.";
+
+"settings.row.appUpdates" = "Оновлення додатку";
+"settings.footer.notifications" = "Доставка може затримуватися — iOS планує фонові перевірки і не виконує їх миттєво.";
+
+/* ===== Notifications ===== */
+
+"notifications.update.title" = "Доступне оновлення: %@";
+
+"notifications.title" = "Сповіщення";
+"notifications.empty" = "Сповіщень ще немає";
+"notifications.markAllRead" = "Позначити все як прочитане";
+"notifications.permissionBanner.message" = "Системні сповіщення вимкнені, тому оповіщення можуть не дійти поза додатком.";
+"notifications.permissionBanner.enable" = "Увімкнути сповіщення";
+"notifications.detail.openLink" = "Відкрити";

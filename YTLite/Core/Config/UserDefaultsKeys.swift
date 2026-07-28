@@ -87,6 +87,17 @@ enum UserDefaultsKeys {
 
     enum Migration {
         static let playbackSourceAuto = "migration_playbackSourceAuto"
+        /// Tokens stored before the keychain item became readable while the
+        /// device is locked.
+        static let keychainAfterFirstUnlock = "migration_keychainAfterFirstUnlock"
+    }
+
+    enum Notifications {
+        static let appUpdatesEnabled = "notifications_appUpdates"
+        static let lastUpdateCheck = "notifications_lastUpdateCheck"
+        /// First launch of a build that has the inbox — nothing published
+        /// before it is worth showing.
+        static let featureInstallDate = "notifications_featureInstallDate"
     }
 }
 
