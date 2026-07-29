@@ -50,6 +50,10 @@
 "player.description.less" = "Згорнути";
 "player.action.share" = "Поділитися";
 "player.action.save" = "Зберегти";
+"player.action.saveFailed" = "Не вдалося зберегти відео.";
+"player.action.saveTo" = "Зберегти в плейлист";
+"player.action.savedTo" = "Збережено в «%1$@»";
+"player.action.removedFrom" = "Видалено з «%1$@»";
 "player.action.download" = "Завантажити";
 
 /* ===== Player: comments ===== */

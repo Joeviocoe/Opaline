@@ -75,6 +75,9 @@ extension WatchViewController {
             setupNavigationBar()
         }
         updateLikeDislikeUI()
+        // The loop above resets every action tint, including the accent that
+        // marks an already-saved video.
+        updateSaveButton()
     }
 
     func applyThemeToSubscribeButton() {

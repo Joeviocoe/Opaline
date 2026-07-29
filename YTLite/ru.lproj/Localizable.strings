@@ -50,6 +50,10 @@
 "player.description.less" = "Свернуть";
 "player.action.share" = "Поделиться";
 "player.action.save" = "Сохранить";
+"player.action.saveFailed" = "Не удалось сохранить видео.";
+"player.action.saveTo" = "Сохранить в плейлист";
+"player.action.savedTo" = "Сохранено в «%1$@»";
+"player.action.removedFrom" = "Удалено из «%1$@»";
 "player.action.download" = "Скачать";
 
 /* ===== Player: comments ===== */

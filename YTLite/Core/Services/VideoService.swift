@@ -95,6 +95,11 @@ protocol PlaylistService: AnyObject {
     func fetchPlaylists(
         completion: @escaping (Result<[Playlist], Error>) -> Void
     )
+    /// Save targets for one video, flagged with whether it is already there.
+    func fetchAddToPlaylistOptions(
+        videoId: String,
+        completion: @escaping (Result<[PlaylistAddOption], Error>) -> Void
+    )
     /// Playlist contents arrive in 15-video pages; pass the previous
     /// page's `continuation` to fetch the next one.
     func fetchPlaylistVideos(
@@ -244,6 +249,11 @@ protocol EngagementService: AnyObject {
     func unsubscribeFromChannel(
         channelId: String,
         cancellationToken: CancellationToken?,
+        completion: @escaping (Result<Void, Error>) -> Void
+    )
+    func editPlaylist(
+        playlistId: String,
+        actions: [[String: Any]],
         completion: @escaping (Result<Void, Error>) -> Void
     )
 }

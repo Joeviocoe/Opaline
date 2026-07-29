@@ -81,6 +81,14 @@
 "player.action.share" = "Share";
 /* Action bar: save to playlist */
 "player.action.save" = "Save";
+/* Shown when saving to Watch Later failed */
+"player.action.saveFailed" = "Could not save the video.";
+/* Title of the playlist picker */
+"player.action.saveTo" = "Save to playlist";
+/* Toast after saving; %1$@ = playlist name */
+"player.action.savedTo" = "Saved to %1$@";
+/* Toast after removing from a playlist; %1$@ = playlist name */
+"player.action.removedFrom" = "Removed from %1$@";
 /* Action bar: download */
 "player.action.download" = "Download";
 

@@ -223,6 +223,7 @@ extension WatchViewController {
         contentView.addSubview(actionBar)
         buildActionBarItems()
         shareButton.addTarget(self, action: #selector(shareTapped), for: .touchUpInside)
+        saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
         likeButton.addTarget(self, action: #selector(likeTapped), for: .touchUpInside)
         dislikeButton.addTarget(self, action: #selector(dislikeTapped), for: .touchUpInside)
     }

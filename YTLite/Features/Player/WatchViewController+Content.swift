@@ -122,6 +122,7 @@ extension WatchViewController {
         fetchExternalServiceData(
             videoId: page.video.id
         )
+        prefetchPlaylistOptions()
         applyTheme()
         applyRelatedVideos(from: page)
         resetComments()

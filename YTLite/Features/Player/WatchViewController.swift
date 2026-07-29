@@ -34,6 +34,7 @@ final class WatchViewController: UIViewController {
     var initialVideo: Video
     let client: WatchService
     let engagementClient: EngagementService
+    let playlistClient: PlaylistService
     let channelInfoStore: ChannelInfoStore
     let channelViewControllerFactory: (
         String,
@@ -53,6 +54,7 @@ final class WatchViewController: UIViewController {
     let relatedBatchSize = 5
     var comments: [Comment] = []
     var commentsContinuation: String?
+    var playlistOptions: [PlaylistAddOption]?
     var visibleCommentsCount = 10
     let commentsPageSize = 10
     var videoPlayerView: VideoPlayerView?
@@ -166,6 +168,7 @@ final class WatchViewController: UIViewController {
         video: Video,
         watchService: WatchService,
         engagementService: EngagementService,
+        playlistService: PlaylistService,
         channelInfoStore: ChannelInfoStore,
         channelViewControllerFactory: @escaping (
             String,
@@ -187,6 +190,7 @@ final class WatchViewController: UIViewController {
         initialVideo = video
         client = watchService
         engagementClient = engagementService
+        playlistClient = playlistService
         self.channelInfoStore = channelInfoStore
         self.channelViewControllerFactory = channelViewControllerFactory
         self.videoRouter = videoRouter
