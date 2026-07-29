@@ -36,7 +36,7 @@
 "common.ok" = "OK";
 "common.save" = "Зберегти";
 "common.done" = "Готово";
-"common.playlist" = "Плейлист";
+"common.playlist" = "Список відтворення";
 "library.title" = "Бібліотека";
 
 /* ===== Player: status ===== */
@@ -51,14 +51,14 @@
 "player.action.share" = "Поділитися";
 "player.action.save" = "Зберегти";
 "player.action.saveFailed" = "Не вдалося зберегти відео.";
-"player.action.saveTo" = "Додати до плейлиста";
+"player.action.saveTo" = "Зберегти в списку відтворення";
 "player.action.savedTo" = "Збережено в «%1$@»";
 "player.action.removedFrom" = "Видалено з «%1$@»";
 "player.action.download" = "Завантажити";
 
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
-"video.menu.playNext" = "Додати до черги";
+"video.menu.playNext" = "Додати в чергу";
 "video.menu.watchLater" = "Дивитися пізніше";
 "video.menu.watchLaterName" = "Дивитися пізніше";
 "video.menu.removeFrom" = "Видалити з «%1$@»";
@@ -213,7 +213,7 @@
 
 "search.title" = "Пошук";
 "search.placeholder" = "Пошук на YouTube";
-"search.recent" = "Останні запити";
+"search.recent" = "Останні пошукові запити";
 "search.filters" = "Фільтри";
 "search.filters.active" = "Фільтри •";
 "search.filters.title" = "Фільтри пошуку";
@@ -227,10 +227,10 @@
 "search.filters.typeTitle" = "Тип";
 "search.filters.durationTitle" = "Тривалість";
 
-"search.sort.relevance" = "За релевантністю";
-"search.sort.rating" = "За рейтингом";
-"search.sort.uploadDate" = "За датою завантаження";
-"search.sort.viewCount" = "За кількістю переглядів";
+"search.sort.relevance" = "Відповідність";
+"search.sort.rating" = "Рейтинг";
+"search.sort.uploadDate" = "Дата завантаження";
+"search.sort.viewCount" = "Кількість переглядів";
 "search.date.any" = "Будь-коли";
 "search.date.lastHour" = "За останню годину";
 "search.date.today" = "Сьогодні";
@@ -240,7 +240,7 @@
 "search.type.any" = "Будь-який тип";
 "search.type.video" = "Відео";
 "search.type.channel" = "Канал";
-"search.type.playlist" = "Плейлист";
+"search.type.playlist" = "Список відтворення";
 "search.duration.any" = "Будь-яка тривалість";
 "search.duration.short" = "До 4 хвилин";
 "search.duration.medium" = "4–20 хвилин";
@@ -263,7 +263,7 @@
 
 "channel.tab.videos" = "Відео";
 "channel.tab.live" = "Трансляції";
-"channel.tab.playlists" = "Плейлисти";
+"channel.tab.playlists" = "Списки відтворення";
 "channel.about.title" = "Про канал";
 "channel.about.close" = "Закрити";
 "channel.about.subscribers" = "Підписники";
@@ -275,8 +275,8 @@
 
 "library.history" = "Історія";
 "library.downloads" = "Завантаження";
-"library.playlists" = "Плейлисти";
-"library.playlists.favorites" = "Обране";
+"library.playlists" = "Списки відтворення";
+"library.playlists.favorites" = "Вибране";
 "library.downloads.comingSoon" = "Завантаження скоро з'являться";
 "library.history.signIn" = "Увійдіть, щоб бачити історію переглядів";
 "library.history.empty" = "Історія переглядів порожня";

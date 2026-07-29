@@ -15,7 +15,7 @@
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "音声トラック";
 /* Menu item: toggles the playback statistics overlay */
-"player.menu.stats" = "詳細統計情報";
+"player.menu.stats" = "統計情報";
 /* Picker title: subtitles */
 "player.menu.subtitles" = "字幕";
 
@@ -46,7 +46,7 @@
 /* ===== Common ===== */
 
 /* Subscribe button, not-subscribed state */
-"common.subscribe" = "登録";
+"common.subscribe" = "チャンネル登録";
 /* Subscribe button, subscribed state */
 "common.subscribed" = "登録済み";
 /* Generic cancel action */
@@ -58,14 +58,14 @@
 /* Generic done action */
 "common.done" = "完了";
 /* Fallback title/label of a playlist tile */
-"common.playlist" = "プレイリスト";
+"common.playlist" = "再生リスト";
 /* Library tab title */
 "library.title" = "ライブラリ";
 
 /* ===== Player: status ===== */
 
 /* Status label while the player prepares the first video */
-"player.status.preparing" = "ビデオを準備中...";
+"player.status.preparing" = "動画を準備しています...";
 /* Status label while an expired stream URL is re-resolved */
 "player.status.refreshing" = "ストリームを更新中...";
 
@@ -162,11 +162,11 @@
 "sponsorblock.category.selfpromo.name" = "無報酬/自己プロモーション";
 "sponsorblock.category.selfpromo.description" = "「スポンサー」と似ていますが、無報酬または自己プロモーションです。グッズ、寄付、コラボレーション相手に関する情報が含まれます。";
 "sponsorblock.category.exclusive_access.name" = "限定アクセス";
-"sponsorblock.category.exclusive_access.description" = "ビデオ全体にのみ使用。無償または補助を受けた製品、サービス、場所を紹介するビデオに使用されます。";
+"sponsorblock.category.exclusive_access.description" = "動画全体にのみ使用。無償または補助を受けた製品、サービス、場所を紹介する動画に使用されます。";
 "sponsorblock.category.interaction.name" = "エンゲージメントリマインダー（チャンネル登録）";
 "sponsorblock.category.interaction.description" = "コンテンツの途中で「いいね」「チャンネル登録」「フォロー」を短く促す部分。長い場合や特定の内容については、自己プロモーションに分類してください。";
 "sponsorblock.category.highlight.name" = "ハイライト";
-"sponsorblock.category.highlight.description" = "ほとんどの人が見たいビデオの箇所。「xから動画」というコメントと同様です。";
+"sponsorblock.category.highlight.description" = "ほとんどの人が見たい動画の箇所。「xから動画」というコメントと同様です。";
 "sponsorblock.category.intro.name" = "イントロ/イントロアニメーション";
 "sponsorblock.category.intro.description" = "実質的なコンテンツのない区間。一時停止、静止画、繰り返しのアニメーション。情報を含む遷移には使用しないでください。";
 "sponsorblock.category.outro.name" = "エンディング/クレジット";
@@ -174,11 +174,11 @@
 "sponsorblock.category.preview.name" = "プレビュー/まとめ";
 "sponsorblock.category.preview.description" = "この動画やシリーズ内の他の動画の今後の内容を示すクリップの集まり。すべての情報は後で繰り返されます。";
 "sponsorblock.category.filler.name" = "オフ Topic/ジョーク";
-"sponsorblock.category.filler.description" = "ビデオのメインコンテンツを理解するのに必須ではない、オフ Topicなシーンやジョーク。コンテキストや背景情報を提供するセグメントは含めないでください。";
+"sponsorblock.category.filler.description" = "動画のメインコンテンツを理解するのに必須ではない、本題から逸れたシーンやジョーク。コンテキストや背景情報を提供するセグメントは含めないでください。";
 "sponsorblock.category.music_offtopic.name" = "ノンミュージックセクション";
 "sponsorblock.category.music_offtopic.description" = "ミュージックビデオのみ。ミュージックビデオのノンミュージック部分。";
 "sponsorblock.category.chapter.name" = "チャプター";
-"sponsorblock.category.chapter.description" = "ビデオのカスタム名付きセクション。";
+"sponsorblock.category.chapter.description" = "動画のカスタム名付きセクション。";
 
 /* ===== Settings ===== */
 
@@ -198,7 +198,7 @@
 /* Section footers */
 "settings.footer.themeAutoSystem" = "システムの外観に自動で従います。";
 "settings.footer.themeAutoHours" = "上記の時間帯に暗いテーマに自動で切り替わります。";
-"settings.footer.playback" = "ズームでフィルはフルスクリーン時にビデオを自動的にスケーヱーし、黒いバーをなくします。プレーヤーでピンチすると、ビデオごとに上書きされます。\n\n自動再生は5秒のカウントダウン後に次のおすすめ動画を再生します。ミックスのスイッチは、ミックス/再生リストのキューに同じ動作を即座に適用します。";
+"settings.footer.playback" = "ズームでフィルは全画面表示時に動画を拡大し、黒帯が残らないようにします。プレーヤーでピンチすると動画ごとに上書きされます。\n\n自動再生は5秒のカウントダウン後に次のおすすめ動画を再生します。ミックスのスイッチは、ミックスや再生リストのキューに同じ動作をすぐに適用します。";
 "settings.footer.autoDub" = "動画の元の言語が吹き替え言語と異なる場合、対応する音声トラックが自動的に選択されます。";
 "settings.footer.home" = "おすすめシェルフの表示方法: 連続したグリッドまたはTVスタイルの水平レール。";
 "settings.footer.ryd" = "低評価数は Return YouTube Dislike (returnyoutubedislike.com) によって提供されています — オープンコミュニティプロジェクト。";
@@ -283,10 +283,10 @@
 /* Header above the recent-search list */
 "search.recent" = "最近の検索";
 /* Filters toolbar button; the dotted variant marks active filters */
-"search.filters" = "フィルター";
+"search.filters" = "フィルタ";
 "search.filters.active" = "フィルター •";
 /* Filters sheet title + reset action */
-"search.filters.title" = "検索フィルター";
+"search.filters.title" = "検索フィルタ";
 "search.filters.reset" = "フィルターをリセット";
 /* Filter rows; %1$@ = the current value */
 "search.filters.sort" = "並べ替え: %1$@";
@@ -297,10 +297,10 @@
 "search.filters.sortTitle" = "並べ替え";
 "search.filters.dateTitle" = "アップロード日";
 "search.filters.typeTitle" = "種類";
-"search.filters.durationTitle" = "期間";
+"search.filters.durationTitle" = "動画の長さ";
 
 /* Filter option values */
-"search.sort.relevance" = "関連性";
+"search.sort.relevance" = "関連度";
 "search.sort.rating" = "評価";
 "search.sort.uploadDate" = "アップロード日";
 "search.sort.viewCount" = "視聴回数";
@@ -313,7 +313,7 @@
 "search.type.any" = "すべての種類";
 "search.type.video" = "動画";
 "search.type.channel" = "チャンネル";
-"search.type.playlist" = "プレイリスト";
+"search.type.playlist" = "再生リスト";
 "search.duration.any" = "すべての期間";
 "search.duration.short" = "4分未満";
 "search.duration.medium" = "4〜20分";
@@ -341,7 +341,7 @@
 /* Channel tab bar */
 "channel.tab.videos" = "動画";
 "channel.tab.live" = "ライブ";
-"channel.tab.playlists" = "プレイリスト";
+"channel.tab.playlists" = "再生リスト";
 /* About sheet */
 "channel.about.title" = "概要";
 "channel.about.close" = "閉じる";
@@ -354,7 +354,7 @@
 
 "library.history" = "履歴";
 "library.downloads" = "ダウンロード";
-"library.playlists" = "プレイリスト";
+"library.playlists" = "再生リスト";
 "library.playlists.favorites" = "お気に入り";
 "library.downloads.comingSoon" = "ダウンロードは近日公開";
 "library.history.signIn" = "サインインして視聴履歴を表示";
@@ -377,8 +377,8 @@
 
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "アカウント";
-"account.signIn" = "サインイン";
-"account.myChannel" = "自分のチャンネル";
+"account.signIn" = "ログイン";
+"account.myChannel" = "マイチャンネル";
 "account.signOut" = "サインアウト";
 "account.notSignedIn" = "未サインイン";
 

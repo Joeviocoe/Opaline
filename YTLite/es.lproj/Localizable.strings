@@ -75,8 +75,8 @@
 "player.action.share" = "Compartir";
 /* Action bar: save to playlist */
 "player.action.save" = "Guardar";
-"player.action.saveFailed" = "No se ha podido guardar el vídeo.";
-"player.action.saveTo" = "Añadir a la playlist";
+"player.action.saveFailed" = "No se ha podido guardar el video.";
+"player.action.saveTo" = "Guardar en una playlist";
 "player.action.savedTo" = "Guardado en %1$@";
 "player.action.removedFrom" = "Eliminado de %1$@";
 /* Action bar: download */
@@ -84,11 +84,11 @@
 
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
-"video.menu.playNext" = "Añadir a la cola";
+"video.menu.playNext" = "Agregar a la fila";
 "video.menu.watchLater" = "Ver más tarde";
 "video.menu.watchLaterName" = "Ver más tarde";
 "video.menu.removeFrom" = "Remove from %1$@";
-"video.menu.queued" = "Añadido a la cola";
+"video.menu.queued" = "Se agregó a la fila";
 
 /* ===== Player: comments ===== */
 
@@ -195,7 +195,7 @@
 "settings.footer.themeAutoSystem" = "Sigue automáticamente la apariencia del sistema.";
 "settings.footer.themeAutoHours" = "Cambia automáticamente al tema oscuro entre las horas indicadas.";
 "settings.footer.playback" = "Ampliar para rellenar escala el video en pantalla completa para que no queden barras negras. El pellizco en el reproductor lo anula por video.\n\nReproducción automática reproduce el siguiente video sugerido tras una cuenta regresiva de 5 s. El interruptor de Mix aplica lo mismo al instante a las colas de mix/lista de reproducción.";
-"settings.footer.autoDub" = "Si el idioma original de un vídeo difiere del idioma de doblaje, la pista de audio correspondiente se selecciona automáticamente.";
+"settings.footer.autoDub" = "Si el idioma original de un video difiere del idioma de doblaje, la pista de audio correspondiente se selecciona automáticamente.";
 "settings.footer.home" = "Cómo se muestran los estantes de recomendaciones: una cuadrícula continua o carriles horizontales estilo TV.";
 "settings.footer.ryd" = "Los recuentos de dislikes están impulsados por Return YouTube Dislike (returnyoutubedislike.com) — un proyecto comunitario abierto.";
 "settings.footer.debug" = "Forzar una fuente de reproducción específica. Normalmente se usa Android VR con respaldo automático. El servidor resolutor alimenta la fuente Mobile Web + pot (creación de pot y n-solving en iOS 12–13).";
@@ -212,7 +212,7 @@
 /* Playback rows */
 "settings.row.defaultQuality" = "Calidad predeterminada";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
-"settings.quality.auto" = "Auto";
+"settings.quality.auto" = "Automática";
 "settings.row.backgroundPlayback" = "Reproducción en segundo plano";
 "settings.row.pip" = "Imagen en imagen";
 "settings.row.hideStatusBar" = "Ocultar barra de estado en pantalla completa";
@@ -223,7 +223,7 @@
 "settings.row.autoplayMix" = "Reproducción automática (%1$@)";
 
 /* Auto-dub rows: master toggle, dub-language picker, AI-dub exclusion */
-"settings.row.autoDub" = "Iniciar los vídeos doblados";
+"settings.row.autoDub" = "Iniciar los videos doblados";
 "settings.row.autoDubLanguage" = "Idioma del doblaje";
 "settings.row.autoDubIgnoreAI" = "Ignorar doblajes con IA";
 
@@ -291,15 +291,15 @@
 "search.filters.duration" = "Duración: %1$@";
 /* Sub-sheet titles */
 "search.filters.sortTitle" = "Ordenar por";
-"search.filters.dateTitle" = "Fecha de publicación";
+"search.filters.dateTitle" = "Fecha de carga";
 "search.filters.typeTitle" = "Tipo";
 "search.filters.durationTitle" = "Duración";
 
 /* Filter option values */
 "search.sort.relevance" = "Relevancia";
-"search.sort.rating" = "Valoración";
-"search.sort.uploadDate" = "Fecha de publicación";
-"search.sort.viewCount" = "N.º de reproducciones";
+"search.sort.rating" = "Calificación";
+"search.sort.uploadDate" = "Fecha de carga";
+"search.sort.viewCount" = "Cantidad de vistas";
 "search.date.any" = "Cualquier momento";
 "search.date.lastHour" = "Última hora";
 "search.date.today" = "Hoy";

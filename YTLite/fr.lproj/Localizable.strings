@@ -11,7 +11,7 @@
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Piste audio";
 /* Menu item: toggles the playback statistics overlay */
-"player.menu.stats" = "Statistiques";
+"player.menu.stats" = "Stats pour les nerds";
 /* Picker title: subtitles */
 "player.menu.subtitles" = "Sous-titres";
 
@@ -76,7 +76,7 @@
 /* Action bar: save to playlist */
 "player.action.save" = "Enregistrer";
 "player.action.saveFailed" = "Impossible d'enregistrer la vidéo.";
-"player.action.saveTo" = "Ajouter à une playlist";
+"player.action.saveTo" = "Enregistrer dans une playlist";
 "player.action.savedTo" = "Enregistrée dans %1$@";
 "player.action.removedFrom" = "Supprimée de %1$@";
 /* Action bar: download */
@@ -297,7 +297,7 @@
 
 /* Filter option values */
 "search.sort.relevance" = "Pertinence";
-"search.sort.rating" = "Évaluation";
+"search.sort.rating" = "Note";
 "search.sort.uploadDate" = "Date de mise en ligne";
 "search.sort.viewCount" = "Nombre de vues";
 "search.date.any" = "Toutes les dates";
@@ -319,11 +319,11 @@
 
 "home.title" = "Accueil";
 /* Chip resetting to the unfiltered feed */
-"home.category.all" = "Tout";
+"home.category.all" = "Tous";
 /* Static category chips (server shelf titles arrive already localized) */
 "home.category.live" = "En direct";
 "home.category.news" = "Actualités";
-"home.category.gaming" = "Jeux";
+"home.category.gaming" = "Jeux vidéo";
 "home.category.sports" = "Sports";
 "home.category.learning" = "Éducation";
 "home.category.fashion" = "Mode";
@@ -339,7 +339,7 @@
 "channel.tab.live" = "En direct";
 "channel.tab.playlists" = "Playlists";
 /* About sheet */
-"channel.about.title" = "Informations";
+"channel.about.title" = "À propos";
 "channel.about.close" = "Fermer";
 "channel.about.subscribers" = "Abonnés";
 "channel.about.videos" = "Vidéos";

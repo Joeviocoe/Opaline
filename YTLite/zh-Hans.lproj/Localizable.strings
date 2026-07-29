@@ -52,7 +52,7 @@
 /* Generic cancel action */
 "common.cancel" = "取消";
 /* Generic confirmation button */
-"common.ok" = "好";
+"common.ok" = "确定";
 /* Generic save action */
 "common.save" = "保存";
 /* Generic done action */
@@ -60,7 +60,7 @@
 /* Fallback title/label of a playlist tile */
 "common.playlist" = "播放列表";
 /* Library tab title */
-"library.title" = "资料库";
+"library.title" = "媒体库";
 
 /* ===== Player: status ===== */
 
@@ -80,7 +80,7 @@
 /* Action bar: save to playlist */
 "player.action.save" = "保存";
 "player.action.saveFailed" = "无法保存视频。";
-"player.action.saveTo" = "添加到播放列表";
+"player.action.saveTo" = "保存到播放列表";
 "player.action.savedTo" = "已保存到「%1$@」";
 "player.action.removedFrom" = "已从「%1$@」移除";
 /* Action bar: download */
@@ -88,7 +88,7 @@
 
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
-"video.menu.playNext" = "添加到队列";
+"video.menu.playNext" = "添加到待播列表";
 "video.menu.watchLater" = "稍后观看";
 "video.menu.watchLaterName" = "稍后观看";
 "video.menu.removeFrom" = "Remove from %1$@";
@@ -281,7 +281,7 @@
 /* Search bar placeholder */
 "search.placeholder" = "搜索 YouTube";
 /* Header above the recent-search list */
-"search.recent" = "最近搜索";
+"search.recent" = "最近执行的搜索";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "筛选";
 "search.filters.active" = "筛选 •";
@@ -294,7 +294,7 @@
 "search.filters.type" = "类型：%1$@";
 "search.filters.duration" = "时长：%1$@";
 /* Sub-sheet titles */
-"search.filters.sortTitle" = "排序方式";
+"search.filters.sortTitle" = "排序依据";
 "search.filters.dateTitle" = "上传日期";
 "search.filters.typeTitle" = "类型";
 "search.filters.durationTitle" = "时长";
@@ -353,7 +353,7 @@
 /* ===== Library ===== */
 
 "library.history" = "历史记录";
-"library.downloads" = "下载";
+"library.downloads" = "下载内容";
 "library.playlists" = "播放列表";
 "library.playlists.favorites" = "收藏";
 "library.downloads.comingSoon" = "下载功能即将推出";
@@ -376,7 +376,7 @@
 /* ===== Account (toolbar sheet) ===== */
 
 /* Fallback account name when the profile has none */
-"account.fallbackName" = "帐户";
+"account.fallbackName" = "账号";
 "account.signIn" = "登录";
 "account.myChannel" = "我的频道";
 "account.signOut" = "退出登录";

@@ -15,7 +15,7 @@
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "音軌";
 /* Menu item: toggles the playback statistics overlay */
-"player.menu.stats" = "詳細統計資訊";
+"player.menu.stats" = "統計資料";
 /* Picker title: subtitles */
 "player.menu.subtitles" = "字幕";
 
@@ -60,7 +60,7 @@
 /* Fallback title/label of a playlist tile */
 "common.playlist" = "播放清單";
 /* Library tab title */
-"library.title" = "資料庫";
+"library.title" = "媒體庫";
 
 /* ===== Player: status ===== */
 
@@ -72,7 +72,7 @@
 /* ===== Player: watch page ===== */
 
 /* Expands the video description */
-"player.description.more" = "展開";
+"player.description.more" = "更多";
 /* Collapses the video description */
 "player.description.less" = "收合";
 /* Action bar: share the video */
@@ -80,7 +80,7 @@
 /* Action bar: save to playlist */
 "player.action.save" = "儲存";
 "player.action.saveFailed" = "無法儲存影片。";
-"player.action.saveTo" = "加入播放清單";
+"player.action.saveTo" = "儲存至播放清單";
 "player.action.savedTo" = "已儲存至「%1$@」";
 "player.action.removedFrom" = "已從「%1$@」移除";
 /* Action bar: download */
@@ -88,7 +88,7 @@
 
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
-"video.menu.playNext" = "加入佇列";
+"video.menu.playNext" = "新增至待播清單";
 "video.menu.watchLater" = "稍後觀看";
 "video.menu.watchLaterName" = "稍後觀看";
 "video.menu.removeFrom" = "Remove from %1$@";
@@ -281,7 +281,7 @@
 /* Search bar placeholder */
 "search.placeholder" = "搜尋 YouTube";
 /* Header above the recent-search list */
-"search.recent" = "最近搜尋";
+"search.recent" = "最近的搜尋";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "篩選";
 "search.filters.active" = "篩選 •";
@@ -294,13 +294,13 @@
 "search.filters.type" = "類型：%1$@";
 "search.filters.duration" = "時長：%1$@";
 /* Sub-sheet titles */
-"search.filters.sortTitle" = "排序方式";
+"search.filters.sortTitle" = "排序依據";
 "search.filters.dateTitle" = "上傳日期";
 "search.filters.typeTitle" = "類型";
-"search.filters.durationTitle" = "時長";
+"search.filters.durationTitle" = "影片長度";
 
 /* Filter option values */
-"search.sort.relevance" = "相關性";
+"search.sort.relevance" = "關聯性";
 "search.sort.rating" = "評分";
 "search.sort.uploadDate" = "上傳日期";
 "search.sort.viewCount" = "觀看次數";
@@ -353,7 +353,7 @@
 /* ===== Library ===== */
 
 "library.history" = "觀看記錄";
-"library.downloads" = "下載";
+"library.downloads" = "已下載的內容";
 "library.playlists" = "播放清單";
 "library.playlists.favorites" = "收藏";
 "library.downloads.comingSoon" = "下載功能即將推出";
@@ -367,7 +367,7 @@
 
 /* ===== Subscriptions ===== */
 
-"subscriptions.title" = "訂閱";
+"subscriptions.title" = "訂閱內容";
 "subscriptions.all" = "全部訂閱";
 /* "All" button in the channel avatar bar */
 "subscriptions.allButton" = "全部";

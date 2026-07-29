@@ -9,7 +9,7 @@
 "player.menu.settings" = "Параметры воспроизведения";
 "player.menu.quality" = "Качество";
 "player.menu.audioTrack" = "Аудиодорожка";
-"player.menu.stats" = "Статистика для сисадминов";
+"player.menu.stats" = "Подробная статистика";
 "player.menu.subtitles" = "Субтитры";
 
 /* ===== Player: pickers ===== */
@@ -234,13 +234,13 @@
 "search.date.any" = "За всё время";
 "search.date.lastHour" = "За последний час";
 "search.date.today" = "Сегодня";
-"search.date.thisWeek" = "На этой неделе";
+"search.date.thisWeek" = "За эту неделю";
 "search.date.thisMonth" = "В этом месяце";
 "search.date.thisYear" = "В этом году";
 "search.type.any" = "Любой тип";
 "search.type.video" = "Видео";
-"search.type.channel" = "Канал";
-"search.type.playlist" = "Плейлист";
+"search.type.channel" = "Каналы";
+"search.type.playlist" = "Плейлисты";
 "search.duration.any" = "Любая длительность";
 "search.duration.short" = "До 4 минут";
 "search.duration.medium" = "4–20 минут";
@@ -274,7 +274,7 @@
 /* ===== Library ===== */
 
 "library.history" = "История";
-"library.downloads" = "Загрузки";
+"library.downloads" = "Скачанные";
 "library.playlists" = "Плейлисты";
 "library.playlists.favorites" = "Избранное";
 "library.downloads.comingSoon" = "Загрузки скоро появятся";

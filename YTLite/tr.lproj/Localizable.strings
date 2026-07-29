@@ -15,7 +15,7 @@
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Ses parçası";
 /* Menu item: toggles the playback statistics overlay */
-"player.menu.stats" = "İstatistikler";
+"player.menu.stats" = "Meraklısına istatistikler";
 /* Picker title: subtitles */
 "player.menu.subtitles" = "Altyazılar";
 
@@ -80,7 +80,7 @@
 /* Action bar: save to playlist */
 "player.action.save" = "Kaydet";
 "player.action.saveFailed" = "Video kaydedilemedi.";
-"player.action.saveTo" = "Oynatma listesine ekle";
+"player.action.saveTo" = "Oynatma listesine kaydet";
 "player.action.savedTo" = "%1$@ listesine kaydedildi";
 "player.action.removedFrom" = "%1$@ listesinden kaldırıldı";
 /* Action bar: download */
@@ -88,7 +88,7 @@
 
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
-"video.menu.playNext" = "Kuyruğa ekle";
+"video.menu.playNext" = "Sıraya ekle";
 "video.menu.watchLater" = "Daha sonra izle";
 "video.menu.watchLaterName" = "Daha sonra izle";
 "video.menu.removeFrom" = "Remove from %1$@";
@@ -300,10 +300,10 @@
 "search.filters.durationTitle" = "Süre";
 
 /* Filter option values */
-"search.sort.relevance" = "İlgili";
-"search.sort.rating" = "Derecelendirme";
+"search.sort.relevance" = "Alaka düzeyi";
+"search.sort.rating" = "Kullanıcı oyu";
 "search.sort.uploadDate" = "Yükleme tarihi";
-"search.sort.viewCount" = "Görüntülenme sayısı";
+"search.sort.viewCount" = "Görüntüleme sayısı";
 "search.date.any" = "Herhangi bir zaman";
 "search.date.lastHour" = "Son saat";
 "search.date.today" = "Bugün";
@@ -353,7 +353,7 @@
 /* ===== Library ===== */
 
 "library.history" = "Geçmiş";
-"library.downloads" = "İndirmeler";
+"library.downloads" = "İndirilenler";
 "library.playlists" = "Oynatma listeleri";
 "library.playlists.favorites" = "Favoriler";
 "library.downloads.comingSoon" = "İndirmeler yakında";
@@ -377,7 +377,7 @@
 
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "Hesap";
-"account.signIn" = "Giriş Yap";
+"account.signIn" = "Oturum aç";
 "account.myChannel" = "Kanalım";
 "account.signOut" = "Çıkış Yap";
 "account.notSignedIn" = "Giriş yapılmadı";

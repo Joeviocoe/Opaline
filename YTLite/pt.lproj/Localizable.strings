@@ -11,7 +11,7 @@
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Faixa de áudio";
 /* Menu item: toggles the playback statistics overlay */
-"player.menu.stats" = "Estatísticas";
+"player.menu.stats" = "Estatísticas para nerds";
 /* Picker title: subtitles */
 "player.menu.subtitles" = "Legendas";
 
@@ -76,7 +76,7 @@
 /* Action bar: save to playlist */
 "player.action.save" = "Salvar";
 "player.action.saveFailed" = "Não foi possível salvar o vídeo.";
-"player.action.saveTo" = "Adicionar à playlist";
+"player.action.saveTo" = "Salvar na playlist";
 "player.action.savedTo" = "Salvo em %1$@";
 "player.action.removedFrom" = "Removido de %1$@";
 /* Action bar: download */
@@ -212,7 +212,7 @@
 /* Playback rows */
 "settings.row.defaultQuality" = "Qualidade padrão";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
-"settings.quality.auto" = "Auto";
+"settings.quality.auto" = "Automática";
 "settings.row.backgroundPlayback" = "Reprodução em segundo plano";
 "settings.row.pip" = "Picture-in-Picture";
 "settings.row.hideStatusBar" = "Ocultar barra de status em tela cheia";
@@ -299,7 +299,7 @@
 "search.sort.relevance" = "Relevância";
 "search.sort.rating" = "Avaliação";
 "search.sort.uploadDate" = "Data de envio";
-"search.sort.viewCount" = "Número de visualizações";
+"search.sort.viewCount" = "Contagem de visualizações";
 "search.date.any" = "Qualquer momento";
 "search.date.lastHour" = "Última hora";
 "search.date.today" = "Hoje";
@@ -323,7 +323,7 @@
 /* Static category chips (server shelf titles arrive already localized) */
 "home.category.live" = "Ao vivo";
 "home.category.news" = "Notícias";
-"home.category.gaming" = "Jogos";
+"home.category.gaming" = "Games";
 "home.category.sports" = "Esportes";
 "home.category.learning" = "Educação";
 "home.category.fashion" = "Moda";
@@ -351,7 +351,7 @@
 "library.history" = "Histórico";
 "library.downloads" = "Downloads";
 "library.playlists" = "Playlists";
-"library.playlists.favorites" = "Favoritos";
+"library.playlists.favorites" = "Favoritas";
 "library.downloads.comingSoon" = "Downloads em breve";
 "library.history.signIn" = "Entre para ver seu histórico";
 "library.history.empty" = "Nenhum histórico encontrado";

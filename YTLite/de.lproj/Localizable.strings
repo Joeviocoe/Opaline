@@ -9,9 +9,9 @@
 /* Menu item + picker title: video quality */
 "player.menu.quality" = "Qualität";
 /* Menu item + picker title: audio track (dub) selection */
-"player.menu.audioTrack" = "Audiospur";
+"player.menu.audioTrack" = "Audiotrack";
 /* Menu item: toggles the playback statistics overlay */
-"player.menu.stats" = "Statistiken";
+"player.menu.stats" = "Statistiken für Interessierte";
 /* Picker title: subtitles */
 "player.menu.subtitles" = "Untertitel";
 
@@ -56,7 +56,7 @@
 /* Fallback title/label of a playlist tile */
 "common.playlist" = "Playlist";
 /* Library tab title */
-"library.title" = "Bibliothek";
+"library.title" = "Mediathek";
 
 /* ===== Player: status ===== */
 
@@ -76,7 +76,7 @@
 /* Action bar: save to playlist */
 "player.action.save" = "Speichern";
 "player.action.saveFailed" = "Video konnte nicht gespeichert werden.";
-"player.action.saveTo" = "Zur Playlist hinzufügen";
+"player.action.saveTo" = "Zu Playlist hinzufügen";
 "player.action.savedTo" = "In %1$@ gespeichert";
 "player.action.removedFrom" = "Aus %1$@ entfernt";
 /* Action bar: download */
@@ -212,7 +212,7 @@
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
 "settings.quality.auto" = "Auto";
 "settings.row.backgroundPlayback" = "Hintergrundwiedergabe";
-"settings.row.pip" = "Bild-in-Bild";
+"settings.row.pip" = "Bild im Bild";
 "settings.row.hideStatusBar" = "Statusleiste im Vollbild ausblenden";
 "settings.row.zoomToFill" = "Zoom zum Füllen im Vollbild";
 "settings.row.showShorts" = "YouTube Shorts in Abonnements anzeigen";
@@ -273,9 +273,9 @@
 
 "search.title" = "Suche";
 /* Search bar placeholder */
-"search.placeholder" = "YouTube durchsuchen";
+"search.placeholder" = "Auf YouTube suchen";
 /* Header above the recent-search list */
-"search.recent" = "Letzte Suchen";
+"search.recent" = "Letzte Suchanfragen";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "Filter";
 "search.filters.active" = "Filter •";
@@ -288,7 +288,7 @@
 "search.filters.type" = "Typ: %1$@";
 "search.filters.duration" = "Dauer: %1$@";
 /* Sub-sheet titles */
-"search.filters.sortTitle" = "Sortierung";
+"search.filters.sortTitle" = "Sortieren nach";
 "search.filters.dateTitle" = "Upload-Datum";
 "search.filters.typeTitle" = "Typ";
 "search.filters.durationTitle" = "Dauer";
@@ -297,12 +297,12 @@
 "search.sort.relevance" = "Relevanz";
 "search.sort.rating" = "Bewertung";
 "search.sort.uploadDate" = "Upload-Datum";
-"search.sort.viewCount" = "Aufrufe";
+"search.sort.viewCount" = "Anzahl der Aufrufe";
 "search.date.any" = "Beliebige Zeit";
 "search.date.lastHour" = "Letzte Stunde";
 "search.date.today" = "Heute";
 "search.date.thisWeek" = "Diese Woche";
-"search.date.thisMonth" = "Diesen Monat";
+"search.date.thisMonth" = "Dieser Monat";
 "search.date.thisYear" = "Dieses Jahr";
 "search.type.any" = "Beliebiger Typ";
 "search.type.video" = "Video";
@@ -361,7 +361,7 @@
 
 /* ===== Subscriptions ===== */
 
-"subscriptions.title" = "Abonnements";
+"subscriptions.title" = "Abos";
 "subscriptions.all" = "Alle Abonnements";
 /* "All" button in the channel avatar bar */
 "subscriptions.allButton" = "Alle";
@@ -386,7 +386,7 @@
 "settings.section.language" = "Sprache";
 "settings.footer.language" = "Die App-Sprache ändert sowohl die Oberfläche als auch die Inhalte: Titel, Suche und Feeds folgen ihr (YouTube übersetzt Metadaten serverseitig, wie die offizielle App). Änderungen gelten vollständig nach einem Neustart der App.";
 /* Rows */
-"settings.row.appLanguage" = "Appsprache";
+"settings.row.appLanguage" = "App-Sprache";
 "settings.row.region" = "Region";
 /* Picker option following the device language/region */
 "settings.language.system" = "System";

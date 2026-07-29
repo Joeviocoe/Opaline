@@ -11,7 +11,7 @@
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Traccia audio";
 /* Menu item: toggles the playback statistics overlay */
-"player.menu.stats" = "Statistiche";
+"player.menu.stats" = "Statistiche per nerd";
 /* Picker title: subtitles */
 "player.menu.subtitles" = "Sottotitoli";
 
@@ -56,7 +56,7 @@
 /* Fallback title/label of a playlist tile */
 "common.playlist" = "Playlist";
 /* Library tab title */
-"library.title" = "Libreria";
+"library.title" = "Raccolta";
 
 /* ===== Player: status ===== */
 
@@ -68,7 +68,7 @@
 /* ===== Player: watch page ===== */
 
 /* Expands the video description */
-"player.description.more" = "Più";
+"player.description.more" = "Altro";
 /* Collapses the video description */
 "player.description.less" = "Meno";
 /* Action bar: share the video */
@@ -76,7 +76,7 @@
 /* Action bar: save to playlist */
 "player.action.save" = "Salva";
 "player.action.saveFailed" = "Impossibile salvare il video.";
-"player.action.saveTo" = "Aggiungi alla playlist";
+"player.action.saveTo" = "Salva in una playlist";
 "player.action.savedTo" = "Salvato in %1$@";
 "player.action.removedFrom" = "Rimosso da %1$@";
 /* Action bar: download */
@@ -212,7 +212,7 @@
 /* Playback rows */
 "settings.row.defaultQuality" = "Qualità predefinita";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
-"settings.quality.auto" = "Auto";
+"settings.quality.auto" = "Automatica";
 "settings.row.backgroundPlayback" = "Riproduzione in background";
 "settings.row.pip" = "Picture-in-Picture";
 "settings.row.hideStatusBar" = "Nascondi barra di stato a schermo intero";
@@ -296,10 +296,10 @@
 "search.filters.durationTitle" = "Durata";
 
 /* Filter option values */
-"search.sort.relevance" = "Rilevanza";
-"search.sort.rating" = "Valutazione";
+"search.sort.relevance" = "Pertinenza";
+"search.sort.rating" = "Voto";
 "search.sort.uploadDate" = "Data di caricamento";
-"search.sort.viewCount" = "Visualizzazioni";
+"search.sort.viewCount" = "Numero di visualizzazioni";
 "search.date.any" = "Qualsiasi data";
 "search.date.lastHour" = "Ultima ora";
 "search.date.today" = "Oggi";
@@ -323,7 +323,7 @@
 /* Static category chips (server shelf titles arrive already localized) */
 "home.category.live" = "In diretta";
 "home.category.news" = "Notizie";
-"home.category.gaming" = "Gaming";
+"home.category.gaming" = "Giochi";
 "home.category.sports" = "Sport";
 "home.category.learning" = "Educazione";
 "home.category.fashion" = "Moda";
