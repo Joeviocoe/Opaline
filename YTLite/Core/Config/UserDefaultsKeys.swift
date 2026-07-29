@@ -61,6 +61,13 @@ enum UserDefaultsKeys {
         static let region = "localization_region"
     }
 
+    enum Playlists {
+        /// Legacy "Favorites" playlist id (`FL` + channelId). The TV library
+        /// browse omits it, so it is remembered the first time the
+        /// add-to-playlist options mention it.
+        static let legacyFavoritesId = "playlists_legacyFavoritesId"
+    }
+
     enum Player {
         static let backgroundPlayback = "player_backgroundPlayback"
         static let pipEnabled = "player_pipEnabled"

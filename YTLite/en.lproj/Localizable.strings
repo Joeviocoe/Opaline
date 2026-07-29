@@ -353,6 +353,8 @@
 "library.history" = "History";
 "library.downloads" = "Downloads";
 "library.playlists" = "Playlists";
+/* Legacy pre-2013 "Favorites" playlist */
+"library.playlists.favorites" = "Favorites";
 "library.downloads.comingSoon" = "Downloads coming soon";
 "library.history.signIn" = "Sign in to view your watch history";
 "library.history.empty" = "No watch history found";

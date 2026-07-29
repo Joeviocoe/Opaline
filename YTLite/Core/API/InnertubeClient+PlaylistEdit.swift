@@ -66,6 +66,7 @@ private extension InnertubeClient {
                 "playlist options: \(options.count), "
                     + "added=\(options.filter(\.isAdded).count)"
             )
+            Self.rememberLegacyFavorites(in: options)
             return options.isEmpty ? nil : options
         } completion: { completion($0) }
     }
@@ -98,6 +99,67 @@ private extension InnertubeClient {
 // MARK: - Parsing
 
 extension InnertubeClient {
+    /// Id of the pre-2013 "Favorites" playlist (`FL` + channelId), if this
+    /// account still has one. The TV library browse never lists it, so the
+    /// add-to-playlist response is the only place it surfaces.
+    static var legacyFavoritesId: String? {
+        UserDefaults.standard.string(
+            forKey: UserDefaultsKeys.Playlists.legacyFavoritesId
+        )
+    }
+
+    /// The accounts list carries the user's channel id as
+    /// `offlineCacheKeyToken.clientCacheKey` — the channel id minus its `UC`
+    /// prefix — and the legacy playlist id is `FL` + that. Lets Favorites show
+    /// up right after sign-in instead of after the first video.
+    static func rememberOwnChannelId(from json: [String: Any]) {
+        guard legacyFavoritesId == nil,
+              let key = firstClientCacheKey(in: json),
+              !key.isEmpty
+        else {
+            return
+        }
+        AppLog.innertube("own channel key \(key) → legacy FL\(key)")
+        UserDefaults.standard.set(
+            "FL" + key,
+            forKey: UserDefaultsKeys.Playlists.legacyFavoritesId
+        )
+    }
+
+    private static func firstClientCacheKey(in value: Any) -> String? {
+        if let dict = value as? [String: Any] {
+            if let key = dict["clientCacheKey"] as? String {
+                return key
+            }
+            for child in dict.values {
+                if let key = firstClientCacheKey(in: child) {
+                    return key
+                }
+            }
+        } else if let array = value as? [Any] {
+            for child in array {
+                if let key = firstClientCacheKey(in: child) {
+                    return key
+                }
+            }
+        }
+        return nil
+    }
+
+    static func rememberLegacyFavorites(
+        in options: [PlaylistAddOption]
+    ) {
+        guard let legacy = options.first(
+            where: { $0.id.hasPrefix("FL") }
+        ) else {
+            return
+        }
+        UserDefaults.standard.set(
+            legacy.id,
+            forKey: UserDefaultsKeys.Playlists.legacyFavoritesId
+        )
+    }
+
     static func parseAddToPlaylistOptions(
         _ json: [String: Any]
     ) -> [PlaylistAddOption] {

@@ -151,6 +151,32 @@ private extension InnertubeClient {
         playlistVideoList(from: json)?["contents"] as? [[String: Any]] ?? []
     }
 
+    /// Playlists the TV library browse never lists: Watch Later, and the
+    /// legacy Favorites list on accounts old enough to have one.
+    static func implicitPlaylists(
+        besides playlists: [Playlist]
+    ) -> [Playlist] {
+        let known = Set(playlists.map(\.id))
+        let watchLater = Playlist(
+            id: "WL",
+            title: "Watch Later",
+            description: "",
+            thumbnailURL: nil,
+            itemCount: nil
+        )
+        let legacy = legacyFavoritesId.map {
+            Playlist(
+                id: $0,
+                title: "library.playlists.favorites".localized,
+                description: "",
+                thumbnailURL: nil,
+                itemCount: nil
+            )
+        }
+        return ([watchLater] + [legacy].compactMap { $0 })
+            .filter { !known.contains($0.id) }
+    }
+
     func handlePlaylistsFetchResult(
         _ result: Result<[Playlist], Error>,
         token: String,
@@ -160,14 +186,8 @@ private extension InnertubeClient {
         case .failure(let error):
             completion(.failure(error))
         case .success(let playlists):
-            let watchLater = Playlist(
-                id: "WL",
-                title: "Watch Later",
-                description: "",
-                thumbnailURL: nil,
-                itemCount: nil
-            )
-            let all = [watchLater] + playlists
+            let all = Self.implicitPlaylists(besides: playlists)
+                + playlists
             guard !all.isEmpty else {
                 completion(.success(all))
                 return

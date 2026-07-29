@@ -89,6 +89,7 @@ extension InnertubeClient {
             AppLog.innertube(
                 "accountsList: name=\(info.name), avatar=\(info.avatarURL ?? "nil")"
             )
+            InnertubeClient.rememberOwnChannelId(from: json)
             return info
         } completion: { completion($0) }
     }
