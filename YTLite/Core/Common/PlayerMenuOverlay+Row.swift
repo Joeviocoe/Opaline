@@ -12,6 +12,14 @@ extension PlayerMenuOverlay {
             equalToConstant: Metrics.rowHeight
         ).isActive = true
         button.addTarget(self, action: #selector(rowTapped(_:)), for: .touchUpInside)
+        // The title and icon are plain subviews, so a system button's own
+        // highlight never shows — the row needs its own pressed state.
+        button.addTarget(self, action: #selector(rowPressed(_:)), for: .touchDown)
+        button.addTarget(
+            self,
+            action: #selector(rowReleased(_:)),
+            for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit]
+        )
 
         let color = item.isDestructive ? UIColor.systemRed : rowColor
         addRowLabel(item.title, color: color, hasIcons: hasIcons, to: button)
@@ -19,6 +27,19 @@ extension PlayerMenuOverlay {
             addRowIcon(iconName, color: color, to: button)
         }
         return button
+    }
+
+    @objc
+    func rowPressed(_ button: UIButton) {
+        Feedback.tap()
+        button.backgroundColor = rowColor.withAlphaComponent(0.12)
+    }
+
+    @objc
+    func rowReleased(_ button: UIButton) {
+        UIView.animate(withDuration: 0.2) {
+            button.backgroundColor = .clear
+        }
     }
 
     private func addRowLabel(

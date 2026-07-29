@@ -98,6 +98,7 @@ final class NavChevronButton: UIView {
         // stays as tap area.
         button.contentHorizontalAlignment = .leading
         button.addTarget(target, action: action, for: .touchUpInside)
+        button.addTapFeedback()
         button.frame = bounds
         button.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(button)

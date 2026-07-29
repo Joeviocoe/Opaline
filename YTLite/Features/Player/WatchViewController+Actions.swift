@@ -9,6 +9,11 @@ extension WatchViewController {
         }
         let wasLiked = currentLikeStatus == .like
         currentLikeStatus = wasLiked ? .indifferent : .like
+        // Optimistic, like the tint below: the request result arrives too
+        // late to feel connected to the tap.
+        if !wasLiked {
+            Feedback.success()
+        }
         AppLog.player(
             "like tapped: "
             + "\(wasLiked ? "removing" : "sending") like"
@@ -82,23 +87,11 @@ extension WatchViewController {
         }
     }
 
-    @objc
-    func subscribeButtonTapped() {
-        guard let channelId = watchPage?.channelInfo?.id
-            ?? watchPage?.video.channelId else {
-            return
-        }
-        let wasSubscribed = isSubscribed
-        isSubscribed = !wasSubscribed
-        subscribeButton.setTitle(
-            isSubscribed
-                ? "common.subscribed".localized
-                : "common.subscribe".localized,
-            for: .normal
-        )
-        subscribeButton.isEnabled = false
-        applyTheme()
-        let handler: (Result<Void, Error>) -> Void = { [weak self] result in
+    private func subscribeHandler(
+        channelId: String,
+        wasSubscribed: Bool
+    ) -> (Result<Void, Error>) -> Void {
+        { [weak self] result in
             DispatchQueue.main.async {
                 self?.handleSubscribeResult(
                     result,
@@ -107,6 +100,28 @@ extension WatchViewController {
                 )
             }
         }
+    }
+
+    @objc
+    func subscribeButtonTapped() {
+        guard let channelId = watchPage?.channelInfo?.id
+            ?? watchPage?.video.channelId else {
+            return
+        }
+        let wasSubscribed = isSubscribed
+        isSubscribed = !wasSubscribed
+        if !wasSubscribed {
+            Feedback.success()
+        }
+        subscribeButton.setTitle(
+            isSubscribed
+                ? "common.subscribed".localized
+                : "common.subscribe".localized,
+            for: .normal
+        )
+        subscribeButton.isEnabled = false
+        applyTheme()
+        let handler = subscribeHandler(channelId: channelId, wasSubscribed: wasSubscribed)
         if wasSubscribed {
             engagementClient.unsubscribeFromChannel(channelId: channelId, completion: handler)
         } else {

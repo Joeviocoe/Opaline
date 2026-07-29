@@ -236,4 +236,24 @@ extension MainTabBarController: UITabBarControllerDelegate {
         }
         return true
     }
+
+    func tabBarController(
+        _ tabBarController: UITabBarController,
+        didSelect viewController: UIViewController
+    ) {
+        Feedback.select()
+        Feedback.pop(selectedTabIcon())
+    }
+
+    /// The icon inside the tab button, not the button: the bar owns its
+    /// buttons' frames and resets them, which fights an animated transform.
+    private func selectedTabIcon() -> UIView? {
+        let buttons = tabBar.subviews
+            .filter { $0 is UIControl }
+            .sorted { $0.frame.minX < $1.frame.minX }
+        guard selectedIndex < buttons.count else {
+            return nil
+        }
+        return buttons[selectedIndex].subviews.first { $0 is UIImageView }
+    }
 }

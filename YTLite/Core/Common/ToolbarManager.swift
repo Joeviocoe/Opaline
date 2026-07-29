@@ -61,12 +61,14 @@ final class ToolbarManager {
         let button = ProfileAvatarButton()
         button.refresh()
         button.addTarget(target, action: action, for: .touchUpInside)
+        button.addTapFeedback()
         return UIBarButtonItem(customView: button)
     }
 
     private func makeBellButton(target: AnyObject, action: Selector) -> UIBarButtonItem {
         let button = NotificationsBellButton()
         button.addTarget(target, action: action, for: .touchUpInside)
+        button.addTapFeedback()
         return UIBarButtonItem(customView: button)
     }
 }
@@ -76,6 +78,9 @@ final class ToolbarManager {
 extension UIViewController {
     @objc
     func toolbarOpenSearch() {
+        // System bar items expose no view to animate, so these three get the
+        // haptic only; the custom bell/avatar buttons pop as well.
+        Feedback.tap()
         let searchVC = ToolbarManager.shared.searchViewControllerFactory?()
         guard let searchVC else {
             assertionFailure("ToolbarManager search factory is not configured")
@@ -91,6 +96,7 @@ extension UIViewController {
 
     @objc
     func toolbarOpenSettings() {
+        Feedback.tap()
         let nav = RotatingNavigationController(rootViewController: SettingsViewController())
         nav.modalPresentationStyle = .pageSheet
         if #available(iOS 15, *) {

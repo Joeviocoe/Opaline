@@ -21,7 +21,6 @@ extension WatchViewController {
 
     @objc
     func saveTapped() {
-        ToastView.tap()
         if let options = playlistOptions {
             presentPlaylistPicker(options)
             return
@@ -118,6 +117,10 @@ extension WatchViewController {
         switch result {
         case .success:
             applyLocalToggle(option, removing: removing)
+            if !removing {
+                // The toast below carries the haptic half.
+                Feedback.checkmark(on: saveButton)
+            }
             let key = removing
                 ? "player.action.removedFrom"
                 : "player.action.savedTo"

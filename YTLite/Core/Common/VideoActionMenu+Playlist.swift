@@ -172,6 +172,6 @@ extension VideoActionMenu {
     }
 
     private static func showFailed(in view: UIView) {
-        ToastView.show("player.action.saveFailed".localized, in: view)
+        ToastView.show("player.action.saveFailed".localized, in: view, isError: true)
     }
 }

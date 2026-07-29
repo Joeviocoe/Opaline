@@ -155,6 +155,7 @@ final class MiniPlayerBar: UIView {
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        closeButton.addTapFeedback()
         infoBar.addSubview(closeButton)
 
         NSLayoutConstraint.activate([

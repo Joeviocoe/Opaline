@@ -15,9 +15,20 @@ extension VideoPlayerView {
         layer.addSublayer(topGradientLayer)
         layer.addSublayer(bottomGradientLayer)
         setupControls()
+        addControlFeedback()
         addGestureRecognizers()
         addLifecycleObservers()
         observeReadyForDisplay()
+    }
+
+    private func addControlFeedback() {
+        for button in [
+            settingsButton, pipButton, ccButton, speedButton,
+            rewindButton, playPauseButton, forwardButton,
+            fullscreenButton, skipButton
+        ] {
+            button.addTapFeedback()
+        }
     }
 
     /// Unavailable controls stay visible but disabled, so the top-bar

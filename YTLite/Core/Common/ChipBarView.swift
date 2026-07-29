@@ -150,6 +150,8 @@ final class ChipBarView: UIView {
         guard idx != selectedIndex, idx < buttons.count else {
             return
         }
+        Feedback.select()
+        Feedback.pop(sender)
         setSelected(idx)
         onSelect?(idx)
     }

@@ -160,21 +160,18 @@ extension VideoPlayerView {
     private func handleTimeControlChange(on player: AVPlayer) {
         switch player.timeControlStatus {
         case .waitingToPlayAtSpecifiedRate:
-            spinner.startAnimating()
-            setCenter(hidden: true)
+            scheduleBufferingIndicator()
             if CMTimeGetSeconds(player.currentTime()) > 1 {
                 clockResync.isStalled = true
             }
         case .playing:
-            spinner.stopAnimating()
-            setCenter(hidden: false)
+            hideBufferingIndicator()
             if clockResync.isStalled {
                 clockResync.isStalled = false
                 scheduleClockResync()
             }
         case .paused:
-            spinner.stopAnimating()
-            setCenter(hidden: false)
+            hideBufferingIndicator()
             clockResync.isStalled = false
             clockResync.workItem?.cancel()
         @unknown default:

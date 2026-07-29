@@ -212,6 +212,7 @@ extension WatchViewController {
         subscribeButton.isEnabled = !OAuthClient.shared.isAnonymous
         let sel = #selector(subscribeButtonTapped)
         subscribeButton.addTarget(self, action: sel, for: .touchUpInside)
+        subscribeButton.addTapFeedback()
         cv.addSubview(subscribeButton)
     }
 
@@ -226,6 +227,9 @@ extension WatchViewController {
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
         likeButton.addTarget(self, action: #selector(likeTapped), for: .touchUpInside)
         dislikeButton.addTarget(self, action: #selector(dislikeTapped), for: .touchUpInside)
+        for item in actionBarItems {
+            item.button.addTapFeedback()
+        }
     }
 
     private func buildActionBarItems() {

@@ -3,9 +3,31 @@ import UIKit
 /// Transient confirmation strip. iPads have no Taptic Engine, so a visible
 /// toast — not haptics — is the only feedback that works on every device.
 enum ToastView {
-    static func show(_ text: String, in view: UIView) {
+    /// A toast always confirms (or fails) an action that just finished, so
+    /// the matching notification haptic belongs here rather than at every
+    /// call site.
+    static func show(_ text: String, in view: UIView, isError: Bool = false) {
+        if isError {
+            Feedback.failure()
+        } else {
+            Feedback.success()
+        }
         let label = makeLabel(text)
         view.addSubview(label)
+        pin(label, to: view)
+        UIView.animate(withDuration: 0.2) {
+            label.alpha = 1
+        }
+        UIView.animate(
+            withDuration: 0.3,
+            delay: 1.6,
+            options: [],
+            animations: { label.alpha = 0 },
+            completion: { _ in label.removeFromSuperview() }
+        )
+    }
+
+    private static func pin(_ label: UILabel, to view: UIView) {
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(
                 equalTo: view.centerXAnchor
@@ -23,16 +45,6 @@ enum ToastView {
                 constant: -24
             )
         ])
-        UIView.animate(withDuration: 0.2) {
-            label.alpha = 1
-        }
-        UIView.animate(
-            withDuration: 0.3,
-            delay: 1.6,
-            options: [],
-            animations: { label.alpha = 0 },
-            completion: { _ in label.removeFromSuperview() }
-        )
     }
 
     private static func makeLabel(_ text: String) -> UILabel {
@@ -48,14 +60,6 @@ enum ToastView {
         label.alpha = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
-    }
-
-    /// No-op on iPad — `UIImpactFeedbackGenerator` is a silent no-op where
-    /// there is no Taptic Engine, so no device check is needed.
-    static func tap() {
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.prepare()
-        generator.impactOccurred()
     }
 }
 

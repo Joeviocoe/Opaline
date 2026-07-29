@@ -287,6 +287,9 @@ extension VideoCell {
 
     @objc
     private func handleMenuTap() {
+        // Haptic only: the cell lays its subviews out by frame, which fights
+        // the transform `Feedback.pop` animates.
+        Feedback.tap()
         onMenuTap?(menuButton)
     }
 

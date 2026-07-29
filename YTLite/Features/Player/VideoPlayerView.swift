@@ -214,7 +214,7 @@ final class VideoPlayerView: UIView {
     // MARK: - State
 
     var timeObserver: Any?
-    var hideWorkItem: DispatchWorkItem?
+    var hideWorkItem: DispatchWorkItem?, bufferingIndicatorWork: DispatchWorkItem?
     var controlsVisible = false
     var wasPlayingOnResign = false
     let multitaskPause = MultitaskPauseState()
