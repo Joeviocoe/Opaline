@@ -20,16 +20,8 @@ final class ChannelViewController: VideosViewController {
     var playlistLookup: [String: Playlist] = [:]
 
     lazy var infoBarButton: UIBarButtonItem = {
-        if #available(iOS 13, *) {
-            return UIBarButtonItem(
-                image: UIImage(systemName: "info.circle"),
-                style: .plain,
-                target: self,
-                action: #selector(showAbout)
-            )
-        }
-        return UIBarButtonItem(
-            title: "ℹ️",
+        UIBarButtonItem(
+            image: resizedNavBarIcon("icon_info_circle", size: 22),
             style: .plain,
             target: self,
             action: #selector(showAbout)

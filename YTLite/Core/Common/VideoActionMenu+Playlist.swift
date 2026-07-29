@@ -63,12 +63,13 @@ extension VideoActionMenu {
                     toggle(option, from: presenter, engagement: engagement)
                 }
             }
+            let host = menuHost(presenter)
             PlayerMenuOverlay.show(
-                in: presenter.view,
+                in: host,
                 title: nil,
                 items: items,
                 style: .themed,
-                from: anchor.convert(anchor.bounds, to: presenter.view)
+                from: anchor.convert(anchor.bounds, to: host)
             )
         }
     }

@@ -144,8 +144,10 @@ extension VideoCell {
         contentView.addSubview(channelLabel)
         metaLabel.font = UIFont.systemFont(ofSize: 11)
         contentView.addSubview(metaLabel)
-        menuButton.setTitle("⋮", for: .normal)
-        menuButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        menuButton.setImage(resizedNavBarIcon("icon_ellipsis_vertical", size: 16), for: .normal)
+        // Keeps the 40pt hit box while the glyph itself sits near the card edge.
+        menuButton.contentHorizontalAlignment = .right
+        menuButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 6)
         menuButton.addTarget(self, action: #selector(handleMenuTap), for: .touchUpInside)
         contentView.addSubview(menuButton)
         let avatarTap = UITapGestureRecognizer(target: self, action: #selector(handleChannelTap))
@@ -194,8 +196,7 @@ extension VideoCell {
         let titleW = textW - 40
         let titleH = computeTitleHeight(for: titleW)
         titleLabel.frame = CGRect(x: textX, y: vPad, width: titleW, height: titleH)
-        let menuX = cellWidth - hPad - 40
-        menuButton.frame = CGRect(x: menuX, y: vPad, width: 40, height: 40)
+        menuButton.frame = CGRect(x: cellWidth - 40, y: vPad, width: 40, height: 40)
         let afterTitle = titleLabel.frame.maxY + 8
         channelAvatarView.isHidden = false
         channelAvatarView.frame = CGRect(x: textX, y: afterTitle, width: avatarSz, height: avatarSz)
@@ -235,8 +236,7 @@ extension VideoCell {
         let titleW = textW - 40
         let titleH = computeTitleHeight(for: titleW)
         titleLabel.frame = CGRect(x: textX, y: vPad, width: titleW, height: titleH)
-        let menuX = cellWidth - hPad - 40
-        menuButton.frame = CGRect(x: menuX, y: vPad, width: 40, height: 40)
+        menuButton.frame = CGRect(x: cellWidth - 40, y: vPad, width: 40, height: 40)
         let channelY = titleLabel.frame.maxY + 4
         channelLabel.frame = CGRect(x: textX, y: channelY, width: textW, height: 14)
         let metaY = channelLabel.frame.maxY + 4
@@ -269,7 +269,7 @@ extension VideoCell {
         let titleTop = thumbH + VideoCell.hPad
         let titleH = computeTitleHeight(for: textW - 40)
         titleLabel.frame = CGRect(x: textX, y: titleTop, width: textW - 40, height: titleH)
-        menuButton.frame = CGRect(x: textX + textW - 40, y: titleTop, width: 40, height: 40)
+        menuButton.frame = CGRect(x: cellWidth - 40, y: titleTop, width: 40, height: 40)
         let channelTop = titleLabel.frame.maxY + 2
         channelLabel.frame = CGRect(x: textX, y: channelTop, width: textW, height: 14)
         let metaTop = channelLabel.frame.maxY + 2
@@ -297,7 +297,7 @@ extension VideoCell {
         titleLabel.textColor = theme.primaryText
         channelLabel.textColor = theme.secondaryText
         metaLabel.textColor = theme.secondaryText
-        menuButton.setTitleColor(theme.secondaryText, for: .normal)
+        menuButton.tintColor = theme.secondaryText
     }
 }
 

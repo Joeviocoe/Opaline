@@ -21,13 +21,22 @@ enum VideoActionMenu {
             anchor: anchor,
             remove: remove
         )
+        let host = menuHost(presenter)
         PlayerMenuOverlay.show(
-            in: presenter.view,
+            in: host,
             title: nil,
             items: items,
             style: .themed,
-            from: anchor.convert(anchor.bounds, to: presenter.view)
+            from: anchor.convert(anchor.bounds, to: host)
         )
+    }
+
+    /// The window, not the presenter's view: on the watch screen the related
+    /// list sits in a view stacked above the controller's own, so an overlay
+    /// added there renders underneath it and never receives the tap that
+    /// dismisses it — every further tap then stacked another dimming layer.
+    static func menuHost(_ presenter: UIViewController) -> UIView {
+        presenter.view.window ?? presenter.view
     }
 
     private static func menuItems(
