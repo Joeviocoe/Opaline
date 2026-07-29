@@ -30,12 +30,14 @@ final class NotificationsBellButton: UIButton {
             dotView.topAnchor.constraint(equalTo: topAnchor, constant: 3),
             dotView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2)
         ])
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(refresh),
-            name: AppNotificationStore.didChangeNotification,
-            object: nil
-        )
+        for name in [
+            AppNotificationStore.didChangeNotification,
+            ThemeManager.didChangeNotification
+        ] {
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(refresh), name: name, object: nil
+            )
+        }
         refresh()
     }
 
