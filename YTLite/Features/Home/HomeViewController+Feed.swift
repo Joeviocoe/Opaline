@@ -46,6 +46,12 @@ extension HomeViewController {
                 let age = self.cache.feedAge("home") ?? .greatestFiniteMagnitude
                 guard age >= AppCache.feedRevalidateAfter else {
                     AppLog.home("cache is \(Int(age / 60))m old → no revalidation")
+                    // The cache holds one page, so it only knows a few
+                    // shelves. Collect the rest the way a fresh load does —
+                    // this appends pages below the fold and never touches
+                    // what is already on screen.
+                    self.beginChipDiscovery()
+                    self.continueChipPrefetchIfNeeded()
                     return
                 }
                 AppLog.home("revalidating feed in background")
