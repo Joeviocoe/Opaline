@@ -36,6 +36,8 @@
 "common.ok" = "ОК";
 "common.save" = "Сохранить";
 "common.done" = "Готово";
+"common.edit" = "Изменить";
+"common.delete" = "Удалить";
 "common.playlist" = "Плейлист";
 "library.title" = "Библиотека";
 

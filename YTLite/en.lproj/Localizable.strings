@@ -59,6 +59,10 @@
 "common.save" = "Save";
 /* Generic done action */
 "common.done" = "Done";
+/* Generic edit action, e.g. entering multi-select editing mode */
+"common.edit" = "Edit";
+/* Generic delete action */
+"common.delete" = "Delete";
 /* Fallback title/label of a playlist tile */
 "common.playlist" = "Playlist";
 /* Library tab title */
