@@ -79,7 +79,13 @@ final class ImageDiskCache {
         let fileURL = cacheDir.appendingPathComponent(
             cacheKey(for: url)
         )
-        try? data.write(to: fileURL, options: .atomic)
+        // Background fetch runs while the device is locked; the default
+        // `.complete` protection would make this write fail there and
+        // lose the entry.
+        try? data.write(
+            to: fileURL,
+            options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+        )
     }
 
     func clear() {

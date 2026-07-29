@@ -128,6 +128,7 @@ extension SubscriptionsViewController {
                 case let .failure(error):
                     self.finishLoadingMore()
                     AppLog.subs("pagination error: \(error)")
+                    self.revalidateOnceAfterStaleToken()
                 }
             }
         }
@@ -157,6 +158,19 @@ extension SubscriptionsViewController {
     func finishLoadingMore() {
         isLoadingMore = false
     }
+
+    /// Skipping revalidation on launch means the cached continuation can be
+    /// hours old; the first dead one is the signal to refetch, so scrolling
+    /// never dead-ends. Once per session — a genuinely offline device
+    /// shouldn't retry on every attempt.
+    func revalidateOnceAfterStaleToken() {
+        guard !didRevalidateAfterStaleToken else {
+            return
+        }
+        didRevalidateAfterStaleToken = true
+        AppLog.subs("stale continuation → revalidating")
+        loadFeed()
+    }
 }
 
 // MARK: - Private Helpers
@@ -179,6 +193,18 @@ private extension SubscriptionsViewController {
             spinner.stopAnimating()
             setPage(cachedPage)
             harvestChannels(from: cachedPage)
+            // Revalidating replaces the whole feed and rebuilds the screen
+            // (see HomeViewController+Feed.swift for the same rule) — skip
+            // it while the cache is recent; background refresh keeps it
+            // that way, pull-to-refresh forces it, and a stale
+            // continuation triggers it lazily via revalidateOnceAfterStaleToken.
+            let age = cache.feedAge("subscriptions") ?? .greatestFiniteMagnitude
+            guard age >= AppCache.feedRevalidateAfter else {
+                AppLog.subs("cache is \(Int(age / 60))m old → no revalidation")
+                return
+            }
+            AppLog.subs("revalidating feed in background")
+            loadFeed()
         } else {
             AppLog.subs("no cache → network")
             loadFeed()

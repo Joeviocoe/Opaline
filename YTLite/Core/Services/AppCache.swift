@@ -15,6 +15,11 @@ final class AppCache {
     // MARK: - Type Properties
     static let shared = AppCache()
 
+    /// How stale a cached feed must be before a screen (or the background
+    /// refresh) is allowed to revalidate it over the network. Shared by
+    /// Home and Subscriptions so the two screens agree on one number.
+    static let feedRevalidateAfter: TimeInterval = 2 * 60 * 60
+
     static var persistenceEnabled: Bool {
         get {
             let key = UserDefaultsKeys.Cache.feedPersistenceEnabled
@@ -99,7 +104,13 @@ final class AppCache {
         ensureCacheDir()
         let entry = CacheEntry(data: value, storedAt: Date())
         if let data = try? JSONEncoder().encode(entry) {
-            try? data.write(to: cacheURL(for: key), options: .atomic)
+            // Background fetch runs while the device is locked; the default
+            // `.complete` protection would make this write fail there and
+            // lose the entry.
+            try? data.write(
+                to: cacheURL(for: key),
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+            )
             AppLog.cache("disk-write key=\(key) size=\(data.count)b")
         }
     }

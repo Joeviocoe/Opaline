@@ -41,6 +41,8 @@ class HomeViewController: VideosViewController {
     var feedGeneration = 0
     /// Session-lifetime cache so tab switches don't refetch.
     var categoryCache: [String: FeedPage] = [:]
+    /// One rescue refetch per session when a cached token turns out dead.
+    var didRevalidateAfterStaleToken = false
     lazy var chipBar = ChipBarView()
 
     override var groupsByShelf: Bool { HomeLayout.selected == .rails }
@@ -185,92 +187,9 @@ class HomeViewController: VideosViewController {
                 case .failure:
                     self.finishLoadingMore()
                     self.endChipDiscovery()
+                    self.revalidateOnceAfterStaleToken()
                 }
             }
         }
-    }
-}
-
-// MARK: - Feed loading
-
-extension HomeViewController {
-    func setupToolbar() {
-        ToolbarManager.shared.install(in: self)
-    }
-
-    func loadCachedOrFetchFeed() {
-        cache.loadHomeFeed { [weak self] cachedPage in
-            guard let self else {
-                return
-            }
-            if let cachedPage {
-                AppLog.home("cache-hit → showing \(cachedPage.videos.count) videos instantly")
-                self.isLoadingInitial = false
-                self.spinner.stopAnimating()
-                self.resetShelfDrain()
-                self.setPage(self.enqueueShelves(from: cachedPage))
-                // Cached continuation tokens go stale within hours —
-                // revalidate so scrolling and chip discovery survive.
-                AppLog.home("revalidating feed in background")
-                self.loadFeed()
-            } else {
-                AppLog.home("no cache → loading from network")
-                self.loadFeed()
-            }
-        }
-    }
-
-    private func showFeedError() {
-        if OAuthClient.shared.isAnonymous {
-            signInEmptyView.isHidden = false
-        } else {
-            errorLabel.isHidden = false
-        }
-    }
-
-    func loadFeed() {
-        let t0 = Date()
-        AppLog.home("network fetch start")
-        errorLabel.isHidden = true
-        signInEmptyView.isHidden = true
-        resetShelfDrain()
-        beginChipDiscovery()
-        let generation = feedGeneration
-        service.fetchHomeFeed { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self, self.feedGeneration == generation else {
-                    return
-                }
-                let ms = Int(Date().timeIntervalSince(t0) * 1_000)
-                self.spinner.stopAnimating()
-                self.endRefreshing()
-                switch result {
-                case .success(let page):
-                    AppLog.home("network fetch done \(ms)ms videos=\(page.videos.count)")
-                    self.applyFreshFeed(page)
-                case .failure(let err):
-                    AppLog.home("network fetch failed \(ms)ms: \(err)")
-                    self.endChipDiscovery()
-                    // Keep cached/stale content when revalidation
-                    // fails offline — only blank screens get the error.
-                    if self.videoCount == 0 {
-                        self.setPage(FeedPage(videos: [], continuation: nil))
-                        self.showFeedError()
-                    }
-                }
-            }
-        }
-    }
-
-    /// Replaces the session with a freshly fetched feed: cached and
-    /// previously accumulated pages carry expiring continuation
-    /// tokens, so runs and chips restart from this page.
-    private func applyFreshFeed(_ page: FeedPage) {
-        cache.setHomeFeed(page)
-        startFreshSession()
-        setPage(enqueueShelves(from: page))
-        rebuildChips()
-        applyPendingChipReselect()
-        continueChipPrefetchIfNeeded()
     }
 }

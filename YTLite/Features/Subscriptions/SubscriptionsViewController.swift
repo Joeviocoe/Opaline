@@ -37,6 +37,9 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     var isLoadingNewContentHistory = false
     var isLoadingNewContentRSS = false
     var locallyWatchedVideoIds: Set<String> = []
+    /// Once per session — mirrors `HomeViewController`'s guard so a dead
+    /// cached continuation triggers exactly one lazy revalidation.
+    var didRevalidateAfterStaleToken = false
 
     init(
         dependencies: AppDependencies,

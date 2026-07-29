@@ -21,6 +21,29 @@ extension AppCache {
     }
 
     // MARK: - Home
+    /// Feeds are shown from cache instantly and then revalidated over the
+    /// network, which rebuilds the whole screen — shelves come back in a
+    /// different order every time. Screens use this age to skip that
+    /// revalidation while the cache is still recent.
+    func feedAge(_ feedKey: String) -> TimeInterval? {
+        feedUpdatedAt(feedKey).map { Date().timeIntervalSince($0) }
+    }
+
+    /// When the cached feed was last written — screens compare it against
+    /// what they are showing to notice a background refresh.
+    func feedUpdatedAt(_ feedKey: String) -> Date? {
+        UserDefaults.standard.object(
+            forKey: UserDefaultsKeys.Cache.feedUpdatedAt(feedKey)
+        ) as? Date
+    }
+
+    func stampFeedUpdate(_ feedKey: String) {
+        UserDefaults.standard.set(
+            Date(),
+            forKey: UserDefaultsKeys.Cache.feedUpdatedAt(feedKey)
+        )
+    }
+
     func cachedHomeFeed() -> FeedPage? {
         homeFeed
     }
@@ -47,6 +70,7 @@ extension AppCache {
 
     func setHomeFeed(_ page: FeedPage) {
         homeFeed = page
+        stampFeedUpdate("home")
         diskQueue.async { [weak self] in
             self?.writeDisk(page, key: "home")
         }
@@ -87,6 +111,7 @@ extension AppCache {
 
     func setSubscriptionsFeed(_ page: FeedPage) {
         subscriptionsFeed = page
+        stampFeedUpdate("subscriptions")
         diskQueue.async { [weak self] in
             self?.writeDisk(page, key: "subscriptions")
         }

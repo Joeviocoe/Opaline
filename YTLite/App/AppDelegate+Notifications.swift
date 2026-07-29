@@ -15,12 +15,25 @@ extension AppDelegate {
             @escaping (UIBackgroundFetchResult) -> Void
     ) {
         AppLog.notifications("background fetch woke the app")
-        // `force`: the 2h throttle exists to keep foreground launches from
-        // hammering the manifest. iOS hands out these windows sparingly and
-        // on its own schedule, so throttling one would just waste it.
+        // News check and feed warm-up share the one ~30s window. `force`:
+        // the 2h throttle exists to keep foreground launches from hammering
+        // the manifest, while iOS hands out these windows sparingly and on
+        // its own schedule — throttling one would just waste it.
+        let group = DispatchGroup()
+        var newData = false
+        group.enter()
         UpdateNotificationService.shared.checkIfNeeded(force: true) { added in
-            AppLog.notifications("background fetch finished: newData=\(added)")
-            completionHandler(added ? .newData : .noData)
+            newData = newData || added
+            group.leave()
+        }
+        group.enter()
+        BackgroundRefreshService.shared.refresh { refreshed in
+            newData = newData || refreshed
+            group.leave()
+        }
+        group.notify(queue: .main) {
+            AppLog.notifications("background fetch finished: newData=\(newData)")
+            completionHandler(newData ? .newData : .noData)
         }
     }
 }

@@ -18,6 +18,13 @@ enum UserDefaultsKeys {
         static let feedCacheDays = "feedCacheDays"
         static let imageCacheEnabled = "imageCacheEnabled"
         static let imageCacheDays = "imageCacheDays"
+
+        /// When a feed was last written — read on launch to decide whether
+        /// the screen may skip its network revalidation. Cheaper than
+        /// reading the cache file just for its timestamp.
+        static func feedUpdatedAt(_ feedKey: String) -> String {
+            "cache_feedUpdatedAt_\(feedKey)"
+        }
     }
 
     enum Auth {
