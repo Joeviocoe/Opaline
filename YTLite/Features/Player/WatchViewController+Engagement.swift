@@ -57,7 +57,7 @@ extension WatchViewController {
         commentsLabel.textColor = theme.primaryText
         metaLabel.textColor = theme.secondaryText
         channelMetaLabel.textColor = theme.secondaryText
-        descriptionLabel.textColor = theme.secondaryText
+        applyDescriptionText()
         likeCountLabel.textColor = theme.secondaryText
         dislikeCountLabel.textColor = theme.secondaryText
         descriptionButton.setTitleColor(theme.secondaryText, for: .normal)
@@ -96,8 +96,7 @@ extension WatchViewController {
     // MARK: - Description
 
     func updateDescriptionUI() {
-        let text = descriptionLabel.text ?? ""
-        let hasDesc = !text.isEmpty
+        let hasDesc = !descriptionText.isEmpty
         descriptionLabel.isHidden = !descriptionExpanded
         channelTopToMeta?.isActive = !descriptionExpanded
         channelTopToDesc?.isActive = descriptionExpanded

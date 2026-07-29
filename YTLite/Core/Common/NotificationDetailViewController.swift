@@ -18,11 +18,11 @@ final class NotificationDetailViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 13)
         return label
     }()
-    private let bodyLabel: UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.font = UIFont.systemFont(ofSize: 15)
-        return label
+    private let bodyLabel: UITextView = {
+        let textView = UITextView()
+        LinkifiedText.configure(textView)
+        textView.font = UIFont.systemFont(ofSize: 15)
+        return textView
     }()
 
     private var hasLink: Bool {
@@ -56,7 +56,7 @@ final class NotificationDetailViewController: UIViewController {
         }
         titleLabel.text = item.title
         dateLabel.text = DateFormatter.notificationDetailDisplay.string(from: item.date)
-        bodyLabel.text = item.body
+        bodyLabel.delegate = self
         bodyLabel.isHidden = item.body == nil
         setupLayout()
         applyTheme()
@@ -117,7 +117,13 @@ final class NotificationDetailViewController: UIViewController {
         scrollView.backgroundColor = theme.background
         titleLabel.textColor = hasLink ? theme.accent : theme.primaryText
         dateLabel.textColor = theme.secondaryText
-        bodyLabel.textColor = theme.primaryText
+        bodyLabel.attributedText = LinkifiedText.attributedString(
+            from: item.body ?? "",
+            font: UIFont.systemFont(ofSize: 15),
+            color: theme.primaryText,
+            includeTimestamps: false
+        )
+        bodyLabel.linkTextAttributes = [.foregroundColor: theme.accent]
     }
 
     @objc
@@ -135,7 +141,18 @@ final class NotificationDetailViewController: UIViewController {
         guard let urlString = item.urlString, let url = URL(string: urlString) else {
             return
         }
-        UIApplication.shared.open(url)
+        LinkifiedText.handleTap(url: url)
+    }
+}
+
+extension NotificationDetailViewController: UITextViewDelegate {
+    func textView(
+        _ textView: UITextView,
+        shouldInteractWith URL: URL,
+        in characterRange: NSRange,
+        interaction: UITextItemInteraction
+    ) -> Bool {
+        LinkifiedText.handleTap(url: URL)
     }
 }
 

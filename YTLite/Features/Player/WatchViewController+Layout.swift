@@ -179,9 +179,10 @@ extension WatchViewController {
         metaLabel.font = UIFont.systemFont(ofSize: 13)
         metaLabel.numberOfLines = 0
         cv.addSubview(metaLabel)
+        LinkifiedText.configure(descriptionLabel)
         descriptionLabel.font = UIFont.systemFont(ofSize: 13)
-        descriptionLabel.numberOfLines = 0
         descriptionLabel.isHidden = true
+        descriptionLabel.delegate = self
         cv.addSubview(descriptionLabel)
         descriptionButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         descriptionButton.addTarget(self, action: #selector(toggleDescription), for: .touchUpInside)

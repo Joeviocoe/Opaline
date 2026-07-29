@@ -1,4 +1,5 @@
 // swiftlint:disable file_length
+import AVFoundation
 import UIKit
 
 // MARK: - Vote Formatting
@@ -34,7 +35,8 @@ extension WatchViewController {
         subscribeButton.isHidden =
             !OAuthClient.shared.isAnonymous
         subscribeButton.setTitle("common.subscribe".localized, for: .normal)
-        descriptionLabel.text = nil
+        descriptionText = ""
+        descriptionLabel.attributedText = nil
         descriptionButton.isHidden = true
         resetComments()
         loadInitialAvatar()
@@ -167,9 +169,24 @@ extension WatchViewController {
         )
         isSubscribed = page.isSubscribed
         subscribeButton.isHidden = false
-        descriptionLabel.text = page.description
+        descriptionText = page.description ?? ""
+        applyDescriptionText()
         descriptionExpanded = false
         updateDescriptionUI()
+    }
+
+    /// Rebuilds the description's attributed text — called both when the
+    /// video's description is applied and when the theme changes, since the
+    /// link color is baked into the attributed string.
+    func applyDescriptionText() {
+        let theme = ThemeManager.shared
+        descriptionLabel.attributedText = LinkifiedText.attributedString(
+            from: descriptionText,
+            font: UIFont.systemFont(ofSize: 13),
+            color: theme.secondaryText,
+            includeTimestamps: true
+        )
+        descriptionLabel.linkTextAttributes = [.foregroundColor: theme.accent]
     }
 
     func applyEngagementData(from page: WatchPage) {
@@ -369,5 +386,30 @@ extension WatchViewController {
         commentsStackView.arrangedSubviews
             .forEach { $0.removeFromSuperview() }
         loadMoreCommentsButton.isHidden = true
+    }
+
+    /// Seeks the active player to an absolute position, used by tapped
+    /// timestamps in the description and in comments.
+    func seekPlayer(toSeconds seconds: Int) {
+        videoPlayerView?.player?.seek(
+            to: CMTime(seconds: Double(seconds), preferredTimescale: 600),
+            toleranceBefore: .zero,
+            toleranceAfter: .zero
+        )
+    }
+}
+
+// MARK: - Linkified Text Taps
+
+extension WatchViewController: UITextViewDelegate {
+    func textView(
+        _ textView: UITextView,
+        shouldInteractWith URL: URL,
+        in characterRange: NSRange,
+        interaction: UITextItemInteraction
+    ) -> Bool {
+        LinkifiedText.handleTap(url: URL) { [weak self] seconds in
+            self?.seekPlayer(toSeconds: seconds)
+        }
     }
 }

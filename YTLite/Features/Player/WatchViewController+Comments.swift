@@ -132,7 +132,7 @@ extension WatchViewController {
     func makeCommentView(
         _ comment: Comment
     ) -> UIView {
-        CommentViewBuilder.makeCommentView(comment)
+        CommentViewBuilder.makeCommentView(comment, linkDelegate: self)
     }
 
     func expandRelatedIfNeeded() {
