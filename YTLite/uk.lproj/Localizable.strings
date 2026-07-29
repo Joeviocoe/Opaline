@@ -51,10 +51,18 @@
 "player.action.share" = "Поділитися";
 "player.action.save" = "Зберегти";
 "player.action.saveFailed" = "Не вдалося зберегти відео.";
-"player.action.saveTo" = "Зберегти в плейлист";
+"player.action.saveTo" = "Додати до плейлиста";
 "player.action.savedTo" = "Збережено в «%1$@»";
 "player.action.removedFrom" = "Видалено з «%1$@»";
 "player.action.download" = "Завантажити";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "Додати до черги";
+"video.menu.watchLater" = "Дивитися пізніше";
+"video.menu.watchLaterName" = "Дивитися пізніше";
+"video.menu.removeFrom" = "Видалити з «%1$@»";
+"video.menu.queued" = "Додано до черги";
 
 /* ===== Player: comments ===== */
 

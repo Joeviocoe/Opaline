@@ -92,6 +92,19 @@
 /* Action bar: download */
 "player.action.download" = "Download";
 
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+/* Queues the video to play right after the current one */
+"video.menu.playNext" = "Add to queue";
+/* Adds the video to the Watch Later playlist */
+"video.menu.watchLater" = "Watch later";
+/* Name of the Watch Later playlist, used in the "Saved to %1$@" toast */
+"video.menu.watchLaterName" = "Watch later";
+/* Removes the video from a playlist; %1$@ = playlist name */
+"video.menu.removeFrom" = "Remove from %1$@";
+/* Toast after "Play next in queue" */
+"video.menu.queued" = "Added to queue";
+
 /* ===== Player: comments ===== */
 
 /* Comments section header */

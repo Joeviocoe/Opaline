@@ -80,11 +80,19 @@
 /* Action bar: save to playlist */
 "player.action.save" = "保存";
 "player.action.saveFailed" = "動画を保存できませんでした。";
-"player.action.saveTo" = "再生リストに保存";
+"player.action.saveTo" = "再生リストに追加";
 "player.action.savedTo" = "「%1$@」に保存しました";
 "player.action.removedFrom" = "「%1$@」から削除しました";
 /* Action bar: download */
 "player.action.download" = "ダウンロード";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "キューに追加";
+"video.menu.watchLater" = "後で見る";
+"video.menu.watchLaterName" = "後で見る";
+"video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.queued" = "キューに追加しました";
 
 /* ===== Player: comments ===== */
 

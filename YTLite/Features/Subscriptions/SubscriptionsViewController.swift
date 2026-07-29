@@ -160,11 +160,15 @@ extension SubscriptionsViewController: UITableViewDataSource {
         }
         let video = videos[indexPath.row]
         cell.configure(with: video)
+        attachHandlers(to: cell, video: video)
+        return cell
+    }
+
+    private func attachHandlers(to cell: SubscriptionVideoCell, video: Video) {
         cell.onChannelTap = { [weak self] in
-            guard let self else {
-                return
-            }
-            guard let channelId = video.channelId else {
+            guard let self,
+                  let channelId = video.channelId
+            else {
                 return
             }
             self.navigationController?.pushViewController(
@@ -175,7 +179,12 @@ extension SubscriptionsViewController: UITableViewDataSource {
                 animated: true
             )
         }
-        return cell
+        cell.onMenuTap = { [weak self] anchor in
+            guard let self else {
+                return
+            }
+            VideoActionMenu.present(video: video, from: self, anchor: anchor)
+        }
     }
 }
 

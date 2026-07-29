@@ -2,9 +2,9 @@ import UIKit
 
 // MARK: - DataSource / Delegate
 
-extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
+extension PlaylistVideosViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        isLoadingInitial ? HistoryViewController.skeletonCount : videos.count
+        isLoading ? PlaylistVideosViewController.skeletonCount : videos.count
     }
 
     func tableView(
@@ -17,7 +17,7 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
         ) as? SubscriptionVideoCell else {
             return UITableViewCell()
         }
-        if isLoadingInitial {
+        if isLoading {
             cell.configureSkeleton()
             return cell
         }
@@ -34,8 +34,8 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
             else {
                 return
             }
-            let targetNav = self.navigationController?.parent?
-                .navigationController ?? self.navigationController
+            let parentNav = self.navigationController?.parent?.navigationController
+            let targetNav = parentNav ?? self.navigationController
             targetNav?.pushViewController(
                 self.channelViewControllerFactory(
                     channelId,
@@ -48,16 +48,15 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
             guard let self else {
                 return
             }
-            VideoActionMenu.present(video: video, from: self, anchor: anchor)
+            VideoActionMenu.present(
+                video: video,
+                from: self,
+                anchor: anchor,
+                removeFrom: (id: self.playlist.id, title: self.playlist.title)
+            ) { [weak self] in
+                self?.removeVideoFromList(videoId: video.id)
+            }
         }
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard !isLoadingInitial else {
-            return
-        }
-        let video = videos[indexPath.row]
-        videoRouter.open(video: video, from: self)
     }
 
     func tableView(
@@ -65,12 +64,19 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
         willDisplay cell: UITableViewCell,
         forRowAt indexPath: IndexPath
     ) {
-        guard !isLoadingInitial, !isLoadingMore,
-              continuationToken != nil,
-              indexPath.row >= videos.count - 5
-        else {
+        guard !isLoading else {
             return
         }
-        loadMore()
+        if indexPath.row >= videos.count - 4 {
+            loadMoreVideos()
+        }
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !isLoading else {
+            return
+        }
+        let video = videos[indexPath.row]
+        videoRouter.open(video: video, from: self)
     }
 }

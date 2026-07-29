@@ -80,11 +80,19 @@
 /* Action bar: save to playlist */
 "player.action.save" = "Kaydet";
 "player.action.saveFailed" = "Video kaydedilemedi.";
-"player.action.saveTo" = "Oynatma listesine kaydet";
+"player.action.saveTo" = "Oynatma listesine ekle";
 "player.action.savedTo" = "%1$@ listesine kaydedildi";
 "player.action.removedFrom" = "%1$@ listesinden kaldırıldı";
 /* Action bar: download */
 "player.action.download" = "İndir";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "Kuyruğa ekle";
+"video.menu.watchLater" = "Daha sonra izle";
+"video.menu.watchLaterName" = "Daha sonra izle";
+"video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.queued" = "Kuyruğa eklendi";
 
 /* ===== Player: comments ===== */
 

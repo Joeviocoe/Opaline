@@ -10,6 +10,7 @@ final class ShelfRailCell: UICollectionViewCell {
 
     var onVideoTap: ((Video) -> Void)?
     var onChannelTap: ((Video) -> Void)?
+    var onMenuTap: ((Video, UIView) -> Void)?
     /// Fired when the rail scrolls near its trailing edge.
     var onNearEnd: (() -> Void)?
 
@@ -97,6 +98,9 @@ extension ShelfRailCell: UICollectionViewDataSource, UICollectionViewDelegate {
         cell.configure(with: video)
         cell.onChannelTap = { [weak self] in
             self?.onChannelTap?(video)
+        }
+        cell.onMenuTap = { [weak self] anchor in
+            self?.onMenuTap?(video, anchor)
         }
         return cell
     }

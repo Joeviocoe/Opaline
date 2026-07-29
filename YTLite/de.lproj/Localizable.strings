@@ -76,11 +76,19 @@
 /* Action bar: save to playlist */
 "player.action.save" = "Speichern";
 "player.action.saveFailed" = "Video konnte nicht gespeichert werden.";
-"player.action.saveTo" = "In Playlist speichern";
+"player.action.saveTo" = "Zur Playlist hinzufügen";
 "player.action.savedTo" = "In %1$@ gespeichert";
 "player.action.removedFrom" = "Aus %1$@ entfernt";
 /* Action bar: download */
 "player.action.download" = "Herunterladen";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "Zur Warteschlange hinzufügen";
+"video.menu.watchLater" = "Später ansehen";
+"video.menu.watchLaterName" = "Später ansehen";
+"video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.queued" = "Zur Warteschlange hinzugefügt";
 
 /* ===== Player: comments ===== */
 

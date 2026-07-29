@@ -8,6 +8,16 @@ final class VideoRouter {
     var channelViewControllerFactory: ((String, String) -> UIViewController)?
     private var panel: PlayerPanelViewController?
 
+    /// The video currently loaded in the mini/full player, if any — lets
+    /// `VideoActionMenu` seed an empty queue with the right "now playing"
+    /// item instead of guessing.
+    var currentVideo: Video? {
+        guard let watchVC = panel?.watchVC else {
+            return nil
+        }
+        return watchVC.watchPage?.video ?? watchVC.initialVideo
+    }
+
     private init() {}
 
     func open(video: Video, from presenter: UIViewController) {

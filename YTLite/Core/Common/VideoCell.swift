@@ -19,9 +19,11 @@ class VideoCell: UICollectionViewCell {
     private let titleLabel = UILabel()
     private let channelLabel = UILabel()
     private let metaLabel = UILabel()
+    private let menuButton = UIButton(type: .system)
     private var representedChannelId: String?
     private var cachedTitleHeight: CGFloat = 0
     var onChannelTap: (() -> Void)?
+    var onMenuTap: ((UIView) -> Void)?
 
     /// Force grid layout regardless of cell width.
     var forceGridLayout: Bool = false {
@@ -86,6 +88,7 @@ class VideoCell: UICollectionViewCell {
         progressTrack.isHidden = true
         progressFill.isHidden = true
         onChannelTap = nil
+        onMenuTap = nil
     }
 }
 
@@ -141,6 +144,10 @@ extension VideoCell {
         contentView.addSubview(channelLabel)
         metaLabel.font = UIFont.systemFont(ofSize: 11)
         contentView.addSubview(metaLabel)
+        menuButton.setTitle("⋮", for: .normal)
+        menuButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        menuButton.addTarget(self, action: #selector(handleMenuTap), for: .touchUpInside)
+        contentView.addSubview(menuButton)
         let avatarTap = UITapGestureRecognizer(target: self, action: #selector(handleChannelTap))
         channelAvatarView.addGestureRecognizer(avatarTap)
         let labelTap = UITapGestureRecognizer(target: self, action: #selector(handleChannelTap))
@@ -184,8 +191,11 @@ extension VideoCell {
         let avatarSz: CGFloat = 32
         let textX = thumbnail.frame.maxX + hPad
         let textW = cellWidth - textX - hPad
-        let titleH = computeTitleHeight(for: textW)
-        titleLabel.frame = CGRect(x: textX, y: vPad, width: textW, height: titleH)
+        let titleW = textW - 40
+        let titleH = computeTitleHeight(for: titleW)
+        titleLabel.frame = CGRect(x: textX, y: vPad, width: titleW, height: titleH)
+        let menuX = cellWidth - hPad - 40
+        menuButton.frame = CGRect(x: menuX, y: vPad, width: 40, height: 40)
         let afterTitle = titleLabel.frame.maxY + 8
         channelAvatarView.isHidden = false
         channelAvatarView.frame = CGRect(x: textX, y: afterTitle, width: avatarSz, height: avatarSz)
@@ -222,8 +232,11 @@ extension VideoCell {
         channelAvatarView.isHidden = true
         let textX = thumbnail.frame.maxX + hPad
         let textW = cellWidth - textX - hPad
-        let titleH = computeTitleHeight(for: textW)
-        titleLabel.frame = CGRect(x: textX, y: vPad, width: textW, height: titleH)
+        let titleW = textW - 40
+        let titleH = computeTitleHeight(for: titleW)
+        titleLabel.frame = CGRect(x: textX, y: vPad, width: titleW, height: titleH)
+        let menuX = cellWidth - hPad - 40
+        menuButton.frame = CGRect(x: menuX, y: vPad, width: 40, height: 40)
         let channelY = titleLabel.frame.maxY + 4
         channelLabel.frame = CGRect(x: textX, y: channelY, width: textW, height: 14)
         let metaY = channelLabel.frame.maxY + 4
@@ -254,8 +267,9 @@ extension VideoCell {
             channelAvatarView.frame = CGRect(x: avatarX, y: avatarY, width: sz, height: sz)
         }
         let titleTop = thumbH + VideoCell.hPad
-        let titleH = computeTitleHeight(for: textW)
-        titleLabel.frame = CGRect(x: textX, y: titleTop, width: textW, height: titleH)
+        let titleH = computeTitleHeight(for: textW - 40)
+        titleLabel.frame = CGRect(x: textX, y: titleTop, width: textW - 40, height: titleH)
+        menuButton.frame = CGRect(x: textX + textW - 40, y: titleTop, width: 40, height: 40)
         let channelTop = titleLabel.frame.maxY + 2
         channelLabel.frame = CGRect(x: textX, y: channelTop, width: textW, height: 14)
         let metaTop = channelLabel.frame.maxY + 2
@@ -272,12 +286,18 @@ extension VideoCell {
     }
 
     @objc
+    private func handleMenuTap() {
+        onMenuTap?(menuButton)
+    }
+
+    @objc
     private func applyTheme() {
         let theme = ThemeManager.shared
         backgroundColor = theme.surface
         titleLabel.textColor = theme.primaryText
         channelLabel.textColor = theme.secondaryText
         metaLabel.textColor = theme.secondaryText
+        menuButton.setTitleColor(theme.secondaryText, for: .normal)
     }
 }
 
@@ -292,11 +312,13 @@ extension VideoCell {
         thumbnail.image = nil
         channelAvatarView.image = nil
         durationLabel.isHidden = true
+        menuButton.isHidden = true
         contentView.showSkeleton()
     }
 
     func configure(with video: Video) {
         hideSkeleton()
+        menuButton.isHidden = false
         representedChannelId = video.channelId
         titleLabel.text = video.title
         channelLabel.text = video.channelName

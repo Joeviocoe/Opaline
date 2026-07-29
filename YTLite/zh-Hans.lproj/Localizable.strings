@@ -80,11 +80,19 @@
 /* Action bar: save to playlist */
 "player.action.save" = "保存";
 "player.action.saveFailed" = "无法保存视频。";
-"player.action.saveTo" = "保存到播放列表";
+"player.action.saveTo" = "添加到播放列表";
 "player.action.savedTo" = "已保存到「%1$@」";
 "player.action.removedFrom" = "已从「%1$@」移除";
 /* Action bar: download */
 "player.action.download" = "下载";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "添加到队列";
+"video.menu.watchLater" = "稍后观看";
+"video.menu.watchLaterName" = "稍后观看";
+"video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.queued" = "已添加到队列";
 
 /* ===== Player: comments ===== */
 

@@ -21,6 +21,12 @@ extension WatchViewController: UICollectionViewDataSource {
                 animated: true
             )
         }
+        cell.onMenuTap = { [weak self] anchor in
+            guard let self else {
+                return
+            }
+            VideoActionMenu.present(video: video, from: self, anchor: anchor)
+        }
     }
 
     func numberOfSections(

@@ -29,6 +29,17 @@ final class PlaybackQueue {
         self.playlistTitle = title
     }
 
+    /// Inserts `video` right after the currently playing item. An empty
+    /// queue is seeded with `current` first so it stays at index 0 —
+    /// `nextVideo`/`seekTo` both assume the playing item leads the list.
+    func playNext(_ video: Video, current: Video) {
+        if videos.isEmpty {
+            videos = [current, video]
+        } else {
+            videos.insert(video, at: 1)
+        }
+    }
+
     func seekTo(videoId: String) {
         guard let idx = videos.firstIndex(
             where: { $0.id == videoId }

@@ -1,20 +1,20 @@
 import UIKit
 
 final class PlaylistVideosViewController: UIViewController {
-    private static let skeletonCount = 6
+    static let skeletonCount = 6
 
-    private let playlist: Playlist
+    let playlist: Playlist
     private let service: PlaylistService
-    private let channelViewControllerFactory: (
+    let channelViewControllerFactory: (
         String,
         String
     ) -> UIViewController
-    private let videoRouter: VideoRouter
-    private var videos: [Video] = []
-    private var isLoading = true
+    let videoRouter: VideoRouter
+    var videos: [Video] = []
+    var isLoading = true
     private var continuationToken: String?
     private var isLoadingMore = false
-    private let tableView = UITableView()
+    let tableView = UITableView()
     private let spinner = UIActivityIndicatorView(style: .white)
     private let emptyLabel = UILabel()
     private lazy var topBarHider = TopBarAutoHider(owner: self)
@@ -177,7 +177,7 @@ final class PlaylistVideosViewController: UIViewController {
     }
 
     /// Appends the next 15-video page once scrolling nears the end.
-    private func loadMoreVideos() {
+    func loadMoreVideos() {
         guard let token = continuationToken,
               !isLoadingMore, !isLoading else {
             return
@@ -206,69 +206,19 @@ final class PlaylistVideosViewController: UIViewController {
     private func handleRefresh() {
         loadVideos()
     }
-}
 
-// MARK: - DataSource / Delegate
-
-extension PlaylistVideosViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        isLoading ? PlaylistVideosViewController.skeletonCount : videos.count
-    }
-
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: SubscriptionVideoCell.reuseId,
-            for: indexPath
-        ) as? SubscriptionVideoCell else {
-            return UITableViewCell()
-        }
-        if isLoading {
-            cell.configureSkeleton()
-            return cell
-        }
-        let video = videos[indexPath.row]
-        cell.configure(with: video)
-        cell.onChannelTap = { [weak self] in
-            guard let self else {
-                return
-            }
-            guard let channelId = video.channelId else {
-                return
-            }
-            let parentNav = self.navigationController?.parent?.navigationController
-            let targetNav = parentNav ?? self.navigationController
-            targetNav?.pushViewController(
-                self.channelViewControllerFactory(
-                    channelId,
-                    video.channelName
-                ),
-                animated: true
-            )
-        }
-        return cell
-    }
-
-    func tableView(
-        _ tableView: UITableView,
-        willDisplay cell: UITableViewCell,
-        forRowAt indexPath: IndexPath
-    ) {
-        guard !isLoading else {
+    /// The network removal round trip finishes after this view's `videos`
+    /// may have changed further, so look the video up by id rather than
+    /// trusting a captured index path.
+    func removeVideoFromList(videoId: String) {
+        guard let index = videos.firstIndex(where: { $0.id == videoId }) else {
             return
         }
-        if indexPath.row >= videos.count - 4 {
-            loadMoreVideos()
+        videos.remove(at: index)
+        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        if videos.isEmpty {
+            emptyLabel.text = "library.playlist.empty".localized
+            emptyLabel.isHidden = false
         }
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard !isLoading else {
-            return
-        }
-        let video = videos[indexPath.row]
-        videoRouter.open(video: video, from: self)
     }
 }

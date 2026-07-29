@@ -32,7 +32,7 @@ extension SubscriptionVideoCell {
             return CGSize(width: width, height: 220)
         } else {
             let thumbH = (width * 9.0 / 16.0).rounded()
-            let textW = width - 12 - 36 - 10 - 12
+            let textW = width - 12 - 36 - 10 - 12 - 36
             let titleH = min(titleLabel.sizeThatFits(CGSize(width: textW, height: 52)).height, 40)
             return CGSize(width: width, height: thumbH + 10 + titleH + 4 + 16 + 2 + 16 + 12)
         }
@@ -66,10 +66,15 @@ extension SubscriptionVideoCell {
 
         let avatarSz: CGFloat = 36
         let textX = thumbnail.frame.maxX + hPad
-        let textW = width - textX - hPad
+        let menuButtonW: CGFloat = 36
+        let textW = width - textX - hPad - menuButtonW
 
         let titleH = min(titleLabel.sizeThatFits(CGSize(width: textW, height: 52)).height, 40)
         titleLabel.frame = CGRect(x: textX, y: vPad, width: textW, height: titleH)
+        // titleH collapses to ~20 on single-line titles; keep a tappable box.
+        menuButton.frame = CGRect(
+            x: textX + textW, y: vPad, width: menuButtonW, height: max(titleH, 36)
+        )
 
         let afterTitle = titleLabel.frame.maxY + 8
         channelAvatarView.isHidden = false
@@ -98,7 +103,8 @@ extension SubscriptionVideoCell {
         let hPad: CGFloat = 12
         let avatarX: CGFloat = hPad
         let textX = avatarX + avatarSz + 10
-        let textW = width - textX - hPad
+        let menuButtonW: CGFloat = 36
+        let textW = width - textX - hPad - menuButtonW
 
         channelAvatarView.isHidden = false
         let avatarY = thumbH + 10
@@ -106,6 +112,9 @@ extension SubscriptionVideoCell {
 
         let titleH = min(titleLabel.sizeThatFits(CGSize(width: textW, height: 52)).height, 40)
         titleLabel.frame = CGRect(x: textX, y: thumbH + 10, width: textW, height: titleH)
+        menuButton.frame = CGRect(
+            x: textX + textW, y: thumbH + 10, width: menuButtonW, height: max(titleH, 36)
+        )
 
         let channelTop = titleLabel.frame.maxY + 4
         channelLabel.frame = CGRect(x: textX, y: channelTop, width: textW, height: 16)

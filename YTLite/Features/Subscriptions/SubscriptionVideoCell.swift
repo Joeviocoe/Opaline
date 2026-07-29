@@ -14,6 +14,8 @@ class SubscriptionVideoCell: UITableViewCell {
     let dateLabel = UILabel()
     private var representedChannelId: String?
     var onChannelTap: (() -> Void)?
+    let menuButton = UIButton(type: .system)
+    var onMenuTap: ((UIView) -> Void)?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -81,6 +83,11 @@ class SubscriptionVideoCell: UITableViewCell {
         contentView.addSubview(channelLabel)
         dateLabel.font = UIFont.systemFont(ofSize: 12)
         contentView.addSubview(dateLabel)
+        menuButton.setTitle("⋮", for: .normal)
+        menuButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        menuButton.contentEdgeInsets = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
+        menuButton.addTarget(self, action: #selector(handleMenuTap), for: .touchUpInside)
+        contentView.addSubview(menuButton)
     }
 
     private func setupTapGestures() {
@@ -94,6 +101,9 @@ class SubscriptionVideoCell: UITableViewCell {
     private func handleChannelTap() { onChannelTap?() }
 
     @objc
+    private func handleMenuTap() { onMenuTap?(menuButton) }
+
+    @objc
     private func applyTheme() {
         let theme = ThemeManager.shared
         backgroundColor = theme.background
@@ -101,6 +111,7 @@ class SubscriptionVideoCell: UITableViewCell {
         titleLabel.textColor = theme.primaryText
         channelLabel.textColor = theme.secondaryText
         dateLabel.textColor = theme.secondaryText
+        menuButton.tintColor = theme.secondaryText
     }
 
     func configureSkeleton() {
@@ -111,11 +122,13 @@ class SubscriptionVideoCell: UITableViewCell {
         thumbnail.image = nil
         channelAvatarView.image = nil
         durationLabel.isHidden = true
+        menuButton.isHidden = true
         contentView.showSkeleton()
     }
 
     func configure(with video: Video) {
         applyTheme()
+        menuButton.isHidden = false
         representedChannelId = video.channelId
         titleLabel.text = video.title
         channelLabel.text = video.channelName
@@ -156,6 +169,7 @@ class SubscriptionVideoCell: UITableViewCell {
         progressTrack.isHidden = true
         progressFill.isHidden = true
         onChannelTap = nil
+        onMenuTap = nil
     }
 
     func applyWatchProgress(videoId: String) {
