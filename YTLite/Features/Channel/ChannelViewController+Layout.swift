@@ -67,6 +67,29 @@ extension ChannelViewController {
         cv.setContentOffset(CGPoint(x: 0, y: -topInset), animated: false)
     }
 
+    /// A channel with three videos can't scroll far enough to collapse
+    /// the header: the list hits its end, springs back, and the header
+    /// flickers open again. Pad the bottom until the whole collapse
+    /// range is reachable.
+    func padBottomInsetForCollapse() {
+        guard let cv = collectionView else {
+            return
+        }
+        let contentHeight = cv.collectionViewLayout
+            .collectionViewContentSize.height
+        let reachable = contentHeight + cv.adjustedContentInset.top
+            + cv.adjustedContentInset.bottom - cv.contentInset.bottom
+        let collapseRange = headerView.expandedHeight
+            - headerView.collapsedHeight
+        let pad = videoCount > 0
+            ? max(0, cv.bounds.height + collapseRange - reachable)
+            : 0
+        guard abs(cv.contentInset.bottom - pad) > 0.5 else {
+            return
+        }
+        cv.contentInset.bottom = pad
+    }
+
     func updateScrollInsets(for scrollView: UIScrollView) {
         let extra = filterBar.isHidden ? 0 : ChannelFilterBarView.preferredHeight
         scrollView.scrollIndicatorInsets.top =

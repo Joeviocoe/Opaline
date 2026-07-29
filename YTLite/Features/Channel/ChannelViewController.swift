@@ -16,6 +16,7 @@ final class ChannelViewController: VideosViewController {
     var isSubscribed: Bool = false
     var currentChannelPage: ChannelPage?
     var currentTab: ChannelTabsView.Tab = .videos
+    var filterChips: [ChannelFilterChip] = []
     var playlistLookup: [String: Playlist] = [:]
 
     lazy var infoBarButton: UIBarButtonItem = {
@@ -88,6 +89,11 @@ final class ChannelViewController: VideosViewController {
         applyErrorLabelTheme()
         restoreFromCache()
         loadChannel()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        padBottomInsetForCollapse()
     }
 
     override func applyTheme() {

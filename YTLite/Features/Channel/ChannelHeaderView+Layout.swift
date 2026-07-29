@@ -1,30 +1,38 @@
 import UIKit
 
 extension ChannelHeaderView {
+    /// Horizontal layout: banner strip, then one row of
+    /// avatar + name/stats + subscribe button.
     func activateConstraints(
         _ parent: UIView,
         _ cv: UICollectionView,
         _ errLabel: UILabel
     ) {
-        buildDynamicConstraints()
+        heightRef = heightAnchor.constraint(
+            equalToConstant: expandedHeight
+        )
         var all = frameConstraints(parent)
         all += bannerConstraints()
-        all += avatarNameConstraints()
-        all += contentConstraints()
+        all += avatarAndButtonConstraints()
+        all += textConstraints()
         all += skeletonConstraints()
         all += outerConstraints(parent, cv, errLabel)
         NSLayoutConstraint.activate(all)
     }
 
-    private func buildDynamicConstraints() {
-        heightRef = heightAnchor.constraint(
-            equalToConstant: expandedHeight
+    /// The list scrolls under the header, so its top inset is the
+    /// header's expanded height.
+    func configureCollectionView(_ cv: UICollectionView) {
+        cv.translatesAutoresizingMaskIntoConstraints = false
+        cv.autoresizingMask = []
+        cv.contentInset = UIEdgeInsets(
+            top: expandedHeight, left: 0, bottom: 0, right: 0
         )
-        avatarTopRef = avatarView.topAnchor.constraint(
-            equalTo: topAnchor, constant: bannerHeight - 32
+        cv.scrollIndicatorInsets = UIEdgeInsets(
+            top: expandedHeight, left: 0, bottom: 0, right: 0
         )
-        nameTopRef = nameLabel.topAnchor.constraint(
-            equalTo: avatarView.bottomAnchor, constant: 14
+        cv.setContentOffset(
+            CGPoint(x: 0, y: -expandedHeight), animated: false
         )
     }
 
@@ -47,6 +55,7 @@ extension ChannelHeaderView {
     private func bannerConstraints() -> [NSLayoutConstraint] {
         let biv = bannerImageView
         let bov = bannerOverlay
+        let sv = separatorView
         return [
             biv.topAnchor.constraint(equalTo: topAnchor),
             biv.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -55,59 +64,7 @@ extension ChannelHeaderView {
             bov.topAnchor.constraint(equalTo: biv.topAnchor),
             bov.leadingAnchor.constraint(equalTo: biv.leadingAnchor),
             bov.trailingAnchor.constraint(equalTo: biv.trailingAnchor),
-            bov.bottomAnchor.constraint(equalTo: biv.bottomAnchor)
-        ]
-    }
-
-    private func avatarNameConstraints() -> [NSLayoutConstraint] {
-        guard let avatarTopRef, let nameTopRef
-        else {
-            return []
-        }
-        let vb = verifiedBadgeView
-        return [
-            avatarTopRef,
-            avatarView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            avatarView.widthAnchor.constraint(equalToConstant: 64),
-            avatarView.heightAnchor.constraint(equalToConstant: 64),
-            nameTopRef,
-            nameLabel.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 24
-            ),
-            nameLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -44
-            ),
-            vb.leadingAnchor.constraint(
-                equalTo: nameLabel.trailingAnchor, constant: 4
-            ),
-            vb.centerYAnchor.constraint(equalTo: nameLabel.centerYAnchor),
-            vb.widthAnchor.constraint(equalToConstant: 16),
-            vb.heightAnchor.constraint(equalToConstant: 16)
-        ]
-    }
-
-    private func contentConstraints() -> [NSLayoutConstraint] {
-        let sl = subscribersLabel
-        let sb = subscribeButton
-        let sv = separatorView
-        return [
-            sl.topAnchor.constraint(
-                equalTo: nameLabel.bottomAnchor, constant: 6
-            ),
-            sl.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 24
-            ),
-            sl.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -24
-            ),
-            sb.topAnchor.constraint(
-                equalTo: sl.bottomAnchor, constant: 14
-            ),
-            sb.centerXAnchor.constraint(equalTo: centerXAnchor),
-            sb.heightAnchor.constraint(equalToConstant: 36),
-            sv.topAnchor.constraint(
-                equalTo: sb.bottomAnchor, constant: 18
-            ),
+            bov.bottomAnchor.constraint(equalTo: biv.bottomAnchor),
             sv.leadingAnchor.constraint(equalTo: leadingAnchor),
             sv.trailingAnchor.constraint(equalTo: trailingAnchor),
             sv.heightAnchor.constraint(equalToConstant: 1),
@@ -115,28 +72,87 @@ extension ChannelHeaderView {
         ]
     }
 
+    /// The avatar straddles the banner edge; the button lines up with
+    /// its bottom, next to the stats.
+    private func avatarAndButtonConstraints() -> [NSLayoutConstraint] {
+        let av = avatarView
+        let sb = subscribeButton
+        return [
+            av.topAnchor.constraint(
+                equalTo: topAnchor,
+                constant: bannerHeight - avatarOverlap
+            ),
+            av.leadingAnchor.constraint(
+                equalTo: leadingAnchor, constant: 16
+            ),
+            av.widthAnchor.constraint(equalToConstant: avatarSize),
+            av.heightAnchor.constraint(equalToConstant: avatarSize),
+            sb.trailingAnchor.constraint(
+                equalTo: trailingAnchor, constant: -16
+            ),
+            sb.bottomAnchor.constraint(equalTo: av.bottomAnchor),
+            sb.heightAnchor.constraint(equalToConstant: 32)
+        ]
+    }
+
+    /// Name and stats sit beside the avatar, aligned to its bottom —
+    /// which keeps them clear of the banner above.
+    private func textConstraints() -> [NSLayoutConstraint] {
+        let nl = nameLabel
+        let sl = subscribersLabel
+        let vb = verifiedBadgeView
+        let textLead = avatarView.trailingAnchor
+        let limit = subscribeButton.leadingAnchor
+        let badgeWidth = vb.widthAnchor.constraint(equalToConstant: 0)
+        badgeWidthRef = badgeWidth
+        return [
+            nl.leadingAnchor.constraint(equalTo: textLead, constant: 12),
+            nl.bottomAnchor.constraint(
+                equalTo: sl.topAnchor, constant: -2
+            ),
+            vb.leadingAnchor.constraint(
+                equalTo: nl.trailingAnchor, constant: 4
+            ),
+            vb.trailingAnchor.constraint(
+                lessThanOrEqualTo: limit, constant: -12
+            ),
+            vb.centerYAnchor.constraint(equalTo: nl.centerYAnchor),
+            vb.heightAnchor.constraint(equalToConstant: 14),
+            badgeWidth,
+            sl.leadingAnchor.constraint(equalTo: textLead, constant: 12),
+            sl.bottomAnchor.constraint(
+                equalTo: avatarView.bottomAnchor
+            ),
+            sl.trailingAnchor.constraint(
+                lessThanOrEqualTo: limit, constant: -12
+            )
+        ]
+    }
+
     private func skeletonConstraints() -> [NSLayoutConstraint] {
         let ns = nameSkeleton
         let ss = subsSkeleton
         let bs = btnSkeleton
-        let avBottom = avatarView.bottomAnchor
+        let textLead = avatarView.trailingAnchor
         return [
-            ns.topAnchor.constraint(equalTo: avBottom, constant: 14),
-            ns.centerXAnchor.constraint(equalTo: centerXAnchor),
-            ns.widthAnchor.constraint(equalToConstant: 160),
-            ns.heightAnchor.constraint(equalToConstant: 20),
-            ss.topAnchor.constraint(
-                equalTo: ns.bottomAnchor, constant: 10
+            ns.leadingAnchor.constraint(equalTo: textLead, constant: 12),
+            ns.bottomAnchor.constraint(
+                equalTo: ss.topAnchor, constant: -6
             ),
-            ss.centerXAnchor.constraint(equalTo: centerXAnchor),
-            ss.widthAnchor.constraint(equalToConstant: 110),
-            ss.heightAnchor.constraint(equalToConstant: 14),
-            bs.topAnchor.constraint(
-                equalTo: ss.bottomAnchor, constant: 14
+            ns.widthAnchor.constraint(equalToConstant: 150),
+            ns.heightAnchor.constraint(equalToConstant: 16),
+            ss.leadingAnchor.constraint(equalTo: textLead, constant: 12),
+            ss.bottomAnchor.constraint(
+                equalTo: avatarView.bottomAnchor, constant: -2
             ),
-            bs.centerXAnchor.constraint(equalTo: centerXAnchor),
-            bs.widthAnchor.constraint(equalToConstant: 120),
-            bs.heightAnchor.constraint(equalToConstant: 36)
+            ss.widthAnchor.constraint(equalToConstant: 100),
+            ss.heightAnchor.constraint(equalToConstant: 12),
+            bs.trailingAnchor.constraint(
+                equalTo: trailingAnchor, constant: -16
+            ),
+            bs.bottomAnchor.constraint(equalTo: avatarView.bottomAnchor),
+            bs.widthAnchor.constraint(equalToConstant: 104),
+            bs.heightAnchor.constraint(equalToConstant: 32)
         ]
     }
 

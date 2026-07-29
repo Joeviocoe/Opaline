@@ -1,10 +1,12 @@
 import UIKit
 
-/// Horizontal scrollable filter chip bar for channel Videos/Live tabs.
+/// Horizontal scrollable chip bar — used both for the channel's tabs
+/// and for a tab's filter chips.
 final class ChannelFilterBarView: UIView {
     static let preferredHeight: CGFloat = 44
 
-    var onChipSelected: ((ChannelFilterChip) -> Void)?
+    var onSelect: ((Int) -> Void)?
+    var titleFont: UIFont = .systemFont(ofSize: 13, weight: .medium)
 
     private let scrollView: UIScrollView = {
         let sv = UIScrollView()
@@ -22,7 +24,7 @@ final class ChannelFilterBarView: UIView {
         return sv
     }()
 
-    private var chips: [ChannelFilterChip] = []
+    private var titles: [String] = []
     private var buttons: [UIButton] = []
     private var selectedIndex: Int = 0
 
@@ -31,20 +33,20 @@ final class ChannelFilterBarView: UIView {
         setup()
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setup()
+        fatalError("init(coder:) is not supported")
     }
 
-    func setChips(_ chips: [ChannelFilterChip], selected: Int) {
-        self.chips = chips
+    func setTitles(_ titles: [String], selected: Int) {
+        self.titles = titles
         self.selectedIndex = selected
         rebuildButtons()
         applyTheme()
     }
 
-    func clearChips() {
-        chips = []
+    func clearTitles() {
+        titles = []
         buttons = []
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
     }
@@ -78,10 +80,10 @@ final class ChannelFilterBarView: UIView {
 
     private func rebuildButtons() {
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        buttons = chips.enumerated().map { idx, chip in
+        buttons = titles.enumerated().map { idx, title in
             let btn = UIButton(type: .system)
-            btn.setTitle(chip.label, for: .normal)
-            btn.titleLabel?.font = .systemFont(ofSize: 13, weight: .medium)
+            btn.setTitle(title, for: .normal)
+            btn.titleLabel?.font = titleFont
             btn.layer.cornerRadius = 14
             btn.layer.borderWidth = 1
             btn.contentEdgeInsets = UIEdgeInsets(
@@ -99,12 +101,12 @@ final class ChannelFilterBarView: UIView {
     @objc
     private func chipTapped(_ sender: UIButton) {
         let idx = sender.tag
-        guard idx != selectedIndex, idx < chips.count else {
+        guard idx != selectedIndex, idx < titles.count else {
             return
         }
         selectedIndex = idx
         applyTheme()
-        onChipSelected?(chips[idx])
+        onSelect?(idx)
     }
 
     private func styleButton(_ btn: UIButton, selected: Bool) {

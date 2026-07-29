@@ -11,17 +11,21 @@ final class ChannelHeaderView: UIView {
     var separatorView = UIView()
     var nameSkeleton = SkeletonBlockView(cornerRadius: 6)
     var subsSkeleton = SkeletonBlockView(cornerRadius: 4)
-    var btnSkeleton = SkeletonBlockView(cornerRadius: 18)
+    var btnSkeleton = SkeletonBlockView(cornerRadius: 16)
     var heightRef: NSLayoutConstraint?
-    var avatarTopRef: NSLayoutConstraint?
-    var nameTopRef: NSLayoutConstraint?
-    let expandedHeight: CGFloat = 290
+    /// Zero unless the channel is verified, so the name gets the space.
+    var badgeWidthRef: NSLayoutConstraint?
+    let expandedHeight: CGFloat = 140
     let collapsedHeight: CGFloat = 0
-    var bannerHeight: CGFloat = 120
+    let bannerHeight: CGFloat = 88
+    let avatarSize: CGFloat = 64
+    /// How far the avatar rides up over the banner's bottom edge.
+    let avatarOverlap: CGFloat = 20
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = false
+        clipsToBounds = true
         configureBanner()
         configureLabels()
         configureButtonAndSeparator()
@@ -48,8 +52,11 @@ final class ChannelHeaderView: UIView {
     func update(with info: ChannelInfo, fallback: String) {
         hideSkeletonState()
         nameLabel.text = info.title.isEmpty ? fallback : info.title
-        subscribersLabel.text = info.subscriberCountText
+        subscribersLabel.text = [
+            info.subscriberCountText, info.videoCountText
+        ].compactMap { $0 }.joined(separator: " · ")
         verifiedBadgeView.isHidden = !info.isVerified
+        badgeWidthRef?.constant = info.isVerified ? 14 : 0
         loadImage(info.avatarURL, into: avatarView)
         loadImage(info.bannerURL, into: bannerImageView)
     }
@@ -62,14 +69,17 @@ final class ChannelHeaderView: UIView {
     func applyTheme(isSubscribed: Bool) {
         let theme = ThemeManager.shared
         backgroundColor = theme.background
+        bannerImageView.backgroundColor = theme.surface
         nameLabel.textColor = theme.primaryText
         subscribersLabel.textColor = theme.secondaryText
         separatorView.backgroundColor = theme.separator
         applyButtonTheme(subscribed: isSubscribed, theme: theme)
     }
 
+    /// Collapses the header as the list scrolls up. Only the height and
+    /// the fade move — the inner layout stays put and is clipped away.
     func updateForScroll(_ scrollView: UIScrollView) {
-        guard let heightRef, let avatarTopRef, let nameTopRef
+        guard let heightRef
         else {
             return
         }
@@ -80,11 +90,7 @@ final class ChannelHeaderView: UIView {
         let ht = max(collapsedHeight, expandedHeight - offset)
         heightRef.constant = ht
         isHidden = ht <= 0
-        scrollView.scrollIndicatorInsets.top = ht
-        avatarTopRef.constant = (bannerHeight - 32) - 16 * progress
-        nameTopRef.constant = 14 - 16 * progress
         applyScrollAlpha(progress)
-        applyAvatarScale(progress)
     }
 
     func showSkeletonState() {
@@ -106,18 +112,21 @@ final class ChannelHeaderView: UIView {
         bannerImageView.clipsToBounds = true
         bannerImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bannerImageView)
-        bannerOverlay.backgroundColor = UIColor.black.withAlphaComponent(0.3)
+        bannerOverlay.backgroundColor = UIColor.black.withAlphaComponent(0.2)
         bannerOverlay.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bannerOverlay)
-        avatarView.layer.cornerRadius = 32
+        avatarView.layer.cornerRadius = avatarSize / 2
+        avatarView.layer.borderWidth = 2
         avatarView.layer.masksToBounds = true
         avatarView.translatesAutoresizingMaskIntoConstraints = false
     }
 
     private func configureLabels() {
-        nameLabel.font = .systemFont(ofSize: 24, weight: .semibold)
-        nameLabel.numberOfLines = 2
-        nameLabel.textAlignment = .center
+        nameLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        nameLabel.numberOfLines = 1
+        nameLabel.setContentCompressionResistancePriority(
+            .defaultLow, for: .horizontal
+        )
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         if #available(iOS 13.0, *) {
             verifiedBadgeView.image = UIImage(
@@ -128,19 +137,24 @@ final class ChannelHeaderView: UIView {
         verifiedBadgeView.contentMode = .scaleAspectFit
         verifiedBadgeView.isHidden = true
         verifiedBadgeView.translatesAutoresizingMaskIntoConstraints = false
-        subscribersLabel.font = .systemFont(ofSize: 14)
-        subscribersLabel.textAlignment = .center
-        subscribersLabel.numberOfLines = 2
+        subscribersLabel.font = .systemFont(ofSize: 13)
+        subscribersLabel.numberOfLines = 1
+        subscribersLabel.setContentCompressionResistancePriority(
+            .defaultLow, for: .horizontal
+        )
         subscribersLabel.translatesAutoresizingMaskIntoConstraints = false
     }
 
     private func configureButtonAndSeparator() {
         subscribeButton.titleLabel?.font = .systemFont(
-            ofSize: 15, weight: .semibold
+            ofSize: 14, weight: .semibold
         )
-        subscribeButton.layer.cornerRadius = 18
+        subscribeButton.layer.cornerRadius = 16
         subscribeButton.contentEdgeInsets = UIEdgeInsets(
-            top: 10, left: 18, bottom: 10, right: 18
+            top: 8, left: 16, bottom: 8, right: 16
+        )
+        subscribeButton.setContentCompressionResistancePriority(
+            .required, for: .horizontal
         )
         subscribeButton.isEnabled = !OAuthClient.shared.isAnonymous
         subscribeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -155,43 +169,25 @@ final class ChannelHeaderView: UIView {
         ].forEach { addSubview($0) }
     }
 
-    private func configureCollectionView(_ cv: UICollectionView) {
-        cv.translatesAutoresizingMaskIntoConstraints = false
-        cv.autoresizingMask = []
-        cv.contentInset = UIEdgeInsets(
-            top: expandedHeight, left: 0, bottom: 0, right: 0
-        )
-        cv.scrollIndicatorInsets = UIEdgeInsets(
-            top: expandedHeight, left: 0, bottom: 0, right: 0
-        )
-        cv.setContentOffset(
-            CGPoint(x: 0, y: -expandedHeight), animated: false
-        )
-    }
-
     // MARK: - Private Helpers
 
     private func applyScrollAlpha(_ progress: CGFloat) {
-        avatarView.alpha = max(0, 1 - progress * 1.15)
-        subscribersLabel.alpha = max(0, 1 - progress * 1.25)
-        subscribeButton.alpha = max(0, 1 - progress * 1.35)
-        separatorView.alpha = max(0, 1 - progress * 1.5)
-        nameLabel.alpha = max(0, 1 - progress * 1.1)
+        let fade = max(0, 1 - progress * 1.4)
+        avatarView.alpha = fade
+        nameLabel.alpha = fade
+        verifiedBadgeView.alpha = fade
+        subscribersLabel.alpha = fade
+        subscribeButton.alpha = fade
+        separatorView.alpha = fade
         bannerImageView.alpha = max(0, 1 - progress * 2.0)
         bannerOverlay.alpha = bannerImageView.alpha
-    }
-
-    private func applyAvatarScale(_ progress: CGFloat) {
-        let sc = 1 - (0.35 * progress)
-        avatarView.transform = CGAffineTransform(
-            scaleX: sc, y: sc
-        )
     }
 
     private func applyButtonTheme(
         subscribed: Bool,
         theme: ThemeManager
     ) {
+        avatarView.layer.borderColor = theme.background.cgColor
         if subscribed {
             subscribeButton.backgroundColor = theme.surface
             subscribeButton.setTitleColor(

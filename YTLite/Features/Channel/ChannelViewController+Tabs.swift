@@ -40,8 +40,8 @@ extension ChannelViewController {
 
     func installFilterBar() {
         filterBar.isHidden = true
-        filterBar.onChipSelected = { [weak self] chip in
-            self?.handleChipSelected(chip)
+        filterBar.onSelect = { [weak self] index in
+            self?.handleChipSelected(at: index)
         }
         view.addSubview(filterBar)
         NSLayoutConstraint.activate([
@@ -56,7 +56,8 @@ extension ChannelViewController {
             return
         }
         currentTab = tab
-        filterBar.clearChips()
+        filterChips = []
+        filterBar.clearTitles()
         filterBar.isHidden = true
         loadCurrentTab()
     }
@@ -151,7 +152,8 @@ extension ChannelViewController {
         guard !chips.isEmpty else {
             return
         }
-        filterBar.setChips(chips, selected: 0)
+        filterChips = chips
+        filterBar.setTitles(chips.map { $0.label }, selected: 0)
         filterBar.isHidden = false
         adjustCollectionInsetsForFilterBar()
     }
@@ -171,8 +173,11 @@ extension ChannelViewController {
         }
     }
 
-    func handleChipSelected(_ chip: ChannelFilterChip) {
-        switch chip.action {
+    func handleChipSelected(at index: Int) {
+        guard index < filterChips.count else {
+            return
+        }
+        switch filterChips[index].action {
         case .continuation(let token):
             loadSortedVideoTab(token: token)
         case .browse(let action):
