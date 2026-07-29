@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.6.5",
+          "date": "2026-07-28T13:31:41Z",
+          "localizedDescription": "## Fixes\n\n- **Empty tab bar segment** (#30) — An extra, blank tab with no icon or title could appear next to Library after the app window was resized (Slide Over / Split View / multitasking). The player panel is no longer attached to the tab bar controller, so the tab bar always shows exactly its three tabs.\n- **Player layout in narrow windows** — The progress bar sat right under the transport buttons with a wide gap down to the timestamps; it now sits just above the time labels, which keeps the controls evenly spaced in Slide Over without changing the layout on iPhone or full-screen iPad.\n- **Playback pausing in multitasking** — Dragging the app into Slide Over next to another app made iOS pause video and audio. Playback now resumes automatically after that system pause, while a pause you triggered yourself stays paused.\n- **Layout warnings** — Cleaned up the Auto Layout and collection-view layout warnings logged while the app window was being resized.",
+          "downloadURL": "https://github.com/verback2308/ytlite/releases/download/1.6.5/YTLite_1.6.5.ipa",
+          "size": 4518089,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.6.4",
           "date": "2026-07-27T20:26:19Z",
           "localizedDescription": "## Fixes\n\n*   **Picture-in-Picture** ([#28](https://github.com/verback2308/ytlite/issues/28)) — PiP now works the same on iPhone and iPad and follows the setting: turn it on and leaving the app moves the video into a floating window; leave it off and you get background audio as before. The player's PiP button always works regardless of the setting. The button no longer stops working after opening Control Center, and playback no longer pauses when returning from PiP to the mini player. On iOS 12, iOS can't keep background audio and PiP available at once, so the app rebuilds the player when PiP is needed again — you may notice a brief buffering pause after listening in the background. On iOS 14.2+ this doesn't happen\n*   **Bot check recovery** — when YouTube answers a playback request with a bot check, the app no longer fails with a generic error. It renews the session identity and retries once on its own, showing a short \"renewing session\" status; in most cases the video just starts. If the retry is blocked too, the message now says what actually happened\n*   **Related videos in landscape** ([#29](https://github.com/verback2308/ytlite/issues/29)) — the first card in the related-videos sidebar no longer slides under the navigation bar (visible on iOS 26 and on Mac with \"Designed for iPad\")\n*   **Seeking** — double-tap seeking now accelerates: consecutive taps in the same direction step 10s, 20s, 30s and then 60s each, so three taps cover a minute, and a fast burst counts every tap instead of losing the ones that land mid-seek. The time label no longer jumps back to the playing position while you drag the seek bar — it follows your finger until you let go\n*   **Feed crash** — fixed a crash when loading the next page of videos in a feed",
@@ -92,14 +100,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.6.4",
-      "versionDate": "2026-07-27T20:26:19Z",
-      "versionDescription": "## Fixes\n\n*   **Picture-in-Picture** ([#28](https://github.com/verback2308/ytlite/issues/28)) — PiP now works the same on iPhone and iPad and follows the setting: turn it on and leaving the app moves the video into a floating window; leave it off and you get background audio as before. The player's PiP button always works regardless of the setting. The button no longer stops working after opening Control Center, and playback no longer pauses when returning from PiP to the mini player. On iOS 12, iOS can't keep background audio and PiP available at once, so the app rebuilds the player when PiP is needed again — you may notice a brief buffering pause after listening in the background. On iOS 14.2+ this doesn't happen\n*   **Bot check recovery** — when YouTube answers a playback request with a bot check, the app no longer fails with a generic error. It renews the session identity and retries once on its own, showing a short \"renewing session\" status; in most cases the video just starts. If the retry is blocked too, the message now says what actually happened\n*   **Related videos in landscape** ([#29](https://github.com/verback2308/ytlite/issues/29)) — the first card in the related-videos sidebar no longer slides under the navigation bar (visible on iOS 26 and on Mac with \"Designed for iPad\")\n*   **Seeking** — double-tap seeking now accelerates: consecutive taps in the same direction step 10s, 20s, 30s and then 60s each, so three taps cover a minute, and a fast burst counts every tap instead of losing the ones that land mid-seek. The time label no longer jumps back to the playing position while you drag the seek bar — it follows your finger until you let go\n*   **Feed crash** — fixed a crash when loading the next page of videos in a feed",
-      "downloadURL": "https://github.com/verback2308/ytlite/releases/download/1.6.4/YTLite_1.6.4.ipa",
+      "version": "1.6.5",
+      "versionDate": "2026-07-28T13:31:41Z",
+      "versionDescription": "## Fixes\n\n- **Empty tab bar segment** (#30) — An extra, blank tab with no icon or title could appear next to Library after the app window was resized (Slide Over / Split View / multitasking). The player panel is no longer attached to the tab bar controller, so the tab bar always shows exactly its three tabs.\n- **Player layout in narrow windows** — The progress bar sat right under the transport buttons with a wide gap down to the timestamps; it now sits just above the time labels, which keeps the controls evenly spaced in Slide Over without changing the layout on iPhone or full-screen iPad.\n- **Playback pausing in multitasking** — Dragging the app into Slide Over next to another app made iOS pause video and audio. Playback now resumes automatically after that system pause, while a pause you triggered yourself stays paused.\n- **Layout warnings** — Cleaned up the Auto Layout and collection-view layout warnings logged while the app window was being resized.",
+      "downloadURL": "https://github.com/verback2308/ytlite/releases/download/1.6.5/YTLite_1.6.5.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 4513178,
+      "size": 4518089,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -122,6 +130,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "YTLite 1.6.5 - UI fixes & improvements",
+      "identifier": "release-1.6.5",
+      "caption": "Empty tab bar segment — An extra, blank tab with no icon or title could appear next to Library after the app window w…",
+      "date": "2026-07-28T13:31:41Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/ytlite/releases/tag/1.6.5"
+    },
     {
       "title": "YTLite 1.6.4 - BotCheck recovery, PiP discrepancy fix, UI/UX improvements",
       "identifier": "release-1.6.4",
