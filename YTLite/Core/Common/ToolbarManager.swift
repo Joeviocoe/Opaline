@@ -178,6 +178,12 @@ final class ProfileAvatarButton: UIButton {
         translatesAutoresizingMaskIntoConstraints = false
         widthAnchor.constraint(equalToConstant: size).isActive = true
         heightAnchor.constraint(equalToConstant: size).isActive = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(refresh),
+            name: ThemeManager.didChangeNotification,
+            object: nil
+        )
     }
 
     @available(*, unavailable)
@@ -185,6 +191,7 @@ final class ProfileAvatarButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
 
+    @objc
     func refresh() {
         tintColor = ThemeManager.shared.isDark ? .white : .darkGray
         if let avatar = UserProfileStore.shared.avatarImage {
