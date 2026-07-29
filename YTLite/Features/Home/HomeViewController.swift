@@ -43,6 +43,9 @@ class HomeViewController: VideosViewController {
     var categoryCache: [String: FeedPage] = [:]
     /// One rescue refetch per session when a cached token turns out dead.
     var didRevalidateAfterStaleToken = false
+    /// Freshness of the feed currently on screen — compared against the
+    /// cache to spot one written by background refresh.
+    var appliedFeedAt = Date.distantPast
     lazy var chipBar = ChipBarView()
 
     override var groupsByShelf: Bool { HomeLayout.selected == .rails }
@@ -105,7 +108,18 @@ class HomeViewController: VideosViewController {
         setupToolbar()
         observeSignOut()
         observeTokenRefresh()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
         loadCachedOrFetchFeed()
+    }
+
+    @objc
+    private func handleDidBecomeActive() {
+        adoptFreshCacheIfNeeded()
     }
 
     @objc

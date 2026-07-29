@@ -7,6 +7,26 @@ extension HomeViewController {
         ToolbarManager.shared.install(in: self)
     }
 
+    /// Adopts a feed that background refresh wrote while the app was away.
+    /// Two guards keep this from becoming the shelf-reshuffle the whole
+    /// revalidation change was made to stop: the list must be at the top
+    /// (nothing moves under a scrolling finger) and the cache must actually
+    /// be newer than what is on screen (background refresh runs about
+    /// hourly, so a quick app switch changes nothing).
+    func adoptFreshCacheIfNeeded() {
+        guard let collectionView, collectionView.contentOffset.y <= 1,
+              let cachedAt = cache.feedUpdatedAt("home"),
+              cachedAt > appliedFeedAt,
+              let cachedPage = cache.cachedHomeFeed()
+        else {
+            return
+        }
+        AppLog.home("adopting feed refreshed in the background")
+        resetShelfDrain()
+        applyCachedPage(cachedPage)
+        rebuildChips()
+    }
+
     func loadCachedOrFetchFeed() {
         cache.loadHomeFeed { [weak self] cachedPage in
             guard let self else {
@@ -17,7 +37,7 @@ extension HomeViewController {
                 self.isLoadingInitial = false
                 self.spinner.stopAnimating()
                 self.resetShelfDrain()
-                self.setPage(self.enqueueShelves(from: cachedPage))
+                self.applyCachedPage(cachedPage)
                 // Revalidating replaces the whole feed — YouTube reorders
                 // shelves on every request, so the screen visibly rebuilds
                 // and thumbnails reload. Skip it while the cache is recent;
@@ -35,6 +55,13 @@ extension HomeViewController {
                 self.loadFeed()
             }
         }
+    }
+
+    /// Shows a cached page and remembers how fresh it was, so a later
+    /// background refresh can be recognised as newer than the screen.
+    private func applyCachedPage(_ page: FeedPage) {
+        appliedFeedAt = cache.feedUpdatedAt("home") ?? Date()
+        setPage(enqueueShelves(from: page))
     }
 
     /// Skipping revalidation on launch means the cached tokens can be hours
@@ -97,6 +124,7 @@ extension HomeViewController {
     /// tokens, so runs and chips restart from this page.
     private func applyFreshFeed(_ page: FeedPage) {
         cache.setHomeFeed(page)
+        appliedFeedAt = Date()
         startFreshSession()
         setPage(enqueueShelves(from: page))
         rebuildChips()
