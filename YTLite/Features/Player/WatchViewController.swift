@@ -63,6 +63,9 @@ final class WatchViewController: UIViewController {
     var activeResourceLoader: AVAssetResourceLoaderDelegate?
     var statusObservation: NSKeyValueObservation?
     var descriptionExpanded = false
+    /// Raw (un-linkified) description text, kept so the attributed text can
+    /// be rebuilt when the theme changes.
+    var descriptionText = ""
     var isLoadingComments = false
     let sponsorBlock = SponsorBlockController()
     var autoplayOverlay: AutoplayOverlayView?
@@ -101,7 +104,7 @@ final class WatchViewController: UIViewController {
     let channelNameLabel = UILabel()
     let channelMetaLabel = UILabel()
     let subscribeButton = UIButton(type: .system)
-    let descriptionLabel = UILabel()
+    let descriptionLabel = UITextView()
     let descriptionButton = UIButton(type: .system)
     let commentsLabel = UILabel()
     let commentsStackView = UIStackView()

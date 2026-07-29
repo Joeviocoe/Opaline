@@ -1,14 +1,17 @@
 import UIKit
 
 enum CommentViewBuilder {
-    static func makeCommentView(_ comment: Comment) -> UIView {
+    static func makeCommentView(
+        _ comment: Comment,
+        linkDelegate: UITextViewDelegate
+    ) -> UIView {
         let container = UIView()
         container.translatesAutoresizingMaskIntoConstraints = false
 
         let avatarView = makeAvatar(comment)
         let authorLabel = makeAuthorLabel(comment)
         let metaLabel = makeMetaLabel(comment)
-        let contentLabel = makeContentLabel(comment)
+        let contentLabel = makeContentLabel(comment, linkDelegate: linkDelegate)
         let separator = makeSeparator()
 
         for view in [avatarView, authorLabel, metaLabel, contentLabel, separator] {
@@ -69,14 +72,23 @@ enum CommentViewBuilder {
         return label
     }
 
-    private static func makeContentLabel(_ comment: Comment) -> UILabel {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 13)
-        label.textColor = ThemeManager.shared.primaryText
-        label.numberOfLines = 0
-        label.text = comment.content
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+    private static func makeContentLabel(
+        _ comment: Comment,
+        linkDelegate: UITextViewDelegate
+    ) -> UITextView {
+        let textView = UITextView()
+        LinkifiedText.configure(textView)
+        let theme = ThemeManager.shared
+        textView.attributedText = LinkifiedText.attributedString(
+            from: comment.content,
+            font: UIFont.systemFont(ofSize: 13),
+            color: theme.primaryText,
+            includeTimestamps: true
+        )
+        textView.linkTextAttributes = [.foregroundColor: theme.accent]
+        textView.delegate = linkDelegate
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        return textView
     }
 
     private static func makeSeparator() -> UIView {
