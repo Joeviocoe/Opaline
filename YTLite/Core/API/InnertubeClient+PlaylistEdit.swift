@@ -113,13 +113,17 @@ extension InnertubeClient {
     /// prefix — and the legacy playlist id is `FL` + that. Lets Favorites show
     /// up right after sign-in instead of after the first video.
     static func rememberOwnChannelId(from json: [String: Any]) {
-        guard legacyFavoritesId == nil,
-              let key = firstClientCacheKey(in: json),
-              !key.isEmpty
-        else {
+        guard let key = firstClientCacheKey(in: json), !key.isEmpty else {
             return
         }
-        AppLog.innertube("own channel key \(key) → legacy FL\(key)")
+        AppLog.innertube("own channel UC\(key), legacy FL\(key)")
+        UserDefaults.standard.set(
+            "UC" + key,
+            forKey: UserDefaultsKeys.Account.ownChannelId
+        )
+        guard legacyFavoritesId == nil else {
+            return
+        }
         UserDefaults.standard.set(
             "FL" + key,
             forKey: UserDefaultsKeys.Playlists.legacyFavoritesId

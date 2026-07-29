@@ -79,6 +79,10 @@
 "player.action.share" = "分享";
 /* Action bar: save to playlist */
 "player.action.save" = "儲存";
+"player.action.saveFailed" = "無法儲存影片。";
+"player.action.saveTo" = "儲存至播放清單";
+"player.action.savedTo" = "已儲存至「%1$@」";
+"player.action.removedFrom" = "已從「%1$@」移除";
 /* Action bar: download */
 "player.action.download" = "下載";
 
@@ -343,6 +347,7 @@
 "library.history" = "觀看記錄";
 "library.downloads" = "下載";
 "library.playlists" = "播放清單";
+"library.playlists.favorites" = "收藏";
 "library.downloads.comingSoon" = "下載功能即將推出";
 "library.history.signIn" = "登入以查看觀看記錄";
 "library.history.empty" = "沒有觀看記錄";
@@ -365,6 +370,7 @@
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "帳戶";
 "account.signIn" = "登入";
+"account.myChannel" = "我的頻道";
 "account.signOut" = "登出";
 "account.notSignedIn" = "未登入";
 

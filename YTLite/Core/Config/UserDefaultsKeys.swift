@@ -61,6 +61,12 @@ enum UserDefaultsKeys {
         static let region = "localization_region"
     }
 
+    enum Account {
+        /// The signed-in user's own channel id, derived from the accounts
+        /// list (`UC` + `offlineCacheKeyToken.clientCacheKey`).
+        static let ownChannelId = "account_ownChannelId"
+    }
+
     enum Playlists {
         /// Legacy "Favorites" playlist id (`FL` + channelId). The TV library
         /// browse omits it, so it is remembered the first time the

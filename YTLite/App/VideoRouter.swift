@@ -4,6 +4,8 @@ final class VideoRouter {
     static let shared = VideoRouter()
 
     var watchViewControllerFactory: ((Video) -> WatchViewController)?
+    /// Lets Core screens push a channel without importing Features.
+    var channelViewControllerFactory: ((String, String) -> UIViewController)?
     private var panel: PlayerPanelViewController?
 
     private init() {}

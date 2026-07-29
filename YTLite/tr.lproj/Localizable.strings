@@ -79,6 +79,10 @@
 "player.action.share" = "Paylaş";
 /* Action bar: save to playlist */
 "player.action.save" = "Kaydet";
+"player.action.saveFailed" = "Video kaydedilemedi.";
+"player.action.saveTo" = "Oynatma listesine kaydet";
+"player.action.savedTo" = "%1$@ listesine kaydedildi";
+"player.action.removedFrom" = "%1$@ listesinden kaldırıldı";
 /* Action bar: download */
 "player.action.download" = "İndir";
 
@@ -343,6 +347,7 @@
 "library.history" = "Geçmiş";
 "library.downloads" = "İndirmeler";
 "library.playlists" = "Oynatma listeleri";
+"library.playlists.favorites" = "Favoriler";
 "library.downloads.comingSoon" = "İndirmeler yakında";
 "library.history.signIn" = "İzleme geçmişinizi görmek için giriş yapın";
 "library.history.empty" = "İzleme geçmişi bulunamadı";
@@ -365,6 +370,7 @@
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "Hesap";
 "account.signIn" = "Giriş Yap";
+"account.myChannel" = "Kanalım";
 "account.signOut" = "Çıkış Yap";
 "account.notSignedIn" = "Giriş yapılmadı";
 

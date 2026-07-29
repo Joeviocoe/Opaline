@@ -79,6 +79,10 @@
 "player.action.share" = "分享";
 /* Action bar: save to playlist */
 "player.action.save" = "保存";
+"player.action.saveFailed" = "无法保存视频。";
+"player.action.saveTo" = "保存到播放列表";
+"player.action.savedTo" = "已保存到「%1$@」";
+"player.action.removedFrom" = "已从「%1$@」移除";
 /* Action bar: download */
 "player.action.download" = "下载";
 
@@ -343,6 +347,7 @@
 "library.history" = "历史记录";
 "library.downloads" = "下载";
 "library.playlists" = "播放列表";
+"library.playlists.favorites" = "收藏";
 "library.downloads.comingSoon" = "下载功能即将推出";
 "library.history.signIn" = "登录以查看观看历史";
 "library.history.empty" = "没有观看历史记录";
@@ -365,6 +370,7 @@
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "帐户";
 "account.signIn" = "登录";
+"account.myChannel" = "我的频道";
 "account.signOut" = "退出登录";
 "account.notSignedIn" = "未登录";
 

@@ -377,6 +377,8 @@
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "Account";
 "account.signIn" = "Sign In";
+/* Opens the signed-in user's own channel */
+"account.myChannel" = "My Channel";
 "account.signOut" = "Sign Out";
 "account.notSignedIn" = "Not signed in";
 

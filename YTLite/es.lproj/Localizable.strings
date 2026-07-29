@@ -75,6 +75,10 @@
 "player.action.share" = "Compartir";
 /* Action bar: save to playlist */
 "player.action.save" = "Guardar";
+"player.action.saveFailed" = "No se ha podido guardar el vídeo.";
+"player.action.saveTo" = "Guardar en lista de reproducción";
+"player.action.savedTo" = "Guardado en %1$@";
+"player.action.removedFrom" = "Eliminado de %1$@";
 /* Action bar: download */
 "player.action.download" = "Descargar";
 
@@ -339,6 +343,7 @@
 "library.history" = "Historial";
 "library.downloads" = "Descargas";
 "library.playlists" = "Listas";
+"library.playlists.favorites" = "Favoritos";
 "library.downloads.comingSoon" = "Las descargas estarán disponibles pronto";
 "library.history.signIn" = "Inicia sesión para ver tu historial";
 "library.history.empty" = "No se encontró historial";
@@ -361,6 +366,7 @@
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "Cuenta";
 "account.signIn" = "Iniciar sesión";
+"account.myChannel" = "Mi canal";
 "account.signOut" = "Cerrar sesión";
 "account.notSignedIn" = "No has iniciado sesión";
 

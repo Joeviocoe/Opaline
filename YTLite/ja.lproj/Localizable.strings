@@ -79,6 +79,10 @@
 "player.action.share" = "共有";
 /* Action bar: save to playlist */
 "player.action.save" = "保存";
+"player.action.saveFailed" = "動画を保存できませんでした。";
+"player.action.saveTo" = "再生リストに保存";
+"player.action.savedTo" = "「%1$@」に保存しました";
+"player.action.removedFrom" = "「%1$@」から削除しました";
 /* Action bar: download */
 "player.action.download" = "ダウンロード";
 
@@ -343,6 +347,7 @@
 "library.history" = "履歴";
 "library.downloads" = "ダウンロード";
 "library.playlists" = "プレイリスト";
+"library.playlists.favorites" = "お気に入り";
 "library.downloads.comingSoon" = "ダウンロードは近日公開";
 "library.history.signIn" = "サインインして視聴履歴を表示";
 "library.history.empty" = "視聴履歴が見つかりません";
@@ -365,6 +370,7 @@
 /* Fallback account name when the profile has none */
 "account.fallbackName" = "アカウント";
 "account.signIn" = "サインイン";
+"account.myChannel" = "自分のチャンネル";
 "account.signOut" = "サインアウト";
 "account.notSignedIn" = "未サインイン";
 
