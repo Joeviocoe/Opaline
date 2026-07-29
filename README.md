@@ -55,6 +55,7 @@ When Google dropped support for the official YouTube app on older devices, there
 - **Search & browse** — live suggestions, recent-search history, filters (sort, upload date, type, duration), channel pages, playlists
 - **Smart home feed** — endless recommendations with category chips read from your feed's shelves
 - **Subscriptions** — follow channels with a local subscription feed
+- **Notifications** — a bell in the top bar collects app news and new-version announcements, with the full release notes in the message; system notifications are optional and everything still collects in-app if you decline
 - **Watch history** — progress indicators, synced across devices
 - **Autoplay** — automatically play the next related video
 - **Auto theme** — follows system dark mode on iOS 13+, scheduled hours on iOS 12; manual override available
@@ -145,6 +146,7 @@ Install the `.ipa` package directly:
 - **Shorts** are not natively supported — they are treated as regular videos, but can be hidden from the subscriptions feed
 - Comments are displayed as a flat read-only list
 - Offline download is not yet available
+- Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
 
 ## Localization
 
@@ -196,6 +198,10 @@ open YTLite.xcodeproj
 ```
 
 Edit `Config/Local.xcconfig` and set your own `PRODUCT_BUNDLE_IDENTIFIER`.
+`APP_MANIFEST_URL` in the same file points the update check at a release
+manifest — leave the default to follow this repository, or aim it at a file
+served from your own machine to test notifications. Release builds get the
+URL of whatever repository they are built from, written in by the workflow.
 
 Select the **YTVLite** scheme, choose your device or simulator, and build (⌘B).
 
