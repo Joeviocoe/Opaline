@@ -2,7 +2,9 @@ import UIKit
 
 /// Notification inbox — presented as a sheet, like Settings.
 final class NotificationsViewController: UIViewController {
-    private lazy var tableView = UITableView(frame: .zero, style: .plain)
+    static let editToolbarHeight: CGFloat = 44
+
+    lazy var tableView = UITableView(frame: .zero, style: .plain)
     private let bannerView = NotificationPermissionBannerView()
     private let emptyLabel: UILabel = {
         let label = UILabel()
@@ -13,17 +15,31 @@ final class NotificationsViewController: UIViewController {
         return label
     }()
 
-    private var items: [AppNotification] { AppNotificationStore.shared.notifications }
-    private lazy var markAllReadButton = UIBarButtonItem(
+    var items: [AppNotification] { AppNotificationStore.shared.notifications }
+    lazy var editButton = UIBarButtonItem(
+        title: "common.edit".localized,
+        style: .plain,
+        target: self,
+        action: #selector(editTapped)
+    )
+    /// Bottom toolbar shown only while editing, mirroring Messages.app.
+    lazy var editToolbar = UIToolbar()
+    lazy var markAllReadToolbarItem = UIBarButtonItem(
         title: "notifications.markAllRead".localized,
         style: .plain,
         target: self,
         action: #selector(markAllReadTapped)
     )
+    lazy var deleteToolbarItem = UIBarButtonItem(
+        title: "common.delete".localized,
+        style: .plain,
+        target: self,
+        action: #selector(deleteSelectedTapped)
+    )
     /// Set right before a local `deleteRows` animation so the async
     /// `didChangeNotification` it triggers doesn't also fire a full
     /// `reloadData`, which would crash fighting the in-flight row animation.
-    private var suppressNextReload = false
+    var suppressNextReload = false
 
     /// Wraps the inbox in the shared sheet presentation, so other call
     /// sites (bell button, notification taps) can reuse the same chrome.
@@ -48,9 +64,10 @@ final class NotificationsViewController: UIViewController {
             target: self,
             action: #selector(dismissTapped)
         )
-        navigationItem.leftBarButtonItem = markAllReadButton
+        navigationItem.leftBarButtonItem = editButton
         bannerView.onEnable = { [weak self] in self?.handleEnableTapped() }
         setupTableView()
+        setupEditToolbar()
         applyTheme()
         NotificationCenter.default.addObserver(
             self,
@@ -108,6 +125,7 @@ final class NotificationsViewController: UIViewController {
         tableView.separatorColor = theme.separator
         emptyLabel.textColor = theme.secondaryText
         bannerView.applyTheme()
+        applyEditToolbarTheme()
         reload()
     }
 
@@ -119,12 +137,7 @@ final class NotificationsViewController: UIViewController {
         }
         tableView.reloadData()
         updateEmptyState()
-        markAllReadButton.isEnabled = AppNotificationStore.shared.unreadCount > 0
-    }
-
-    @objc
-    private func markAllReadTapped() {
-        AppNotificationStore.shared.markAllRead()
+        updateToolbarButtonsState()
     }
 
     @objc
@@ -212,6 +225,11 @@ extension NotificationsViewController: UITableViewDataSource, UITableViewDelegat
         cell.detailTextLabel?.text = DateFormatter.notificationsDisplay.string(from: item.date)
         cell.detailTextLabel?.textColor = theme.secondaryText
         cell.backgroundColor = theme.surface
+        // The default selection grey is near-white and blows out the text on
+        // the dark theme; a tint of the text colour works in both.
+        let selected = UIView()
+        selected.backgroundColor = theme.primaryText.withAlphaComponent(0.1)
+        cell.selectedBackgroundView = selected
         cell.accessoryType = .disclosureIndicator
         return cell
     }
@@ -232,10 +250,14 @@ extension NotificationsViewController: UITableViewDataSource, UITableViewDelegat
         AppNotificationStore.shared.remove(id: items[indexPath.row].id)
         tableView.deleteRows(at: [indexPath], with: .automatic)
         updateEmptyState()
-        markAllReadButton.isEnabled = AppNotificationStore.shared.unreadCount > 0
+        updateToolbarButtonsState()
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !tableView.isEditing else {
+            updateToolbarButtonsState()
+            return
+        }
         tableView.deselectRow(at: indexPath, animated: true)
         let item = items[indexPath.row]
         AppNotificationStore.shared.markRead(id: item.id)
@@ -243,6 +265,13 @@ extension NotificationsViewController: UITableViewDataSource, UITableViewDelegat
             NotificationDetailViewController(item: item),
             animated: true
         )
+    }
+
+    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+        guard tableView.isEditing else {
+            return
+        }
+        updateToolbarButtonsState()
     }
 }
 
