@@ -115,12 +115,19 @@ extension VideoPlayerView {
         if #available(iOS 14.2, *) {
             return
         }
+        // The layer's readiness matters as much as the controller's: starting
+        // before the first frame is drawn opens a window that stays black with
+        // sound behind it (#31). Background audio takes over instead — the
+        // same fallback as when PiP is unavailable altogether.
         guard isAutoPiPEnabled, wasPlayingOnResign, !isScreenLocked,
+              playerLayer.isReadyForDisplay,
               pipController?.isPictureInPicturePossible == true
         else {
+            pipTrace("auto: skipped")
             return
         }
         pipIsStarting = true
+        pipTrace("auto: starting")
         pipController?.startPictureInPicture()
     }
 
@@ -200,6 +207,7 @@ extension VideoPlayerView {
 
     @objc
     func pipTapped() {
+        pipTrace("tap")
         if pipController?.isPictureInPictureActive == true {
             pipController?.stopPictureInPicture()
             return
@@ -223,7 +231,7 @@ extension VideoPlayerView {
             return
         }
         guard attempt < 60 else {
-            AppLog.player("PiP: gave up waiting for a usable controller")
+            pipTrace("wait: gave up")
             return
         }
         // `isPictureInPicturePossible` turns true before the rebuilt layer has
@@ -236,64 +244,5 @@ extension VideoPlayerView {
             return
         }
         pip.startPictureInPicture()
-    }
-}
-
-// MARK: - PiP Delegate
-
-extension VideoPlayerView: AVPictureInPictureControllerDelegate {
-    func pictureInPictureControllerWillStartPictureInPicture(
-        _ controller: AVPictureInPictureController
-    ) {
-        pipIsStarting = true
-        pipButton.setImage(
-            PlayerIcons.pipExit(),
-            for: .normal
-        )
-    }
-
-    func pictureInPictureControllerDidStartPictureInPicture(
-        _ controller: AVPictureInPictureController
-    ) {
-        pipIsStarting = false
-    }
-
-    func pictureInPictureControllerDidStopPictureInPicture(
-        _ controller: AVPictureInPictureController
-    ) {
-        pipIsStarting = false
-        // AVKit pauses on the way out of PiP; restore what was playing.
-        if wasPlayingOnResign, let player, player.rate == 0 {
-            player.play()
-        }
-        pipButton.setImage(
-            PlayerIcons.pip(),
-            for: .normal
-        )
-    }
-
-    func pictureInPictureController(
-        _ controller: AVPictureInPictureController,
-        failedToStartPictureInPictureWithError error: Error
-    ) {
-        AppLog.player("PiP failed to start: \(error)")
-        pipIsStarting = false
-    }
-
-    func pictureInPictureController(
-        _ controller: AVPictureInPictureController,
-        restoreUserInterfaceForPictureInPictureStopWithCompletionHandler
-            completionHandler: @escaping (Bool) -> Void
-    ) {
-        // This callback means "put your own player UI back": expand the panel
-        // so AVKit hands the picture to a layer that is actually on screen —
-        // restoring into a collapsed panel flashes the whole app black.
-        // Handing it to a layer without a player stops playback outright.
-        wasPlayingOnResign = (player?.rate ?? 0) > 0
-        VideoRouter.shared.expandPanel()
-        if playerLayer.player == nil {
-            playerLayer.player = player
-        }
-        completionHandler(true)
     }
 }
