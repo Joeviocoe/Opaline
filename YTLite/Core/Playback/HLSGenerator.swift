@@ -206,6 +206,24 @@ enum HLSGenerator {
         return lines.joined(separator: "\n") + "\n"
     }
 
+    /// `BANDWIDTH` must be an upper bound on every segment's rate, audio
+    /// rendition included — YouTube's `bitrate` is the video average, so VBR
+    /// peaks overshoot it and AVPlayer logs -12318 ("Segment exceeds specified
+    /// bandwidth for variant"). SIDX gives us each segment's real size, so take
+    /// the actual peak instead of guessing a headroom factor.
+    static func peakBitrate(
+        _ segments: [SidxSegment],
+        fallback: Int
+    ) -> Int {
+        let peak = segments.reduce(0) { best, segment in
+            guard segment.duration > 0 else {
+                return best
+            }
+            return max(best, Int(Double(segment.size) * 8 / segment.duration))
+        }
+        return peak > 0 ? peak : fallback
+    }
+
     // MARK: - Helpers
 
     private static func readBigUInt16(

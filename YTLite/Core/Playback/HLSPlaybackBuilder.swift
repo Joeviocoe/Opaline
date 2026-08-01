@@ -229,7 +229,12 @@ private extension HLSPlaybackBuilder {
             videoSegments: videoSegments,
             audioSegments: audioSegments
         )
-        registerMainPlaylists(on: loader, input: input)
+        registerMainPlaylists(
+            on: loader,
+            input: input,
+            videoSegments: videoSegments,
+            audioSegments: audioSegments
+        )
         return loader
     }
 
@@ -259,7 +264,9 @@ private extension HLSPlaybackBuilder {
 
     static func registerMainPlaylists(
         on loader: HLSPlaylistLoader,
-        input: BuildInput
+        input: BuildInput,
+        videoSegments: [SidxSegment],
+        audioSegments: [SidxSegment]
     ) {
         let vidFmt = input.videoFormat
         let audFmt = input.audioFormat
@@ -271,8 +278,10 @@ private extension HLSPlaybackBuilder {
         let codecs = "\(vidFmt.codecs),\(audFmt.codecs)"
         let width = vidFmt.width ?? 1_280
         let height = vidFmt.height ?? 720
+        let audioPeak = HLSGenerator.peakBitrate(audioSegments, fallback: audFmt.bitrate)
         let mainPl = HLSGenerator.mainPlaylist(
-            bandwidth: vidFmt.bitrate,
+            bandwidth: HLSGenerator.peakBitrate(videoSegments, fallback: vidFmt.bitrate)
+                + audioPeak,
             codecs: codecs,
             resolution: "\(width)x\(height)",
             uris: uris
@@ -280,7 +289,7 @@ private extension HLSPlaybackBuilder {
         loader.register(path: "master.m3u8", content: mainPl)
         let audioOnlyPl = HLSGenerator.audioOnlyMainPlaylist(
             audioCodecs: audFmt.codecs,
-            audioBandwidth: audFmt.bitrate,
+            audioBandwidth: audioPeak,
             audioPlaylistURI: uris.audio
         )
         loader.register(
