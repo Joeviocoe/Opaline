@@ -107,7 +107,7 @@ YTLite runs on devices with **iOS 12 and above**.
 
 Add the YTLite source to your sideloading app to receive automatic updates:
 
-<a href="https://stikstore.app/altdirect/?url=https://raw.githubusercontent.com/verback2308/YTLite/main/source/apps.json"><img src="https://github.com/StikStore/altdirect/raw/main/assets/png/AltSource_Blue.png" height="55" alt="Add Source"></a>
+<a href="https://stikstore.app/altdirect/?url=https://repo.verback2308.pp.ua/apps.json"><img src="https://github.com/StikStore/altdirect/raw/main/assets/png/AltSource_Blue.png" height="55" alt="Add Source"></a>
 
 **Option 2 — Manual install**
 
@@ -129,7 +129,7 @@ cp Config/Local.xcconfig.example Config/Local.xcconfig
 Add the repo to your package manager to install YTLite and receive automatic updates:
 
 ```
-https://verback2308.github.io/ytlite/
+https://repo.verback2308.pp.ua/
 ```
 
 Rootful (`iphoneos-arm`) and rootless (`iphoneos-arm64`) packages are provided; Sileo, Zebra and Cydia are supported. Every released version stays available in the repo, so you can also install or roll back to an older one (Sileo/Zebra: package page → version list). If you previously installed the IPA via AppSync, uninstall it before installing from the repo.

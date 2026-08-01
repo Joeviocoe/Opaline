@@ -44,8 +44,17 @@ jobs:
           # feed, so a fork ships with its own without editing anything.
           # `//` starts a comment in xcconfig — hence the `$()` splits.
           sed -i '' '/^APP_MANIFEST_URL/d' Config/Local.xcconfig
-          printf 'APP_MANIFEST_URL = https:/$()/raw.githubusercontent.com/%s/main/source/apps.json\n' \
-            "$GITHUB_REPOSITORY" >> Config/Local.xcconfig
+          if [ "${GITHUB_REPOSITORY%%/*}" = "verback2308" ]; then
+            # Upstream polls its own domain: the URL is baked into every
+            # shipped binary and can never be changed afterwards, so it must
+            # survive a repo rename or a move off GitHub. Matched on the owner,
+            # not the full name, so it keeps holding after a rename.
+            printf 'APP_MANIFEST_URL = https:/$()/repo.verback2308.pp.ua/apps.json\n' \
+              >> Config/Local.xcconfig
+          else
+            printf 'APP_MANIFEST_URL = https:/$()/raw.githubusercontent.com/%s/main/source/apps.json\n' \
+              "$GITHUB_REPOSITORY" >> Config/Local.xcconfig
+          fi
           cat Config/Local.xcconfig
 
       - name: Compute release version

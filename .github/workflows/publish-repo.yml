@@ -6,10 +6,13 @@ name: Publish Cydia/Sileo repo
 # GitHub Pages, so jailbroken devices see the update in Sileo/Zebra/Cydia and
 # can install any released version, not just the latest.
 #
-# One-time setup: repo Settings → Pages → Source: "GitHub Actions".
-# Repo URL for package managers: https://verback2308.github.io/ytlite/
-# (all-lowercase on purpose: Sileo/Cydia lowercase entered URLs and GitHub
-# Pages paths are case-sensitive — hence the lowercase repository name).
+# One-time setup: repo Settings → Pages → Source: "GitHub Actions", and
+# Settings → Pages → Custom domain: repo.verback2308.pp.ua (DNS: CNAME →
+# verback2308.github.io).
+# Repo URL for package managers: https://repo.verback2308.pp.ua/
+# The old https://verback2308.github.io/ytlite/ keeps working: once a custom
+# domain is set, GitHub 301-redirects the github.io path to the domain root,
+# so sources already added on jailbroken devices need no action.
 
 on:
   release:
@@ -69,6 +72,10 @@ jobs:
             --screenshots screenshots/app/iphone/light \
             --changelog changelog.jsonl
           cp source/icon.png site/CydiaIcon.png
+          # The AltStore source rides along on the same site, so both install
+          # channels live under one domain.
+          cp source/apps.json site/apps.json
+          echo repo.verback2308.pp.ua > site/CNAME
 
       - name: Upload Pages artifact
         if: steps.fetch.outputs.count != '0'
