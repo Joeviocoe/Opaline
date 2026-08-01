@@ -7,7 +7,7 @@
 [![Latest release](https://img.shields.io/github/v/release/verback2308/YTLite?label=release&color=blue)](https://github.com/verback2308/YTLite/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/verback2308/YTLite/total?color=brightgreen)](https://github.com/verback2308/YTLite/releases)
 ![iOS 12+](https://img.shields.io/badge/iOS-12%2B-lightgrey?logo=apple)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 
 <br>
 
@@ -296,4 +296,4 @@ This project is for educational and personal use. It is not affiliated with, end
 
 ## License
 
-MIT
+[GNU General Public License v3.0](LICENSE) — any derivative work must also be released under GPLv3 with its full source code.
