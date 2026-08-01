@@ -12,23 +12,19 @@ extension WatchViewController {
         }
         let position = player.currentTime().seconds
         let wasPlaying = player.rate > 0
-        isRecoveringPlayback = true
-        hasSeenPlaybackError = false
-        recoveryTargetSeconds = position
         AppLog.player(
             "recoverPlayback: pos=\(position)s"
                 + " wasPlaying=\(wasPlaying)"
         )
-        DispatchQueue.main.async {
-            self.updateStatusLabel("player.status.refreshing".localized)
-        }
         let token = CancellationToken()
         pageLoadToken = token
-        playbackFacade.start(
-            videoId: initialVideo.id,
-            apiClient: client,
-            cancellationToken: token
-        )
+        guard playbackFacade.recover(cancellationToken: token) else {
+            showPlaybackError("player.error.playback".localized)
+            return
+        }
+        isRecoveringPlayback = true
+        hasSeenPlaybackError = false
+        recoveryTargetSeconds = position
     }
 
     func applyRecoverySeekIfNeeded(

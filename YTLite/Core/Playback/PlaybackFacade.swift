@@ -30,6 +30,10 @@ enum PlaybackBufferPolicy {
 /// Drives source-based playback: picks a `VideoSource` via the factory, loads
 /// it, and hands the prepared item to the `PlaybackContext` (player shell).
 final class PlaybackFacade {
+    /// Recoveries closer together than this are one failing streak; a lone
+    /// one hours later (URL expiry) starts the ladder over.
+    private static let recoveryStreakWindow: TimeInterval = 60
+
     weak var context: PlaybackContext?
     /// The active source — owns stream resolution and quality selection.
     var activeVideoSource: VideoSource?
@@ -38,6 +42,11 @@ final class PlaybackFacade {
     weak var currentApiClient: WatchService?
     /// Video that already burned its one silent bot-check retry.
     var botCheckRetriedVideoId: String?
+    /// Consecutive mid-playback recoveries, for the escalation ladder.
+    var recoveryAttempts = 0
+    /// When the last recovery started — an isolated one (URL expiry hours
+    /// later) must not count against the ladder.
+    var lastRecoveryAt: Date?
 }
 
 // MARK: - Public API
@@ -47,13 +56,13 @@ extension PlaybackFacade {
         videoId: String,
         apiClient: WatchService,
         cancellationToken: CancellationToken,
-        client: DirectPlaybackClient = .androidVR,
+        kind: VideoSourceKind = PlaybackSource.selected.sourceKind,
         statusKey: String = "player.status.resolving"
     ) {
         currentVideoId = videoId
         currentApiClient = apiClient
         let source = DefaultVideoSourceFactory(apiClient: apiClient)
-            .make(kind: PlaybackSource.selected.sourceKind)
+            .make(kind: kind)
         activeVideoSource = source
         context?.updateStatusLabel(statusKey.localized)
         source.loadPlayback(
@@ -67,6 +76,58 @@ extension PlaybackFacade {
                 }
                 self.handlePrepared(result, cancellation: cancellationToken)
             }
+        }
+    }
+
+    /// Restarts playback after a mid-playback failure (segment 403, fatal
+    /// stall). The source can't see these itself — its manifest loaded fine,
+    /// so its own load-time fallback never fires. Escalate instead: refresh
+    /// the same source once (that fixes genuine URL expiry), then rebuild on
+    /// a different client, then stop. Returns false when the budget is spent
+    /// — the shell shows the error rather than hammering the API forever.
+    func recover(cancellationToken: CancellationToken) -> Bool {
+        guard let videoId = currentVideoId,
+              let apiClient = currentApiClient else {
+            return false
+        }
+        if let last = lastRecoveryAt,
+           Date().timeIntervalSince(last) > Self.recoveryStreakWindow {
+            recoveryAttempts = 0
+        }
+        lastRecoveryAt = Date()
+        recoveryAttempts += 1
+        let selected = PlaybackSource.selected.sourceKind
+        let kind: VideoSourceKind
+        switch recoveryAttempts {
+        case 1:
+            kind = selected
+        case 2:
+            kind = escalated(from: selected)
+        default:
+            AppLog.player("recovery: retries spent, giving up")
+            return false
+        }
+        AppLog.player("recovery attempt \(recoveryAttempts) on \(kind)")
+        start(
+            videoId: videoId,
+            apiClient: apiClient,
+            cancellationToken: cancellationToken,
+            kind: kind,
+            statusKey: "player.status.refreshing"
+        )
+        return true
+    }
+
+    /// Whatever the failing stream came from, hand the next attempt to a
+    /// different client — the same one would serve the same dead URLs.
+    private func escalated(
+        from kind: VideoSourceKind
+    ) -> VideoSourceKind {
+        switch kind {
+        case .auto, .androidVR, .progressive:
+            return .mwebPot
+        case .mwebPot:
+            return .androidVR
         }
     }
 
@@ -134,5 +195,7 @@ extension PlaybackFacade {
         currentVideoId = nil
         currentApiClient = nil
         botCheckRetriedVideoId = nil
+        recoveryAttempts = 0
+        lastRecoveryAt = nil
     }
 }
