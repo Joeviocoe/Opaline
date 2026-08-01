@@ -1,6 +1,18 @@
 import UIKit
 
 extension WatchViewController {
+    static let relatedHeaderHeight: CGFloat = 32
+
+    /// One column everywhere except an iPad in portrait, which has the width
+    /// for two: the landscape sidebar is narrow, and on iPhone the related list
+    /// matches the single-column feeds on Home and Subscriptions.
+    func relatedColumns(isLandscape: Bool) -> CGFloat {
+        if isLandscape || UIDevice.current.userInterfaceIdiom != .pad {
+            return 1
+        }
+        return 2
+    }
+
     func updateLayoutForSize(_ size: CGSize? = nil) {
         // While in fullscreen the player view lives in the window, not in our
         // view hierarchy — skip layout until the user exits fullscreen.
@@ -98,7 +110,7 @@ extension WatchViewController {
         containerSize: CGSize?
     )
         -> CGSize {
-        let cols: CGFloat = isLandscape ? 1 : 2
+        let cols = relatedColumns(isLandscape: isLandscape)
         let inset = layout.sectionInset.left
             + layout.sectionInset.right
         let spacing = layout.minimumInteritemSpacing
@@ -127,9 +139,8 @@ extension WatchViewController {
         isLandscape: Bool,
         itemHeight: CGFloat
     ) {
-        let cols: CGFloat = isLandscape ? 1 : 2
+        let cols = relatedColumns(isLandscape: isLandscape)
         let si = layout.sectionInset
-        let headerHeight: CGFloat = isPlaylistMode ? 32 : 0
         let playlistCount = CGFloat(
             isPlaylistMode ? queue.videos.count : 0
         )
@@ -145,9 +156,10 @@ extension WatchViewController {
         }
         let playlistHeight = sectionHeight(playlistCount)
         let relatedHeight = sectionHeight(relatedCount)
+        // Every section carries a header now (Mix and Related both).
         let totalSections = isPlaylistMode ? 2 : 1
-        let totalHeaders = CGFloat(totalSections - 1)
-            * headerHeight
+        let totalHeaders = CGFloat(totalSections)
+            * WatchViewController.relatedHeaderHeight
         let total = playlistHeight
             + relatedHeight + totalHeaders
         let desired = isLandscape ? 0 : total
@@ -190,5 +202,43 @@ extension WatchViewController {
             rv.bottomAnchor.constraint(equalTo: sc.bottomAnchor)
         ]
         NSLayoutConstraint.activate(relatedLandscapeConstraints)
+    }
+}
+
+// MARK: - Rotation
+
+extension WatchViewController {
+    override func viewWillTransition(
+        to size: CGSize,
+        with coordinator:
+        UIViewControllerTransitionCoordinator
+    ) {
+        super.viewWillTransition(
+            to: size,
+            with: coordinator
+        )
+        coordinator.animate(
+            alongsideTransition: { [weak self] _ in
+                guard let self else {
+                    return
+                }
+                // On iPhone landscape *is* fullscreen: the rotation itself
+                // drives entering and leaving it.
+                syncFullscreenWithRotation(isLandscape: size.width > size.height)
+                // While in fullscreen the player view lives directly in the
+                // window; keep its frame in sync with the rotating window.
+                if fullscreenSnapshot != nil,
+                   let window = view.window {
+                    videoPlayerView?.frame = window.bounds
+                    videoPlayerView?.setNeedsLayout()
+                } else {
+                    updateLayoutForSize(size)
+                }
+                view.layoutIfNeeded()
+            },
+            completion: { [weak self] _ in
+                self?.updateLayoutForSize()
+            }
+        )
     }
 }

@@ -206,14 +206,15 @@ extension WatchViewController {
     }
 
     func exitFullscreenIfNeeded() {
-        guard fullscreenSnapshot != nil,
-              let playerView = videoPlayerView else {
+        guard let playerView = videoPlayerView,
+              playerView.isFullscreen else {
             return
         }
-        if isLandscapeFullscreen {
-            exitLandscapeFullscreen(playerView: playerView)
-        } else {
+        if UIDevice.current.userInterfaceIdiom == .pad {
             exitFullscreen(playerView: playerView)
+        } else {
+            // Rotating back to portrait is what leaves fullscreen on iPhone.
+            rotateInterface(to: .portrait)
         }
     }
 }

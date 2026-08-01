@@ -84,9 +84,8 @@ extension WatchViewController: UICollectionViewDataSource {
         at indexPath: IndexPath
     )
         -> UICollectionReusableView {
-        guard isPlaylistMode,
-              kind == UICollectionView
-              .elementKindSectionHeader
+        guard kind == UICollectionView
+            .elementKindSectionHeader
         else {
             return UICollectionReusableView()
         }
@@ -98,7 +97,7 @@ extension WatchViewController: UICollectionViewDataSource {
                 for: indexPath
             ) as? PlaylistSectionHeaderView
             ?? PlaylistSectionHeaderView()
-        let title: String = if indexPath.section == 0 {
+        let title: String = if isPlaylistMode, indexPath.section == 0 {
             queue.playlistTitle ?? "player.related.mix".localized
         } else {
             "player.related.title".localized
@@ -150,12 +149,9 @@ extension WatchViewController: UICollectionViewDelegateFlowLayout {
         referenceSizeForHeaderInSection section: Int
     )
         -> CGSize {
-        guard isPlaylistMode else {
-            return .zero
-        }
-        return CGSize(
+        CGSize(
             width: collectionView.bounds.width,
-            height: 32
+            height: WatchViewController.relatedHeaderHeight
         )
     }
 }

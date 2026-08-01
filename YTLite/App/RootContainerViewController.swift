@@ -16,12 +16,15 @@ final class RootContainerViewController: UIViewController {
     override var childForStatusBarHidden: UIViewController? { children.last }
     override var childForHomeIndicatorAutoHidden: UIViewController? { children.last }
 
+    // Orientation follows the same chain as the status bar: while the player
+    // panel is installed it decides, so the app can rotate into landscape
+    // fullscreen without unlocking rotation for the rest of the tabs.
     override var shouldAutorotate: Bool {
-        mainTabBar.shouldAutorotate
+        (children.last ?? mainTabBar).shouldAutorotate
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        mainTabBar.supportedInterfaceOrientations
+        (children.last ?? mainTabBar).supportedInterfaceOrientations
     }
 
     init(mainTabBar: MainTabBarController) {

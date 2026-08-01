@@ -330,9 +330,7 @@ extension WatchViewController {
     func navigateTo(_ video: Video) {
         let current = watchPage?.video ?? initialVideo
         videoHistory.append(current)
-        let inFullscreen = isLandscapeFullscreen
-            || (videoPlayerView?.isFullscreen == true)
-        loadVideoInternal(video, keepFullscreen: inFullscreen)
+        loadVideoInternal(video, keepFullscreen: isPlayerFullscreen)
         updateLeftBarButton()
     }
 

@@ -60,8 +60,8 @@ extension WatchViewController {
             name: .sourceAudioTracksDidChange,
             object: nil
         )
-        // On iPhone the interface is portrait-locked; handle landscape fullscreen
-        // by observing raw device orientation changes instead of relying on rotation.
+        // Only to release the orientation lock a fullscreen toggle took — the
+        // rotation itself is UIKit's job.
         if UIDevice.current.userInterfaceIdiom != .pad {
             UIDevice.current.beginGeneratingDeviceOrientationNotifications()
             nc.addObserver(
@@ -115,6 +115,10 @@ extension WatchViewController {
             equalTo: pc.widthAnchor,
             multiplier: 9.0 / 16.0
         )
+        // Not required: in landscape fullscreen the player lives in the window
+        // and this view keeps its portrait layout at landscape bounds, where a
+        // 16:9 player plus the scroll view below it cannot fit.
+        playerAspectConstraint?.priority = UILayoutPriority(999)
         scrollTopToPlayerConstraint = sv.topAnchor.constraint(equalTo: pc.bottomAnchor)
         sidebarTopConstraint = sc.topAnchor.constraint(equalTo: safe.topAnchor)
         // Respect right safe area so sidebar content clears the rounded corner on iPhone landscape.
@@ -362,26 +366,6 @@ extension WatchViewController {
         // same push or its first related card slides under the nav bar.
         if abs((sidebarTopConstraint?.constant ?? 0) - offset) > 0.5 {
             sidebarTopConstraint?.constant = offset
-        }
-    }
-}
-
-// MARK: - iPhone landscape rotation → auto-fullscreen
-
-extension WatchViewController {
-    @objc
-    func handleDeviceOrientationChange() {
-        let orientation = UIDevice.current.orientation
-        guard let playerView = videoPlayerView else {
-            return
-        }
-        if orientation.isLandscape, !isLandscapeFullscreen {
-            enterLandscapeFullscreen(
-                playerView: playerView,
-                orientation: orientation
-            )
-        } else if orientation == .portrait, isLandscapeFullscreen {
-            exitLandscapeFullscreen(playerView: playerView)
         }
     }
 }

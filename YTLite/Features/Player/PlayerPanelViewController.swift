@@ -58,6 +58,7 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
 
     func expand(animated: Bool) {
         isExpanded = true
+        refreshSupportedOrientations()
         refreshMiniBar()
         let animations = {
             self.view.transform = .identity
@@ -84,6 +85,7 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
 
     func collapse(animated: Bool) {
         isExpanded = false
+        refreshSupportedOrientations()
         refreshMiniBar()
         miniBar?.transform = .identity
         miniBar?.alpha = 0
@@ -337,6 +339,22 @@ extension PlayerPanelViewController {
     override var childForHomeIndicatorAutoHidden: UIViewController? {
         navigationWrapper
     }
+
+    override var shouldAutorotate: Bool {
+        isExpanded ? navigationWrapper.shouldAutorotate : false
+    }
+
+    /// Only the expanded player may rotate the app — collapsed to the mini bar
+    /// it is just an overlay over the portrait-only tabs.
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        isExpanded
+            ? navigationWrapper.supportedInterfaceOrientations
+            : .portrait
+    }
+
+    // Expanding and collapsing swaps the mask above, so both call
+    // `refreshSupportedOrientations()` — otherwise the player comes back from
+    // the mini bar deaf to rotation until the next unrelated device change.
 
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()

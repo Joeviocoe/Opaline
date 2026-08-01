@@ -27,7 +27,6 @@ private func makeLandscapeRelatedLayout() -> UICollectionViewFlowLayout {
     return layout
 }
 
-// swiftlint:disable:next type_body_length
 final class WatchViewController: UIViewController {
     // MARK: - Dependencies
 
@@ -146,9 +145,11 @@ final class WatchViewController: UIViewController {
         superview: UIView,
         frame: CGRect
     )?
-    var isLandscapeFullscreen = false
     var channelTopToMeta: NSLayoutConstraint?
     var channelTopToDesc: NSLayoutConstraint?
+    /// Pins the interface while a fullscreen toggle rotates it against the way
+    /// the device is physically held; cleared once the two agree again.
+    var orientationLock: UIInterfaceOrientationMask?
 
     // MARK: - Computed Properties
 
@@ -158,7 +159,10 @@ final class WatchViewController: UIViewController {
 
     override var supportedInterfaceOrientations:
         UIInterfaceOrientationMask {
-        .allButUpsideDown
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return .all
+        }
+        return orientationLock ?? .allButUpsideDown
     }
 
     var isPlaylistMode: Bool {
@@ -241,39 +245,6 @@ final class WatchViewController: UIViewController {
             pageLoadToken.cancel()
             videoPlayerView?.player?.pause()
         }
-    }
-
-    // MARK: - Other Methods
-
-    override func viewWillTransition(
-        to size: CGSize,
-        with coordinator:
-        UIViewControllerTransitionCoordinator
-    ) {
-        super.viewWillTransition(
-            to: size,
-            with: coordinator
-        )
-        coordinator.animate(
-            alongsideTransition: { [weak self] _ in
-                guard let self else {
-                    return
-                }
-                // While in fullscreen the player view lives directly in the
-                // window; keep its frame in sync with the rotating window.
-                if fullscreenSnapshot != nil,
-                   let window = view.window {
-                    videoPlayerView?.frame = window.bounds
-                    videoPlayerView?.setNeedsLayout()
-                } else {
-                    updateLayoutForSize(size)
-                }
-                view.layoutIfNeeded()
-            },
-            completion: { [weak self] _ in
-                self?.updateLayoutForSize()
-            }
-        )
     }
 
     // MARK: - Deinitializer

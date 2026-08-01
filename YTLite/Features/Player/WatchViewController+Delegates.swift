@@ -37,27 +37,49 @@ extension WatchViewController: VideoPlayerViewDelegate {
     }
 
     func videoPlayerViewDidTapFullscreen(_ playerView: VideoPlayerView) {
-        if playerView.isFullscreen {
-            exitFullscreen(playerView: playerView)
+        // iPad rotates freely, so fullscreen there is a plain window fill.
+        // iPhone is portrait-only outside the player: the button rotates the
+        // interface, and the rotation is what enters or leaves fullscreen.
+        guard UIDevice.current.userInterfaceIdiom != .pad else {
+            if playerView.isFullscreen {
+                exitFullscreen(playerView: playerView)
+            } else {
+                enterFullscreen(playerView: playerView)
+            }
             return
         }
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            enterFullscreen(playerView: playerView)
-        } else {
-            let orientation = UIDevice.current.orientation
-            let landscape: UIDeviceOrientation = orientation.isLandscape
-                ? orientation : .landscapeLeft
-            enterLandscapeFullscreen(
-                playerView: playerView,
-                orientation: landscape
-            )
-        }
+        rotateInterface(to: playerView.isFullscreen ? .portrait : .landscapeRight)
     }
 
-    func enterFullscreen(playerView: VideoPlayerView) {
+    func enterFullscreen(playerView: VideoPlayerView, animated: Bool = true) {
         guard let window = view.window else {
             return
         }
+        detachPlayerToWindow(playerView, window: window)
+        setNeedsStatusBarAppearanceUpdate()
+        setNeedsUpdateOfHomeIndicatorAutoHidden()
+        guard animated else {
+            playerView.frame = window.bounds
+            playerView.applyAutoZoomIfNeeded()
+            return
+        }
+        UIView.animate(
+            withDuration: 0.25,
+            delay: 0,
+            options: .curveEaseInOut,
+            animations: {
+                playerView.frame = window.bounds
+            },
+            completion: { _ in
+                playerView.applyAutoZoomIfNeeded()
+            }
+        )
+    }
+
+    private func detachPlayerToWindow(
+        _ playerView: VideoPlayerView,
+        window: UIWindow
+    ) {
         let frameInWindow = playerView.convert(
             playerView.bounds, to: window
         )
@@ -73,27 +95,18 @@ extension WatchViewController: VideoPlayerViewDelegate {
         playerView.frame = frameInWindow
         window.addSubview(playerView)
         playerView.isFullscreen = true
-        setNeedsStatusBarAppearanceUpdate()
-        setNeedsUpdateOfHomeIndicatorAutoHidden()
-        UIView.animate(
-            withDuration: 0.25,
-            delay: 0,
-            options: .curveEaseInOut,
-            animations: {
-                playerView.frame = window.bounds
-            },
-            completion: { _ in
-                playerView.applyAutoZoomIfNeeded()
-            }
-        )
     }
 
-    func exitFullscreen(playerView: VideoPlayerView) {
+    func exitFullscreen(playerView: VideoPlayerView, animated: Bool = true) {
         guard let window = view.window,
               let snap = fullscreenSnapshot else {
             return
         }
         let target = snap.superview.convert(snap.frame, to: window)
+        guard animated else {
+            restoreFromFullscreen(playerView: playerView, snapshot: snap)
+            return
+        }
         UIView.animate(
             withDuration: 0.25,
             delay: 0,
@@ -124,7 +137,6 @@ extension WatchViewController: VideoPlayerViewDelegate {
             playerView.bottomAnchor.constraint(equalTo: sv.bottomAnchor)
         ])
         playerView.isFullscreen = false
-        isLandscapeFullscreen = false
         fullscreenSnapshot = nil
         setNeedsStatusBarAppearanceUpdate()
         setNeedsUpdateOfHomeIndicatorAutoHidden()
@@ -141,10 +153,8 @@ extension WatchViewController {
         ) as? Bool ?? true
     }
 
-    /// Fullscreen via either path — iPhone transform-based landscape or the
-    /// iPad window-fill (`enterFullscreen`).
     var isPlayerFullscreen: Bool {
-        isLandscapeFullscreen || videoPlayerView?.isFullscreen == true
+        videoPlayerView?.isFullscreen == true
     }
 
     override var prefersStatusBarHidden: Bool {
@@ -163,86 +173,75 @@ extension WatchViewController {
     }
 }
 
-// MARK: - iPhone landscape fullscreen (no UI rotation)
+// MARK: - iPhone rotation-driven fullscreen
+
 extension WatchViewController {
-    func enterLandscapeFullscreen(
-        playerView: VideoPlayerView,
-        orientation: UIDeviceOrientation
-    ) {
-        guard let window = view.window else {
-            return
-        }
-        let frameInWindow = playerView.convert(playerView.bounds, to: window)
-        if fullscreenSnapshot == nil {
-            fullscreenSnapshot = (
-                superview: playerView.superview ?? view,
-                frame: playerView.frame
+    /// Rotates the whole interface, so the home indicator, notification and
+    /// Control Center edges follow the video — a transform inside a portrait
+    /// window leaves the system believing the phone is upright.
+    func rotateInterface(to orientation: UIInterfaceOrientation) {
+        // Read the physical orientation first: the KVC write below overwrites
+        // it with the one we are asking for.
+        let device = UIDevice.current.orientation
+        let mask: UIInterfaceOrientationMask =
+            orientation.isLandscape ? .landscape : .portrait
+        orientationLock = mask
+        refreshSupportedOrientations()
+        if #available(iOS 16.0, *) {
+            view.window?.windowScene?.requestGeometryUpdate(
+                .iOS(interfaceOrientations: mask)
             )
+        } else {
+            // KVC on `orientation` is the only pre-iOS 16 way to rotate on demand.
+            UIDevice.current.setValue(orientation.rawValue, forKey: "orientation")
         }
-        isLandscapeFullscreen = true
-        setNeedsStatusBarAppearanceUpdate()
-        setNeedsUpdateOfHomeIndicatorAutoHidden()
-        playerView.removeFromSuperview()
-        playerView.translatesAutoresizingMaskIntoConstraints = true
-        playerView.autoresizingMask = []
-        playerView.frame = frameInWindow
-        window.addSubview(playerView)
-        playerView.isFullscreen = true
-        // Rotate clockwise for landscapeLeft, counterclockwise for landscapeRight,
-        // so the video appears right-side-up from the user's perspective.
-        let angle: CGFloat = orientation == .landscapeLeft ? .pi / 2 : -.pi / 2
-        animateLandscapeEntry(playerView: playerView, window: window, angle: angle)
+        // The phone may already be held the way we just rotated to — then no
+        // orientation notification is coming and the lock would never lift.
+        releaseOrientationLock(ifDeviceIs: device)
     }
 
-    private func animateLandscapeEntry(
-        playerView: VideoPlayerView,
-        window: UIWindow,
-        angle: CGFloat
-    ) {
-        let width = window.bounds.width
-        let height = window.bounds.height
-        UIView.animate(
-            withDuration: 0.25,
-            delay: 0,
-            options: .curveEaseInOut,
-            animations: {
-                playerView.transform = CGAffineTransform(rotationAngle: angle)
-                playerView.bounds = CGRect(x: 0, y: 0, width: height, height: width)
-                playerView.center = CGPoint(x: width / 2, y: height / 2)
-            },
-            completion: { _ in
-                playerView.applyAutoZoomIfNeeded()
-            }
-        )
-    }
-
-    func exitLandscapeFullscreen(playerView: VideoPlayerView) {
-        guard let window = view.window,
-              let snap = fullscreenSnapshot else {
+    /// Landscape *is* fullscreen on iPhone, so the rotation drives the state.
+    /// Called from inside the rotation transition — the transition animates it.
+    func syncFullscreenWithRotation(isLandscape: Bool) {
+        guard UIDevice.current.userInterfaceIdiom != .pad,
+              let playerView = videoPlayerView,
+              playerView.isFullscreen != isLandscape else {
             return
         }
-        isLandscapeFullscreen = false
-        setNeedsStatusBarAppearanceUpdate()
-        setNeedsUpdateOfHomeIndicatorAutoHidden()
-        let target = snap.superview.convert(snap.frame, to: window)
-        UIView.animate(
-            withDuration: 0.25,
-            delay: 0,
-            options: .curveEaseInOut,
-            animations: {
-                playerView.transform = .identity
-                playerView.bounds = CGRect(
-                    origin: .zero,
-                    size: target.size
-                )
-                playerView.center = CGPoint(
-                    x: target.midX,
-                    y: target.midY
-                )
-            },
-            completion: { [weak self] _ in
-                self?.restoreFromFullscreen(playerView: playerView, snapshot: snap)
-            }
-        )
+        if isLandscape {
+            enterFullscreen(playerView: playerView, animated: false)
+        } else {
+            exitFullscreen(playerView: playerView, animated: false)
+        }
+    }
+
+    /// Releases the lock taken by `rotateInterface`, so autorotation resumes.
+    ///
+    /// The lock exists only to stop UIKit snapping straight back to the way the
+    /// phone is physically held, so it lasts exactly as long as that conflict:
+    /// tap fullscreen while upright and the interface stays landscape until the
+    /// phone moves, then the next return to portrait leaves fullscreen.
+    @objc
+    func handleDeviceOrientationChange() {
+        releaseOrientationLock(ifDeviceIs: UIDevice.current.orientation)
+    }
+
+    private func releaseOrientationLock(ifDeviceIs device: UIDeviceOrientation) {
+        guard let lock = orientationLock else {
+            return
+        }
+        // Only a real orientation frees a landscape lock. `.faceUp` is one nudge
+        // away whenever the phone is held tilted, and treating it as "left
+        // portrait" drops out of fullscreen on a 1.5° wobble.
+        let released = lock == .landscape
+            ? device.isLandscape || device == .portraitUpsideDown
+            : !device.isLandscape
+        guard released else {
+            return
+        }
+        orientationLock = nil
+        // Widening the mask back is invisible to UIKit until it re-reads it —
+        // without this the interface stays pinned to what the lock allowed.
+        refreshSupportedOrientations()
     }
 }
