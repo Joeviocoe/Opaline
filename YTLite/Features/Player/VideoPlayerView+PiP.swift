@@ -22,20 +22,17 @@ extension VideoPlayerView {
         ) as? Bool ?? true
     }
 
-    /// The screen went dark, i.e. the device is locking rather than switching
-    /// to another app — PiP cannot take over behind the lock screen, so
-    /// background audio wins. iOS exposes no lock state at all, and this
-    /// heuristic would fail on an always-on display; that is safe here
-    /// because only `startAutoPiPIfNeeded()` consults it, and that runs
-    /// solely below iOS 14.2 — long before always-on hardware existed.
-    private var isScreenLocked: Bool {
-        UIScreen.main.brightness == 0
-    }
-
     /// Whether the system will start PiP by itself during the background
-    /// transition — the layer must keep its player for that to work. Before
-    /// iOS 14.2 there is no such automatism; `startAutoPiPIfNeeded()` covers
-    /// those versions and the detach then keys off `isPiPActive` instead.
+    /// transition — the layer must keep its player for that to work.
+    ///
+    /// AVKit has always done this for fullscreen playback;
+    /// `canStartPictureInPictureAutomaticallyFromInline` (iOS 14.2) is what
+    /// extends it to inline. Below that, inline gets background audio and the
+    /// PiP button — starting PiP by hand is not an option, because the last
+    /// callback before the transition is `willResignActive`, which Control
+    /// Center and the notification shade raise just as loudly, and a start
+    /// issued once the app is in the background is swallowed by AVKit without
+    /// even a `failedToStart`.
     private var willAutoPiP: Bool {
         guard isAutoPiPEnabled, isPiPAvailable else {
             return false
@@ -43,7 +40,7 @@ extension VideoPlayerView {
         if #available(iOS 14.2, *) {
             return true
         }
-        return false
+        return isFullscreen
     }
 
     /// Hands the current item to a replacement player and re-points every
@@ -104,31 +101,6 @@ extension VideoPlayerView {
         if #available(iOS 15.0, *), !isAutoPiPEnabled {
             pipController = nil
         }
-        startAutoPiPIfNeeded()
-    }
-
-    /// Before iOS 14.2 nothing starts PiP automatically, so it is started by
-    /// hand — here rather than in `appDidEnterBackground`, because AVKit only
-    /// accepts a start while the app is still foreground-active and rejects
-    /// anything later with AVKitErrorDomain -1001.
-    private func startAutoPiPIfNeeded() {
-        if #available(iOS 14.2, *) {
-            return
-        }
-        // The layer's readiness matters as much as the controller's: starting
-        // before the first frame is drawn opens a window that stays black with
-        // sound behind it (#31). Background audio takes over instead — the
-        // same fallback as when PiP is unavailable altogether.
-        guard isAutoPiPEnabled, wasPlayingOnResign, !isScreenLocked,
-              playerLayer.isReadyForDisplay,
-              pipController?.isPictureInPicturePossible == true
-        else {
-            pipTrace("auto: skipped")
-            return
-        }
-        pipIsStarting = true
-        pipTrace("auto: starting")
-        pipController?.startPictureInPicture()
     }
 
     /// A real backgrounding: detach the layer (a layer-backed player is paused
@@ -149,14 +121,29 @@ extension VideoPlayerView {
         }
     }
 
-    private func enterBackgroundAudioMode() {
+    private func enterBackgroundAudioMode(force: Bool = false) {
         // iOS 15+ keeps background audio alive through
         // `audiovisualBackgroundPlaybackPolicy`, so the layer never has to
         // give up its player — and PiP survives, lock screen included.
         if #available(iOS 15.0, *) {
             return
         }
-        guard !isPiPActive, !willAutoPiP else {
+        guard !isPiPActive else {
+            return
+        }
+        // Waiting on the system's own auto-PiP: the layer has to keep its
+        // player for that, so the audio fallback is held back until AVKit has
+        // had its chance. It gets one second — a layer-backed player that is
+        // neither in PiP nor detached is paused by iOS soon after (#31).
+        if willAutoPiP, !force {
+            pipTrace("auto: waiting for the system")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                guard let self, !self.isPiPActive else {
+                    return
+                }
+                self.pipTrace("auto: system did not start, audio only")
+                self.enterBackgroundAudioMode(force: true)
+            }
             return
         }
         playerLayer.player = nil
