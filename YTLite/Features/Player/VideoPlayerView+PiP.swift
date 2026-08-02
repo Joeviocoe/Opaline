@@ -23,6 +23,16 @@ extension VideoPlayerView {
         ) as? Bool ?? true
     }
 
+    /// The screen went dark, i.e. the device is locking rather than switching
+    /// to another app. PiP cannot take over behind the lock screen, so waiting
+    /// for it there only stalls the sound for a second before the audio
+    /// fallback runs anyway. iOS exposes no lock state at all; this heuristic
+    /// would misfire on an always-on display, which is safe because only the
+    /// pre-iOS 15 path consults it.
+    private var isScreenLocked: Bool {
+        UIScreen.main.brightness == 0
+    }
+
     /// Whether the system will start PiP by itself during the background
     /// transition — the layer must keep its player for that to work.
     ///
@@ -57,6 +67,12 @@ extension VideoPlayerView {
         addPlayerObservers()
         setupPiP()
         updatePlayPauseIcon()
+        // A PiP request that arrived before the swap waited for exactly this:
+        // starting against the old, poisoned player fails with -1001.
+        if pipStartPending {
+            pipStartPending = false
+            startPiPWhenPossible()
+        }
     }
 
     /// With the setting off no controller is built at all, and that is the
@@ -140,7 +156,7 @@ extension VideoPlayerView {
         // player for that, so the audio fallback is held back until AVKit has
         // had its chance. It gets one second — a layer-backed player that is
         // neither in PiP nor detached is paused by iOS soon after (#31).
-        if willAutoPiP, !force {
+        if willAutoPiP, !force, !isScreenLocked {
             pipTrace("auto: waiting for the system")
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                 guard let self, !self.isPiPActive else {
@@ -177,24 +193,6 @@ extension VideoPlayerView {
         }
         // Re-evaluate the PiP setting (it may have changed in Settings).
         setupPiP()
-        rebuildPlayerIfPoisoned()
-    }
-
-    /// The background detach costs this player its ability to enter PiP on
-    /// iOS 12, so it is swapped out here rather than at the moment PiP is
-    /// asked for — a fresh controller needs a beat to report itself usable.
-    private func rebuildPlayerIfPoisoned() {
-        // Matches the detach in `enterBackgroundAudioMode()`: everything below
-        // iOS 15 still loses its layer to keep audio alive, and thus needs the
-        // swap — including 14.2–14.x, where auto-PiP already works.
-        if #available(iOS 15.0, *) {
-            return
-        }
-        guard playerNeedsRebuildForPiP, !isPiPActive, isAutoPiPEnabled else {
-            return
-        }
-        playerNeedsRebuildForPiP = false
-        onNeedsFreshPlayer?()
     }
 
     @objc
@@ -204,12 +202,16 @@ extension VideoPlayerView {
             pipController?.stopPictureInPicture()
             return
         }
-        // With auto-PiP off nothing rebuilds the player on foregrounding, so
-        // a background-audio session leaves it unable to enter PiP. Pay that
-        // cost here instead — only when PiP is actually asked for.
+        // Below iOS 15 a background-audio session costs the player its ability
+        // to enter PiP (the layer had to give it up), and only a fresh player
+        // wins it back. That rebuild flashes the picture and rewinds a couple
+        // of seconds, so it is paid here — once, by whoever actually asks for
+        // PiP — instead of on every return from the background.
         if playerNeedsRebuildForPiP {
             playerNeedsRebuildForPiP = false
+            pipStartPending = true
             onNeedsFreshPlayer?()
+            return
         }
         startPiPWhenPossible()
     }
@@ -218,7 +220,7 @@ extension VideoPlayerView {
     /// that wait covers the fresh item's buffering — hence the generous
     /// budget. Polling because `isPictureInPicturePossible` is not KVO-safe
     /// to observe from an extension without extra stored state.
-    private func startPiPWhenPossible(attempt: Int = 0) {
+    func startPiPWhenPossible(attempt: Int = 0) {
         guard let pip = pipController, !pip.isPictureInPictureActive else {
             return
         }
@@ -229,7 +231,12 @@ extension VideoPlayerView {
         // `isPictureInPicturePossible` turns true before the rebuilt layer has
         // drawn its first frame, and a start in that window is swallowed
         // without a single delegate callback — wait for the picture as well.
-        guard pip.isPictureInPicturePossible, playerLayer.isReadyForDisplay else {
+        // `isReadyForDisplay` alone is not enough right after a player swap:
+        // it still reports the frame of the *previous* item, so the start goes
+        // out against an item that cannot serve it yet and fails with -1001.
+        guard pip.isPictureInPicturePossible, playerLayer.isReadyForDisplay,
+              player?.currentItem?.status == .readyToPlay
+        else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
                 self?.startPiPWhenPossible(attempt: attempt + 1)
             }

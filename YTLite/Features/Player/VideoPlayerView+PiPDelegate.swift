@@ -52,6 +52,14 @@ extension VideoPlayerView: AVPictureInPictureControllerDelegate {
         AppLog.player("PiP failed to start: \(error)")
         pipTrace("delegate: failedToStart")
         pipIsStarting = false
+        // AVKit reports readiness it cannot honour yet, so a start can still
+        // land a moment too early. Only a start the user asked for is retried,
+        // and only while the app is on screen: a retry from a background
+        // auto-start would pop a window up on the way back instead.
+        guard UIApplication.shared.applicationState == .active else {
+            return
+        }
+        startPiPWhenPossible(attempt: 50)
     }
 
     func pictureInPictureController(

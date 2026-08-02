@@ -216,7 +216,7 @@ final class VideoPlayerView: UIView {
     var timeObserver: Any?
     var hideWorkItem: DispatchWorkItem?, bufferingIndicatorWork: DispatchWorkItem?
     var controlsVisible = false
-    var wasPlayingOnResign = false
+    var wasPlayingOnResign = false, pipStartPending = false
     let multitaskPause = MultitaskPauseState()
     var pipIsStarting = false, playerNeedsRebuildForPiP = false, pipIsRestoring = false
     var duration: Double = 0

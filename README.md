@@ -149,6 +149,7 @@ Install the `.ipa` package directly:
 - Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
 - **Picture in Picture is limited by the system before iOS 15**, and no app can work around it: the window survives exactly one video, and switching to another one closes it and leaves audio playing — [the full findings are in issue #31](https://github.com/verback2308/ytlite/issues/31#issuecomment-5148224679)
   - Before iOS 14.2 the system only starts PiP by itself from **fullscreen**. Leaving the app while the video plays inline gives background audio instead — the PiP button works in both cases
+  - Before iOS 15 background audio requires the player to give up its video layer, and the system then refuses to open PiP for that video at all. So once a video has played in the background, automatic PiP no longer starts for it — the PiP button still does, and the next video starts clean
   - On a **jailbroken device** PiP may not start at all — confirmed on an iPad mini 2 running iOS 12.5.8 with Chimera, and likely the same on checkra1n. The jailbreak denies it, not the app; installing [ForceInPicture](https://github.com/PoomSmart/ForceInPicture) restores it
 
 ## Localization
