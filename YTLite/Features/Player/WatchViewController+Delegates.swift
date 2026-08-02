@@ -6,34 +6,52 @@ extension WatchViewController: VideoPlayerViewDelegate {
     func videoPlayerViewDidTapSettings(
         _ playerView: VideoPlayerView
     ) {
+        presentPlayerMenu(
+            title: "player.menu.settings".localized,
+            items: playbackSettingsItems()
+        )
+    }
+
+    private func menuItem(
+        _ title: String,
+        action: @escaping (WatchViewController) -> Void
+    ) -> PlayerMenuItem {
+        PlayerMenuItem(title: title) { [weak self] in
+            guard let self else {
+                return
+            }
+            action(self)
+        }
+    }
+
+    private func playbackSettingsItems() -> [PlayerMenuItem] {
         let stats = "player.menu.stats".localized
         var items = [
-            PlayerMenuItem(
-                title: "player.menu.quality".localized
-            ) { [weak self] in
-                self?.showQualityPicker()
+            menuItem("player.menu.quality".localized) {
+                $0.showQualityPicker()
             }
         ]
         if playbackFacade.activeVideoSource?
             .supportsAudioTrackSelection == true {
             items.append(
-                PlayerMenuItem(
-                    title: "player.menu.audioTrack".localized
-                ) { [weak self] in
-                    self?.showAudioTrackPicker()
+                menuItem("player.menu.audioTrack".localized) {
+                    $0.showAudioTrackPicker()
+                }
+            )
+        }
+        if !queue.videos.isEmpty {
+            items.append(
+                menuItem("player.menu.queue".localized) {
+                    $0.showQueue()
                 }
             )
         }
         items.append(
-            PlayerMenuItem(
-                title: statsOverlay != nil ? "✓ \(stats)" : stats
-            ) { [weak self] in
-                self?.toggleStatsOverlay()
+            menuItem(statsOverlay != nil ? "✓ \(stats)" : stats) {
+                $0.toggleStatsOverlay()
             }
         )
-        presentPlayerMenu(
-            title: "player.menu.settings".localized, items: items
-        )
+        return items
     }
 
     func videoPlayerViewDidTapFullscreen(_ playerView: VideoPlayerView) {

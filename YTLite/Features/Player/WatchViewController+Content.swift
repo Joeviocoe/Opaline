@@ -253,7 +253,10 @@ extension WatchViewController {
 
     func applyRelatedVideos(from page: WatchPage) {
         var related = page.relatedVideos
-        if let next = page.nextVideo {
+        // Up next leads the related list, except in a queue: there it is the
+        // next queued item and already sits in the section above.
+        let queued = Set((page.playlistVideos ?? []).map(\.id))
+        if let next = page.nextVideo, !queued.contains(next.id) {
             related.removeAll { $0.id == next.id }
             let enriched = enrichWithChannelId(next, from: related)
             related.insert(enriched, at: 0)
@@ -372,6 +375,10 @@ extension WatchViewController {
         allRelatedVideos = []
         visibleRelatedVideos = []
         relatedCollectionView.reloadData()
+        // The screen is reused for the next video, and in landscape the
+        // sidebar scrolls on its own — without this the new list opens at
+        // wherever the last one was left, headers already off the top.
+        relatedCollectionView.setContentOffset(.zero, animated: false)
         comments = []
         commentsContinuation = nil
         visibleCommentsCount = commentsPageSize
