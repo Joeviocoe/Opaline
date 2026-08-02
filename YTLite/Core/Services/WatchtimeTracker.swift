@@ -15,6 +15,7 @@ final class WatchtimeTracker {
     private var urls: WatchtimeURLs?
     private var videoId: String?
     private var sessionStart: Date?
+    private var lastPingedPosition: TimeInterval?
 
     /// Provides current playback position (seconds).
     /// Set by the host view controller before or after start().
@@ -64,6 +65,7 @@ final class WatchtimeTracker {
         urls = nil
         videoId = nil
         sessionStart = nil
+        lastPingedPosition = nil
     }
 
     // MARK: - Private
@@ -83,6 +85,14 @@ final class WatchtimeTracker {
             return
         }
         let pos = currentPosition()
+        // A paused video is still a loaded video, and the timer keeps firing
+        // for as long as the screen is open — an app left on a pause overnight
+        // was reporting the same second four times a minute. Nothing to report
+        // means nothing to send.
+        guard pos != lastPingedPosition else {
+            return
+        }
+        lastPingedPosition = pos
         let extra = "ver=2&cpn=\(cpn)"
             + "&cmt=\(fmt(pos))&el=detailpage"
             + "&st=0&et=\(fmt(pos))"
