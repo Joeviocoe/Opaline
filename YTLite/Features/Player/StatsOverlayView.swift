@@ -52,6 +52,11 @@ final class StatsOverlayView: UIView {
             ?? UIFont.systemFont(ofSize: 10)
         label.textColor = .white
         label.numberOfLines = 0
+        // Let the text wrap rather than break the panel's trailing limit if a
+        // row ever outgrows the screen.
+        label.setContentCompressionResistancePriority(
+            .defaultHigh, for: .horizontal
+        )
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
         NSLayoutConstraint.activate([
@@ -81,8 +86,11 @@ final class StatsOverlayView: UIView {
             closeButton.trailingAnchor.constraint(equalTo: trailingAnchor),
             closeButton.widthAnchor.constraint(equalToConstant: 30),
             closeButton.heightAnchor.constraint(equalToConstant: 30),
+            // Equal, not `>=`: with an inequality here nothing pins the panel's
+            // width to its text, so the first layout pass stretches it to the
+            // full player width and only a later pass shrinks it back.
             closeButton.leadingAnchor.constraint(
-                greaterThanOrEqualTo: label.trailingAnchor, constant: 4
+                equalTo: label.trailingAnchor, constant: 4
             )
         ])
     }
