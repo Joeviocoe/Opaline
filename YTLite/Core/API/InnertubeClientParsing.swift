@@ -10,7 +10,12 @@ extension InnertubeClient {
         )
         let sub = parseSubscribeState(json)
         let likeInfo = parseWatchLikeInfo(json)
-        let pivot = parsePivotPlaylist(
+        // A queue exists only where the watch request carried a playlistId
+        // (`executeWatchNext`) — i.e. the video was opened from a mix or a
+        // playlist. Read back from the response alone, the pivot's generic
+        // suggestion shelves passed for a queue on ordinary videos: three
+        // unrelated videos under a "Mix" header, played next by autoplay.
+        let pivot = fb.playlistId == nil ? nil : parsePivotPlaylist(
             json: json,
             currentVideoId: fb.id
         )
@@ -22,8 +27,9 @@ extension InnertubeClient {
             channelInfo: ch,
             subscribeButtonText: sub.text,
             isSubscribed: sub.isSubscribed,
-            relatedVideos: deduplicatedRelated(
-                json: json, excludingId: fb.id
+            relatedVideos: relatedFromPivot(
+                json: json,
+                excludingIds: Set([fb.id] + (pivot?.videos.map(\.id) ?? []))
             ),
             likeCount: likeInfo.likeCount,
             likeStatus: likeInfo.likeStatus,
@@ -125,25 +131,6 @@ private extension InnertubeClient {
             isLive: fb.isLive,
             playlistId: fb.playlistId
         )
-    }
-
-    static func deduplicatedRelated(
-        json: [String: Any],
-        excludingId: String
-    ) -> [Video] {
-        collectTileRenderers(in: json)
-            .compactMap(parseTileRenderer)
-            .filter { $0.id != excludingId }
-            .reduce(
-                into: [Video]()
-            ) { result, video in
-                guard !result.contains(
-                    where: { $0.id == video.id }
-                ) else {
-                    return
-                }
-                result.append(video)
-            }
     }
 
     static func autoplayNextVideo(

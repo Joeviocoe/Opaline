@@ -14,6 +14,8 @@
 "player.menu.quality" = "Quality";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Audio track";
+/* Menu item + list title: the videos queued after this one */
+"player.menu.queue" = "Queue";
 /* Menu item: toggles the playback statistics overlay */
 "player.menu.stats" = "Stats for nerds";
 /* Picker title: subtitles */

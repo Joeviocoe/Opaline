@@ -9,6 +9,7 @@
 "player.menu.settings" = "Параметры воспроизведения";
 "player.menu.quality" = "Качество";
 "player.menu.audioTrack" = "Аудиодорожка";
+"player.menu.queue" = "Очередь";
 "player.menu.stats" = "Подробная статистика";
 "player.menu.subtitles" = "Субтитры";
 

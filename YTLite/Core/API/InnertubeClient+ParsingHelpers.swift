@@ -145,34 +145,6 @@ extension InnertubeClient {
         }
         return result
     }
-
-    static func collectTileRenderers(
-        in value: Any
-    ) -> [[String: Any]] {
-        var result: [[String: Any]] = []
-        if let dict = value as? [String: Any] {
-            if let tile = dict["tileRenderer"]
-                as? [String: Any] {
-                result.append(tile)
-            }
-            for child in dict.values {
-                result.append(
-                    contentsOf: collectTileRenderers(
-                        in: child
-                    )
-                )
-            }
-        } else if let array = value as? [Any] {
-            for child in array {
-                result.append(
-                    contentsOf: collectTileRenderers(
-                        in: child
-                    )
-                )
-            }
-        }
-        return result
-    }
 }
 
 private extension InnertubeClient {
