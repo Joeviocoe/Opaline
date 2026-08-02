@@ -95,8 +95,11 @@ extension WatchViewController {
         }
         scrollView.alwaysBounceVertical = true
         scrollView.delaysContentTouches = false
+        // `canCancelContentTouches` is what takes the touch back from a
+        // related card once the finger starts scrolling. The pan must be
+        // allowed to cancel touches for that to reach the cell — without it
+        // the tap survives the whole drag and opens a video on lift-off.
         scrollView.canCancelContentTouches = true
-        scrollView.panGestureRecognizer.cancelsTouchesInView = false
         scrollView.delegate = self
         [scrollView, playerContainer, sidebarContainer].forEach { view.addSubview($0) }
         scrollView.addSubview(contentView)
