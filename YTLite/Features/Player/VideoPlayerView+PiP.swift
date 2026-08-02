@@ -89,17 +89,17 @@ extension VideoPlayerView {
         wasPlayingOnResign = (player?.rate ?? 0) > 0
         // The setting can be toggled without ever leaving the app, so the
         // system flag is refreshed here rather than only in `setupPiP()`.
+        //
+        // From iOS 26 the flag is advisory: with Settings → General → Picture
+        // in Picture → Start PiP Automatically on, the system opens the window
+        // regardless. Both ways around it were tried on device and are worse
+        // than obeying — dropping the controller works only until the first
+        // manual PiP (AVKit keeps it alive past our reference and starts that
+        // ghost with no delegate to hear it), and closing the window from
+        // `didStart` leaves it flashing open and shut on every app switch.
         if #available(iOS 14.2, *) {
             pipController?
                 .canStartPictureInPictureAutomaticallyFromInline = isAutoPiPEnabled
-        }
-        // iOS 26 starts PiP on backgrounding even with the flag set to false,
-        // so the controller itself is taken away for the transition and
-        // rebuilt on activation — the button keeps working, nothing can
-        // auto-start. Safe from iOS 15 on, where the layer is never detached
-        // and a rebuilt controller therefore stays usable.
-        if #available(iOS 15.0, *), !isAutoPiPEnabled {
-            pipController = nil
         }
     }
 
