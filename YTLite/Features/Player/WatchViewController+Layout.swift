@@ -335,18 +335,18 @@ extension WatchViewController {
     /// bottom and the raw safe-area top, then push the player container and
     /// the landscape sidebar down so both start below the navigation bar.
     func adjustForFloatingNavBar() {
+        // Never measure mid-transition: entering and leaving fullscreen moves
+        // the nav bar and this view in separate layout passes, and a reading
+        // taken between them is a phantom offset the size of the status bar —
+        // it drops the sidebar and everything under the player until the next
+        // pass takes it back.
+        guard fullscreenSnapshot == nil, !isLeavingFullscreen else {
+            return
+        }
         guard let navBar = navigationController?.navigationBar,
               !navBar.isHidden
         else {
-            if additionalSafeAreaInsets.top != 0 {
-                additionalSafeAreaInsets.top = 0
-            }
-            if playerTopConstraint?.constant != 0 {
-                playerTopConstraint?.constant = 0
-            }
-            if sidebarTopConstraint?.constant != 0 {
-                sidebarTopConstraint?.constant = 0
-            }
+            applyTopOffset(0)
             return
         }
         let navBarBottom = navBar.convert(
@@ -355,15 +355,18 @@ extension WatchViewController {
         ).y
         let safeTop = view.safeAreaInsets.top
             - additionalSafeAreaInsets.top
-        let offset = max(0, navBarBottom - safeTop)
-        if abs(additionalSafeAreaInsets.top - 0) > 0.5 {
+        applyTopOffset(max(0, navBarBottom - safeTop))
+    }
+
+    /// The landscape sidebar hangs off the same safe-area top as the player, so
+    /// both take the push or the first related card slides under the nav bar.
+    private func applyTopOffset(_ offset: CGFloat) {
+        if abs(additionalSafeAreaInsets.top) > 0.5 {
             additionalSafeAreaInsets.top = 0
         }
         if abs((playerTopConstraint?.constant ?? 0) - offset) > 0.5 {
             playerTopConstraint?.constant = offset
         }
-        // The landscape sidebar hangs off the same safe-area top, so it needs the
-        // same push or its first related card slides under the nav bar.
         if abs((sidebarTopConstraint?.constant ?? 0) - offset) > 0.5 {
             sidebarTopConstraint?.constant = offset
         }

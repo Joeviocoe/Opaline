@@ -141,12 +141,11 @@ final class WatchViewController: UIViewController {
     var relatedPortraitConstraints: [NSLayoutConstraint] = []
     var relatedLandscapeConstraints: [NSLayoutConstraint] = []
     var isShowingLandscapeRelated = false
-    var fullscreenSnapshot: (
-        superview: UIView,
-        frame: CGRect
-    )?
-    var channelTopToMeta: NSLayoutConstraint?
-    var channelTopToDesc: NSLayoutConstraint?
+    var fullscreenSnapshot: FullscreenSnapshot?
+    /// True from the moment the exit animation starts until the player is back
+    /// in place — the status bar follows this, not the player's own state.
+    var isLeavingFullscreen = false
+    var channelTopToMeta, channelTopToDesc: NSLayoutConstraint?
     /// Pins the interface while a fullscreen toggle rotates it against the way
     /// the device is physically held; cleared once the two agree again.
     var orientationLock: UIInterfaceOrientationMask?
