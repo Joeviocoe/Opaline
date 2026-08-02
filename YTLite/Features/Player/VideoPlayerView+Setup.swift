@@ -57,6 +57,14 @@ extension VideoPlayerView {
             name: UIApplication.didEnterBackgroundNotification,
             object: nil
         )
+        // The PiP setting is reachable without ever leaving the player, and
+        // it decides whether the controller exists at all.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(defaultsChanged),
+            name: UserDefaults.didChangeNotification,
+            object: nil
+        )
     }
 
     // MARK: - Gesture Recognizers
