@@ -1,6 +1,14 @@
 import UIKit
 
 final class SplashViewController: UIViewController {
+    /// Without this the bar draws in `.default`, which on iOS 12 always means
+    /// dark text — unreadable over the dark theme's background this screen is
+    /// painted with. From iOS 13 `.default` follows the window's interface
+    /// style, which is why the splash only ever looked wrong on 12.
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        ThemeManager.shared.statusBarStyle
+    }
+
     var onComplete: (() -> Void)?
 
     private let logoView = UIImageView()

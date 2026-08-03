@@ -12,6 +12,12 @@ final class RootContainerViewController: UIViewController {
 
     // The player panel, when installed, is the last child — and the one that
     // owns the status bar and home indicator while it is on screen.
+    /// The theme decides whenever the chain has nobody to ask — at launch the
+    /// style is read while the tab bar is still being built, and `.default`
+    /// means black text on iOS 12 no matter how dark the screen behind it is.
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        ThemeManager.shared.statusBarStyle
+    }
     override var childForStatusBarStyle: UIViewController? { children.last }
     override var childForStatusBarHidden: UIViewController? { children.last }
     override var childForHomeIndicatorAutoHidden: UIViewController? { children.last }
