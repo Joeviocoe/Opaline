@@ -16,6 +16,10 @@ class MainTabBarController: UITabBarController {
         selectedViewController
     }
 
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        ThemeManager.shared.statusBarStyle
+    }
+
     override var childForStatusBarStyle: UIViewController? {
         selectedViewController
     }
