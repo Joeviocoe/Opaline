@@ -141,6 +141,8 @@ final class WatchViewController: UIViewController {
     var relatedPortraitConstraints: [NSLayoutConstraint] = []
     var relatedLandscapeConstraints: [NSLayoutConstraint] = []
     var isShowingLandscapeRelated = false
+    /// Related is a skeleton until the watch page answers.
+    var isLoadingRelated = true
     var fullscreenSnapshot: FullscreenSnapshot?
     /// True from the moment the exit animation starts until the player is back
     /// in place — the status bar follows this, not the player's own state.
