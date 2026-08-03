@@ -46,7 +46,11 @@ extension WatchViewController: UICollectionViewDataSource {
                 ? max(0, queue.videos.count - 1)
                 : visibleRelatedVideos.count
         }
-        return visibleRelatedVideos.count
+        // Placeholders while the page loads: an empty list would let the
+        // sidebar lay out at no height and come back scrolled.
+        return isLoadingRelated
+            ? relatedBatchSize
+            : visibleRelatedVideos.count
     }
 
     func collectionView(
@@ -68,6 +72,7 @@ extension WatchViewController: UICollectionViewDataSource {
             visibleRelatedVideos[safe: indexPath.item]
         }
         guard let video else {
+            cell.configureSkeleton()
             return cell
         }
         let isLandscape =
@@ -189,10 +194,35 @@ extension WatchViewController: UIScrollViewDelegate {
         isOuterScrollViewDragging = false
     }
 
+    /// The sidebar gets its content while it still has no size, and when the
+    /// frame grows from zero UIKit hands the collection a proportional offset
+    /// — 384 pt into 98 pt of content. Any offset past the end is nonsense
+    /// nobody asked for, so it goes back to where it can legally sit.
+    private func clampRelatedOffset(_ scrollView: UIScrollView) {
+        guard !scrollView.isDragging, !scrollView.isDecelerating else {
+            return
+        }
+        let maxY = max(
+            0, scrollView.contentSize.height - scrollView.bounds.height
+        )
+        guard scrollView.contentOffset.y > maxY else {
+            return
+        }
+        scrollView.contentOffset.y = maxY
+    }
+
+    /// Whichever view is carrying the related list: the page scroll in
+    /// portrait, the sidebar's own collection in landscape. Only the first
+    /// was ever asked, so a landscape sidebar stopped at the first batch.
     func scrollViewDidScroll(
         _ scrollView: UIScrollView
     ) {
-        guard scrollView === self.scrollView else {
+        if scrollView === relatedCollectionView {
+            clampRelatedOffset(scrollView)
+        }
+        guard scrollView === self.scrollView
+            || scrollView === relatedCollectionView
+        else {
             return
         }
         let threshold: CGFloat = 400

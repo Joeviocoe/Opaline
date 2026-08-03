@@ -261,12 +261,30 @@ extension WatchViewController {
             let enriched = enrichWithChannelId(next, from: related)
             related.insert(enriched, at: 0)
         }
+        // The page arrives twice — from the cache, then from the network —
+        // and YouTube's pivot differs between the two calls. Replacing the
+        // list would reshuffle it while it is being read, so what is already
+        // on screen stays put and only genuinely new videos are appended.
+        // In memory only: the merged list is this screen's, the cache keeps
+        // the response it was given.
+        if !allRelatedVideos.isEmpty {
+            let known = Set(allRelatedVideos.map(\.id))
+            related = allRelatedVideos
+                + related.filter { !known.contains($0.id) }
+        }
+        isLoadingRelated = false
         allRelatedVideos = related
         visibleRelatedVideos = Array(
             related.prefix(relatedBatchSize)
         )
         populateQueueIfNeeded(from: page)
         relatedCollectionView.reloadData()
+        // Zeroed here and not only on the way out of the previous video: the
+        // list is often handed its content while the sidebar has no size yet,
+        // and when the frame grows from zero the flow layout answers with a
+        // proportional offset — 384 pt into 98 pt of content, i.e. the list
+        // opens somewhere in its middle.
+        relatedCollectionView.setContentOffset(.zero, animated: false)
         channelInfoStore.preload(
             channelIds: related.compactMap(\.channelId)
         )
@@ -372,6 +390,7 @@ extension WatchViewController {
 
     func resetVideoState() {
         watchPage = nil
+        isLoadingRelated = true
         allRelatedVideos = []
         visibleRelatedVideos = []
         relatedCollectionView.reloadData()

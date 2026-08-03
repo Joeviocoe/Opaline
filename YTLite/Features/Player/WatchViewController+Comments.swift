@@ -8,7 +8,19 @@ extension WatchViewController {
         visibleCommentsCount = commentsPageSize
         isLoadingComments = false
         commentsLabel.text = "player.comments.title".localized
-        renderComments()
+        // Skeleton, not "no comments yet": nothing has been asked for yet, and
+        // announcing an empty section before the request even goes out reads
+        // as a verdict.
+        clearComments()
+        renderCommentSkeletons()
+        updateLoadMoreButton()
+    }
+
+    private func clearComments() {
+        commentsStackView.arrangedSubviews.forEach { vw in
+            commentsStackView.removeArrangedSubview(vw)
+            vw.removeFromSuperview()
+        }
     }
 
     func loadComments(continuation: String? = nil) {
@@ -78,10 +90,7 @@ extension WatchViewController {
     }
 
     func renderComments() {
-        commentsStackView.arrangedSubviews.forEach { vw in
-            commentsStackView.removeArrangedSubview(vw)
-            vw.removeFromSuperview()
-        }
+        clearComments()
         if comments.isEmpty {
             renderEmptyComments()
         } else {
@@ -98,15 +107,37 @@ extension WatchViewController {
     }
 
     func renderEmptyComments() {
+        guard !isLoadingComments else {
+            renderCommentSkeletons()
+            return
+        }
         let emptyLabel = UILabel()
         emptyLabel.numberOfLines = 0
         emptyLabel.font = UIFont.systemFont(ofSize: 13)
         emptyLabel.textColor =
             ThemeManager.shared.secondaryText
-        emptyLabel.text = isLoadingComments
-            ? "player.comments.loading".localized
-            : "player.comments.unavailableYet".localized
+        emptyLabel.text = "player.comments.unavailableYet".localized
         commentsStackView.addArrangedSubview(emptyLabel)
+    }
+
+    /// Three shimmering rows the height of a short comment — the same trick
+    /// the feeds use, instead of a "Loading…" line that reflows the layout
+    /// once the real comments land.
+    private func renderCommentSkeletons() {
+        let rows = (0 ..< 3).map { _ -> UIView in
+            let row = UIView()
+            row.layer.cornerRadius = 8
+            row.layer.masksToBounds = true
+            row.heightAnchor.constraint(
+                equalToConstant: 56
+            ).isActive = true
+            commentsStackView.addArrangedSubview(row)
+            return row
+        }
+        // The shimmer overlay is frame-based, so the rows need their size
+        // before it is added.
+        commentsStackView.layoutIfNeeded()
+        rows.forEach { $0.showSkeleton() }
     }
 
     func updateLoadMoreButton() {
