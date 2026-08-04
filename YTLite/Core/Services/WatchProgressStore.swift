@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 struct WatchProgress {
     let fraction: Double
@@ -16,16 +16,31 @@ final class WatchProgressStore {
 
     private let fractionKey = "WatchProgressStore.fractions"
     private let maxEntries = 200
-    private let queue = DispatchQueue(
-        label: "com.ytvlite.watch-progress",
-        attributes: .concurrent
+    private let persistDebounceInterval: TimeInterval = 5
+
+    /// Guards `fractions` only. Never call UserDefaults or
+    /// NotificationCenter while holding it.
+    private let lock = NSLock()
+    private var fractions: [String: Double] = [:]
+
+    /// Serial: all UserDefaults writes and pending-write bookkeeping
+    /// happen here, off the lock.
+    private let persistQueue = DispatchQueue(
+        label: "com.ytvlite.watch-progress.persist"
     )
-    private var serverFractions: [String: Double] = [:]
+    /// Only touched from `persistQueue`.
+    private var pendingWork: DispatchWorkItem?
 
     init() {
         loadFractions()
         UserDefaults.standard.removeObject(
             forKey: "WatchProgressStore.v1"
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
         )
     }
 
@@ -33,45 +48,50 @@ final class WatchProgressStore {
         videoId: String,
         fraction: Double
     ) {
-        queue.async(flags: .barrier) {
-            self.serverFractions[videoId] = fraction
-            if self.serverFractions.count > self.maxEntries {
-                let excess = self.serverFractions
-                    .count - self.maxEntries
-                self.serverFractions.keys
-                    .prefix(excess)
-                    .forEach {
-                        self.serverFractions
-                            .removeValue(forKey: $0)
-                    }
+        lock.lock()
+        fractions[videoId] = fraction
+        if fractions.count > maxEntries {
+            let excess = fractions.count - maxEntries
+            fractions.keys.prefix(excess).forEach {
+                fractions.removeValue(forKey: $0)
             }
-            self.persistFractions()
         }
+        lock.unlock()
+        schedulePersist()
     }
 
     func setServerFractions(
         _ entries: [String: Double]
     ) {
-        queue.async(flags: .barrier) {
-            self.serverFractions = entries
-            self.persistFractions()
+        lock.lock()
+        fractions = entries
+        lock.unlock()
+        persistQueue.async {
+            self.pendingWork?.cancel()
+            self.pendingWork = nil
+            self.writeToDefaults()
         }
     }
 
     func progress(
         forVideoId videoId: String
     ) -> WatchProgress? {
-        guard let frac = queue.sync(execute: {
-            serverFractions[videoId]
-        }) else {
+        lock.lock()
+        let frac = fractions[videoId]
+        lock.unlock()
+        guard let frac else {
             return nil
         }
         return WatchProgress(fraction: frac)
     }
 
     func clearAll() {
-        queue.async(flags: .barrier) {
-            self.serverFractions.removeAll()
+        lock.lock()
+        fractions.removeAll()
+        lock.unlock()
+        persistQueue.async {
+            self.pendingWork?.cancel()
+            self.pendingWork = nil
             UserDefaults.standard.removeObject(
                 forKey: self.fractionKey
             )
@@ -87,12 +107,48 @@ final class WatchProgressStore {
         else {
             return
         }
-        serverFractions = raw
+        fractions = raw
     }
 
-    private func persistFractions() {
-        UserDefaults.standard.set(
-            serverFractions, forKey: fractionKey
-        )
+    /// Throttles UserDefaults writes to at most one per
+    /// `persistDebounceInterval`. Safe to call from any thread.
+    private func schedulePersist() {
+        persistQueue.async {
+            guard self.pendingWork == nil else {
+                return
+            }
+            let work = DispatchWorkItem { [weak self] in
+                guard let self else {
+                    return
+                }
+                self.pendingWork = nil
+                self.writeToDefaults()
+            }
+            self.pendingWork = work
+            self.persistQueue.asyncAfter(
+                deadline: .now() + self.persistDebounceInterval,
+                execute: work
+            )
+        }
+    }
+
+    /// Must run on `persistQueue`. Copies the dictionary under the
+    /// lock, then writes outside it.
+    private func writeToDefaults() {
+        lock.lock()
+        let snapshot = fractions
+        lock.unlock()
+        UserDefaults.standard.set(snapshot, forKey: fractionKey)
+    }
+
+    @objc
+    private func appDidEnterBackground() {
+        // Synchronous: the app can be suspended right after this
+        // handler returns, so the flush must finish before that.
+        persistQueue.sync {
+            self.pendingWork?.cancel()
+            self.pendingWork = nil
+            self.writeToDefaults()
+        }
     }
 }

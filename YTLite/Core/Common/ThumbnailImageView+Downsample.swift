@@ -4,6 +4,16 @@ import UIKit
 extension ThumbnailImageView {
     // MARK: - Prefetch
 
+    /// Network fetches started by `prefetch(url:)`, keyed by cache key, so a
+    /// cell that scrolls away before the fetch lands can cancel it.
+    ///
+    /// Started on a background queue, cancelled from the main-thread prefetch
+    /// delegate, so it needs guarding. A lock rather than a hop to main: this
+    /// runs once per prefetched thumbnail during scrolling, and the main
+    /// thread is the resource we are trying to free.
+    private static var prefetchTokens: [String: CancellationToken] = [:]
+    private static let prefetchLock = NSLock()
+
     static func prefetch(url: URL) {
         let key = url.absoluteString
         guard cache.object(forKey: key) == nil else {
@@ -17,6 +27,14 @@ extension ThumbnailImageView {
             }
             fetchAndCache(url: url, key: key)
         }
+    }
+
+    static func cancelPrefetch(url: URL) {
+        let key = url.absoluteString
+        prefetchLock.lock()
+        let token = prefetchTokens.removeValue(forKey: key)
+        prefetchLock.unlock()
+        token?.cancel()
     }
 
     // MARK: - Downsampling
@@ -82,10 +100,21 @@ extension ThumbnailImageView {
         url: URL,
         key: String
     ) {
+        let token = CancellationToken()
+        prefetchLock.lock()
+        prefetchTokens[key] = token
+        prefetchLock.unlock()
         transport.send(
             HTTPRequest(method: .get, url: url),
-            cancellationToken: nil
+            cancellationToken: token
         ) { result in
+            prefetchLock.lock()
+            // Only drop our own entry — a newer prefetch for the same URL
+            // may already have replaced it.
+            if prefetchTokens[key] === token {
+                prefetchTokens[key] = nil
+            }
+            prefetchLock.unlock()
             guard let data = try? result.get().data else {
                 return
             }

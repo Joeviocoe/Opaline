@@ -16,6 +16,8 @@ class SubscriptionVideoCell: UITableViewCell {
     var onChannelTap: (() -> Void)?
     let menuButton = UIButton(type: .system)
     var onMenuTap: ((UIView) -> Void)?
+    var cachedTitleHeight: CGFloat = 0
+    var cachedTitleWidth: CGFloat = 0
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -150,6 +152,7 @@ class SubscriptionVideoCell: UITableViewCell {
             thumbnail.setImage(url: url)
         }
         applyWatchProgress(videoId: video.id)
+        cachedTitleHeight = 0
         setNeedsLayout()
     }
 
@@ -169,6 +172,7 @@ class SubscriptionVideoCell: UITableViewCell {
         progressFill.isHidden = true
         onChannelTap = nil
         onMenuTap = nil
+        cachedTitleHeight = 0
     }
 
     func applyWatchProgress(videoId: String) {

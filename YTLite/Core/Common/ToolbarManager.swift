@@ -1,16 +1,27 @@
 import UIKit
 
+/// Redrawing these ran once per cell instance, so a screen filling up cost
+/// ~20 offscreen draws. Callers are all cell/button setup on the main
+/// thread, so a plain dictionary needs no lock.
+private var resizedNavBarIconCache: [String: UIImage] = [:]
+
 /// Nav-bar icons are PNG assets drawn at their point size and tinted by the
 /// bar; shared with `NotificationsBellButton`.
 func resizedNavBarIcon(_ name: String, size: CGFloat) -> UIImage? {
+    let key = "\(name)@\(size)"
+    if let cached = resizedNavBarIconCache[key] {
+        return cached
+    }
     guard let img = UIImage(named: name) else {
         return nil
     }
     let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
-    return renderer.image { _ in
+    let resized = renderer.image { _ in
         img.draw(in: CGRect(origin: .zero, size: CGSize(width: size, height: size)))
     }
     .withRenderingMode(.alwaysTemplate)
+    resizedNavBarIconCache[key] = resized
+    return resized
 }
 
 /// Builds and manages the shared navigation bar buttons (Search + Settings + Profile/Avatar).

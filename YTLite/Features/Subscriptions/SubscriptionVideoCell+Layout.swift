@@ -3,6 +3,21 @@ import UIKit
 // MARK: - Layout
 
 extension SubscriptionVideoCell {
+    /// UIKit measures a self-sizing row twice — once through
+    /// `systemLayoutSizeFitting` and again in `layoutSubviews` — so this
+    /// caches the text measurement per cell. Keyed by width: the three
+    /// callers derive `textW` differently, and an unkeyed cache would hand
+    /// one of them a height measured for someone else's width.
+    private func computeTitleHeight(for width: CGFloat) -> CGFloat {
+        if cachedTitleHeight > 0, cachedTitleWidth == width {
+            return cachedTitleHeight
+        }
+        let height = titleLabel.sizeThatFits(CGSize(width: width, height: 52)).height
+        cachedTitleHeight = min(height, 40)
+        cachedTitleWidth = width
+        return cachedTitleHeight
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         let width = contentView.bounds.width
@@ -33,7 +48,7 @@ extension SubscriptionVideoCell {
         } else {
             let thumbH = (width * 9.0 / 16.0).rounded()
             let textW = width - 12 - 36 - 10 - 12 - 36
-            let titleH = min(titleLabel.sizeThatFits(CGSize(width: textW, height: 52)).height, 40)
+            let titleH = computeTitleHeight(for: textW)
             return CGSize(width: width, height: thumbH + 10 + titleH + 4 + 16 + 2 + 16 + 12)
         }
     }
@@ -69,7 +84,7 @@ extension SubscriptionVideoCell {
         let menuButtonW: CGFloat = 36
         let textW = width - textX - hPad - menuButtonW
 
-        let titleH = min(titleLabel.sizeThatFits(CGSize(width: textW, height: 52)).height, 40)
+        let titleH = computeTitleHeight(for: textW)
         titleLabel.frame = CGRect(x: textX, y: vPad, width: textW, height: titleH)
         // titleH collapses to ~20 on single-line titles; keep a tappable box.
         menuButton.frame = CGRect(
@@ -110,7 +125,7 @@ extension SubscriptionVideoCell {
         let avatarY = thumbH + 10
         channelAvatarView.frame = CGRect(x: avatarX, y: avatarY, width: avatarSz, height: avatarSz)
 
-        let titleH = min(titleLabel.sizeThatFits(CGSize(width: textW, height: 52)).height, 40)
+        let titleH = computeTitleHeight(for: textW)
         titleLabel.frame = CGRect(x: textX, y: thumbH + 10, width: textW, height: titleH)
         menuButton.frame = CGRect(
             x: textX + textW, y: thumbH + 10, width: menuButtonW, height: max(titleH, 36)

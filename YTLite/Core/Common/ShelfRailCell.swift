@@ -60,6 +60,14 @@ final class ShelfRailCell: UICollectionViewCell {
     }
 
     func configure(with videos: [Video]) {
+        // Rail cells get dequeued constantly during vertical scroll, and
+        // reloading the inner collection on every reuse rebuilt the whole
+        // horizontal row. Comparing every id is far cheaper than that, and
+        // a reused cell still holds the previous shelf's list, so a partial
+        // comparison could leave a stale row on screen.
+        if self.videos.elementsEqual(videos, by: { $0.id == $1.id }) {
+            return
+        }
         self.videos = videos
         listView.reloadData()
         listView.setContentOffset(.zero, animated: false)

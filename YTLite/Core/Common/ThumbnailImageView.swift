@@ -49,7 +49,6 @@ class ThumbnailImageView: UIImageView {
         if let cached = ThumbnailImageView.cache.object(
             forKey: key
         ) {
-            AppLog.img("mem-hit \(url.lastPathComponent)")
             image = cached
             isShowingFallback = false
             loadToken = nil
@@ -90,7 +89,6 @@ class ThumbnailImageView: UIImageView {
         fileURL: URL,
         cacheKey: String
     ) {
-        AppLog.img("disk-hit \(url.lastPathComponent)")
         let maxSz = maxPixelSize
         guard let img = ThumbnailImageView.downsample(
             imageAt: fileURL, to: maxSz
@@ -134,7 +132,6 @@ class ThumbnailImageView: UIImageView {
         url: URL,
         cacheKey: String
     ) {
-        AppLog.img("fetch \(url.lastPathComponent)")
         let maxSz = maxPixelSize
         let token = CancellationToken()
         loadToken = token
@@ -169,7 +166,6 @@ class ThumbnailImageView: UIImageView {
             cacheKey: cacheKey,
             maxPixelSize: maxPixelSize
         )
-        AppLog.img("stored \(url.lastPathComponent)")
     }
 
     private func clearTaskOnMain(url: URL) {
