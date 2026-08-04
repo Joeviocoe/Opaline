@@ -2,31 +2,50 @@ import UIKit
 
 /// Horizontal bar of circular channel avatars shown above the
 /// Subscriptions feed, with an "All" button pinned to the right.
+///
+/// Backed by a `UICollectionView` (see `ShelfRailCell` for the same
+/// horizontal-rail pattern elsewhere in the app) so only the visible
+/// handful of avatars are ever instantiated — a subscriber with dozens
+/// of channels no longer pays for building every avatar subtree up
+/// front on first render.
 final class ChannelAvatarBarView: UIView {
     static let preferredHeight: CGFloat = 88
+
+    private static let cellReuseId = "ChannelAvatarCell"
 
     var onChannelTapped: ((SubscribedChannel) -> Void)?
     var onAllTapped: (() -> Void)?
 
-    private let scrollView: UIScrollView = {
-        let sv = UIScrollView()
-        sv.showsHorizontalScrollIndicator = false
-        sv.translatesAutoresizingMaskIntoConstraints = false
-        return sv
-    }()
-
-    private let stack: UIStackView = {
-        let sv = UIStackView()
-        sv.axis = .horizontal
-        sv.spacing = 8
-        sv.alignment = .center
-        sv.translatesAutoresizingMaskIntoConstraints = false
-        return sv
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.itemSize = CGSize(
+            width: ChannelAvatarItemView.itemWidth,
+            height: ChannelAvatarBarView.preferredHeight
+        )
+        layout.minimumLineSpacing = 8
+        layout.sectionInset = UIEdgeInsets(
+            top: 0, left: 12, bottom: 0, right: 12
+        )
+        let cv = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout
+        )
+        cv.showsHorizontalScrollIndicator = false
+        cv.backgroundColor = .clear
+        cv.dataSource = self
+        cv.delegate = self
+        cv.register(
+            ChannelAvatarCell.self,
+            forCellWithReuseIdentifier: ChannelAvatarBarView.cellReuseId
+        )
+        cv.translatesAutoresizingMaskIntoConstraints = false
+        return cv
     }()
 
     private let allButton = UIButton(type: .system)
     private let separator = UIView()
-    private var items: [ChannelAvatarItemView] = []
+    private var channels: [SubscribedChannel] = []
     private var selectedChannelId: String?
     private var newContentChannelIds: Set<String> = []
 
@@ -41,27 +60,18 @@ final class ChannelAvatarBarView: UIView {
     }
 
     func setChannels(_ channels: [SubscribedChannel]) {
-        stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        items = channels.map { channel in
-            let item = ChannelAvatarItemView(channel: channel)
-            item.onTap = { [weak self] in
-                self?.onChannelTapped?(channel)
-            }
-            return item
-        }
-        items.forEach { stack.addArrangedSubview($0) }
-        applySelection()
-        applyNewContentDots()
+        self.channels = channels
+        collectionView.reloadData()
     }
 
     func setSelectedChannelId(_ id: String?) {
         selectedChannelId = id
-        applySelection()
+        reloadVisibleState()
     }
 
     func setNewContentChannelIds(_ ids: Set<String>) {
         newContentChannelIds = ids
-        applyNewContentDots()
+        reloadVisibleState()
     }
 
     func applyTheme() {
@@ -69,21 +79,8 @@ final class ChannelAvatarBarView: UIView {
         backgroundColor = theme.background
         separator.backgroundColor = theme.separator
         allButton.setTitleColor(theme.accent, for: .normal)
-        items.forEach { $0.applyTheme() }
-        applySelection()
-    }
-
-    private func applySelection() {
-        for item in items {
-            item.setSelected(item.channel.id == selectedChannelId)
-        }
-    }
-
-    private func applyNewContentDots() {
-        for item in items {
-            item.setShowsNewContent(
-                newContentChannelIds.contains(item.channel.id)
-            )
+        for case let cell as ChannelAvatarCell in collectionView.visibleCells {
+            cell.applyTheme()
         }
     }
 
@@ -92,31 +89,42 @@ final class ChannelAvatarBarView: UIView {
         onAllTapped?()
     }
 
+    /// Re-applies selection / new-content state to whatever cells are
+    /// currently on screen, without a full reload (avatars/images stay
+    /// put; only the derived state changes).
+    private func reloadVisibleState() {
+        for case let cell as ChannelAvatarCell in collectionView.visibleCells {
+            guard let indexPath = collectionView.indexPath(for: cell) else {
+                continue
+            }
+            configure(cell, at: indexPath)
+        }
+    }
+
+    private func configure(_ cell: ChannelAvatarCell, at indexPath: IndexPath) {
+        guard indexPath.item < channels.count else {
+            return
+        }
+        let channel = channels[indexPath.item]
+        cell.configure(with: channel)
+        cell.setSelected(channel.id == selectedChannelId)
+        cell.setShowsNewContent(newContentChannelIds.contains(channel.id))
+        cell.applyTheme()
+    }
+
     private func setup() {
-        addSubview(scrollView)
-        scrollView.addSubview(stack)
+        addSubview(collectionView)
         setupAllButton()
         separator.translatesAutoresizingMaskIntoConstraints = false
         addSubview(separator)
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scrollView.trailingAnchor.constraint(
+            collectionView.topAnchor.constraint(equalTo: topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            collectionView.trailingAnchor.constraint(
                 equalTo: allButton.leadingAnchor,
                 constant: -4
             ),
-            stack.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            stack.leadingAnchor.constraint(
-                equalTo: scrollView.leadingAnchor,
-                constant: 12
-            ),
-            stack.trailingAnchor.constraint(
-                equalTo: scrollView.trailingAnchor,
-                constant: -12
-            ),
-            stack.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
             separator.leadingAnchor.constraint(equalTo: leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: trailingAnchor),
             separator.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -145,119 +153,39 @@ final class ChannelAvatarBarView: UIView {
     }
 }
 
-/// Single tappable avatar with the channel name underneath and an
-/// accent ring when selected.
-private final class ChannelAvatarItemView: UIControl {
-    static let avatarSize: CGFloat = 48
-    static let ringSize: CGFloat = 56
-    static let itemWidth: CGFloat = 64
-
-    let channel: SubscribedChannel
-    var onTap: (() -> Void)?
-
-    private let ringView = UIView()
-    private let avatarView = ChannelAvatarView()
-    private let nameLabel = UILabel()
-    private let dotView = NewContentDotView()
-    private var isRingSelected = false
-
-    init(channel: SubscribedChannel) {
-        self.channel = channel
-        super.init(frame: .zero)
-        setup()
+extension ChannelAvatarBarView: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        numberOfItemsInSection section: Int
+    ) -> Int {
+        channels.count
     }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) is not supported")
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: ChannelAvatarBarView.cellReuseId,
+            for: indexPath
+        ) as? ChannelAvatarCell else {
+            return UICollectionViewCell()
+        }
+        configure(cell, at: indexPath)
+        return cell
     }
 
-    func setSelected(_ selected: Bool) {
-        isRingSelected = selected
-        ringView.layer.borderWidth = selected ? 2 : 0
-        ringView.layer.borderColor = ThemeManager.shared.accent.cgColor
-        nameLabel.font = .systemFont(
-            ofSize: 11,
-            weight: selected ? .semibold : .regular
-        )
-        applyNameColor()
-    }
-
-    func setShowsNewContent(_ shows: Bool) {
-        dotView.isHidden = !shows
-    }
-
-    func applyTheme() {
-        avatarView.applyTheme()
-        dotView.applyTheme()
-        applyNameColor()
-    }
-
-    @objc
-    private func handleTap() {
-        onTap?()
-    }
-
-    private func applyNameColor() {
-        let theme = ThemeManager.shared
-        nameLabel.textColor = isRingSelected
-            ? theme.primaryText : theme.secondaryText
-    }
-
-    private func setup() {
-        translatesAutoresizingMaskIntoConstraints = false
-        setupRingAndAvatar()
-        setupNameLabel()
-        NSLayoutConstraint.activate([
-            widthAnchor.constraint(
-                equalToConstant: ChannelAvatarItemView.itemWidth
-            ),
-            ringView.topAnchor.constraint(equalTo: topAnchor),
-            ringView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            avatarView.centerXAnchor.constraint(
-                equalTo: ringView.centerXAnchor
-            ),
-            avatarView.centerYAnchor.constraint(
-                equalTo: ringView.centerYAnchor
-            ),
-            nameLabel.topAnchor.constraint(
-                equalTo: ringView.bottomAnchor,
-                constant: 3
-            ),
-            nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            nameLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
-        addTarget(self, action: #selector(handleTap), for: .touchUpInside)
-    }
-
-    private func setupRingAndAvatar() {
-        let ring = ChannelAvatarItemView.ringSize
-        let avatar = ChannelAvatarItemView.avatarSize
-        ringView.layer.cornerRadius = ring / 2
-        ringView.isUserInteractionEnabled = false
-        ringView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(ringView)
-        avatarView.configure(with: channel)
-        addSubview(avatarView)
-        addSubview(dotView)
-        dotView.constrainToTopRight(of: avatarView)
-        NSLayoutConstraint.activate([
-            ringView.widthAnchor.constraint(equalToConstant: ring),
-            ringView.heightAnchor.constraint(equalToConstant: ring),
-            avatarView.widthAnchor.constraint(equalToConstant: avatar),
-            avatarView.heightAnchor.constraint(equalToConstant: avatar)
-        ])
-    }
-
-    private func setupNameLabel() {
-        nameLabel.font = .systemFont(ofSize: 11)
-        nameLabel.textAlignment = .center
-        nameLabel.lineBreakMode = .byTruncatingTail
-        nameLabel.numberOfLines = 1
-        nameLabel.text = channel.title
-        nameLabel.isUserInteractionEnabled = false
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(nameLabel)
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
+        guard indexPath.item < channels.count else {
+            return
+        }
+        onChannelTapped?(channels[indexPath.item])
     }
 }
+
+/// Reusable cell wrapping a single `ChannelAvatarItemView`. The item
+/// view is created once per cell and rebound via `configure(with:)`
+/// on reuse, exactly like `ShelfRailCell` reuses `VideoCell`.
