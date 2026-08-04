@@ -320,6 +320,7 @@ extension WatchViewController {
         )
         rv.dataSource = self
         rv.delegate = self
+        rv.prefetchDataSource = self
         rv.translatesAutoresizingMaskIntoConstraints = false
         rv.isScrollEnabled = false
         // Disable automatic inset adjustment: in portrait the outer scroll view manages

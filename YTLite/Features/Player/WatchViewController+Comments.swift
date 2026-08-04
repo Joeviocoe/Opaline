@@ -5,7 +5,7 @@ extension WatchViewController {
     func resetComments() {
         comments = []
         commentsContinuation = nil
-        visibleCommentsCount = commentsPageSize
+        visibleCommentsCount = WatchPaging.commentsPage
         isLoadingComments = false
         commentsLabel.text = "player.comments.title".localized
         // Skeleton, not "no comments yet": nothing has been asked for yet, and
@@ -70,7 +70,11 @@ extension WatchViewController {
         case .success(let page):
             commentsContinuation = page.continuation
             if continuation == nil {
+                // A first page replaces the list wholesale, so the rows on
+                // screen are no longer a prefix of it — `renderComments`
+                // appends, and would otherwise leave stale rows behind.
                 comments = page.comments
+                clearComments()
             } else {
                 appendNewComments(page.comments)
             }
@@ -89,18 +93,36 @@ extension WatchViewController {
         comments.append(contentsOf: unique)
     }
 
+    /// Appends only the rows not yet on screen instead of tearing the whole
+    /// stack down every call — `expandCommentsIfNeeded`/pagination call this
+    /// repeatedly and the comment order never changes. Falls back to a full
+    /// rebuild whenever the stack isn't already showing a clean prefix of
+    /// `comments` (skeleton/empty state, or a genuine reset via
+    /// `clearComments()`).
     func renderComments() {
-        clearComments()
-        if comments.isEmpty {
+        guard !comments.isEmpty else {
+            clearComments()
             renderEmptyComments()
-        } else {
-            for comment in comments.prefix(
-                visibleCommentsCount
-            ) {
-                commentsStackView.addArrangedSubview(
-                    makeCommentView(comment)
-                )
-            }
+            updateLoadMoreButton()
+            view.setNeedsLayout()
+            return
+        }
+        let target = Array(comments.prefix(visibleCommentsCount))
+        let rendered = commentsStackView.arrangedSubviews
+        var renderedCount = rendered.allSatisfy { $0 is CommentRowView }
+            ? rendered.count
+            : 0
+        // Anything other than "the stack already shows a clean prefix of
+        // `target`" (skeleton/empty rows, or a shrunk `target`) needs a
+        // full rebuild rather than an append.
+        let needsRebuild = (renderedCount == 0 && !rendered.isEmpty)
+            || renderedCount > target.count
+        if needsRebuild {
+            clearComments()
+            renderedCount = 0
+        }
+        for comment in target[renderedCount...] {
+            commentsStackView.addArrangedSubview(makeCommentView(comment))
         }
         updateLoadMoreButton()
         view.setNeedsLayout()
@@ -172,7 +194,7 @@ extension WatchViewController {
             return
         }
         let nextCount = min(
-            visibleRelatedVideos.count + relatedBatchSize,
+            visibleRelatedVideos.count + WatchPaging.relatedBatch,
             allRelatedVideos.count
         )
         visibleRelatedVideos = Array(
@@ -184,7 +206,7 @@ extension WatchViewController {
 
     func expandCommentsIfNeeded() {
         if visibleCommentsCount < comments.count {
-            visibleCommentsCount += commentsPageSize
+            visibleCommentsCount += WatchPaging.commentsPage
             renderComments()
         } else if commentsContinuation != nil,
                   !isLoadingComments {

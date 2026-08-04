@@ -2,6 +2,9 @@
 import AVFoundation
 import UIKit
 
+/// In-flight cap for the lazy related-channel fetches below.
+private let maxChannelInfoFetches = 3
+
 // MARK: - Vote Formatting
 
 private func formatVoteCount(_ count: Int) -> String {
@@ -69,6 +72,37 @@ extension WatchViewController {
         }
     }
 
+    /// Enqueues a related-sidebar channel fetch, capped to a few in flight
+    /// at once — called from `willDisplay` in
+    /// `WatchViewController+CollectionDelegates.swift` as cells scroll into
+    /// view, replacing the eager fetch of the whole related list at once.
+    /// `ChannelInfoStore` already caches per channel and coalesces
+    /// duplicate in-flight requests, so this only needs to remember which
+    /// channels this screen already asked for.
+    func requestChannelInfo(channelId: String) {
+        guard !channelFetches.requested.contains(channelId) else {
+            return
+        }
+        channelFetches.requested.insert(channelId)
+        channelFetches.pending.append(channelId)
+        drainChannelInfoQueue()
+    }
+
+    private func drainChannelInfoQueue() {
+        while channelFetches.inFlight < maxChannelInfoFetches,
+              !channelFetches.pending.isEmpty {
+            let channelId = channelFetches.pending.removeFirst()
+            channelFetches.inFlight += 1
+            channelInfoStore.fetch(channelId: channelId) { [weak self] _ in
+                guard let self else {
+                    return
+                }
+                channelFetches.inFlight -= 1
+                drainChannelInfoQueue()
+            }
+        }
+    }
+
     func buildMetaText(
         viewCount: String?,
         publishedAt: String?
@@ -121,15 +155,25 @@ extension WatchViewController {
         applyChannelInfo(from: page)
         applySubscriptionState(from: page)
         applyEngagementData(from: page)
-        fetchExternalServiceData(
-            videoId: page.video.id
-        )
-        prefetchPlaylistOptions()
         applyTheme()
         applyRelatedVideos(from: page)
+        startSideEffects(for: page.video.id)
+        view.setNeedsLayout()
+    }
+
+    /// RYD/SponsorBlock, playlist prefetch and the first comments page —
+    /// kicked off once per video. `applyWatchPage` runs twice (cache, then
+    /// network); everything above this is UI application and safe to
+    /// re-run, but these are one-shot network calls.
+    private func startSideEffects(for videoId: String) {
+        guard sideEffectsStartedForVideoId != videoId else {
+            return
+        }
+        sideEffectsStartedForVideoId = videoId
+        fetchExternalServiceData(videoId: videoId)
+        prefetchPlaylistOptions()
         resetComments()
         loadComments()
-        view.setNeedsLayout()
     }
 
     func applyChannelInfo(from page: WatchPage) {
@@ -177,15 +221,30 @@ extension WatchViewController {
 
     /// Rebuilds the description's attributed text — called both when the
     /// video's description is applied and when the theme changes, since the
-    /// link color is baked into the attributed string.
+    /// link color is baked into the attributed string. The linkify pass is
+    /// skipped when neither input changed since the last call (the watch
+    /// page landing twice, or a theme re-apply with the same text).
     func applyDescriptionText() {
         let theme = ThemeManager.shared
-        descriptionLabel.attributedText = LinkifiedText.attributedString(
+        if let cached = descriptionAttributedCache,
+           cached.text == descriptionText,
+           cached.isDark == theme.isDark {
+            descriptionLabel.attributedText = cached.attributed
+            descriptionLabel.linkTextAttributes = [.foregroundColor: theme.accent]
+            return
+        }
+        let attributed = LinkifiedText.attributedString(
             from: descriptionText,
             font: UIFont.systemFont(ofSize: 13),
             color: theme.secondaryText,
             includeTimestamps: true
         )
+        descriptionAttributedCache = DescriptionAttributedCache(
+            text: descriptionText,
+            isDark: theme.isDark,
+            attributed: attributed
+        )
+        descriptionLabel.attributedText = attributed
         descriptionLabel.linkTextAttributes = [.foregroundColor: theme.accent]
     }
 
@@ -275,7 +334,7 @@ extension WatchViewController {
         isLoadingRelated = false
         allRelatedVideos = related
         visibleRelatedVideos = Array(
-            related.prefix(relatedBatchSize)
+            related.prefix(WatchPaging.relatedBatch)
         )
         populateQueueIfNeeded(from: page)
         relatedCollectionView.reloadData()
@@ -285,9 +344,6 @@ extension WatchViewController {
         // proportional offset — 384 pt into 98 pt of content, i.e. the list
         // opens somewhere in its middle.
         relatedCollectionView.setContentOffset(.zero, animated: false)
-        channelInfoStore.preload(
-            channelIds: related.compactMap(\.channelId)
-        )
     }
 
     private func populateQueueIfNeeded(
@@ -393,6 +449,9 @@ extension WatchViewController {
         isLoadingRelated = true
         allRelatedVideos = []
         visibleRelatedVideos = []
+        sideEffectsStartedForVideoId = nil
+        channelFetches.pending = []
+        channelFetches.requested = []
         relatedCollectionView.reloadData()
         // The screen is reused for the next video, and in landscape the
         // sidebar scrolls on its own — without this the new list opens at
@@ -400,7 +459,7 @@ extension WatchViewController {
         relatedCollectionView.setContentOffset(.zero, animated: false)
         comments = []
         commentsContinuation = nil
-        visibleCommentsCount = commentsPageSize
+        visibleCommentsCount = WatchPaging.commentsPage
         isLoadingComments = false
         descriptionExpanded = false
         likeCountLabel.text = "—"

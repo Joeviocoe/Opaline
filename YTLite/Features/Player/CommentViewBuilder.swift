@@ -1,11 +1,16 @@
 import UIKit
 
+/// Marks a stack view arranged subview as a rendered comment row, so
+/// `renderComments()` can tell real rows apart from skeleton/empty-state
+/// placeholders without extra state and append only the unrendered tail.
+final class CommentRowView: UIView {}
+
 enum CommentViewBuilder {
     static func makeCommentView(
         _ comment: Comment,
         linkDelegate: UITextViewDelegate
     ) -> UIView {
-        let container = UIView()
+        let container = CommentRowView()
         container.translatesAutoresizingMaskIntoConstraints = false
 
         let avatarView = makeAvatar(comment)

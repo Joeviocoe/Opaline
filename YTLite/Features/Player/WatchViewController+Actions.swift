@@ -166,7 +166,7 @@ extension WatchViewController {
     @objc
     func loadMoreCommentsTapped() {
         if visibleCommentsCount < comments.count {
-            visibleCommentsCount += commentsPageSize
+            visibleCommentsCount += WatchPaging.commentsPage
             renderComments()
         } else if let continuation = commentsContinuation {
             loadComments(continuation: continuation)

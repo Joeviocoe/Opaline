@@ -16,6 +16,12 @@ enum MonogramAvatar {
         UIColor(red: 0.42, green: 0.51, blue: 0.58, alpha: 1) // blue gray
     ]
 
+    // ponytail: main-thread-only cache (no lock) — MonogramAvatar.image is
+    // always called from UIView setup (ThumbnailImageView.setAvatar), never
+    // off-thread. Add an NSLock if a background caller shows up.
+    // swiftlint:disable:next legacy_objc_type
+    private static let cache = NSCache<NSString, UIImage>()
+
     static func color(for name: String) -> UIColor {
         palette[Int(fnv1a(name) % UInt64(palette.count))]
     }
@@ -31,7 +37,20 @@ enum MonogramAvatar {
         return trimmed.first.map(String.init) ?? "?"
     }
 
+    /// Output is a pure function of `name` (letter + color) and `side`.
+    /// Main-thread only — see cache note above.
     static func image(for name: String, side: CGFloat = 96) -> UIImage {
+        // swiftlint:disable:next legacy_objc_type
+        let key = "\(name)-\(side)" as NSString
+        if let cached = cache.object(forKey: key) {
+            return cached
+        }
+        let image = renderImage(for: name, side: side)
+        cache.setObject(image, forKey: key)
+        return image
+    }
+
+    private static func renderImage(for name: String, side: CGFloat) -> UIImage {
         let size = CGSize(width: side, height: side)
         let text = NSAttributedString(
             string: letter(for: name),

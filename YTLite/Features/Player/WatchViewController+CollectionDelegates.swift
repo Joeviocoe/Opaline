@@ -49,7 +49,7 @@ extension WatchViewController: UICollectionViewDataSource {
         // Placeholders while the page loads: an empty list would let the
         // sidebar lay out at no height and come back scrolled.
         return isLoadingRelated
-            ? relatedBatchSize
+            ? WatchPaging.relatedBatch
             : visibleRelatedVideos.count
     }
 
@@ -64,14 +64,7 @@ extension WatchViewController: UICollectionViewDataSource {
         ) as? VideoCell else {
             return UICollectionViewCell()
         }
-        let video: Video? = if isPlaylistMode {
-            indexPath.section == 0
-                ? queue.videos[safe: indexPath.item + 1]
-                : visibleRelatedVideos[safe: indexPath.item]
-        } else {
-            visibleRelatedVideos[safe: indexPath.item]
-        }
-        guard let video else {
+        guard let video = relatedVideo(at: indexPath) else {
             cell.configureSkeleton()
             return cell
         }
@@ -131,17 +124,36 @@ extension WatchViewController: UICollectionViewDelegate {
         _ collectionView: UICollectionView,
         didSelectItemAt indexPath: IndexPath
     ) {
-        let video: Video? = if isPlaylistMode {
-            indexPath.section == 0
-                ? queue.videos[safe: indexPath.item + 1]
-                : visibleRelatedVideos[safe: indexPath.item]
-        } else {
-            visibleRelatedVideos[safe: indexPath.item]
-        }
-        guard let video else {
+        guard let video = relatedVideo(at: indexPath) else {
             return
         }
         navigateTo(video)
+    }
+
+    /// Related cells show the uploader's avatar; fetching that for the
+    /// whole related list up front (~20 channels) at playback start was the
+    /// fan-out — load it lazily, one channel per cell, as it scrolls in.
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
+        guard let channelId = relatedVideo(at: indexPath)?.channelId else {
+            return
+        }
+        requestChannelInfo(channelId: channelId)
+    }
+}
+
+extension WatchViewController {
+    /// The collection carries the queue in section 0 when in playlist mode
+    /// (offset by one — the current video is not listed) and the related
+    /// videos otherwise. Shared with prefetching.
+    func relatedVideo(at indexPath: IndexPath) -> Video? {
+        if isPlaylistMode, indexPath.section == 0 {
+            return queue.videos[safe: indexPath.item + 1]
+        }
+        return visibleRelatedVideos[safe: indexPath.item]
     }
 }
 

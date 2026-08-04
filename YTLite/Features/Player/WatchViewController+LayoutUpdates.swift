@@ -21,16 +21,32 @@ extension WatchViewController {
         }
         let resolved = size ?? view.bounds.size
         let isLandscape = resolved.width > resolved.height
+
+        // Deliberately unconditional. Gating this on "the size changed"
+        // looks safe and is not: the rotation's completion pass re-runs it
+        // at the same size precisely to catch the collection view's bounds
+        // once they have settled (see `computeItemSize`). Skipping it left
+        // the related container sized from the pre-rotation width, i.e. a
+        // half-screen gap under the comments.
+        reconfigureLayout(isLandscape: isLandscape, resolved: resolved)
+
+        // These are cheap and must run on every pass.
+        relatedCollectionView.backgroundColor = ThemeManager.shared.background
+        if !isLandscape {
+            relatedCollectionView.alpha = 1
+        }
+        view.bringSubviewToFront(playerContainer)
+        view.bringSubviewToFront(sidebarContainer)
+    }
+
+    /// The size-dependent half of `updateLayoutForSize`, split out only to
+    /// keep that function within the body-length limit.
+    private func reconfigureLayout(isLandscape: Bool, resolved: CGSize) {
         if isLandscape {
             activateLandscapeLayout()
         } else {
             activatePortraitLayout()
         }
-        relatedCollectionView.backgroundColor = ThemeManager.shared.background
-        let expected = isLandscape ? landscapeRelatedLayout : portraitRelatedLayout
-        if !isLandscape { relatedCollectionView.alpha = 1 }
-        view.bringSubviewToFront(playerContainer)
-        view.bringSubviewToFront(sidebarContainer)
         if let sv = relatedCollectionView.superview {
             sv.setNeedsLayout()
             sv.layoutIfNeeded()
@@ -40,6 +56,7 @@ extension WatchViewController {
         }
         // Swap last: applying a layout that still carries the item size from
         // the previous width makes the flow layout complain.
+        let expected = isLandscape ? landscapeRelatedLayout : portraitRelatedLayout
         if relatedCollectionView.collectionViewLayout !== expected {
             relatedCollectionView.setCollectionViewLayout(expected, animated: false)
         }

@@ -50,12 +50,10 @@ final class WatchViewController: UIViewController {
     var isSubscribed: Bool = false
     var allRelatedVideos: [Video] = []
     var visibleRelatedVideos: [Video] = []
-    let relatedBatchSize = 5
     var comments: [Comment] = []
     var commentsContinuation: String?
     var playlistOptions: [PlaylistAddOption]?
     var visibleCommentsCount = 10
-    let commentsPageSize = 10
     var videoPlayerView: VideoPlayerView?
     /// Retains the active resource loader (AVURLAsset holds its delegate weakly),
     /// e.g. a source's HLS proxy.
@@ -66,6 +64,19 @@ final class WatchViewController: UIViewController {
     /// be rebuilt when the theme changes.
     var descriptionText = ""
     var isLoadingComments = false
+    /// The watch page is applied twice (cache, then network) but its
+    /// one-shot side effects — RYD/SponsorBlock, playlist prefetch,
+    /// comments — must start only once per video. Set to the videoId whose
+    /// side effects already started; nil once the controller moves on.
+    var sideEffectsStartedForVideoId: String?
+    /// Cached result of the last `applyDescriptionText()` run, keyed by the
+    /// inputs that affect it, so an unrelated re-apply (e.g. the watch page
+    /// landing twice) doesn't re-run the linkify pass.
+    var descriptionAttributedCache: DescriptionAttributedCache?
+    /// Related-sidebar channel avatars load lazily as cells scroll into
+    /// view (see `WatchViewController+CollectionDelegates.swift`), capped
+    /// to a few in flight at once instead of firing for the whole list.
+    var channelFetches = ChannelFetchQueue()
     let sponsorBlock = SponsorBlockController()
     var autoplayOverlay: AutoplayOverlayView?
     let playbackFacade = PlaybackFacade()

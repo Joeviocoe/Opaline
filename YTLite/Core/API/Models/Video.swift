@@ -201,11 +201,4 @@ final class ChannelInfoStore {
             }
         }
     }
-
-    func preload(channelIds: [String]) {
-        let uniqueIds = Array(Set(channelIds))
-        uniqueIds.forEach { channelId in
-            fetch(channelId: channelId) { _ in }
-        }
-    }
 }

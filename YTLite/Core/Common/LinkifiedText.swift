@@ -17,6 +17,10 @@ enum LinkifiedText {
         pattern: #"(?<!\d)[(\[]?(\d{1,2}:)?[0-5]?\d:[0-5]\d[)\]]?(?!\d)"#
     )
 
+    private static let linkDetector = try? NSDataDetector(
+        types: NSTextCheckingResult.CheckingType.link.rawValue
+    )
+
     static func attributedString(
         from text: String,
         font: UIFont,
@@ -28,9 +32,7 @@ enum LinkifiedText {
             attributes: [.font: font, .foregroundColor: color]
         )
         let fullRange = NSRange(text.startIndex..., in: text)
-        if let detector = try? NSDataDetector(
-            types: NSTextCheckingResult.CheckingType.link.rawValue
-        ) {
+        if let detector = linkDetector {
             for match in detector.matches(in: text, range: fullRange) {
                 guard let url = match.url else {
                     continue
