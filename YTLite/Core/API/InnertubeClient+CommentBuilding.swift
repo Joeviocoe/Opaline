@@ -224,9 +224,7 @@ private extension InnertubeClient {
             authorName: commentAuthorName(author),
             authorChannelId: author["channelId"]
                 as? String,
-            authorAvatarURL: extractThumbnailURL(
-                from: avatar?["image"]
-            ),
+            authorAvatarURL: commentAvatarURL(author: author, avatar: avatar),
             content: content,
             publishedTime: properties[
                 "publishedTime"
@@ -236,6 +234,20 @@ private extension InnertubeClient {
             isPinned: viewModel["pinnedText"] != nil
                 || thread["pinnedCommentBadge"] != nil
         )
+    }
+
+    /// Comments moved the avatar to a plain `avatarThumbnailUrl` string on
+    /// the author; the `avatar.image` object they used to carry is gone from
+    /// the mutation entirely. The old path stays as a fallback in case the
+    /// two shapes coexist.
+    static func commentAvatarURL(
+        author: [String: Any],
+        avatar: [String: Any]?
+    ) -> String? {
+        if let url = author["avatarThumbnailUrl"] as? String, !url.isEmpty {
+            return url
+        }
+        return extractThumbnailURL(from: avatar?["image"])
     }
 
     static func commentAuthorName(
