@@ -55,51 +55,52 @@ extension WatchViewController {
         let tl = titleLabel
         let ab = actionBar
         let cs = commentsStackView
-        let lb = loadMoreCommentsButton
         let cv = contentView
-        let rv = relatedCollectionView
-        let cl = commentsLabel
+        let hs = commentsHeaderStack
         activateActionAndCommentConstraints(
             titleLabel: tl,
             actionBar: ab,
-            commentsLabel: cl,
-            commentsStack: cs,
-            loadMoreButton: lb
+            commentsHeader: hs,
+            commentsStack: cs
         )
-        bottomCommentsConstraint = lb.bottomAnchor
+        bottomCommentsConstraint = cs.bottomAnchor
             .constraint(equalTo: cv.bottomAnchor, constant: -16)
-        relatedPortraitConstraints = [
-            rv.topAnchor.constraint(equalTo: lb.bottomAnchor, constant: 20),
-            rv.leadingAnchor.constraint(equalTo: cv.leadingAnchor),
-            rv.trailingAnchor.constraint(equalTo: cv.trailingAnchor),
-            relatedHeightConstraint,
-            rv.bottomAnchor.constraint(equalTo: cv.bottomAnchor, constant: -16)
-        ].compactMap { $0 }
-        NSLayoutConstraint.activate(relatedPortraitConstraints)
+        activateSlotConstraints(below: cs)
     }
 
-    // swiftlint:disable:next function_parameter_count
+    /// Related always occupies this slot in portrait now — the comments
+    /// panel floats above it as a separate overlay (see
+    /// `WatchViewController+CommentsPanel`), so it no longer shares the slot.
+    private func activateSlotConstraints(below cs: UIStackView) {
+        let cv = contentView
+        let rv = relatedCollectionView
+        relatedSlot.portrait = [
+            rv.topAnchor.constraint(equalTo: cs.bottomAnchor, constant: 20),
+            rv.leadingAnchor.constraint(equalTo: cv.leadingAnchor),
+            rv.trailingAnchor.constraint(equalTo: cv.trailingAnchor),
+            relatedSlot.height,
+            rv.bottomAnchor.constraint(equalTo: cv.bottomAnchor, constant: -16)
+        ].compactMap { $0 }
+        NSLayoutConstraint.activate(relatedSlot.portrait)
+    }
+
     private func activateActionAndCommentConstraints(
         titleLabel tl: UILabel,
         actionBar ab: UIStackView,
-        commentsLabel cl: UILabel,
-        commentsStack cs: UIStackView,
-        loadMoreButton lb: UIButton
+        commentsHeader hs: UIView,
+        commentsStack cs: UIStackView
     ) {
         NSLayoutConstraint.activate([
             ab.topAnchor.constraint(equalTo: channelAvatarView.bottomAnchor, constant: 16),
             ab.leadingAnchor.constraint(equalTo: tl.leadingAnchor),
             ab.trailingAnchor.constraint(equalTo: tl.trailingAnchor),
             ab.heightAnchor.constraint(equalToConstant: 52),
-            cl.topAnchor.constraint(equalTo: ab.bottomAnchor, constant: 20),
-            cl.leadingAnchor.constraint(equalTo: tl.leadingAnchor),
-            cl.trailingAnchor.constraint(equalTo: tl.trailingAnchor),
-            cs.topAnchor.constraint(equalTo: cl.bottomAnchor, constant: 12),
+            hs.topAnchor.constraint(equalTo: ab.bottomAnchor, constant: 20),
+            hs.leadingAnchor.constraint(equalTo: tl.leadingAnchor),
+            hs.trailingAnchor.constraint(equalTo: tl.trailingAnchor),
+            cs.topAnchor.constraint(equalTo: hs.bottomAnchor, constant: 12),
             cs.leadingAnchor.constraint(equalTo: tl.leadingAnchor),
-            cs.trailingAnchor.constraint(equalTo: tl.trailingAnchor),
-            lb.topAnchor.constraint(equalTo: cs.bottomAnchor, constant: 12),
-            lb.leadingAnchor.constraint(equalTo: tl.leadingAnchor),
-            lb.trailingAnchor.constraint(equalTo: tl.trailingAnchor)
+            cs.trailingAnchor.constraint(equalTo: tl.trailingAnchor)
         ])
     }
 }

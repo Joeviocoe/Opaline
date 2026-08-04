@@ -164,16 +164,6 @@ extension WatchViewController {
     }
 
     @objc
-    func loadMoreCommentsTapped() {
-        if visibleCommentsCount < comments.count {
-            visibleCommentsCount += WatchPaging.commentsPage
-            renderComments()
-        } else if let continuation = commentsContinuation {
-            loadComments(continuation: continuation)
-        }
-    }
-
-    @objc
     func closeTapped() {
         exitFullscreenIfNeeded()
         if videoHistory.isEmpty {

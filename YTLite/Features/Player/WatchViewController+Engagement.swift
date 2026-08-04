@@ -44,6 +44,36 @@ extension WatchViewController {
 
     // MARK: - Theming
 
+    private func applyThemeToText(_ theme: ThemeManager) {
+        for label in [titleLabel, channelNameLabel, commentsLabel] {
+            label.textColor = theme.primaryText
+        }
+        for label in [metaLabel, channelMetaLabel, likeCountLabel, dislikeCountLabel] {
+            label.textColor = theme.secondaryText
+        }
+        descriptionButton.setTitleColor(theme.secondaryText, for: .normal)
+        applyDescriptionText()
+    }
+
+    /// Reaches every surface that can show a comment, including the panel
+    /// (open or not — it may be off-screen but attached, or entirely
+    /// detached) and the table's cells. Cells read `ThemeManager.shared` at
+    /// `configure(_:linkDelegate:)` time (see `CommentContentView`), so a
+    /// `reloadData()` here is enough to repaint both the currently visible
+    /// rows and any already-dequeued ones the next time they're reused.
+    private func applyThemeToComments(_ theme: ThemeManager) {
+        // The fill lives on `commentsPreviewCard`, not on the stack view —
+        // a stack view ignores `backgroundColor` before iOS 14.
+        commentsPreviewCard.backgroundColor = theme.surface
+        // `surface` sits close to `background` in both themes, so the card
+        // needs an outline of its own to read as a separate block.
+        commentsPreviewCard.layer.borderWidth = 1
+        commentsPreviewCard.layer.borderColor = theme.separator.cgColor
+        commentPreviewContentView.applyTheme()
+        commentsPanel.applyTheme(theme)
+        commentsTableView.reloadData()
+    }
+
     @objc
     func applyTheme() {
         let theme = ThemeManager.shared
@@ -52,19 +82,8 @@ extension WatchViewController {
         contentView.backgroundColor = theme.background
         relatedCollectionView.backgroundColor = theme.background
         sidebarContainer.backgroundColor = theme.background
-        titleLabel.textColor = theme.primaryText
-        channelNameLabel.textColor = theme.primaryText
-        commentsLabel.textColor = theme.primaryText
-        metaLabel.textColor = theme.secondaryText
-        channelMetaLabel.textColor = theme.secondaryText
-        applyDescriptionText()
-        likeCountLabel.textColor = theme.secondaryText
-        dislikeCountLabel.textColor = theme.secondaryText
-        descriptionButton.setTitleColor(theme.secondaryText, for: .normal)
-        loadMoreCommentsButton.setTitleColor(
-            theme.isDark ? .white : theme.accent,
-            for: .normal
-        )
+        applyThemeToText(theme)
+        applyThemeToComments(theme)
         for btn in [likeButton, dislikeButton, shareButton, saveButton, downloadButton] {
             btn.tintColor = theme.primaryText
         }

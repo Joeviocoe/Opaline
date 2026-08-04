@@ -1,12 +1,13 @@
 import UIKit
 
-/// Bookkeeping for the lazy related-channel fetches. `inFlight` is not
-/// reset on a video switch on purpose — the outstanding completions still
-/// decrement it, so zeroing it here would drive it negative.
-struct ChannelFetchQueue {
-    var pending: [String] = []
-    var inFlight = 0
-    var requested: Set<String> = []
+/// Portrait and landscape constraint sets for whichever view occupies the
+/// slot below the description. The related list and the comments table swap
+/// in and out of that one slot, so they carry identical bookkeeping.
+struct SlotLayout {
+    var portrait: [NSLayoutConstraint] = []
+    var landscape: [NSLayoutConstraint] = []
+    var height: NSLayoutConstraint?
+    var isLandscape = false
 }
 
 /// Paging sizes for the two lazily-revealed lists on the watch screen.

@@ -286,26 +286,78 @@ extension WatchViewController {
 
     func setupCommentsSection() {
         let cv = contentView
-        for item in [commentsLabel, commentsStackView, loadMoreCommentsButton] {
+        for item in [commentsHeaderStack, commentsStackView] {
             item.translatesAutoresizingMaskIntoConstraints = false
         }
-        commentsLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        commentsLabel.text = "player.comments.title".localized
-        cv.addSubview(commentsLabel)
+        setupCommentsHeader()
+        cv.addSubview(commentsHeaderStack)
         commentsStackView.axis = .vertical
         commentsStackView.spacing = 12
+        commentsStackView.isUserInteractionEnabled = true
+        commentsStackView.isLayoutMarginsRelativeArrangement = true
+        commentsStackView.layoutMargins = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        setupCommentsPreviewCard()
+        // The whole section opens the panel — the header row, the card and
+        // the gaps between them, not just the comment text.
+        let expandTap = #selector(expandComments)
+        for area in [commentsStackView, commentsHeaderStack, commentsLabel] {
+            area.isUserInteractionEnabled = true
+            area.addGestureRecognizer(
+                UITapGestureRecognizer(target: self, action: expandTap)
+            )
+        }
         cv.addSubview(commentsStackView)
-        loadMoreCommentsButton.contentHorizontalAlignment = .left
-        loadMoreCommentsButton.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
-        loadMoreCommentsButton.setTitle(
-            "player.comments.loadMore".localized, for: .normal
+        setupCommentsTableView()
+        setupCommentsPanel()
+    }
+
+    /// The always-visible "Comments" title above the collapsed preview card
+    /// — tap to expand. The panel that opens owns its own title + close.
+    private func setupCommentsHeader() {
+        commentsLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        commentsLabel.text = "player.comments.title".localized
+        commentsHeaderStack.axis = .horizontal
+        commentsHeaderStack.alignment = .center
+        commentsHeaderStack.addArrangedSubview(commentsLabel)
+    }
+
+    private func setupCommentsTableView() {
+        let tv = commentsTableView
+        tv.register(CommentCell.self, forCellReuseIdentifier: CommentCell.reuseId)
+        tv.register(CommentStatusCell.self, forCellReuseIdentifier: CommentStatusCell.reuseId)
+        tv.dataSource = self
+        tv.delegate = self
+        tv.rowHeight = UITableView.automaticDimension
+        tv.estimatedRowHeight = 80
+        tv.contentInsetAdjustmentBehavior = .never
+        tv.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 16)
+    }
+
+    private func setupCommentsPanel() {
+        commentsPanel.closeButton.addTarget(
+            self, action: #selector(collapseComments), for: .touchUpInside
         )
-        loadMoreCommentsButton.addTarget(
-            self,
-            action: #selector(loadMoreCommentsTapped),
-            for: .touchUpInside
-        )
-        cv.addSubview(loadMoreCommentsButton)
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCommentsPanelPan))
+        commentsPanel.dragRegion.addGestureRecognizer(pan)
+        commentsPanel.isHidden = true
+    }
+
+    /// A UIStackView does not draw its own `backgroundColor` before iOS 14 —
+    /// it is a non-rendering view there, so the card was invisible on the
+    /// target device while looking correct on modern iOS. The fill goes on a
+    /// plain subview pinned behind the arranged content instead.
+    private func setupCommentsPreviewCard() {
+        let card = commentsPreviewCard
+        commentsStackView.insertSubview(card, at: 0)
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.layer.cornerRadius = 12
+        card.isUserInteractionEnabled = false
+        NSLayoutConstraint.activate([
+            card.topAnchor.constraint(equalTo: commentsStackView.topAnchor),
+            card.bottomAnchor.constraint(equalTo: commentsStackView.bottomAnchor),
+            card.leadingAnchor.constraint(equalTo: commentsStackView.leadingAnchor),
+            card.trailingAnchor.constraint(equalTo: commentsStackView.trailingAnchor)
+        ])
     }
 
     func setupRelatedCollection() {
@@ -329,7 +381,7 @@ extension WatchViewController {
         // that pushes the first related video down or off-screen.
         rv.contentInsetAdjustmentBehavior = .never
         contentView.addSubview(rv)
-        relatedHeightConstraint = rv.heightAnchor.constraint(equalToConstant: 0)
+        relatedSlot.height = rv.heightAnchor.constraint(equalToConstant: 0)
     }
 
     /// The nav bar does not always contribute its height to

@@ -2,9 +2,6 @@
 import AVFoundation
 import UIKit
 
-/// In-flight cap for the lazy related-channel fetches below.
-private let maxChannelInfoFetches = 3
-
 // MARK: - Vote Formatting
 
 private func formatVoteCount(_ count: Int) -> String {
@@ -69,37 +66,6 @@ extension WatchViewController {
                 return
             }
             channelAvatarView.setImage(url: url)
-        }
-    }
-
-    /// Enqueues a related-sidebar channel fetch, capped to a few in flight
-    /// at once — called from `willDisplay` in
-    /// `WatchViewController+CollectionDelegates.swift` as cells scroll into
-    /// view, replacing the eager fetch of the whole related list at once.
-    /// `ChannelInfoStore` already caches per channel and coalesces
-    /// duplicate in-flight requests, so this only needs to remember which
-    /// channels this screen already asked for.
-    func requestChannelInfo(channelId: String) {
-        guard !channelFetches.requested.contains(channelId) else {
-            return
-        }
-        channelFetches.requested.insert(channelId)
-        channelFetches.pending.append(channelId)
-        drainChannelInfoQueue()
-    }
-
-    private func drainChannelInfoQueue() {
-        while channelFetches.inFlight < maxChannelInfoFetches,
-              !channelFetches.pending.isEmpty {
-            let channelId = channelFetches.pending.removeFirst()
-            channelFetches.inFlight += 1
-            channelInfoStore.fetch(channelId: channelId) { [weak self] _ in
-                guard let self else {
-                    return
-                }
-                channelFetches.inFlight -= 1
-                drainChannelInfoQueue()
-            }
         }
     }
 
@@ -249,12 +215,12 @@ extension WatchViewController {
     }
 
     func applyEngagementData(from page: WatchPage) {
+        // The watch page never carries these — they arrive later from
+        // Return YouTube Dislike, and this runs again when the network page
+        // lands, so writing a placeholder here wiped the real numbers.
         if let count = page.likeCount {
             likeCountLabel.text = count
-        } else {
-            likeCountLabel.text = "—"
         }
-        dislikeCountLabel.text = "—"
         currentLikeStatus =
             page.likeStatus ?? .indifferent
         updateLikeDislikeUI()
@@ -450,8 +416,6 @@ extension WatchViewController {
         allRelatedVideos = []
         visibleRelatedVideos = []
         sideEffectsStartedForVideoId = nil
-        channelFetches.pending = []
-        channelFetches.requested = []
         relatedCollectionView.reloadData()
         // The screen is reused for the next video, and in landscape the
         // sidebar scrolls on its own — without this the new list opens at
@@ -466,9 +430,13 @@ extension WatchViewController {
         dislikeCountLabel.text = "—"
         currentLikeStatus = .indifferent
         sponsorBlock.reset()
+        // Returns to the collapsed preview and drops the previous video's
+        // rows before `resetComments()`/`loadInitialState()` render the new
+        // one, so nothing from the old video is ever visible mid-switch.
+        collapseComments()
         commentsStackView.arrangedSubviews
             .forEach { $0.removeFromSuperview() }
-        loadMoreCommentsButton.isHidden = true
+        commentsTableView.reloadData()
     }
 
     /// Seeks the active player to an absolute position, used by tapped

@@ -8,28 +8,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// the decision is re-taken in `applicationDidBecomeActive`.
     var deferredAuthPresentation = false
     private let dependencies = AppDependencies.live()
+    /// Built during the splash, handed over by `showMain`.
+    private var preloadedMain: UIViewController?
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        runMigrations()
-        configureSharedDependencies()
-        ThemeManager.shared.applyGlobal()
-        BackgroundPlaybackService.apply()
-        application.beginReceivingRemoteControlEvents()
-        configureLegacyBackgroundFetch(application)
-        UNUserNotificationCenter.current().delegate = self
-        if ReturnYouTubeDislikeService.enabled {
-            ReturnYouTubeDislikeService.shared.prepareIfNeeded()
-        }
-        if UserDefaults.standard.bool(forKey: UserDefaultsKeys.Debug.mainThreadWatchdog) {
-            startMainThreadWatchdog()
-        }
+        configureServices(application)
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = makeSplashViewController()
         window?.makeKeyAndVisible()
         applyWindowTheme()
+        // Build the real UI while the splash is still covering the screen.
+        // Its fade is a Core Animation animation, so it keeps running on the
+        // render server even though this blocks the main thread for a while
+        // — the cold-start cost is paid behind the logo instead of in front
+        // of the user. Deferred by one turn so the splash gets its first
+        // frame out before we take the thread.
+        DispatchQueue.main.async { [weak self] in
+            self?.preloadMainIfNeeded()
+        }
 
         NotificationCenter.default.addObserver(
             self,
@@ -88,6 +87,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             showMain()
         } else {
             showAuth()
+        }
+    }
+
+    private func configureServices(_ application: UIApplication) {
+        runMigrations()
+        configureSharedDependencies()
+        ThemeManager.shared.applyGlobal()
+        BackgroundPlaybackService.apply()
+        application.beginReceivingRemoteControlEvents()
+        configureLegacyBackgroundFetch(application)
+        UNUserNotificationCenter.current().delegate = self
+        if ReturnYouTubeDislikeService.enabled {
+            ReturnYouTubeDislikeService.shared.prepareIfNeeded()
+        }
+        if UserDefaults.standard.bool(forKey: UserDefaultsKeys.Debug.mainThreadWatchdog) {
+            startMainThreadWatchdog()
         }
     }
 
@@ -156,7 +171,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func showMain() {
-        window?.rootViewController = makeMain(dependencies: dependencies)
+        preloadMainIfNeeded()
+        window?.rootViewController = preloadedMain
+            ?? makeMain(dependencies: dependencies)
+        preloadedMain = nil
+    }
+
+    /// Constructs the tab bar and forces the first screen through a full
+    /// load-and-layout pass, which is where the ~850ms of cold-start work
+    /// lives (three navigation controllers, the tab icons, the feed's cache
+    /// read and the first `reloadData`). Idempotent and cheap to call twice.
+    private func preloadMainIfNeeded() {
+        guard preloadedMain == nil, let window else {
+            return
+        }
+        guard OAuthClient.shared.isSignedIn
+            || OAuthClient.shared.isAnonymous
+        else {
+            return
+        }
+        let main = makeMain(dependencies: dependencies)
+        main.view.frame = window.bounds
+        main.view.layoutIfNeeded()
+        preloadedMain = main
     }
 
     private func makeMain(dependencies: AppDependencies) -> UIViewController {

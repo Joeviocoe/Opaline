@@ -37,6 +37,10 @@ extension WatchViewController {
         }
         view.bringSubviewToFront(playerContainer)
         view.bringSubviewToFront(sidebarContainer)
+        // The portrait panel can overlap the player at its expanded detent —
+        // a no-op if it's currently attached to `sidebarContainer` instead
+        // (landscape) or not attached at all (collapsed).
+        view.bringSubviewToFront(commentsPanel)
     }
 
     /// The size-dependent half of `updateLayoutForSize`, split out only to
@@ -54,6 +58,7 @@ extension WatchViewController {
         if relatedCollectionView.bounds.width > 0 {
             updateRelatedLayout(isLandscape: isLandscape, containerSize: resolved)
         }
+        layoutCommentsPanel(isLandscape: isLandscape)
         // Swap last: applying a layout that still carries the item size from
         // the previous width makes the flow layout complain.
         let expected = isLandscape ? landscapeRelatedLayout : portraitRelatedLayout
@@ -179,19 +184,23 @@ extension WatchViewController {
             * WatchViewController.relatedHeaderHeight
         let total = playlistHeight
             + relatedHeight + totalHeaders
-        let desired = isLandscape ? 0 : total
-        if relatedHeightConstraint?.constant != desired {
-            relatedHeightConstraint?.constant = desired
+        // Portrait: related is always full height — the comments panel is a
+        // floating overlay above it now, not a slot swap (see
+        // `WatchViewController+CommentsPanel`). Landscape still swaps: the
+        // panel and related share the sidebar slot there.
+        let desired = (isLandscape && isCommentsExpanded) ? 0 : total
+        if relatedSlot.height?.constant != desired {
+            relatedSlot.height?.constant = desired
         }
     }
 
     func moveRelatedCollection(toLandscape isLandscape: Bool) {
-        guard isShowingLandscapeRelated != isLandscape else {
+        guard relatedSlot.isLandscape != isLandscape else {
             return
         }
         let old = isLandscape
-            ? relatedPortraitConstraints
-            : relatedLandscapeConstraints
+            ? relatedSlot.portrait
+            : relatedSlot.landscape
         NSLayoutConstraint.deactivate(old)
         relatedCollectionView.removeFromSuperview()
         if isLandscape {
@@ -199,9 +208,16 @@ extension WatchViewController {
         } else {
             relatedCollectionView.isScrollEnabled = false
             contentView.addSubview(relatedCollectionView)
-            NSLayoutConstraint.activate(relatedPortraitConstraints)
+            NSLayoutConstraint.activate(relatedSlot.portrait)
         }
-        isShowingLandscapeRelated = isLandscape
+        relatedSlot.isLandscape = isLandscape
+        // `VideoCell` picks its layout from `forceGridLayout`, which is only
+        // set in `cellForItemAt`. Rotating changes the item size and relays
+        // the existing cells out, but never re-configures them, so cells
+        // built in landscape keep the horizontal arrangement inside a
+        // portrait grid box. Reloading re-runs the configuration; it costs
+        // one pass over the visible cells and only happens on rotation.
+        relatedCollectionView.reloadData()
     }
 
     private func moveLandscapeRelated() {
@@ -212,13 +228,13 @@ extension WatchViewController {
         sidebarContainer.addSubview(relatedCollectionView)
         let rv = relatedCollectionView
         let sc = sidebarContainer
-        relatedLandscapeConstraints = [
+        relatedSlot.landscape = [
             rv.topAnchor.constraint(equalTo: sc.topAnchor),
             rv.leadingAnchor.constraint(equalTo: sc.leadingAnchor),
             rv.trailingAnchor.constraint(equalTo: sc.trailingAnchor),
             rv.bottomAnchor.constraint(equalTo: sc.bottomAnchor)
         ]
-        NSLayoutConstraint.activate(relatedLandscapeConstraints)
+        NSLayoutConstraint.activate(relatedSlot.landscape)
     }
 }
 

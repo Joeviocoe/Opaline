@@ -54,6 +54,8 @@ final class WatchViewController: UIViewController {
     var commentsContinuation: String?
     var playlistOptions: [PlaylistAddOption]?
     var visibleCommentsCount = 10
+    /// Whether the comments panel is on screen (open or opening).
+    var isCommentsExpanded = false
     var videoPlayerView: VideoPlayerView?
     /// Retains the active resource loader (AVURLAsset holds its delegate weakly),
     /// e.g. a source's HLS proxy.
@@ -63,7 +65,10 @@ final class WatchViewController: UIViewController {
     /// Raw (un-linkified) description text, kept so the attributed text can
     /// be rebuilt when the theme changes.
     var descriptionText = ""
-    var isLoadingComments = false
+    /// `hasLoadedComments` separates "nothing yet" from "nothing at
+    /// all": a load is always coming when the screen opens, so the
+    /// empty message must not flash before the first result lands.
+    var isLoadingComments = false, hasLoadedComments = false
     /// The watch page is applied twice (cache, then network) but its
     /// one-shot side effects — RYD/SponsorBlock, playlist prefetch,
     /// comments — must start only once per video. Set to the videoId whose
@@ -73,10 +78,6 @@ final class WatchViewController: UIViewController {
     /// inputs that affect it, so an unrelated re-apply (e.g. the watch page
     /// landing twice) doesn't re-run the linkify pass.
     var descriptionAttributedCache: DescriptionAttributedCache?
-    /// Related-sidebar channel avatars load lazily as cells scroll into
-    /// view (see `WatchViewController+CollectionDelegates.swift`), capped
-    /// to a few in flight at once instead of firing for the whole list.
-    var channelFetches = ChannelFetchQueue()
     let sponsorBlock = SponsorBlockController()
     var autoplayOverlay: AutoplayOverlayView?
     let playbackFacade = PlaybackFacade()
@@ -117,10 +118,20 @@ final class WatchViewController: UIViewController {
     let descriptionLabel = UITextView()
     let descriptionButton = UIButton(type: .system)
     let commentsLabel = UILabel()
-    let commentsStackView = UIStackView()
-    let loadMoreCommentsButton = UIButton(
-        type: .system
+    let commentsHeaderStack = UIStackView()
+    /// Collapsed state: holds at most one row (skeleton, empty message, or
+    /// the single preview comment) — never the full list. Also the card
+    /// itself: `applyTheme` gives it a distinct background.
+    /// The preview row, plus the plain view that draws the card behind it —
+    /// a stack view ignores `backgroundColor` before iOS 14.
+    let commentsStackView = UIStackView(), commentsPreviewCard = UIView()
+    let commentsTableView = UITableView(
+        frame: .zero, style: .plain
     )
+    /// The one instance that ever backs the collapsed preview row.
+    let commentPreviewContentView = CommentContentView()
+    /// Expanded-panel chrome — see `WatchViewController+CommentsPanel`.
+    lazy var commentsPanel = CommentsPanelView(tableView: commentsTableView)
     let actionBar = UIStackView()
     let likeButton = UIButton(type: .system)
     let dislikeButton = UIButton(type: .system)
@@ -129,14 +140,19 @@ final class WatchViewController: UIViewController {
     let downloadButton = UIButton(type: .system)
     let likeCountLabel = UILabel()
     let dislikeCountLabel = UILabel()
-    var likeCount: String?
-    var dislikeCount: String?
+    var likeCount: String?, dislikeCount: String?
     var currentLikeStatus: LikeStatus = .indifferent
 
     // MARK: - Constraints
 
     var playerAspectConstraint: NSLayoutConstraint?
-    var relatedHeightConstraint: NSLayoutConstraint?
+    var relatedSlot = SlotLayout()
+    /// Portrait panel's draggable top edge, in `view` coordinates. `.landscape`/
+    /// `.isLandscape` on the slot double as the sidebar bookkeeping when it isn't.
+    var commentsPanelTopConstraint: NSLayoutConstraint?, commentsPanelSlot = SlotLayout()
+    /// True mid-pan (layout passes must not fight the user's finger); true
+    /// when resting at the full-screen detent rather than below the player.
+    var isDraggingCommentsPanel = false, isCommentsPanelDetentExpanded = false
     var playerTopConstraint: NSLayoutConstraint?
     var playerLeadingConstraint: NSLayoutConstraint?
     var playerTrailingConstraint: NSLayoutConstraint?
@@ -149,9 +165,6 @@ final class WatchViewController: UIViewController {
     var sidebarBottomConstraint: NSLayoutConstraint?
     var sidebarWidthConstraint: NSLayoutConstraint?
     var bottomCommentsConstraint: NSLayoutConstraint?
-    var relatedPortraitConstraints: [NSLayoutConstraint] = []
-    var relatedLandscapeConstraints: [NSLayoutConstraint] = []
-    var isShowingLandscapeRelated = false
     /// Related is a skeleton until the watch page answers.
     var isLoadingRelated = true
     var fullscreenSnapshot: FullscreenSnapshot?

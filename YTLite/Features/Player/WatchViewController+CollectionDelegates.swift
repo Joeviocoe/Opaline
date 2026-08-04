@@ -129,20 +129,6 @@ extension WatchViewController: UICollectionViewDelegate {
         }
         navigateTo(video)
     }
-
-    /// Related cells show the uploader's avatar; fetching that for the
-    /// whole related list up front (~20 channels) at playback start was the
-    /// fan-out — load it lazily, one channel per cell, as it scrolls in.
-    func collectionView(
-        _ collectionView: UICollectionView,
-        willDisplay cell: UICollectionViewCell,
-        forItemAt indexPath: IndexPath
-    ) {
-        guard let channelId = relatedVideo(at: indexPath)?.channelId else {
-            return
-        }
-        requestChannelInfo(channelId: channelId)
-    }
 }
 
 extension WatchViewController {

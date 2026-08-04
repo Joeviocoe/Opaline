@@ -29,9 +29,12 @@ class ThumbnailImageView: UIImageView {
 
     func setImage(url: URL, fallback: UIImage? = nil) {
         fallbackImage = fallback
-        let hasContent = (image != nil && !isShowingFallback)
-            || loadToken != nil
-        if currentURL == url, hasContent {
+        // Same URL means the load for it has already been started — leave it
+        // alone. Keying this on "has content" instead meant a view showing a
+        // fallback restarted the fetch on every reconfigure, and with reused
+        // cells that cancelled the in-flight image before it ever landed.
+        // `cancel()` clears `currentURL`, so a genuine reset still reloads.
+        if currentURL == url {
             return
         }
         loadToken?.cancel()
