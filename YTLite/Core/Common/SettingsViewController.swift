@@ -18,6 +18,7 @@ final class SettingsViewController: UIViewController {
         case notificationSettings
         case playbackSource
         case solverEndpoint
+        case mainThreadWatchdog
         case shareLog
     }
     private struct Section {
@@ -113,7 +114,7 @@ final class SettingsViewController: UIViewController {
                 footer: "settings.footer.debug".localized,
                 rows: [
                     .playbackSource, .solverEndpoint,
-                    .shareLog
+                    .mainThreadWatchdog, .shareLog
                 ]
             ),
             Section(header: nil, footer: appVersionFooter, rows: [])
@@ -395,6 +396,23 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 "settings.row.solverServer".localized,
                 value: solverEndpointDisplay
             )
+        case .mainThreadWatchdog:
+            let isOn = UserDefaults.standard.bool(
+                forKey: UserDefaultsKeys.Debug.mainThreadWatchdog
+            )
+            return makeToggleCell(
+                "settings.row.mainThreadWatchdog".localized, isOn: isOn
+            ) {
+                UserDefaults.standard.set(
+                    $0, forKey: UserDefaultsKeys.Debug.mainThreadWatchdog
+                )
+                let appDelegate = UIApplication.shared.delegate as? AppDelegate
+                if $0 {
+                    appDelegate?.startMainThreadWatchdog()
+                } else {
+                    appDelegate?.stopMainThreadWatchdog()
+                }
+            }
         }
     }
 

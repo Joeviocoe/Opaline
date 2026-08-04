@@ -103,6 +103,7 @@ enum UserDefaultsKeys {
     enum Debug {
         static let playbackSource = "debug_playbackSource"
         static let serverBaseURL = "debug_serverBaseURL"
+        static let mainThreadWatchdog = "debug_mainThreadWatchdog"
     }
 
     enum Migration {

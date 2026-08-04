@@ -128,4 +128,5 @@ enum AppLog {
     static func poToken(_ msg: String) { log("PoToken", msg) }
     static func subscribe(_ msg: String) { log("Subscribe", msg) }
     static func notifications(_ msg: String) { log("Notifications", msg) }
+    static func perf(_ msg: String) { log("Perf", msg) }
 }

@@ -275,6 +275,7 @@
 /* Debug rows (values stay technical/English) */
 "settings.row.playbackSource" = "Playback Source";
 "settings.row.solverServer" = "Solver Server";
+"settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
 "settings.row.shareLog" = "Share Debug Log";
 /* Solver-server URL alert */
 "settings.solver.message" = "URL of the solver server.";

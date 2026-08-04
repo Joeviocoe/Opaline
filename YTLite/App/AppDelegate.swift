@@ -23,6 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if ReturnYouTubeDislikeService.enabled {
             ReturnYouTubeDislikeService.shared.prepareIfNeeded()
         }
+        if UserDefaults.standard.bool(forKey: UserDefaultsKeys.Debug.mainThreadWatchdog) {
+            startMainThreadWatchdog()
+        }
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = makeSplashViewController()
         window?.makeKeyAndVisible()
@@ -142,6 +145,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         VideoRouter.shared.watchViewControllerFactory = { [dependencies] video in
             dependencies.makeWatchViewController(video: video)
         }
+    }
+
+    func startMainThreadWatchdog() {
+        MainThreadWatchdog.shared.start { [weak self] in self?.window?.rootViewController }
+    }
+
+    func stopMainThreadWatchdog() {
+        MainThreadWatchdog.shared.stop()
     }
 
     func showMain() {
