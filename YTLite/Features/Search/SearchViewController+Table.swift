@@ -129,9 +129,13 @@ extension SearchViewController: UITableViewDelegate {
         _ tableView: UITableView,
         heightForRowAt indexPath: IndexPath
     ) -> CGFloat {
-        panelMode == .hidden
-            ? UITableView.automaticDimension
-            : Self.panelRowHeight
+        guard panelMode == .hidden else {
+            return Self.panelRowHeight
+        }
+        return SubscriptionVideoCell.rowHeight(
+            forWidth: tableView.bounds.width,
+            title: results[indexPath.row].title
+        )
     }
 
     func tableView(

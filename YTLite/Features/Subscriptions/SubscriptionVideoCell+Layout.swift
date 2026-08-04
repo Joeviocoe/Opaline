@@ -3,6 +3,57 @@ import UIKit
 // MARK: - Layout
 
 extension SubscriptionVideoCell {
+    private static let titleFont = UIFont.systemFont(ofSize: 14, weight: .medium)
+    private static let titleHeightMemoLimit = 300
+    private static var titleHeightMemo: [String: CGFloat] = [:]
+
+    /// Pure text measurement — the single formula both the cell (which has
+    /// a live label to ask) and table view delegates (which don't) use, so
+    /// row heights can never drift from what `layoutSubviews` actually
+    /// draws.
+    ///
+    /// The cap reproduces `titleLabel.numberOfLines = 2`: `boundingRect`
+    /// does not know about it and happily reports three lines for a long
+    /// title, which `UILabel` would then truncate — leaving the row taller
+    /// than the text it shows.
+    static func measuredTitleHeight(text: String, width: CGFloat) -> CGFloat {
+        guard width > 0, !text.isEmpty else {
+            return 0
+        }
+        let bounds = text.boundingRect(
+            with: CGSize(width: width, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: titleFont],
+            context: nil
+        )
+        let twoLines = (titleFont.lineHeight * 2).rounded(.up)
+        return min(bounds.height.rounded(.up), twoLines)
+    }
+
+    /// Row height for the vertical (narrow) layout as a pure function of
+    /// (width, title) — mirrors `sizeThatFits` exactly so delegates can
+    /// compute `heightForRowAt` without a live cell. Memoized per
+    /// (title, width): table view delegates re-ask this every scroll pass.
+    static func rowHeight(forWidth width: CGFloat, title: String) -> CGFloat {
+        guard width <= 500 else {
+            return 220
+        }
+        let textW = width - 12 - 36 - 10 - 12 - 36
+        let key = "\(Int(textW))|\(title)"
+        let titleH: CGFloat
+        if let cached = titleHeightMemo[key] {
+            titleH = cached
+        } else {
+            titleH = measuredTitleHeight(text: title, width: textW)
+            if titleHeightMemo.count >= titleHeightMemoLimit {
+                titleHeightMemo.removeAll()
+            }
+            titleHeightMemo[key] = titleH
+        }
+        let thumbH = (width * 9.0 / 16.0).rounded()
+        return thumbH + 10 + titleH + 4 + 16 + 2 + 16 + 12
+    }
+
     /// UIKit measures a self-sizing row twice — once through
     /// `systemLayoutSizeFitting` and again in `layoutSubviews` — so this
     /// caches the text measurement per cell. Keyed by width: the three
@@ -12,8 +63,8 @@ extension SubscriptionVideoCell {
         if cachedTitleHeight > 0, cachedTitleWidth == width {
             return cachedTitleHeight
         }
-        let height = titleLabel.sizeThatFits(CGSize(width: width, height: 52)).height
-        cachedTitleHeight = min(height, 40)
+        let height = Self.measuredTitleHeight(text: titleLabel.text ?? "", width: width)
+        cachedTitleHeight = height
         cachedTitleWidth = width
         return cachedTitleHeight
     }
@@ -43,14 +94,8 @@ extension SubscriptionVideoCell {
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
         let width = size.width
-        if width > 500 {
-            return CGSize(width: width, height: 220)
-        } else {
-            let thumbH = (width * 9.0 / 16.0).rounded()
-            let textW = width - 12 - 36 - 10 - 12 - 36
-            let titleH = computeTitleHeight(for: textW)
-            return CGSize(width: width, height: thumbH + 10 + titleH + 4 + 16 + 2 + 16 + 12)
-        }
+        let height = Self.rowHeight(forWidth: width, title: titleLabel.text ?? "")
+        return CGSize(width: width, height: height)
     }
 
     override func systemLayoutSizeFitting(

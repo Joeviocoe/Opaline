@@ -102,7 +102,8 @@ class SearchViewController: UIViewController {
         )
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = UITableView.automaticDimension
+        // Heights come from `heightForRowAt`; the estimate keeps the table
+        // asking only for visible rows instead of all of them on reload.
         tableView.estimatedRowHeight = 320
         tableView.separatorInset = UIEdgeInsets(
             top: 0, left: 12, bottom: 0, right: 12

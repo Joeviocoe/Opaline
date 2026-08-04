@@ -82,7 +82,8 @@ final class HistoryViewController: UIViewController {
         )
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = UITableView.automaticDimension
+        // Heights come from `heightForRowAt`; the estimate keeps the table
+        // asking only for visible rows instead of all of them on reload.
         tableView.estimatedRowHeight = 220
         tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false

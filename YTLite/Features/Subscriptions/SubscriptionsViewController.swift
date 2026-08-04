@@ -205,6 +205,11 @@ extension SubscriptionsViewController: UITableViewDelegate {
         videoRouter.open(video: video, from: self)
     }
 
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let title = isLoadingInitial ? "" : videos[indexPath.row].title
+        return SubscriptionVideoCell.rowHeight(forWidth: tableView.bounds.width, title: title)
+    }
+
     func tableView(
         _ tableView: UITableView,
         willDisplay cell: UITableViewCell,
