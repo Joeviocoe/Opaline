@@ -29,12 +29,13 @@ class ThumbnailImageView: UIImageView {
 
     func setImage(url: URL, fallback: UIImage? = nil) {
         fallbackImage = fallback
-        // Same URL means the load for it has already been started — leave it
-        // alone. Keying this on "has content" instead meant a view showing a
-        // fallback restarted the fetch on every reconfigure, and with reused
-        // cells that cancelled the in-flight image before it ever landed.
-        // `cancel()` clears `currentURL`, so a genuine reset still reloads.
-        if currentURL == url {
+        // Deliberately keyed on content, not just the URL: callers clear
+        // `image` and then re-set the same URL to force a reload (see
+        // `ChannelAvatarView.configure`). Skipping on a URL match alone left
+        // those views permanently blank.
+        let hasContent = (image != nil && !isShowingFallback)
+            || loadToken != nil
+        if currentURL == url, hasContent {
             return
         }
         loadToken?.cancel()
