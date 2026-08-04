@@ -61,6 +61,11 @@ extension VideoPlayerView {
 extension VideoPlayerView {
     func setControls(visible: Bool, animated: Bool) {
         controlsVisible = visible
+        // `updateProgress` skips the seek bar while the overlay is hidden,
+        // so catch it up before it comes back into view.
+        if visible, let time = player?.currentTime() {
+            updateProgress(time: time)
+        }
         let targetAlpha: CGFloat = visible ? 1 : 0
         let animDuration = animated ? 0.2 : 0
         UIView.animate(withDuration: animDuration) {

@@ -16,6 +16,12 @@ final class VideoSeekBar: UIControl {
     private var progress: Double = 0
     private var buffer: Double   = 0
     private var segments: [SeekBarSegment] = []
+    /// Track width the segment bars were last built for, or -1 when the
+    /// segment list changed. `layoutSubviews` runs 10x/sec off `setProgress`,
+    /// but the bars only depend on the segments and the width — rebuilding
+    /// them every tick meant creating and destroying a UIView per segment
+    /// forever, even with the controls overlay hidden.
+    private var segmentsLayoutWidth: CGFloat = -1
     private var bufferWidthConstraint: NSLayoutConstraint?
     private var progressWidthConstraint: NSLayoutConstraint?
 
@@ -75,6 +81,7 @@ final class VideoSeekBar: UIControl {
     /// Sets the SponsorBlock segment markers in 0-1 range.
     func setSegments(_ newSegments: [SeekBarSegment]) {
         segments = newSegments
+        segmentsLayoutWidth = -1
         setNeedsLayout()
     }
 
@@ -192,11 +199,12 @@ final class VideoSeekBar: UIControl {
     }
 
     private func layoutSegmentViews() {
-        segmentsView.subviews.forEach { $0.removeFromSuperview() }
         let trackWidth = segmentsView.bounds.width
-        guard trackWidth > 0 else {
+        guard trackWidth > 0, trackWidth != segmentsLayoutWidth else {
             return
         }
+        segmentsLayoutWidth = trackWidth
+        segmentsView.subviews.forEach { $0.removeFromSuperview() }
         for seg in segments {
             let segX = CGFloat(seg.start) * trackWidth
             let segW = max(

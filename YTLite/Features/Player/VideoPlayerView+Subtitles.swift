@@ -21,9 +21,7 @@ extension VideoPlayerView {
             }
             return
         }
-        let cue = subtitleCues.first {
-            time >= $0.start && time < $0.end
-        }
+        let cue = activeCue(at: time)
         if let cue {
             if subtitleLabel.text != cue.text {
                 subtitleLabel.text = cue.text
@@ -36,6 +34,30 @@ extension VideoPlayerView {
                 subtitleLabel.isHidden = true
             }
         }
+    }
+
+    /// Cue covering `time`, or nil in a gap between cues.
+    ///
+    /// Cues are time-ordered, so this binary-searches for the last cue
+    /// starting at or before `time`. A linear scan here cost ~1500
+    /// comparisons per tick on a long video, ten times a second.
+    private func activeCue(at time: Double) -> SubtitleCue? {
+        var low = 0
+        var high = subtitleCues.count - 1
+        var found = -1
+        while low <= high {
+            let mid = (low + high) / 2
+            if subtitleCues[mid].start <= time {
+                found = mid
+                low = mid + 1
+            } else {
+                high = mid - 1
+            }
+        }
+        guard found >= 0, time < subtitleCues[found].end else {
+            return nil
+        }
+        return subtitleCues[found]
     }
 
     func setCaptionTracks(

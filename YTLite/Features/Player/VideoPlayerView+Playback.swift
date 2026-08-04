@@ -256,15 +256,26 @@ extension VideoPlayerView {
             return
         }
         let secs = CMTimeGetSeconds(time)
+        // The overlay is hidden most of the time, and while it is there is
+        // nothing to redraw — but the observer still ticks 10x/sec to drive
+        // SponsorBlock, subtitles and watchtime through `onTimeUpdate`, so
+        // only the seek bar work is skipped.
+        //
         // While the user drags the thumb, `onScrubChanged` owns the label
         // and the bar's fill/thumb — the periodic observer must not fight
         // the finger with the actual playback position (issue: label was
         // unreadable mid-scrub).
-        if !seekBar.isScrubbing {
-            currentTimeLabel.text = formatTime(secs)
+        if controlsVisible, !seekBar.isScrubbing {
+            // This string changes once a second; assigning it every tick
+            // invalidates the label's intrinsic size and relays out the
+            // whole bottom bar.
+            let stamp = formatTime(secs)
+            if currentTimeLabel.text != stamp {
+                currentTimeLabel.text = stamp
+            }
             seekBar.setProgress(secs / duration)
+            updateBuffer(at: time)
         }
-        updateBuffer(at: time)
         onTimeUpdate?(secs)
     }
 
