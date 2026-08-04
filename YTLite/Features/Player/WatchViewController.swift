@@ -152,7 +152,9 @@ final class WatchViewController: UIViewController {
     var commentsPanelTopConstraint: NSLayoutConstraint?, commentsPanelSlot = SlotLayout()
     /// True mid-pan (layout passes must not fight the user's finger); true
     /// when resting at the full-screen detent rather than below the player.
-    var isDraggingCommentsPanel = false, isCommentsPanelDetentExpanded = false
+    /// Set while a drag or a presentation owns the panel's offset, so the
+    /// layout pass leaves it alone instead of snapping it to a detent.
+    var isCommentsPanelOffsetPinned = false, isCommentsPanelDetentExpanded = false
     var playerTopConstraint: NSLayoutConstraint?
     var playerLeadingConstraint: NSLayoutConstraint?
     var playerTrailingConstraint: NSLayoutConstraint?

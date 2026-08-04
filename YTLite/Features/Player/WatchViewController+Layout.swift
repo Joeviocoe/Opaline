@@ -334,9 +334,6 @@ extension WatchViewController {
     }
 
     private func setupCommentsPanel() {
-        commentsPanel.closeButton.addTarget(
-            self, action: #selector(collapseComments), for: .touchUpInside
-        )
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCommentsPanelPan))
         commentsPanel.dragRegion.addGestureRecognizer(pan)
         commentsPanel.isHidden = true

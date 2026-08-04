@@ -1,14 +1,13 @@
 import UIKit
 
 /// The sliding comments panel used by both orientations — a grab handle, a
-/// header row (title + close) and the shared, already-configured comments
+/// header row (just the title) and the shared, already-configured comments
 /// table view. Portrait pins this behind a draggable top constraint owned by
 /// `WatchViewController+CommentsPanel`; landscape drops it into the sidebar
 /// slot with no drag. Either way the table view itself is unchanged — this
 /// type only owns the chrome around it.
 final class CommentsPanelView: UIView {
     let titleLabel = UILabel()
-    let closeButton = UIButton(type: .system)
     /// Handle + header together — the pan gesture in
     /// `WatchViewController+CommentsPanel` is installed on this region so
     /// the table view keeps its own scroll gesture untouched.
@@ -33,7 +32,6 @@ final class CommentsPanelView: UIView {
         backgroundColor = theme.surface
         handle.backgroundColor = theme.secondaryText
         titleLabel.textColor = theme.primaryText
-        closeButton.setTitleColor(theme.isDark ? .white : theme.accent, for: .normal)
         tableView.backgroundColor = theme.surface
     }
 
@@ -46,14 +44,10 @@ final class CommentsPanelView: UIView {
         handle.layer.masksToBounds = true
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        closeButton.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
-        closeButton.setTitle("player.comments.close".localized, for: .normal)
-        closeButton.setContentHuggingPriority(.required, for: .horizontal)
         headerStack.axis = .horizontal
         headerStack.alignment = .center
         headerStack.spacing = 8
         headerStack.addArrangedSubview(titleLabel)
-        headerStack.addArrangedSubview(closeButton)
         addSubviews()
         activateConstraints()
     }

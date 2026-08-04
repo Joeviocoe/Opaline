@@ -132,7 +132,6 @@
 /* Comment reply count; %1$@ = formatted number */
 "player.comments.replies" = "%1$@ replies";
 /* Closes the expanded comments section, restoring the related list */
-"player.comments.close" = "Close";
 
 /* ===== Player: autoplay overlay ===== */
 

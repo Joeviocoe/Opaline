@@ -8,6 +8,15 @@ final class LocalizationManager {
     static let shared = LocalizationManager()
 
     private(set) var bundle: Bundle = .main
+    /// Every `.lproj` is a separate table: a key missing from the active
+    /// language is NOT looked up in the development language, the lookup
+    /// just hands back the key. This is the fallback that does that.
+    private lazy var englishBundle: Bundle? = Bundle.main
+        .path(forResource: "en", ofType: "lproj")
+        .flatMap(Bundle.init(path:))
+    /// Sentinel rather than comparing against the key, so a translation that
+    /// legitimately equals its key isn't mistaken for a miss.
+    private let missing = "\u{0}missing"
 
     private init() {
         reload()
@@ -27,15 +36,24 @@ final class LocalizationManager {
     }
 
     func localized(_ key: String) -> String {
-        bundle.localizedString(forKey: key, value: nil, table: nil)
+        let value = bundle.localizedString(
+            forKey: key, value: missing, table: nil
+        )
+        guard value == missing else {
+            return value
+        }
+        return englishBundle?.localizedString(
+            forKey: key, value: key, table: nil
+        ) ?? key
     }
 }
 
 extension String {
     /// Localized UI string — ALL user-facing text goes through this, never
     /// `NSLocalizedString` directly: the in-app language override needs
-    /// [[LocalizationManager]]'s bundle resolution. Missing keys fall back
-    /// to English (`.strings` runtime behavior), then to the key itself.
+    /// [[LocalizationManager]]'s bundle resolution. A key missing from the
+    /// active language falls back to English, then to the key itself — see
+    /// `LocalizationManager.localized(_:)`, the runtime does not do this.
     var localized: String {
         LocalizationManager.shared.localized(self)
     }

@@ -28,8 +28,14 @@ extension WatchViewController {
         let isLandscape = view.bounds.width > view.bounds.height
         attachCommentsPanel(isLandscape: isLandscape)
         commentsPanel.isHidden = false
+        // `layoutIfNeeded` runs a layout pass, which reaches
+        // `layoutCommentsPanel` and would put the panel straight at its
+        // detent — leaving the animation below nothing to travel. Pinning
+        // the offset keeps the starting position off-screen.
+        isCommentsPanelOffsetPinned = true
         commentsPanelTopConstraint?.constant = commentsPanelOffscreenConstant
         view.layoutIfNeeded()
+        isCommentsPanelOffsetPinned = false
         animateCommentsPanel(toExpandedDetent: false)
     }
 
@@ -61,7 +67,7 @@ extension WatchViewController {
             return
         }
         attachCommentsPanel(isLandscape: isLandscape)
-        guard !commentsPanelSlot.isLandscape, !isDraggingCommentsPanel else {
+        guard !commentsPanelSlot.isLandscape, !isCommentsPanelOffsetPinned else {
             return
         }
         let target = detentConstant(expanded: isCommentsPanelDetentExpanded)
@@ -164,7 +170,7 @@ extension WatchViewController {
         }
         switch gesture.state {
         case .began:
-            isDraggingCommentsPanel = true
+            isCommentsPanelOffsetPinned = true
         case .changed:
             applyCommentsPanelDrag(constraint, gesture: gesture)
         case .ended, .cancelled, .failed:
@@ -190,7 +196,7 @@ extension WatchViewController {
     }
 
     private func finishCommentsPanelDrag(velocity: CGFloat) {
-        isDraggingCommentsPanel = false
+        isCommentsPanelOffsetPinned = false
         guard let constraint = commentsPanelTopConstraint else {
             return
         }
