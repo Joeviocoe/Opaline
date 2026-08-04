@@ -14,33 +14,33 @@ extension WatchViewController {
     /// of position alone.
     private static let flingVelocity: CGFloat = 600
 
+    /// How far the panel travels to be fully off-screen — the sidebar's own
+    /// height in landscape, the whole view in portrait.
+    private var commentsPanelOffscreenConstant: CGFloat {
+        commentsPanelSlot.isLandscape
+            ? sidebarContainer.bounds.height
+            : view.bounds.height
+    }
+
     // MARK: - Present / dismiss
 
     func presentCommentsPanel() {
         let isLandscape = view.bounds.width > view.bounds.height
         attachCommentsPanel(isLandscape: isLandscape)
         commentsPanel.isHidden = false
-        guard !isLandscape else {
-            return
-        }
-        commentsPanelTopConstraint?.constant = view.bounds.height
+        commentsPanelTopConstraint?.constant = commentsPanelOffscreenConstant
         view.layoutIfNeeded()
         animateCommentsPanel(toExpandedDetent: false)
     }
 
     func dismissCommentsPanel() {
-        guard !commentsPanelSlot.isLandscape else {
-            commentsPanel.isHidden = true
-            detachCommentsPanel()
-            relatedCollectionView.isHidden = false
-            return
-        }
         UIView.animate(
             withDuration: 0.22,
             delay: 0,
             options: .curveEaseIn,
             animations: {
-                self.commentsPanelTopConstraint?.constant = self.view.bounds.height
+                self.commentsPanelTopConstraint?.constant =
+                    self.commentsPanelOffscreenConstant
                 self.view.layoutIfNeeded()
             },
             completion: { [weak self] _ in
@@ -49,6 +49,7 @@ extension WatchViewController {
                 }
                 self.commentsPanel.isHidden = true
                 self.detachCommentsPanel()
+                self.relatedCollectionView.isHidden = false
             }
         )
     }
@@ -113,13 +114,18 @@ extension WatchViewController {
         sidebarContainer.addSubview(commentsPanel)
         let cp = commentsPanel
         let sc = sidebarContainer
+        // The top edge is a movable constraint here too, so the same drag
+        // that dismisses the panel in portrait works in the sidebar: it
+        // slides down and uncovers the related list.
+        let top = cp.topAnchor.constraint(equalTo: sc.topAnchor)
         commentsPanelSlot.landscape = [
-            cp.topAnchor.constraint(equalTo: sc.topAnchor),
+            top,
             cp.leadingAnchor.constraint(equalTo: sc.leadingAnchor),
             cp.trailingAnchor.constraint(equalTo: sc.trailingAnchor),
-            cp.bottomAnchor.constraint(equalTo: sc.bottomAnchor)
+            cp.heightAnchor.constraint(equalTo: sc.heightAnchor)
         ]
         NSLayoutConstraint.activate(commentsPanelSlot.landscape)
+        commentsPanelTopConstraint = top
     }
 
     // MARK: - Detents
@@ -127,7 +133,11 @@ extension WatchViewController {
     /// Resting: top edge just below the player. Expanded: top of the safe
     /// area, i.e. full screen.
     private func detentConstant(expanded: Bool) -> CGFloat {
-        expanded ? view.safeAreaInsets.top : playerContainer.frame.maxY
+        guard !commentsPanelSlot.isLandscape else {
+            // The sidebar panel only rests at the top or leaves entirely.
+            return 0
+        }
+        return expanded ? view.safeAreaInsets.top : playerContainer.frame.maxY
     }
 
     private func animateCommentsPanel(toExpandedDetent expanded: Bool) {
@@ -149,9 +159,7 @@ extension WatchViewController {
 
     @objc
     func handleCommentsPanelPan(_ gesture: UIPanGestureRecognizer) {
-        guard !commentsPanelSlot.isLandscape,
-              let constraint = commentsPanelTopConstraint
-        else {
+        guard let constraint = commentsPanelTopConstraint else {
             return
         }
         switch gesture.state {
@@ -176,7 +184,7 @@ extension WatchViewController {
         let delta = gesture.translation(in: view).y
         gesture.setTranslation(.zero, in: view)
         let minConstant = detentConstant(expanded: true)
-        let maxConstant = view.bounds.height
+        let maxConstant = commentsPanelOffscreenConstant
         constraint.constant = min(max(constraint.constant + delta, minConstant), maxConstant)
         view.layoutIfNeeded()
     }
