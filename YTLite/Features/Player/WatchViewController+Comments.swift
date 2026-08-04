@@ -70,11 +70,16 @@ extension WatchViewController {
             } else {
                 appendNewComments(page.comments)
             }
-            setCommentsTitle(
-                page.title
-                    ?? "player.comments.titleCount"
-                        .localized(with: comments.count)
-            )
+            // Only the first page carries the server's total ("546
+            // Comments"); continuations come back without one. Falling back
+            // to the loaded count there rewrote the header down to 29.
+            if let title = page.title {
+                setCommentsTitle(title)
+            } else if continuation == nil {
+                setCommentsTitle(
+                    "player.comments.titleCount".localized(with: comments.count)
+                )
+            }
         }
         renderComments()
     }

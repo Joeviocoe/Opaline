@@ -61,7 +61,10 @@ final class CommentStatusCell: UITableViewCell {
     func configure(text: String?, isSkeleton: Bool, isAction: Bool) {
         skeletonBox.isHidden = !isSkeleton
         messageLabel.isHidden = isSkeleton
-        selectionStyle = isAction ? .default : .none
+        // `.default` paints the row nearly white on tap, which reads as a
+        // material-style ripple and looks nothing like the rest of the app.
+        // The row is a text button; its own colour is the affordance.
+        selectionStyle = .none
         if isSkeleton {
             skeletonBox.showSkeleton()
             return
