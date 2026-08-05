@@ -32,11 +32,13 @@ extension InnertubeClient {
         return percentEncode(base64URLEncoded(root))
     }
 
+    // swiftlint:disable:next function_parameter_count
     static func buildComment(
         commentId: String,
         viewModel: [String: Any],
         thread: [String: Any],
-        mutations: [[String: Any]]
+        mutations: [[String: Any]],
+        replyContinuation: String?
     ) -> Comment? {
         let commentKey = viewModel["commentKey"]
             as? String
@@ -61,7 +63,8 @@ extension InnertubeClient {
             toolbarState: toolbarState,
             toolbarSurface: toolbarSurface,
             viewModel: viewModel,
-            thread: thread
+            thread: thread,
+            replyContinuation: replyContinuation
         )
     }
 
@@ -206,7 +209,8 @@ private extension InnertubeClient {
         toolbarState: [String: Any]?,
         toolbarSurface: [String: Any]?,
         viewModel: [String: Any],
-        thread: [String: Any]
+        thread: [String: Any],
+        replyContinuation: String?
     ) -> Comment? {
         let author = (commentMutation?["author"] as? [String: Any]) ?? [:]
         let toolbar = (commentMutation?["toolbar"] as? [String: Any]) ?? [:]
@@ -232,7 +236,8 @@ private extension InnertubeClient {
             likeCount: commentLikeCount(toolbar),
             replyCount: commentReplyCount(toolbar),
             isPinned: viewModel["pinnedText"] != nil
-                || thread["pinnedCommentBadge"] != nil
+                || thread["pinnedCommentBadge"] != nil,
+            replyContinuation: replyContinuation
         )
     }
 

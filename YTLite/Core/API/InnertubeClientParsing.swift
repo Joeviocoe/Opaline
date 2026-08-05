@@ -75,18 +75,12 @@ extension InnertubeClient {
             as? [String: Any]
         let mutations = batch?["mutations"]
             as? [[String: Any]] ?? []
-        let threads = collectCommentThreads(
-            in: json
-        )
-        let comments = threads.compactMap {
-            parseComment(
-                from: $0, mutations: mutations
-            )
+        let items = commentsItems(in: json)
+        let comments = items.compactMap {
+            parseComment(item: $0, mutations: mutations)
         }
-        let cont = findCommentsContinuation(
-            in: json
-        )
-        let title = findCommentsTitle(in: json)
+        let cont = commentsNextContinuation(in: items)
+        let title = commentsTitle(in: items)
         guard !comments.isEmpty || cont != nil
         else {
             return nil

@@ -110,6 +110,9 @@ struct Comment {
     let likeCount: String?
     let replyCount: String?
     let isPinned: Bool
+    /// Token that loads this thread's replies, `nil` when it has none.
+    /// Replies are one level deep on YouTube — a reply never carries one.
+    let replyContinuation: String?
 }
 
 struct CommentsPage {
