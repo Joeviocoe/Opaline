@@ -10,13 +10,14 @@ extension WatchViewController {
     /// can't be implemented without touching `Core/API`. Falls back to the
     /// first comment if everything happens to be pinned.
     private var previewComment: Comment? {
-        comments.first { !$0.isPinned } ?? comments.first
+        let first = commentThreads.first { !$0.comment.isPinned }
+            ?? commentThreads.first
+        return first?.comment
     }
 
     func resetComments() {
-        comments = []
+        commentThreads = []
         commentsContinuation = nil
-        visibleCommentsCount = WatchPaging.commentsPage
         isLoadingComments = false
         hasLoadedComments = false
         collapseComments()
@@ -29,10 +30,10 @@ extension WatchViewController {
             return
         }
         isLoadingComments = true
-        if comments.isEmpty {
+        if commentThreads.isEmpty {
             commentsLabel.text = "player.comments.loading".localized
-            renderComments()
         }
+        renderComments()
         client.fetchComments(
             videoId: initialVideo.id,
             continuation: continuation,
@@ -59,14 +60,17 @@ extension WatchViewController {
                 "comments load failed "
                 + "\(initialVideo.id): \(error)"
             )
-            if comments.isEmpty {
+            // Dropping the token stops an endless retry loop at the tail of
+            // a list whose next page keeps failing.
+            commentsContinuation = nil
+            if commentThreads.isEmpty {
                 commentsLabel.text =
                     "player.comments.unavailable".localized
             }
         case .success(let page):
             commentsContinuation = page.continuation
             if continuation == nil {
-                comments = page.comments
+                commentThreads = page.comments.map(CommentThread.init)
             } else {
                 appendNewComments(page.comments)
             }
@@ -77,7 +81,8 @@ extension WatchViewController {
                 setCommentsTitle(title)
             } else if continuation == nil {
                 setCommentsTitle(
-                    "player.comments.titleCount".localized(with: comments.count)
+                    "player.comments.titleCount"
+                        .localized(with: commentThreads.count)
                 )
             }
         }
@@ -92,30 +97,95 @@ extension WatchViewController {
     }
 
     func appendNewComments(_ newComments: [Comment]) {
-        let existingIds = Set(comments.map(\.id))
-        let unique = newComments.filter {
-            !existingIds.contains($0.id)
-        }
-        comments.append(contentsOf: unique)
+        let existingIds = Set(commentThreads.map(\.comment.id))
+        commentThreads.append(contentsOf: newComments
+            .filter { !existingIds.contains($0.id) }
+            .map(CommentThread.init))
     }
+
+    // MARK: - Replies
+
+    /// Expands or collapses a thread; the first expansion pulls its replies.
+    func toggleReplies(at index: Int) {
+        guard commentThreads.indices.contains(index) else {
+            return
+        }
+        commentThreads[index].isExpanded.toggle()
+        if commentThreads[index].isExpanded,
+           commentThreads[index].replies.isEmpty {
+            loadReplies(at: index)
+        } else {
+            renderComments()
+        }
+    }
+
+    func loadReplies(at index: Int) {
+        guard commentThreads.indices.contains(index),
+              !commentThreads[index].isLoadingReplies,
+              let token = commentThreads[index].repliesContinuation
+        else {
+            return
+        }
+        commentThreads[index].isLoadingReplies = true
+        renderComments()
+        client.fetchComments(
+            videoId: initialVideo.id,
+            continuation: token,
+            cancellationToken: pageLoadToken
+        ) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.handleRepliesResult(result, at: index)
+            }
+        }
+    }
+
+    private func handleRepliesResult(
+        _ result: Result<CommentsPage, Error>,
+        at index: Int
+    ) {
+        guard commentThreads.indices.contains(index) else {
+            return
+        }
+        commentThreads[index].isLoadingReplies = false
+        switch result {
+        case .failure(let error):
+            AppLog.player("replies load failed: \(error)")
+            commentThreads[index].repliesContinuation = nil
+        case .success(let page):
+            let existing = Set(commentThreads[index].replies.map(\.id))
+            commentThreads[index].replies.append(
+                contentsOf: page.comments.filter {
+                    !existing.contains($0.id)
+                }
+            )
+            commentThreads[index].repliesContinuation = page.continuation
+        }
+        renderComments()
+    }
+
+    // MARK: - Rendering
 
     /// Refreshes both surfaces that can show comments: the always-present
     /// one-row preview, and the expanded table (cheap to reload even while
     /// hidden — only visible rows are ever instantiated).
     func renderComments() {
+        commentRows = buildCommentRows()
         updateCommentsPreview()
         commentsTableView.reloadData()
         view.setNeedsLayout()
     }
 
-    func expandCommentsIfNeeded() {
-        if visibleCommentsCount < comments.count {
-            visibleCommentsCount += WatchPaging.commentsPage
-            renderComments()
-        } else if commentsContinuation != nil,
-                  !isLoadingComments {
-            loadComments(continuation: commentsContinuation)
+    private func buildCommentRows() -> [CommentRow] {
+        guard !commentThreads.isEmpty else {
+            let isDone = hasLoadedComments && !isLoadingComments
+            let empty = "player.comments.unavailableYet".localized
+            return [.status(isDone ? empty : nil)]
         }
+        var rows = commentThreads.commentRows()
+        if isLoadingComments || commentsContinuation != nil {
+            rows.append(.status("player.comments.loading".localized))
+        }
+        return rows
     }
 
     func expandRelatedIfNeeded() {
@@ -146,15 +216,12 @@ extension WatchViewController {
             commentsStackView.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
-        if comments.isEmpty {
+        guard let preview = previewComment else {
             if hasLoadedComments, !isLoadingComments {
                 renderPreviewEmptyMessage()
             } else {
                 renderPreviewSkeleton()
             }
-            return
-        }
-        guard let preview = previewComment else {
             return
         }
         commentPreviewContentView.configure(preview, linkDelegate: self)

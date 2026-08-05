@@ -131,6 +131,12 @@
 "player.comments.likes" = "%1$@ likes";
 /* Comment reply count; %1$@ = formatted number */
 "player.comments.replies" = "%1$@ replies";
+/* Opens a comment's replies when the server sent no count */
+"player.comments.viewReplies" = "View replies";
+/* Collapses a comment's replies */
+"player.comments.hideReplies" = "Hide replies";
+/* Loads the next page of a comment's replies */
+"player.comments.moreReplies" = "Show more replies";
 /* Closes the expanded comments section, restoring the related list */
 
 /* ===== Player: autoplay overlay ===== */

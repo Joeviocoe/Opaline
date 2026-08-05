@@ -6,7 +6,11 @@ import UIKit
 final class CommentCell: UITableViewCell {
     static let reuseId = "CommentCell"
 
+    /// Indent of a reply row relative to a top-level comment.
+    static let replyIndent: CGFloat = 44
+
     private let content = CommentContentView()
+    private var leading: NSLayoutConstraint?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -17,9 +21,13 @@ final class CommentCell: UITableViewCell {
         backgroundColor = .clear
         contentView.backgroundColor = .clear
         contentView.addSubview(content)
+        let leading = content.leadingAnchor.constraint(
+            equalTo: contentView.leadingAnchor, constant: 16
+        )
+        self.leading = leading
         NSLayoutConstraint.activate([
             content.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            content.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            leading,
             content.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             content.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
         ])
@@ -30,8 +38,13 @@ final class CommentCell: UITableViewCell {
         fatalError("Not implemented")
     }
 
-    func configure(_ comment: Comment, linkDelegate: UITextViewDelegate) {
-        content.configure(comment, linkDelegate: linkDelegate)
+    func configure(
+        _ comment: Comment,
+        linkDelegate: UITextViewDelegate,
+        isReply: Bool = false
+    ) {
+        leading?.constant = isReply ? 16 + Self.replyIndent : 16
+        content.configure(comment, linkDelegate: linkDelegate, isReply: isReply)
     }
 }
 
@@ -44,6 +57,7 @@ final class CommentStatusCell: UITableViewCell {
 
     private let messageLabel = UILabel()
     private let skeletonBox = UIView()
+    private var leading: NSLayoutConstraint?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -58,7 +72,15 @@ final class CommentStatusCell: UITableViewCell {
         fatalError("Not implemented")
     }
 
-    func configure(text: String?, isSkeleton: Bool, isAction: Bool) {
+    func configure(
+        text: String?,
+        isSkeleton: Bool,
+        isAction: Bool,
+        isReply: Bool = false
+    ) {
+        // Reply toggles line up with the reply text they open, not with the
+        // parent comment's avatar.
+        leading?.constant = isReply ? 16 + CommentCell.replyIndent : 16
         skeletonBox.isHidden = !isSkeleton
         messageLabel.isHidden = isSkeleton
         // `.default` paints the row nearly white on tap, which reads as a
@@ -89,9 +111,13 @@ final class CommentStatusCell: UITableViewCell {
         }
         let cv = contentView
         let height = skeletonBox.heightAnchor.constraint(equalToConstant: 56)
+        let leading = messageLabel.leadingAnchor.constraint(
+            equalTo: cv.leadingAnchor, constant: 16
+        )
+        self.leading = leading
         NSLayoutConstraint.activate([
             messageLabel.topAnchor.constraint(equalTo: cv.topAnchor, constant: 12),
-            messageLabel.leadingAnchor.constraint(equalTo: cv.leadingAnchor, constant: 16),
+            leading,
             messageLabel.trailingAnchor.constraint(equalTo: cv.trailingAnchor, constant: -16),
             messageLabel.bottomAnchor.constraint(equalTo: cv.bottomAnchor, constant: -12),
             skeletonBox.topAnchor.constraint(equalTo: cv.topAnchor, constant: 8),

@@ -14,7 +14,9 @@ final class CommentContentView: UIView {
     /// Kept so a theme switch can re-render: the body's colours are baked
     /// into its attributed string, so they cannot be restyled in place.
     private var comment: Comment?
+    private var isReply = false
     private weak var linkDelegate: UITextViewDelegate?
+    private var avatarSize: NSLayoutConstraint?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -26,29 +28,31 @@ final class CommentContentView: UIView {
         fatalError("Not implemented")
     }
 
-    func configure(_ comment: Comment, linkDelegate: UITextViewDelegate) {
+    func configure(
+        _ comment: Comment,
+        linkDelegate: UITextViewDelegate,
+        isReply: Bool = false
+    ) {
         self.comment = comment
+        self.isReply = isReply
         self.linkDelegate = linkDelegate
         let url = comment.authorAvatarURL.flatMap { URL(string: $0) }
         avatarView.setAvatar(url: url, name: comment.authorName)
+        avatarSize?.constant = isReply ? 24 : 32
+        avatarView.layer.cornerRadius = isReply ? 12 : 16
         authorLabel.text = comment.isPinned
             ? "player.comments.pinned".localized(with: comment.authorName)
             : comment.authorName
+        // The reply count is the tappable row underneath, not meta text.
         metaLabel.text = [
             comment.publishedTime,
-            comment.likeCount.map { "player.comments.likes".localized(with: $0) },
-            comment.replyCount.map { "player.comments.replies".localized(with: $0) }
+            comment.likeCount.map { "player.comments.likes".localized(with: $0) }
         ]
         .compactMap { $0 }
         .filter { !$0.isEmpty }
         .joined(separator: " • ")
         let theme = ThemeManager.shared
-        contentTextView.attributedText = LinkifiedText.attributedString(
-            from: comment.content,
-            font: UIFont.systemFont(ofSize: 13),
-            color: theme.primaryText,
-            includeTimestamps: true
-        )
+        contentTextView.attributedText = CommentBodyCache.body(for: comment)
         contentTextView.linkTextAttributes = [.foregroundColor: theme.accent]
         contentTextView.delegate = linkDelegate
         authorLabel.textColor = theme.primaryText
@@ -61,7 +65,7 @@ final class CommentContentView: UIView {
         guard let comment, let linkDelegate else {
             return
         }
-        configure(comment, linkDelegate: linkDelegate)
+        configure(comment, linkDelegate: linkDelegate, isReply: isReply)
     }
 
     private func setup() {
@@ -81,11 +85,13 @@ final class CommentContentView: UIView {
     }
 
     private func activateConstraints() {
+        let size = avatarView.widthAnchor.constraint(equalToConstant: 32)
+        avatarSize = size
         NSLayoutConstraint.activate([
             avatarView.topAnchor.constraint(equalTo: topAnchor),
             avatarView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            avatarView.widthAnchor.constraint(equalToConstant: 32),
-            avatarView.heightAnchor.constraint(equalToConstant: 32),
+            size,
+            avatarView.heightAnchor.constraint(equalTo: avatarView.widthAnchor),
 
             authorLabel.topAnchor.constraint(equalTo: topAnchor),
             authorLabel.leadingAnchor.constraint(equalTo: avatarView.trailingAnchor, constant: 12),
@@ -100,5 +106,40 @@ final class CommentContentView: UIView {
             contentTextView.trailingAnchor.constraint(equalTo: authorLabel.trailingAnchor),
             contentTextView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
+    }
+}
+
+/// Linkifying a comment runs an `NSDataDetector` and a regex over its body —
+/// far too much to redo on every cell reuse while scrolling a long list. The
+/// result depends only on the text and the theme's colours, so it is kept
+/// until the theme flips.
+private enum CommentBodyCache {
+    /// ponytail: dropped wholesale when full; comments are short-lived
+    /// per-video state, so an LRU would buy nothing here.
+    private static let limit = 500
+
+    private static var entries: [String: NSAttributedString] = [:]
+    private static var isDark = ThemeManager.shared.isDark
+
+    static func body(for comment: Comment) -> NSAttributedString {
+        let theme = ThemeManager.shared
+        if isDark != theme.isDark {
+            isDark = theme.isDark
+            entries.removeAll()
+        }
+        if let cached = entries[comment.id] {
+            return cached
+        }
+        let built = LinkifiedText.attributedString(
+            from: comment.content,
+            font: UIFont.systemFont(ofSize: 13),
+            color: theme.primaryText,
+            includeTimestamps: true
+        )
+        if entries.count >= limit {
+            entries.removeAll()
+        }
+        entries[comment.id] = built
+        return built
     }
 }

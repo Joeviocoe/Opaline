@@ -264,7 +264,7 @@ extension WatchViewController: PlaybackContext {
 
 // MARK: - Safe Collection Subscript
 
-private extension Collection {
+extension Collection {
     subscript(safe index: Index) -> Element? {
         indices.contains(index) ? self[index] : nil
     }

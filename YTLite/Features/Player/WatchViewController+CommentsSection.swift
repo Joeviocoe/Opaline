@@ -47,7 +47,7 @@ extension WatchViewController: UITableViewDataSource {
         numberOfRowsInSection section: Int
     )
         -> Int {
-        commentsRowCount()
+        commentRows.count
     }
 
     func tableView(
@@ -65,73 +65,150 @@ extension WatchViewController: UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard isCommentsLoadMoreRow(indexPath) else {
+        switch commentRows[safe: indexPath.row] {
+        case .replyToggle(let index):
+            toggleReplies(at: index)
+        case .moreReplies(let index):
+            loadReplies(at: index)
+        default:
+            break
+        }
+    }
+
+    /// Endless scrolling, as in the official app: the next page is fetched
+    /// while the tail is still a few rows away instead of behind a button.
+    func tableView(
+        _ tableView: UITableView,
+        willDisplay cell: UITableViewCell,
+        forRowAt indexPath: IndexPath
+    ) {
+        guard indexPath.row >= commentRows.count - 4,
+              let continuation = commentsContinuation,
+              !isLoadingComments
+        else {
             return
         }
-        expandCommentsIfNeeded()
+        loadComments(continuation: continuation)
+    }
+
+    /// Self-sizing rows re-measure every time they scroll back in, which on
+    /// a long list makes the scroll indicator jump. Remembering what a row
+    /// actually measured keeps the estimate honest.
+    func tableView(
+        _ tableView: UITableView,
+        didEndDisplaying cell: UITableViewCell,
+        forRowAt indexPath: IndexPath
+    ) {
+        guard let key = commentRows[safe: indexPath.row]?.heightKey else {
+            return
+        }
+        commentHeightCache[key] = cell.frame.height
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        estimatedHeightForRowAt indexPath: IndexPath
+    ) -> CGFloat {
+        commentRows[safe: indexPath.row]?.heightKey
+            .flatMap { commentHeightCache[$0] } ?? 80
     }
 }
 
-// MARK: - Table row model
+// MARK: - Cells
 
 private extension WatchViewController {
-    /// One row while empty (skeleton or message), otherwise the visible
-    /// comments plus one trailing "load more" row when there is more to
-    /// fetch — everything past that stays unbuilt until it scrolls in.
-    func commentsRowCount() -> Int {
-        guard !comments.isEmpty else {
-            return 1
-        }
-        let visible = min(visibleCommentsCount, comments.count)
-        let hasMore = visible < comments.count || commentsContinuation != nil
-        return visible + (hasMore ? 1 : 0)
-    }
-
-    func isCommentsLoadMoreRow(_ indexPath: IndexPath) -> Bool {
-        guard !comments.isEmpty else {
-            return false
-        }
-        return indexPath.row >= min(visibleCommentsCount, comments.count)
-    }
-
     func commentsCell(at indexPath: IndexPath) -> UITableViewCell {
-        guard !comments.isEmpty else {
-            return statusCell(
-                text: isLoadingComments ? nil : "player.comments.unavailableYet".localized,
-                isSkeleton: isLoadingComments,
-                isAction: false
-            )
+        switch commentRows[safe: indexPath.row] {
+        case .comment(let comment):
+            return commentCell(comment, isReply: false, at: indexPath)
+        case .reply(let comment):
+            return commentCell(comment, isReply: true, at: indexPath)
+        case .replyToggle(let index):
+            return replyToggleCell(at: index, isMore: false)
+        case .moreReplies(let index):
+            return replyToggleCell(at: index, isMore: true)
+        case .status(let text):
+            return statusCell(text: text, isSkeleton: text == nil, isAction: false)
+        case nil:
+            return UITableViewCell()
         }
-        let visible = min(visibleCommentsCount, comments.count)
-        guard indexPath.row < visible else {
-            return statusCell(
-                text: isLoadingComments
-                    ? "player.comments.loading".localized
-                    : "player.comments.loadMore".localized,
-                isSkeleton: false,
-                isAction: true
-            )
-        }
+    }
+
+    func commentCell(
+        _ comment: Comment,
+        isReply: Bool,
+        at indexPath: IndexPath
+    ) -> UITableViewCell {
         let cell = commentsTableView.dequeueReusableCell(
             withIdentifier: CommentCell.reuseId,
             for: indexPath
-        ) as? CommentCell ?? CommentCell(style: .default, reuseIdentifier: CommentCell.reuseId)
-        cell.configure(comments[indexPath.row], linkDelegate: self)
+        ) as? CommentCell
+            ?? CommentCell(style: .default, reuseIdentifier: CommentCell.reuseId)
+        cell.configure(comment, linkDelegate: self, isReply: isReply)
         return cell
     }
 
-    func statusCell(text: String?, isSkeleton: Bool, isAction: Bool) -> UITableViewCell {
+    /// Both reply rows are the same text button: the one above the replies
+    /// toggles them, the trailing one pulls the next page.
+    func replyToggleCell(at index: Int, isMore: Bool) -> UITableViewCell {
+        let thread = commentThreads[safe: index]
+        let isLoading = thread?.isLoadingReplies == true && isMore
+        let text: String
+        if isLoading {
+            text = "player.comments.loading".localized
+        } else {
+            text = isMore
+                ? "player.comments.moreReplies".localized
+                : (thread?.toggleText ?? "")
+        }
+        return statusCell(
+            text: text,
+            isSkeleton: false,
+            isAction: !isLoading,
+            isReply: true
+        )
+    }
+
+    func statusCell(
+        text: String?,
+        isSkeleton: Bool,
+        isAction: Bool,
+        isReply: Bool = false
+    ) -> UITableViewCell {
         let cell = commentsTableView.dequeueReusableCell(
             withIdentifier: CommentStatusCell.reuseId
         ) as? CommentStatusCell
-            ?? CommentStatusCell(style: .default, reuseIdentifier: CommentStatusCell.reuseId)
-        cell.configure(text: text, isSkeleton: isSkeleton, isAction: isAction)
-        // Status rows are not comments — a rule under "load more" reads as a
+            ?? CommentStatusCell(
+                style: .default,
+                reuseIdentifier: CommentStatusCell.reuseId
+            )
+        cell.configure(
+            text: text,
+            isSkeleton: isSkeleton,
+            isAction: isAction,
+            isReply: isReply
+        )
+        // Status rows are not comments — a rule under them reads as a
         // divider before content that isn't there. Pushing the inset past
         // the row's width is the standard way to drop just this one.
         cell.separatorInset = UIEdgeInsets(
             top: 0, left: .greatestFiniteMagnitude, bottom: 0, right: 0
         )
         return cell
+    }
+}
+
+private extension CommentRow {
+    /// Stable identity for the measured-height cache; the paging and toggle
+    /// rows change text as they go, so they keep the default estimate.
+    var heightKey: String? {
+        switch self {
+        case .comment(let comment):
+            return comment.id
+        case .reply(let comment):
+            return "r\(comment.id)"
+        default:
+            return nil
+        }
     }
 }

@@ -78,6 +78,9 @@
 "player.comments.pinned" = "%1$@ • Закреплено";
 "player.comments.likes" = "Нравится: %1$@";
 "player.comments.replies" = "Ответы: %1$@";
+"player.comments.viewReplies" = "Показать ответы";
+"player.comments.hideReplies" = "Скрыть ответы";
+"player.comments.moreReplies" = "Ещё ответы";
 
 /* ===== Player: autoplay overlay ===== */
 

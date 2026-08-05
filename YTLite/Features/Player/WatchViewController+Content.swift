@@ -421,9 +421,10 @@ extension WatchViewController {
         // sidebar scrolls on its own — without this the new list opens at
         // wherever the last one was left, headers already off the top.
         relatedCollectionView.setContentOffset(.zero, animated: false)
-        comments = []
+        commentThreads = []
+        commentRows = []
+        commentHeightCache = [:]
         commentsContinuation = nil
-        visibleCommentsCount = WatchPaging.commentsPage
         isLoadingComments = false
         descriptionExpanded = false
         likeCountLabel.text = "—"

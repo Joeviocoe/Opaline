@@ -10,10 +10,11 @@ struct SlotLayout {
     var isLandscape = false
 }
 
-/// Paging sizes for the two lazily-revealed lists on the watch screen.
+/// Paging size for the lazily-revealed related list. Comments page
+/// themselves — the server decides the batch and the table pulls the next
+/// one as the tail comes into view.
 enum WatchPaging {
     static let relatedBatch = 5
-    static let commentsPage = 10
 }
 
 /// Memoizes the last `applyDescriptionText()` output so repeat calls with

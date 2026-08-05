@@ -50,10 +50,15 @@ final class WatchViewController: UIViewController {
     var isSubscribed: Bool = false
     var allRelatedVideos: [Video] = []
     var visibleRelatedVideos: [Video] = []
-    var comments: [Comment] = []
+    /// Top-level comments plus their loaded replies; `commentRows` is the
+    /// flattened view of it that the table actually reads (rebuilt in
+    /// `renderComments`, never recomputed per row).
+    /// `commentHeightCache` holds measured row heights keyed by comment, so
+    /// self-sizing rows scrolling back in don't shift the content offset.
+    var commentThreads: [CommentThread] = [], commentRows: [CommentRow] = []
+    var commentHeightCache: [String: CGFloat] = [:]
     var commentsContinuation: String?
     var playlistOptions: [PlaylistAddOption]?
-    var visibleCommentsCount = 10
     /// Whether the comments panel is on screen (open or opening).
     var isCommentsExpanded = false
     var videoPlayerView: VideoPlayerView?
