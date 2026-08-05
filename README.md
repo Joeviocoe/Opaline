@@ -144,7 +144,7 @@ Install the `.ipa` package directly:
 
 - Playback speeds above 2x may cause issues
 - **Shorts** are not natively supported — they are treated as regular videos, but can be hidden from the subscriptions feed
-- Comments are displayed as a flat read-only list
+- Comments are read-only — you can browse and sort them and open replies, but not post, reply or like
 - Offline download is not yet available
 - Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
 - **Picture in Picture is limited by the system before iOS 15**, and no app can work around it: the window survives exactly one video, and switching to another one closes it and leaves audio playing — [the full findings are in issue #31](https://github.com/verback2308/ytlite/issues/31#issuecomment-5148224679)
