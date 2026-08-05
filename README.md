@@ -132,7 +132,9 @@ Add the repo to your package manager to install YTLite and receive automatic upd
 https://repo.verback2308.pp.ua/
 ```
 
-Rootful (`iphoneos-arm`) and rootless (`iphoneos-arm64`) packages are provided; Sileo, Zebra and Cydia are supported. Every released version stays available in the repo, so you can also install or roll back to an older one (Sileo/Zebra: package page → version list). If you previously installed the IPA via AppSync, uninstall it before installing from the repo.
+Rootful (`iphoneos-arm`) and rootless (`iphoneos-arm64`) packages are provided; Sileo, Zebra and Cydia are supported. Every released version stays available in the repo, so you can also install or roll back to an older one (Sileo/Zebra: package page → version list).
+
+Pick one channel and stay on it — the repo package and the IPA share a bundle identifier, and having both installed leaves an app icon the Home Screen cannot delete. Already have the other one? Remove it first: the IPA from the Home Screen, the repo package from your package manager (or `dpkg -r com.verback.ytlite` over SSH).
 
 **Option 2 — Manual install**
 
