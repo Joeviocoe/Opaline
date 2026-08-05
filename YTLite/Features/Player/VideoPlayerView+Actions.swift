@@ -56,6 +56,17 @@ extension VideoPlayerView {
     }
 }
 
+extension CGFloat {
+    /// The hidden controls overlay stays a whisper above transparent instead
+    /// of fully invisible. At alpha 0 nothing is composited over the video
+    /// and the layer is handed to the display's video plane, which bypasses
+    /// the accessibility display filters — Reduce White Point, Night Shift
+    /// and True Tone stop applying to the picture until an overlay comes
+    /// back. Below 0.01 UIKit still skips hit-testing, so taps reach the
+    /// player's gestures exactly as before.
+    static let hiddenControlsAlpha: CGFloat = 0.005
+}
+
 // MARK: - Controls Visibility
 
 extension VideoPlayerView {
@@ -66,7 +77,7 @@ extension VideoPlayerView {
         if visible, let time = player?.currentTime() {
             updateProgress(time: time)
         }
-        let targetAlpha: CGFloat = visible ? 1 : 0
+        let targetAlpha: CGFloat = visible ? 1 : .hiddenControlsAlpha
         let animDuration = animated ? 0.2 : 0
         UIView.animate(withDuration: animDuration) {
             self.controlsView.alpha = targetAlpha

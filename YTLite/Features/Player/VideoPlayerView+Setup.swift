@@ -103,7 +103,7 @@ extension VideoPlayerView {
 
     func setupControls() {
         controlsView.translatesAutoresizingMaskIntoConstraints = false
-        controlsView.alpha = 0
+        controlsView.alpha = .hiddenControlsAlpha
         addSubview(controlsView)
         NSLayoutConstraint.activate([
             controlsView.topAnchor.constraint(
