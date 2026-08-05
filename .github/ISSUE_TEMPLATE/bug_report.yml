@@ -1,0 +1,113 @@
+name: Bug report
+description: Something in the app is broken. One bug per issue.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **One bug per issue.** If you have several unrelated problems, open several issues — mixed reports get closed.
+        Search existing issues first: if yours is already there, comment on it with your device and iOS version — knowing how many people are affected is useful.
+        But keep comments about *that* bug. A different problem is a new issue, not a comment.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
+        - label: I am on the latest release
+          required: true
+        - label: This issue describes exactly one bug
+          required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: What goes wrong, and what you expected instead.
+      placeholder: |
+        Expected: video starts playing.
+        Actual: black screen with a spinner forever.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps, starting from a fresh launch of the app.
+      placeholder: |
+        1. Open the app
+        2. Search for "…"
+        3. Tap the first result
+        4. …
+    validations:
+      required: true
+
+  - type: input
+    id: video
+    attributes:
+      label: Video link (if the bug is about a specific video)
+      placeholder: https://www.youtube.com/watch?v=…
+
+  - type: input
+    id: version
+    attributes:
+      label: YTLite version
+      description: Settings → About.
+      placeholder: "1.6.2"
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and iOS version
+      placeholder: "iPad mini 2, iOS 12.5.7"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - Jailbreak repo (Cydia/Sileo)
+        - IPA from Releases (AltStore / Sideloadly / TrollStore)
+        - Built from source
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Video source (Settings → Playback)
+      description: Only relevant for playback bugs. Please also say whether switching the source changes anything.
+      options:
+        - Not a playback issue
+        - Auto
+        - Android VR
+        - Progressive
+        - WebView HLS
+        - Other / don't know
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, screen recording or logs
+      description: |
+        Attach if you can — drag files into this box. Not always possible, that's fine.
+        A recording of the broken screen is usually enough.
+
+  - type: checkboxes
+    id: reproducible
+    attributes:
+      label: How often does it happen?
+      options:
+        - label: Every time, on the steps above
+        - label: Only sometimes / random
+        - label: Happened once and I cannot reproduce it

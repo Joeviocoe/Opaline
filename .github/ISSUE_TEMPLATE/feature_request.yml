@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest one new feature or improvement.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **One feature per issue.** Wish lists with five ideas get closed — open five issues instead.
+        Do not attach bug reports here; those go to the bug template.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
+        - label: This issue requests exactly one feature
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation you run into, not the solution.
+      placeholder: I watch long podcasts and lose my position when the app is killed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What should the app do?
+      description: If the official YouTube app or another client already does this, say where — a screenshot helps.
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and iOS version
+      description: Some features are impossible on iOS 12, which is the primary target.
+      placeholder: "iPhone 6s, iOS 12.5.7"
+    validations:
+      required: true
