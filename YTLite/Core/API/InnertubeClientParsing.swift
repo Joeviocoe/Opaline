@@ -88,7 +88,8 @@ extension InnertubeClient {
         return CommentsPage(
             title: title,
             comments: comments,
-            continuation: cont
+            continuation: cont,
+            sortOptions: commentsSortOptions(in: items)
         )
     }
 }

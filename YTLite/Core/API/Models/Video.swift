@@ -119,6 +119,17 @@ struct CommentsPage {
     let title: String?
     let comments: [Comment]
     let continuation: String?
+    /// "Top" / "Newest", straight from the header's sort menu — the server
+    /// sends both the localized title and a ready continuation token, so
+    /// nothing has to be built or translated here. Only the first page of a
+    /// sort order carries them.
+    let sortOptions: [CommentSortOption]
+}
+
+struct CommentSortOption {
+    let title: String
+    let token: String
+    let isSelected: Bool
 }
 
 final class ChannelInfoStore {

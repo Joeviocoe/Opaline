@@ -128,7 +128,7 @@ private extension WatchViewController {
         case .moreReplies(let index):
             return replyToggleCell(at: index, isMore: true)
         case .status(let text):
-            return statusCell(text: text, isSkeleton: text == nil, isAction: false)
+            return statusCell(text: text, isSkeleton: text == nil)
         case nil:
             return UITableViewCell()
         }
@@ -148,33 +148,33 @@ private extension WatchViewController {
         return cell
     }
 
-    /// Both reply rows are the same text button: the one above the replies
-    /// toggles them, the trailing one pulls the next page.
+    /// Both reply rows are the same pill: the one above the replies toggles
+    /// them, the trailing one pulls the next page.
     func replyToggleCell(at index: Int, isMore: Bool) -> UITableViewCell {
         let thread = commentThreads[safe: index]
-        let isLoading = thread?.isLoadingReplies == true && isMore
+        let cell = commentsTableView.dequeueReusableCell(
+            withIdentifier: CommentReplyCell.reuseId
+        ) as? CommentReplyCell
+            ?? CommentReplyCell(
+                style: .default,
+                reuseIdentifier: CommentReplyCell.reuseId
+            )
         let text: String
-        if isLoading {
+        if thread?.isLoadingReplies == true, isMore {
             text = "player.comments.loading".localized
         } else {
             text = isMore
                 ? "player.comments.moreReplies".localized
                 : (thread?.toggleText ?? "")
         }
-        return statusCell(
+        cell.configure(
             text: text,
-            isSkeleton: false,
-            isAction: !isLoading,
-            isReply: true
+            isExpanded: !isMore && thread?.isExpanded == true
         )
+        return cell
     }
 
-    func statusCell(
-        text: String?,
-        isSkeleton: Bool,
-        isAction: Bool,
-        isReply: Bool = false
-    ) -> UITableViewCell {
+    func statusCell(text: String?, isSkeleton: Bool) -> UITableViewCell {
         let cell = commentsTableView.dequeueReusableCell(
             withIdentifier: CommentStatusCell.reuseId
         ) as? CommentStatusCell
@@ -182,18 +182,7 @@ private extension WatchViewController {
                 style: .default,
                 reuseIdentifier: CommentStatusCell.reuseId
             )
-        cell.configure(
-            text: text,
-            isSkeleton: isSkeleton,
-            isAction: isAction,
-            isReply: isReply
-        )
-        // Status rows are not comments — a rule under them reads as a
-        // divider before content that isn't there. Pushing the inset past
-        // the row's width is the standard way to drop just this one.
-        cell.separatorInset = UIEdgeInsets(
-            top: 0, left: .greatestFiniteMagnitude, bottom: 0, right: 0
-        )
+        cell.configure(text: text, isSkeleton: isSkeleton)
         return cell
     }
 }

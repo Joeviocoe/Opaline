@@ -63,7 +63,9 @@ extension Array where Element == CommentThread {
                 continue
             }
             rows.append(contentsOf: thread.replies.map { CommentRow.reply($0) })
-            if thread.repliesContinuation != nil {
+            // Before the first page lands there is nothing to page past yet,
+            // and a second pill saying "loading" flashed under the toggle.
+            if thread.repliesContinuation != nil, !thread.replies.isEmpty {
                 rows.append(.moreReplies(index))
             }
         }

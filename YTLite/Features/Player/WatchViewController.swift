@@ -56,8 +56,9 @@ final class WatchViewController: UIViewController {
     /// `commentHeightCache` holds measured row heights keyed by comment, so
     /// self-sizing rows scrolling back in don't shift the content offset.
     var commentThreads: [CommentThread] = [], commentRows: [CommentRow] = []
-    var commentHeightCache: [String: CGFloat] = [:]
-    var commentsContinuation: String?
+    var commentHeightCache: [String: CGFloat] = [:], commentSortOptions: [CommentSortOption] = []
+    /// `commentsPreview` is pinned, so re-sorting doesn't swap the row.
+    var commentsContinuation: String?, commentsPreview: Comment?
     var playlistOptions: [PlaylistAddOption]?
     /// Whether the comments panel is on screen (open or opening).
     var isCommentsExpanded = false

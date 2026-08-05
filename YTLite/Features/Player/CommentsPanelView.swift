@@ -12,9 +12,16 @@ final class CommentsPanelView: UIView {
     /// `WatchViewController+CommentsPanel` is installed on this region so
     /// the table view keeps its own scroll gesture untouched.
     let dragRegion = UIView()
+    /// Tapped sort option, by index into whatever `setSortOptions` was last
+    /// given.
+    var onSelectSort: ((Int) -> Void)?
 
     private let handle = UIView()
     private let headerStack = UIStackView()
+    private let sortBar = ChipBarView()
+    /// Grab handle, title and sort bar stacked together — a stack view so
+    /// hiding the sort bar collapses the space it took with it.
+    private let chrome = UIStackView()
     private let tableView: UITableView
 
     init(tableView: UITableView) {
@@ -35,6 +42,19 @@ final class CommentsPanelView: UIView {
         tableView.backgroundColor = theme.surface
     }
 
+    /// Shows the server's sort choices; an empty list hides the bar (replies
+    /// pages and videos with a single order don't send one).
+    func setSortOptions(_ options: [CommentSortOption]) {
+        sortBar.isHidden = options.count < 2
+        guard options.count > 1 else {
+            return
+        }
+        sortBar.setLabels(
+            options.map(\.title),
+            selected: options.firstIndex(where: \.isSelected) ?? 0
+        )
+    }
+
     private func setup() {
         translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 16
@@ -48,12 +68,17 @@ final class CommentsPanelView: UIView {
         headerStack.alignment = .center
         headerStack.spacing = 8
         headerStack.addArrangedSubview(titleLabel)
+        chrome.axis = .vertical
+        sortBar.isHidden = true
+        sortBar.onSelect = { [weak self] index in
+            self?.onSelectSort?(index)
+        }
         addSubviews()
         activateConstraints()
     }
 
     private func addSubviews() {
-        for item in [dragRegion, tableView] {
+        for item in [chrome, tableView] {
             item.translatesAutoresizingMaskIntoConstraints = false
             addSubview(item)
         }
@@ -61,13 +86,15 @@ final class CommentsPanelView: UIView {
             item.translatesAutoresizingMaskIntoConstraints = false
             dragRegion.addSubview(item)
         }
+        chrome.addArrangedSubview(dragRegion)
+        chrome.addArrangedSubview(sortBar)
     }
 
     private func activateConstraints() {
         NSLayoutConstraint.activate([
-            dragRegion.topAnchor.constraint(equalTo: topAnchor),
-            dragRegion.leadingAnchor.constraint(equalTo: leadingAnchor),
-            dragRegion.trailingAnchor.constraint(equalTo: trailingAnchor),
+            chrome.topAnchor.constraint(equalTo: topAnchor),
+            chrome.leadingAnchor.constraint(equalTo: leadingAnchor),
+            chrome.trailingAnchor.constraint(equalTo: trailingAnchor),
 
             handle.topAnchor.constraint(equalTo: dragRegion.topAnchor, constant: 8),
             handle.centerXAnchor.constraint(equalTo: dragRegion.centerXAnchor),
@@ -83,7 +110,7 @@ final class CommentsPanelView: UIView {
             ),
             headerStack.bottomAnchor.constraint(equalTo: dragRegion.bottomAnchor, constant: -10),
 
-            tableView.topAnchor.constraint(equalTo: dragRegion.bottomAnchor),
+            tableView.topAnchor.constraint(equalTo: chrome.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])

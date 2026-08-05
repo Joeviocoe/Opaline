@@ -9,14 +9,20 @@ import UIKit
 final class CommentContentView: UIView {
     private let avatarView = ThumbnailImageView(frame: .zero)
     private let authorLabel = UILabel()
-    private let metaLabel = UILabel()
     private let contentTextView = UITextView()
+    /// Read-only like counter under the body — the API only offers the
+    /// action to a cookie-authenticated session, so there is nothing to tap.
+    private let likeStack = UIStackView()
+    private let likeIcon = UIImageView()
+    private let likeLabel = UILabel()
     /// Kept so a theme switch can re-render: the body's colours are baked
     /// into its attributed string, so they cannot be restyled in place.
     private var comment: Comment?
     private var isReply = false
     private weak var linkDelegate: UITextViewDelegate?
     private var avatarSize: NSLayoutConstraint?
+    private var likeBottom: NSLayoutConstraint?
+    private var bodyBottom: NSLayoutConstraint?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -40,23 +46,29 @@ final class CommentContentView: UIView {
         avatarView.setAvatar(url: url, name: comment.authorName)
         avatarSize?.constant = isReply ? 24 : 32
         avatarView.layer.cornerRadius = isReply ? 12 : 16
-        authorLabel.text = comment.isPinned
+        // One grey line above the body, as in the official app: who and
+        // when. Likes moved to the action row, replies to their own row.
+        let name = comment.isPinned
             ? "player.comments.pinned".localized(with: comment.authorName)
             : comment.authorName
-        // The reply count is the tappable row underneath, not meta text.
-        metaLabel.text = [
-            comment.publishedTime,
-            comment.likeCount.map { "player.comments.likes".localized(with: $0) }
-        ]
-        .compactMap { $0 }
-        .filter { !$0.isEmpty }
-        .joined(separator: " • ")
+        authorLabel.text = [name, comment.publishedTime]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: " • ")
+        // A comment with no likes shows no counter at all rather than "0".
+        let hasLikes = !(comment.likeCount ?? "").isEmpty
+        likeLabel.text = comment.likeCount
+        likeStack.isHidden = !hasLikes
+        bodyBottom?.isActive = false
+        likeBottom?.isActive = hasLikes
+        bodyBottom?.isActive = !hasLikes
         let theme = ThemeManager.shared
+        likeIcon.tintColor = theme.secondaryText
+        likeLabel.textColor = theme.secondaryText
         contentTextView.attributedText = CommentBodyCache.body(for: comment)
         contentTextView.linkTextAttributes = [.foregroundColor: theme.accent]
         contentTextView.delegate = linkDelegate
-        authorLabel.textColor = theme.primaryText
-        metaLabel.textColor = theme.secondaryText
+        authorLabel.textColor = theme.secondaryText
     }
 
     /// Re-renders with the current theme. Cheap enough to call on every
@@ -72,12 +84,19 @@ final class CommentContentView: UIView {
         translatesAutoresizingMaskIntoConstraints = false
         avatarView.layer.cornerRadius = 16
         avatarView.layer.masksToBounds = true
-        authorLabel.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+        authorLabel.font = UIFont.systemFont(ofSize: 12)
         authorLabel.numberOfLines = 1
-        metaLabel.font = UIFont.systemFont(ofSize: 11)
-        metaLabel.numberOfLines = 0
         LinkifiedText.configure(contentTextView)
-        for item in [avatarView, authorLabel, metaLabel, contentTextView] {
+        likeIcon.image = UIImage(named: "icon_thumb_up")?
+            .withRenderingMode(.alwaysTemplate)
+        likeIcon.contentMode = .scaleAspectFit
+        likeLabel.font = UIFont.systemFont(ofSize: 12)
+        likeStack.axis = .horizontal
+        likeStack.alignment = .center
+        likeStack.spacing = 6
+        likeStack.addArrangedSubview(likeIcon)
+        likeStack.addArrangedSubview(likeLabel)
+        for item in [avatarView, authorLabel, contentTextView, likeStack] {
             item.translatesAutoresizingMaskIntoConstraints = false
             addSubview(item)
         }
@@ -97,15 +116,20 @@ final class CommentContentView: UIView {
             authorLabel.leadingAnchor.constraint(equalTo: avatarView.trailingAnchor, constant: 12),
             authorLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
 
-            metaLabel.topAnchor.constraint(equalTo: authorLabel.bottomAnchor, constant: 2),
-            metaLabel.leadingAnchor.constraint(equalTo: authorLabel.leadingAnchor),
-            metaLabel.trailingAnchor.constraint(equalTo: authorLabel.trailingAnchor),
-
-            contentTextView.topAnchor.constraint(equalTo: metaLabel.bottomAnchor, constant: 6),
+            contentTextView.topAnchor.constraint(equalTo: authorLabel.bottomAnchor, constant: 4),
             contentTextView.leadingAnchor.constraint(equalTo: authorLabel.leadingAnchor),
             contentTextView.trailingAnchor.constraint(equalTo: authorLabel.trailingAnchor),
-            contentTextView.bottomAnchor.constraint(equalTo: bottomAnchor)
+
+            likeIcon.widthAnchor.constraint(equalToConstant: 14),
+            likeIcon.heightAnchor.constraint(equalToConstant: 14),
+            likeStack.topAnchor.constraint(equalTo: contentTextView.bottomAnchor, constant: 6),
+            likeStack.leadingAnchor.constraint(equalTo: authorLabel.leadingAnchor)
         ])
+        // A hidden stack view still claims its height, so which view reaches
+        // the bottom edge is swapped instead of hidden.
+        likeBottom = likeStack.bottomAnchor.constraint(equalTo: bottomAnchor)
+        bodyBottom = contentTextView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        likeBottom?.isActive = true
     }
 }
 

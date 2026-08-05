@@ -324,18 +324,23 @@ extension WatchViewController {
     private func setupCommentsTableView() {
         let tv = commentsTableView
         tv.register(CommentCell.self, forCellReuseIdentifier: CommentCell.reuseId)
+        tv.register(CommentReplyCell.self, forCellReuseIdentifier: CommentReplyCell.reuseId)
         tv.register(CommentStatusCell.self, forCellReuseIdentifier: CommentStatusCell.reuseId)
         tv.dataSource = self
         tv.delegate = self
         tv.rowHeight = UITableView.automaticDimension
         tv.estimatedRowHeight = 80
         tv.contentInsetAdjustmentBehavior = .never
-        tv.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 16)
+        // YouTube separates comments with air, not rules.
+        tv.separatorStyle = .none
     }
 
     private func setupCommentsPanel() {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCommentsPanelPan))
         commentsPanel.dragRegion.addGestureRecognizer(pan)
+        commentsPanel.onSelectSort = { [weak self] index in
+            self?.selectCommentSort(at: index)
+        }
         commentsPanel.isHidden = true
     }
 

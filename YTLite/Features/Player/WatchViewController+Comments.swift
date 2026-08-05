@@ -17,7 +17,10 @@ extension WatchViewController {
 
     func resetComments() {
         commentThreads = []
+        commentSortOptions = []
+        commentsPanel.setSortOptions([])
         commentsContinuation = nil
+        commentsPreview = nil
         isLoadingComments = false
         hasLoadedComments = false
         collapseComments()
@@ -25,12 +28,15 @@ extension WatchViewController {
         renderComments()
     }
 
-    func loadComments(continuation: String? = nil) {
+    func loadComments(continuation: String? = nil, isReload: Bool = false) {
         guard !isLoadingComments else {
             return
         }
         isLoadingComments = true
-        if commentThreads.isEmpty {
+        // Only the very first load has no count to show yet; a sort switch
+        // empties the list too, and blanking the header to "Loading" there
+        // made the count flicker for the duration of one request.
+        if commentThreads.isEmpty, !hasLoadedComments {
             commentsLabel.text = "player.comments.loading".localized
         }
         renderComments()
@@ -42,17 +48,40 @@ extension WatchViewController {
             DispatchQueue.main.async {
                 self?.handleCommentsResult(
                     result,
-                    continuation: continuation
+                    isReload: isReload || continuation == nil
                 )
             }
         }
     }
 
+    /// Re-fetches the list in another order. The sort tokens come from the
+    /// server's own menu, so switching is just a reload with a different
+    /// first-page token.
+    func selectCommentSort(at index: Int) {
+        guard let option = commentSortOptions[safe: index],
+              !option.isSelected
+        else {
+            return
+        }
+        commentSortOptions = commentSortOptions.enumerated().map {
+            CommentSortOption(
+                title: $1.title, token: $1.token, isSelected: $0 == index
+            )
+        }
+        commentThreads = []
+        commentHeightCache = [:]
+        commentsContinuation = nil
+        isLoadingComments = false
+        commentsTableView.setContentOffset(.zero, animated: false)
+        loadComments(continuation: option.token, isReload: true)
+    }
+
     func handleCommentsResult(
         _ result: Result<CommentsPage, Error>,
-        continuation: String?
+        isReload: Bool
     ) {
         isLoadingComments = false
+        let isFirstLoad = !hasLoadedComments
         hasLoadedComments = true
         switch result {
         case .failure(let error):
@@ -68,25 +97,40 @@ extension WatchViewController {
                     "player.comments.unavailable".localized
             }
         case .success(let page):
-            commentsContinuation = page.continuation
-            if continuation == nil {
-                commentThreads = page.comments.map(CommentThread.init)
-            } else {
-                appendNewComments(page.comments)
-            }
-            // Only the first page carries the server's total ("546
-            // Comments"); continuations come back without one. Falling back
-            // to the loaded count there rewrote the header down to 29.
-            if let title = page.title {
-                setCommentsTitle(title)
-            } else if continuation == nil {
-                setCommentsTitle(
-                    "player.comments.titleCount"
-                        .localized(with: commentThreads.count)
-                )
-            }
+            applyCommentsPage(
+                page, isReload: isReload, isFirstLoad: isFirstLoad
+            )
         }
         renderComments()
+    }
+
+    private func applyCommentsPage(
+        _ page: CommentsPage,
+        isReload: Bool,
+        isFirstLoad: Bool
+    ) {
+        commentsContinuation = page.continuation
+        if isReload {
+            commentThreads = page.comments.map(CommentThread.init)
+        } else {
+            appendNewComments(page.comments)
+        }
+        if !page.sortOptions.isEmpty {
+            commentSortOptions = page.sortOptions
+            commentsPanel.setSortOptions(page.sortOptions)
+        }
+        // Only the first page carries the server's total ("546 Comments");
+        // continuations come back without one. Falling back to the loaded
+        // count there rewrote the header down to 29 — and on a sort reload
+        // it rewrote a known total with a partial one.
+        if let title = page.title {
+            setCommentsTitle(title)
+        } else if isReload, isFirstLoad {
+            setCommentsTitle(
+                "player.comments.titleCount"
+                    .localized(with: commentThreads.count)
+            )
+        }
     }
 
     /// The in-flow section header and the panel's own header show the same
@@ -216,7 +260,10 @@ extension WatchViewController {
             commentsStackView.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
-        guard let preview = previewComment else {
+        if commentsPreview == nil {
+            commentsPreview = previewComment
+        }
+        guard let preview = commentsPreview else {
             if hasLoadedComments, !isLoadingComments {
                 renderPreviewEmptyMessage()
             } else {

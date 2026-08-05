@@ -36,6 +36,32 @@ extension InnertubeClient {
         items.compactMap { commentsTitleFromDict($0) }.first
     }
 
+    /// Sort choices from the header, already localized by `hl`.
+    static func commentsSortOptions(
+        in items: [[String: Any]]
+    ) -> [CommentSortOption] {
+        let menu = items
+            .compactMap { $0["commentsHeaderRenderer"] as? [String: Any] }
+            .compactMap { $0["sortMenu"] as? [String: Any] }
+            .compactMap { $0["sortFilterSubMenuRenderer"] as? [String: Any] }
+            .first
+        let entries = menu?["subMenuItems"] as? [[String: Any]] ?? []
+        return entries.compactMap { entry in
+            let endpoint = entry["serviceEndpoint"] as? [String: Any]
+            let command = endpoint?["continuationCommand"] as? [String: Any]
+            guard let title = entry["title"] as? String,
+                  let token = command?["token"] as? String
+            else {
+                return nil
+            }
+            return CommentSortOption(
+                title: title,
+                token: token,
+                isSelected: entry["selected"] as? Bool == true
+            )
+        }
+    }
+
     /// One item is either a top-level thread (`commentThreadRenderer`) or a
     /// bare reply (`commentViewModel`); both parse into the same `Comment`.
     static func parseComment(
