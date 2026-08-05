@@ -37,6 +37,14 @@ jobs:
           sudo install -m 755 "$RUNNER_TEMP/swiftlint/swiftlint" "$(brew --prefix)/bin/swiftlint"
           swiftlint version
 
+      # make_ipa.sh signs with ldid instead of codesign (issue #32). The runner
+      # image ships homebrew-core's ldid, which has no -S flag.
+      - name: Install ldid-procursus
+        run: |
+          brew unlink ldid 2>/dev/null || true
+          brew install ldid-procursus
+          ldid 2>&1 | head -1
+
       - name: Configure local build settings
         run: |
           cp Config/Local.xcconfig.example Config/Local.xcconfig

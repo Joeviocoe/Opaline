@@ -78,7 +78,12 @@ done
 # signing — no Apple registration involved — and is intentionally independent
 # of the dev bundle id in Local.xcconfig. Normalized from the accidental
 # "WD55N799QB.…YTLite.test" of 1.4.0/1.4.1 to the main team; frozen since.
-echo "▶ Replacing dev cert with ad-hoc signature..."
+# A local (signed) build embeds the dev provisioning profile; CI builds with
+# CODE_SIGNING_ALLOWED=NO do not. It names the dev certificate while the
+# signature below is ad-hoc, and installd rejects that pair with 0xe800801c.
+# Drop it so a local IPA matches what CI ships.
+rm -f "$APP_PATH/embedded.mobileprovision"
+
 ENTITLEMENTS=$(mktemp).plist
 cat > "$ENTITLEMENTS" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -94,9 +99,32 @@ cat > "$ENTITLEMENTS" <<'EOF'
 </dict>
 </plist>
 EOF
+echo "▶ Replacing dev cert with ad-hoc signature..."
 codesign -f -s - --deep --entitlements "$ENTITLEMENTS" "$APP_PATH" 2>/dev/null \
   && echo "  codesign: ok" \
   || echo "  codesign: skipped (app will still install via AppSync)"
+
+# Then re-sign the Mach-O binaries with ldid, keeping the bundle signature
+# codesign just produced. A codesign ad-hoc signature carries an empty CMS blob
+# and the adhoc flag; AMFI on iOS 12.0–12.1 kills such a process on launch with
+# a silent SIGKILL and no crash log, so the app installs but never starts
+# (issue #32 — confirmed fixed by an ldid re-sign on 12.1.2). iOS 12.2+ accepts
+# either form. Dropping the codesign step instead of layering on top of it
+# leaves the bundle unsigned and installd rejects the IPA with 0xe800801c.
+# Needs ldid-procursus; the homebrew-core `ldid` has no -S flag.
+if ! ldid 2>&1 | head -1 | grep -q procursus; then
+  echo "❌ ldid-procursus required: brew unlink ldid && brew install ldid-procursus"
+  exit 1
+fi
+# -s preserves whatever codesign just wrote; -S would set entitlements a second
+# time and put an empty entitlements blob on dylibs that never had one.
+echo "▶ Re-signing binaries with ldid for iOS 12.0–12.1..."
+for dylib in "$APP_PATH/Frameworks/"*.dylib; do
+  [ -e "$dylib" ] || continue
+  ldid -s "$dylib"
+done
+ldid -s "$APP_PATH/$APP_NAME"
+echo "  ldid: ok"
 rm -f "$ENTITLEMENTS"
 
 echo "▶ Packaging IPA..."
