@@ -72,6 +72,12 @@ final class ShortsViewController: UIViewController {
         view.backgroundColor = .black
         setupCollectionView()
         setupBackButton()
+        prefetcher.onReady = { [weak self] _ in
+            guard let self else {
+                return
+            }
+            self.queueNext(after: self.attachedIndex)
+        }
         // A seeded run (the channel Shorts tab) already has plenty to swipe
         // through — don't spend a request on the sequence until it thins out.
         if videos.count < 5 {
@@ -115,6 +121,7 @@ final class ShortsViewController: UIViewController {
         movePlayer(into: cell.playerContainer)
         startPlayback(of: videos[index].id)
         prefetchAround(index)
+        queueNext(after: index)
         fetchMetadata(for: index)
         if index >= videos.count - 3 {
             loadNextPage()
@@ -123,6 +130,11 @@ final class ShortsViewController: UIViewController {
 
     /// Uses the prefetched stream when the swipe beat the resolver to it.
     private func startPlayback(of videoId: String) {
+        // Already pre-rolled behind the current short: this is the path that
+        // starts on the first frame instead of a poster.
+        if playerView.advance(to: videoId, watchService: watchService) {
+            return
+        }
         if let entry = prefetcher.take(videoId: videoId) {
             playerView.attach(
                 source: entry.source,
@@ -133,6 +145,22 @@ final class ShortsViewController: UIViewController {
             return
         }
         playerView.load(videoId: videoId, watchService: watchService)
+    }
+
+    /// Hands the next short to the player so it pre-rolls behind the current
+    /// one. Called both on swipe and when a prefetch lands.
+    func queueNext(after index: Int) {
+        guard index == attachedIndex,
+              let next = videos.dropFirst(index + 1).first,
+              playerView.queuedVideoId != next.id,
+              let entry = prefetcher.take(videoId: next.id) else {
+            return
+        }
+        playerView.enqueue(
+            source: entry.source,
+            playback: entry.playback,
+            videoId: next.id
+        )
     }
 
     /// Resolves the next two shorts so the swipe has a stream waiting.

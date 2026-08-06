@@ -1,24 +1,44 @@
 import AVFoundation
 import UIKit
 
-/// The one AVPlayer the Shorts feed owns, moved between cells as the user
+/// The one player the Shorts feed owns, moved between cells as the user
 /// swipes. Deliberately minimal — a short needs playback, looping and a tap
 /// to pause; everything the watch screen adds (quality menus, seek bar,
 /// captions, PiP) is not part of this surface.
+///
+/// An `AVQueuePlayer` so the next short can be queued behind the current one
+/// and pre-rolled by the same player. Handing a prepared item from a second
+/// player is not an option: AVFoundation detaches asynchronously and the
+/// attach throws (crashed on device, see [[ShortsPrefetcher]]).
+/// `actionAtItemEnd` is `.pause` — a queued short must not start on its own,
+/// shorts loop until the user swipes.
 final class ShortsPlayerView: UIView {
+    /// One queued short. The source and resource loader are retained for as
+    /// long as the item is in the queue — dropping either kills the stream.
+    struct Entry {
+        let videoId: String
+        let item: AVPlayerItem
+        let source: VideoSource?
+        let loader: AVAssetResourceLoaderDelegate?
+    }
+
     override static var layerClass: AnyClass { AVPlayerLayer.self }
 
     let facade = PlaybackFacade()
-    private let player = AVPlayer()
+    private let player = AVQueuePlayer()
     private let statusLabel = UILabel()
     private let progressBar = UIView()
     private var progressWidth: NSLayoutConstraint?
     private var timeObserver: Any?
-    private var currentItem: AVPlayerItem?
-    /// Retained for the item's lifetime — dropping it kills the stream.
-    private var resourceLoader: AVAssetResourceLoaderDelegate?
+    /// Mirrors the player's queue: index 0 is playing, 1 is pre-rolling.
+    private var entries: [Entry] = []
 
     var isPaused: Bool { player.rate == 0 }
+
+    /// The short already queued behind the current one, if any.
+    var queuedVideoId: String? {
+        entries.count > 1 ? entries[1].videoId : nil
+    }
 
     private var playerLayer: AVPlayerLayer? {
         layer as? AVPlayerLayer
@@ -33,12 +53,13 @@ final class ShortsPlayerView: UIView {
         // Shorts fill the screen, as in the official app.
         playerLayer?.videoGravity = .resizeAspectFill
         PlaybackBufferPolicy.configure(player: player)
+        player.actionAtItemEnd = .pause
         facade.context = self
         setupStatusLabel()
         setupProgressBar()
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(itemDidEnd),
+            selector: #selector(itemDidEnd(_:)),
             name: .AVPlayerItemDidPlayToEndTime,
             object: nil
         )
@@ -73,15 +94,67 @@ final class ShortsPlayerView: UIView {
         facade.currentVideoId = videoId
         facade.currentApiClient = watchService
         facade.activeVideoSource = source
-        attachPrepared(playback, resumeAt: nil)
+        play(entry: Entry(
+            videoId: videoId,
+            item: playback.item,
+            source: source,
+            loader: playback.resourceLoader
+        ))
+    }
+
+    /// Queues a resolved short behind the current one so the player pre-rolls
+    /// it. Only one is ever queued — that is the one swipe ahead.
+    func enqueue(
+        source: VideoSource,
+        playback: PreparedPlayback,
+        videoId: String
+    ) {
+        guard !entries.isEmpty, entries.count < 2,
+              entries[0].videoId != videoId,
+              player.canInsert(playback.item, after: nil) else {
+            return
+        }
+        PlaybackBufferPolicy.configure(item: playback.item)
+        player.insert(playback.item, after: nil)
+        entries.append(Entry(
+            videoId: videoId,
+            item: playback.item,
+            source: source,
+            loader: playback.resourceLoader
+        ))
+    }
+
+    /// Jumps to the queued short. Returns false when `videoId` is not the one
+    /// queued — a backward or skipping swipe, which has to resolve normally.
+    func advance(to videoId: String, watchService: WatchService) -> Bool {
+        guard queuedVideoId == videoId else {
+            return false
+        }
+        player.advanceToNextItem()
+        entries.removeFirst()
+        facade.currentVideoId = videoId
+        facade.currentApiClient = watchService
+        facade.activeVideoSource = entries[0].source
+        statusLabel.text = nil
+        setProgress(0)
+        player.play()
+        return true
+    }
+
+    private func play(entry: Entry) {
+        PlaybackBufferPolicy.configure(item: entry.item)
+        player.removeAllItems()
+        player.insert(entry.item, after: nil)
+        entries = [entry]
+        statusLabel.text = nil
+        player.play()
     }
 
     func stop() {
         setProgress(0)
         player.pause()
-        player.replaceCurrentItem(with: nil)
-        currentItem = nil
-        resourceLoader = nil
+        player.removeAllItems()
+        entries = []
         facade.reset()
         statusLabel.text = nil
     }
@@ -95,7 +168,10 @@ final class ShortsPlayerView: UIView {
     }
 
     @objc
-    private func itemDidEnd() {
+    private func itemDidEnd(_ note: Notification) {
+        guard (note.object as? AVPlayerItem) === player.currentItem else {
+            return
+        }
         player.seek(to: .zero)
         player.play()
     }
@@ -164,12 +240,12 @@ final class ShortsPlayerView: UIView {
 
 extension ShortsPlayerView: PlaybackContext {
     func attachPrepared(_ prepared: PreparedPlayback, resumeAt: CMTime?) {
-        resourceLoader = prepared.resourceLoader
-        currentItem = prepared.item
-        PlaybackBufferPolicy.configure(item: prepared.item)
-        player.replaceCurrentItem(with: prepared.item)
-        statusLabel.text = nil
-        player.play()
+        play(entry: Entry(
+            videoId: facade.currentVideoId ?? "",
+            item: prepared.item,
+            source: facade.activeVideoSource,
+            loader: prepared.resourceLoader
+        ))
     }
 
     func updateStatusLabel(_ text: String) {

@@ -17,6 +17,10 @@ final class ShortsPrefetcher {
     private var inFlight: Set<String> = []
     private let watchService: WatchService
 
+    /// Fired on the main queue when a short finishes resolving, so the player
+    /// can queue it up and pre-roll it while the current one plays.
+    var onReady: ((String) -> Void)?
+
     init(watchService: WatchService) {
         self.watchService = watchService
     }
@@ -63,5 +67,6 @@ final class ShortsPrefetcher {
             return
         }
         ready[videoId] = (source, playback)
+        onReady?(videoId)
     }
 }
