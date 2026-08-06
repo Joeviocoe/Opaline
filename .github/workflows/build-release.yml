@@ -57,7 +57,13 @@ jobs:
             # shipped binary and can never be changed afterwards, so it must
             # survive a repo rename or a move off GitHub. Matched on the owner,
             # not the full name, so it keeps holding after a rename.
-            printf 'APP_MANIFEST_URL = https:/$()/repo.verback2308.pp.ua/apps.json\n' \
+            #
+            # Builds up to 1.7.x carry repo.verback2308.pp.ua instead. That host
+            # therefore has to keep answering /apps.json -- by serving it or by
+            # redirecting here, which URLSession follows -- for as long as any of
+            # them are still installed. It is also the only channel that can tell
+            # those users anything, so it outlives the domain move by design.
+            printf 'APP_MANIFEST_URL = https:/$()/repo.verback2308.com/apps.json\n' \
               >> Config/Local.xcconfig
           else
             printf 'APP_MANIFEST_URL = https:/$()/raw.githubusercontent.com/%s/main/source/apps.json\n' \
