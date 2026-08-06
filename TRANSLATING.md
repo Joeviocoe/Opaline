@@ -1,7 +1,7 @@
-# Translating YTLite
+# Translating Opaline
 
-YTLite ships classic per-language `Localizable.strings` files — plain text,
-editable without Xcode. English (`YTLite/en.lproj/`) is the source of truth;
+Opaline ships classic per-language `Localizable.strings` files — plain text,
+editable without Xcode. English (`Opaline/en.lproj/`) is the source of truth;
 `ru` is maintained by the author. Adding or updating a language is one file
 (plus two one-line registrations, see Workflow).
 
@@ -11,15 +11,15 @@ state the target language.
 
 ## Workflow (adding language `xx`)
 
-1. Copy `YTLite/en.lproj/Localizable.strings` → `YTLite/xx.lproj/Localizable.strings`
+1. Copy `Opaline/en.lproj/Localizable.strings` → `Opaline/xx.lproj/Localizable.strings`
    and translate the values (by hand or with the prompt below).
-2. Copy `YTLite/en.lproj/Localizable.stringsdict` → `YTLite/xx.lproj/` and fill
+2. Copy `Opaline/en.lproj/Localizable.stringsdict` → `Opaline/xx.lproj/` and fill
    the plural forms your language's CLDR rules require (Russian, for example,
    needs `one`/`few`/`many`; English only `one`/`other`).
 3. Register the language (skip if only updating an existing one):
-   - `YTLite/Core/Localization/AppLanguage.swift` — add the enum case and its
+   - `Opaline/Core/Localization/AppLanguage.swift` — add the enum case and its
      native-script `displayName` ("Русский", not "Russian").
-   - `YTLite/Info.plist` — add the code to `CFBundleLocalizations`.
+   - `Opaline/Info.plist` — add the code to `CFBundleLocalizations`.
 4. Validate: `python3 scripts/check_strings.py` (unknown keys and placeholder
    mismatches are errors; missing keys only warn — partial translations ship
    fine and fall back to English).
@@ -29,7 +29,7 @@ state the target language.
 **Content language note**: UI translation is independent of the *content
 language* (video titles, feeds — translated server-side by YouTube via `hl`).
 If your language's relative-date and view-count words are not yet in
-`YTLite/Core/Localization/ContentKeywords.swift`, subscriptions-feed ordering
+`Opaline/Core/Localization/ContentKeywords.swift`, subscriptions-feed ordering
 degrades gracefully but add a keyword table for full support.
 
 **RTL languages (ar, he, fa)**: not accepted yet — the layout has not been
@@ -39,7 +39,7 @@ audited for right-to-left. UI-only PRs for RTL will be declined until then.
 
 ## Prompt for LLM translation
 
-You are translating the UI strings of YTLite, a lightweight third-party
+You are translating the UI strings of Opaline, a lightweight third-party
 YouTube client for iOS. Input: an English `.strings` file where each line is
 `"key" = "value";` with `/* comments */` giving context. Output: the same
 file with ONLY the values translated into the target language.
@@ -61,7 +61,7 @@ file with ONLY the values translated into the target language.
 
 ### What must NOT be translated
 
-- Product/project names: YTLite, YouTube, Shorts, SponsorBlock,
+- Product/project names: Opaline, YouTube, Shorts, SponsorBlock,
   Return YouTube Dislike, Picture-in-Picture stays translated only if your
   language has an established OS term for it (Apple's own glossary).
 - Technical debug values mentioned inside footer texts: "Android VR",

@@ -54,7 +54,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: YTLite version
+      label: Opaline version
       description: Settings → About.
       placeholder: "1.6.2"
     validations:

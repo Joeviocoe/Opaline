@@ -10,9 +10,9 @@
 // CGContext.draw(_:in:):
 //
 //   swiftc -O -o /tmp/mkicon scripts/make_app_icon.swift
-//   /tmp/mkicon <Logo.png> YTLite/Assets.xcassets/AppIcon.appiconset light
-//   /tmp/mkicon <Logo.png> YTLite/Assets.xcassets/AppIcon.appiconset dark
-//   /tmp/mkicon <Logo.png> YTLite/Assets.xcassets/SplashMark.imageset launch
+//   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset light
+//   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset dark
+//   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/SplashMark.imageset launch
 
 import CoreGraphics
 import Foundation

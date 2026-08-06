@@ -1,5 +1,5 @@
 included:
-  - YTLite
+  - Opaline
 
 excluded:
   - .build

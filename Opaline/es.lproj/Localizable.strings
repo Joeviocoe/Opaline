@@ -1,0 +1,418 @@
+/*
+  Opaline — Spanish (Español).
+*/
+
+/* ===== Player: settings menu ===== */
+
+/* Title of the gear menu in the player */
+"player.menu.settings" = "Configuración de reproducción";
+/* Menu item + picker title: video quality */
+"player.menu.quality" = "Calidad";
+/* Menu item + picker title: audio track (dub) selection */
+"player.menu.audioTrack" = "Pista de audio";
+/* Menu item: toggles the playback statistics overlay */
+"player.menu.stats" = "Estadísticas";
+/* Picker title: subtitles */
+"player.menu.subtitles" = "Subtítulos";
+
+/* ===== Player: pickers ===== */
+
+/* Subtitle picker: disables subtitles */
+"player.subtitles.off" = "Desactivados";
+/* Suffix on auto-generated subtitle tracks, e.g. "English (auto)" */
+"player.subtitles.autoSuffix" = " (auto)";
+/* Suffix on AI auto-dubbed audio tracks, e.g. "Russian (AI)" */
+"player.audioTrack.aiSuffix" = " (IA)";
+
+/* ===== Player: status / errors ===== */
+
+/* Status label while switching; %1$@ = quality label or track name */
+"player.status.loading" = "Cargando %1$@…";
+/* Status label while the stream URL is being resolved */
+"player.status.resolving" = "Resolviendo transmisión…";
+"player.status.botCheckRetry" = "Comprobación de bot: renovando la sesión y reintentando...";
+/* Shown when a video cannot be played at all */
+"player.error.playback" = "Error de reproducción.";
+"player.error.botCheck" = "YouTube pide confirmar que no eres un bot. Inténtalo de nuevo en un momento.";
+/* Shown when switching video quality failed (playback continues) */
+"player.error.qualitySwitch" = "Error al cambiar la calidad.";
+/* Shown when switching the audio track failed (playback continues) */
+"player.error.audioTrackSwitch" = "Error al cambiar la pista de audio.";
+
+/* ===== Common ===== */
+
+/* Subscribe button, not-subscribed state */
+"common.subscribe" = "Suscribirse";
+/* Subscribe button, subscribed state */
+"common.subscribed" = "Suscrito";
+/* Generic cancel action */
+"common.cancel" = "Cancelar";
+/* Generic confirmation button */
+"common.ok" = "OK";
+/* Generic save action */
+"common.save" = "Guardar";
+/* Generic done action */
+"common.done" = "Listo";
+/* Fallback title/label of a playlist tile */
+"common.playlist" = "Lista";
+/* Library tab title */
+"library.title" = "Biblioteca";
+
+/* ===== Player: status ===== */
+
+/* Status label while the player prepares the first video */
+"player.status.preparing" = "Preparando video…";
+/* Status label while an expired stream URL is re-resolved */
+"player.status.refreshing" = "Actualizando transmisión…";
+
+/* ===== Player: watch page ===== */
+
+/* Expands the video description */
+"player.description.more" = "Más";
+/* Collapses the video description */
+"player.description.less" = "Menos";
+/* Action bar: share the video */
+"player.action.share" = "Compartir";
+/* Action bar: save to playlist */
+"player.action.save" = "Guardar";
+"player.action.saveFailed" = "No se ha podido guardar el video.";
+"player.action.saveTo" = "Guardar en una playlist";
+"player.action.savedTo" = "Guardado en %1$@";
+"player.action.removedFrom" = "Eliminado de %1$@";
+/* Action bar: download */
+"player.action.download" = "Descargar";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "Agregar a la fila";
+"video.menu.watchLater" = "Ver más tarde";
+"video.menu.watchLaterName" = "Ver más tarde";
+"video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.queued" = "Se agregó a la fila";
+
+/* ===== Player: comments ===== */
+
+/* Comments section header */
+"player.comments.title" = "Comentarios";
+/* Comments header with count; %1$d = number of comments */
+"player.comments.titleCount" = "Comentarios (%1$d)";
+/* Shown while comments load */
+"player.comments.loading" = "Cargando comentarios…";
+/* Shown when the comments request failed */
+"player.comments.unavailable" = "Comentarios no disponibles";
+/* Shown before the watch page has loaded enough to fetch comments */
+"player.comments.unavailableYet" = "Los comentarios aún no están disponibles.";
+/* Button loading the next page of comments */
+"player.comments.loadMore" = "Cargar más comentarios";
+/* Author line of a pinned comment; %1$@ = author name */
+"player.comments.pinned" = "%1$@ • Fijado";
+/* Comment like count; %1$@ = formatted number */
+"player.comments.likes" = "%1$@ me gusta";
+/* Comment reply count; %1$@ = formatted number */
+"player.comments.replies" = "%1$@ respuestas";
+
+/* ===== Player: autoplay overlay ===== */
+
+/* Header above the next video suggestion */
+"player.autoplay.upNext" = "A continuación";
+/* Starts the suggested video immediately, skipping the countdown */
+"player.autoplay.playNow" = "Reproducir ahora";
+
+/* ===== Player: related section ===== */
+
+/* Header of an unnamed autoplay queue/playlist */
+"player.related.mix" = "Mix";
+/* Header of the related-videos section */
+"player.related.title" = "Relacionados";
+/* Status label on fatal playback failure; %1$@ = error description */
+"player.error.withMessage" = "Error de reproducción: %1$@";
+
+/* ===== Player: speed ===== */
+
+/* The 1x playback speed */
+"player.speed.normal" = "Normal";
+
+/* ===== Player: seek HUD ===== */
+
+/* Accumulated seek offset shown while tapping ±10s repeatedly; %1$@ = signed seconds, e.g. "-90" */
+"player.seek.offset" = "%1$@ s";
+
+/* ===== SponsorBlock ===== */
+
+/* Skip button; %1$@ = localized category name, e.g. "Skip Sponsor" */
+"sponsorblock.skip" = "Saltar %1$@";
+
+/* Skip-behavior options (per-category setting) */
+"sponsorblock.behavior.autoSkip" = "Omitir automáticamente";
+"sponsorblock.behavior.showButton" = "Mostrar botón";
+"sponsorblock.behavior.disabled" = "Desactivar";
+
+/* Footer under the SponsorBlock section (project attribution) */
+"sponsorblock.attribution" = "Con SponsorBlock (sponsor.ajay.app) — un proyecto comunitario abierto.";
+/* Header above the per-category skip settings */
+"sponsorblock.segmentCategories" = "Categorías de segmentos";
+
+/* Category names (SponsorBlock project terms) and their descriptions */
+"sponsorblock.category.sponsor.name" = "Sponsor";
+"sponsorblock.category.sponsor.description" = "Promoción de pago, referidos de pago y anuncios directos. No para autopromoción o menciones gratuitas de causas/creadores/sitios web/productos que les gusten.";
+"sponsorblock.category.selfpromo.name" = "No remunerado/Autopromoción";
+"sponsorblock.category.selfpromo.description" = "Similar a «sponsor» pero no remunerado o autopromoción. Incluye secciones sobre merchandising, donaciones o información sobre con quién han colaborado.";
+"sponsorblock.category.exclusive_access.name" = "Acceso exclusivo";
+"sponsorblock.category.exclusive_access.description" = "Solo para etiquetar videos completos. Se usa cuando un video muestra un producto, servicio o ubicación al que han recibido acceso gratuito o subsidiado.";
+"sponsorblock.category.interaction.name" = "Recordatorio de interacción (Suscribirse)";
+"sponsorblock.category.interaction.description" = "Cuando hay un breve recordatorio de dar me gusta, suscribirse o seguir en medio del contenido. Si es largo o sobre algo específico, debería estar bajo autopromoción.";
+"sponsorblock.category.highlight.name" = "Punto destacado";
+"sponsorblock.category.highlight.description" = "La parte del video que la mayoría busca. Similar a los comentarios «El video empieza en x».";
+"sponsorblock.category.intro.name" = "Interludio/Intro";
+"sponsorblock.category.intro.description" = "Un intervalo sin contenido real. Puede ser una pausa, imagen estática o animación repetitiva. No debe usarse para transiciones con información.";
+"sponsorblock.category.outro.name" = "Tarjetas finales/Créditos";
+"sponsorblock.category.outro.description" = "Créditos o cuando aparecen las tarjetas finales de YouTube. No para conclusiones con información.";
+"sponsorblock.category.preview.name" = "Vista previa/Resumen";
+"sponsorblock.category.preview.description" = "Colección de clips que muestran lo que viene en este video u otros videos de una serie donde toda la información se repite más tarde.";
+"sponsorblock.category.filler.name" = "Digresiones/Chistes";
+"sponsorblock.category.filler.description" = "Escenas digresivas o chistes que no se necesitan para entender el contenido principal del video. No debe incluir segmentos que proporcionen contexto o detalles de fondo.";
+"sponsorblock.category.music_offtopic.name" = "Sección no musical";
+"sponsorblock.category.music_offtopic.description" = "Solo para videos musicales. Parte no musical de un video musical.";
+"sponsorblock.category.chapter.name" = "Capítulo";
+"sponsorblock.category.chapter.description" = "Secciones personalizadas del video.";
+
+/* ===== Settings ===== */
+
+/* Settings sheet title */
+"settings.title" = "Ajustes";
+
+/* Section headers */
+"settings.section.theme" = "Apariencia";
+"settings.section.playback" = "Reproducción";
+"settings.section.autoDub" = "Doblaje";
+"settings.section.home" = "Inicio";
+"settings.section.cache" = "Caché";
+"settings.section.ryd" = "Return YouTube Dislike";
+"settings.section.sponsorblock" = "SponsorBlock";
+"settings.section.debug" = "Depuración";
+
+/* Section footers */
+"settings.footer.themeAutoSystem" = "Sigue automáticamente la apariencia del sistema.";
+"settings.footer.themeAutoHours" = "Cambia automáticamente al tema oscuro entre las horas indicadas.";
+"settings.footer.playback" = "Ampliar para rellenar escala el video en pantalla completa para que no queden barras negras. El pellizco en el reproductor lo anula por video.\n\nReproducción automática reproduce el siguiente video sugerido tras una cuenta regresiva de 5 s. El interruptor de Mix aplica lo mismo al instante a las colas de mix/lista de reproducción.";
+"settings.footer.autoDub" = "Si el idioma original de un video difiere del idioma de doblaje, la pista de audio correspondiente se selecciona automáticamente.";
+"settings.footer.home" = "Cómo se muestran los estantes de recomendaciones: una cuadrícula continua o carriles horizontales estilo TV.";
+"settings.footer.ryd" = "Los recuentos de dislikes están impulsados por Return YouTube Dislike (returnyoutubedislike.com) — un proyecto comunitario abierto.";
+"settings.footer.debug" = "Forzar una fuente de reproducción específica. Normalmente se usa Android VR con respaldo automático. El servidor resolutor alimenta la fuente Mobile Web + pot (creación de pot y n-solving en iOS 12–13).";
+
+/* Theme rows; segment labels for dark/light/auto modes */
+"settings.row.theme" = "Apariencia";
+"settings.theme.dark" = "Oscuro";
+"settings.theme.light" = "Claro";
+"settings.theme.auto" = "Auto";
+/* Hour pickers bounding the iOS 12 scheduled dark mode */
+"settings.row.darkFrom" = "Tema oscuro desde";
+"settings.row.darkUntil" = "Tema oscuro hasta";
+
+/* Playback rows */
+"settings.row.defaultQuality" = "Calidad predeterminada";
+/* The "Auto" entry of the default-quality picker (stored value stays English) */
+"settings.quality.auto" = "Automática";
+"settings.row.backgroundPlayback" = "Reproducción en segundo plano";
+"settings.row.pip" = "Imagen en imagen";
+"settings.row.hideStatusBar" = "Ocultar barra de estado en pantalla completa";
+"settings.row.zoomToFill" = "Ampliar para rellenar en pantalla completa";
+"settings.row.showShorts" = "Mostrar YouTube Shorts en Suscripciones";
+"settings.row.autoplay" = "Reproducción automática";
+/* %1$@ = localized "Mix" term (player.related.mix) */
+"settings.row.autoplayMix" = "Reproducción automática (%1$@)";
+
+/* Auto-dub rows: master toggle, dub-language picker, AI-dub exclusion */
+"settings.row.autoDub" = "Iniciar los videos doblados";
+"settings.row.autoDubLanguage" = "Idioma del doblaje";
+"settings.row.autoDubIgnoreAI" = "Ignorar doblajes con IA";
+
+/* Home layout row + option names */
+"settings.row.homeLayout" = "Diseño de inicio";
+"settings.homeLayout.grid" = "Cuadrícula sencilla";
+"settings.homeLayout.rails" = "Carriles";
+
+/* Notifications section */
+"settings.section.notifications" = "Notificaciones";
+"settings.row.notifications" = "Notificaciones";
+
+/* Cache rows */
+"settings.row.feedCache" = "Caché de feed";
+"settings.row.feedCacheDuration" = "Duración del caché de feed";
+"settings.row.imageCache" = "Caché de imágenes";
+"settings.row.imageCacheDuration" = "Duración del caché de imágenes";
+"settings.row.clearCache" = "Borrar toda la caché";
+/* Alert after clearing all caches */
+"settings.cache.clearedTitle" = "Caché borrada";
+"settings.cache.clearedMessage" = "Se ha borrado toda la caché.";
+
+/* Integration rows */
+"settings.row.ryd" = "Return YouTube Dislike";
+"settings.row.sponsorblock" = "SponsorBlock";
+"settings.row.sponsorblockSettings" = "Configuración de SponsorBlock";
+
+/* Debug rows (values stay technical/English) */
+"settings.row.playbackSource" = "Fuente de reproducción";
+"settings.row.solverServer" = "Solver server";
+"settings.row.shareLog" = "Compartir registro de depuración";
+/* Solver-server URL alert */
+"settings.solver.message" = "URL del servidor resolutor.";
+"settings.solver.reset" = "Restablecer valores predeterminados";
+/* Suffix shown after the solver URL when it is the built-in default */
+"settings.solver.defaultSuffix" = " (predeterminado)";
+/* Alert when no debug logs exist yet */
+"settings.log.noneTitle" = "Sin registros";
+"settings.log.noneMessage" = "Aún no hay registros de depuración disponibles.";
+
+/* ===== Profile ===== */
+
+"profile.title" = "Perfil";
+"profile.signOut" = "Cerrar sesión";
+"profile.clearImageCache" = "Borrar caché de imágenes";
+"profile.imageCacheCleared" = "Caché de imágenes borrada.";
+
+/* ===== Search ===== */
+
+"search.title" = "Buscar";
+/* Search bar placeholder */
+"search.placeholder" = "Buscar en YouTube";
+/* Header above the recent-search list */
+"search.recent" = "Búsquedas recientes";
+/* Filters toolbar button; the dotted variant marks active filters */
+"search.filters" = "Filtros";
+"search.filters.active" = "Filtros •";
+/* Filters sheet title + reset action */
+"search.filters.title" = "Filtros de búsqueda";
+"search.filters.reset" = "Restablecer filtros";
+/* Filter rows; %1$@ = the current value */
+"search.filters.sort" = "Orden: %1$@";
+"search.filters.date" = "Fecha: %1$@";
+"search.filters.type" = "Tipo: %1$@";
+"search.filters.duration" = "Duración: %1$@";
+/* Sub-sheet titles */
+"search.filters.sortTitle" = "Ordenar por";
+"search.filters.dateTitle" = "Fecha de carga";
+"search.filters.typeTitle" = "Tipo";
+"search.filters.durationTitle" = "Duración";
+
+/* Filter option values */
+"search.sort.relevance" = "Relevancia";
+"search.sort.rating" = "Calificación";
+"search.sort.uploadDate" = "Fecha de carga";
+"search.sort.viewCount" = "Cantidad de vistas";
+"search.date.any" = "Cualquier momento";
+"search.date.lastHour" = "Última hora";
+"search.date.today" = "Hoy";
+"search.date.thisWeek" = "Esta semana";
+"search.date.thisMonth" = "Este mes";
+"search.date.thisYear" = "Este año";
+"search.type.any" = "Cualquier tipo";
+"search.type.video" = "Video";
+"search.type.channel" = "Canal";
+"search.type.playlist" = "Lista";
+"search.duration.any" = "Cualquier duración";
+"search.duration.short" = "Menos de 4 min";
+"search.duration.medium" = "4–20 min";
+"search.duration.long" = "Más de 20 min";
+
+/* ===== Home ===== */
+
+"home.title" = "Inicio";
+/* Chip resetting to the unfiltered feed */
+"home.category.all" = "Todo";
+/* Static category chips (server shelf titles arrive already localized) */
+"home.category.live" = "En vivo";
+"home.category.news" = "Noticias";
+"home.category.gaming" = "Videojuegos";
+"home.category.sports" = "Deportes";
+"home.category.learning" = "Educación";
+"home.category.fashion" = "Moda";
+/* Error empty state (two lines) */
+"home.error.loadFailed" = "No se pudo cargar el feed\nDesliza hacia abajo para reintentar";
+/* Signed-out empty state */
+"home.signIn" = "Inicia sesión para ver tus recomendaciones";
+
+/* ===== Channel ===== */
+
+/* Channel tab bar */
+"channel.tab.videos" = "Videos";
+"channel.tab.live" = "En vivo";
+"channel.tab.playlists" = "Listas";
+/* About sheet */
+"channel.about.title" = "Información";
+"channel.about.close" = "Cerrar";
+"channel.about.subscribers" = "Suscriptores";
+"channel.about.videos" = "Videos";
+"channel.about.description" = "Descripción";
+"channel.about.contact" = "Contacto";
+
+/* ===== Library ===== */
+
+"library.history" = "Historial";
+"library.downloads" = "Descargas";
+"library.playlists" = "Listas";
+"library.playlists.favorites" = "Favoritos";
+"library.downloads.comingSoon" = "Las descargas estarán disponibles pronto";
+"library.history.signIn" = "Inicia sesión para ver tu historial";
+"library.history.empty" = "No se encontró historial";
+"library.history.loadFailed" = "No se pudo cargar el historial";
+"library.playlists.signIn" = "Inicia sesión para ver tus listas";
+"library.playlists.loadFailed" = "No se pudieron cargar las listas";
+"library.playlist.empty" = "No hay videos en esta lista";
+"library.playlist.loadFailed" = "No se pudo cargar la lista";
+
+/* ===== Subscriptions ===== */
+
+"subscriptions.title" = "Suscripciones";
+"subscriptions.all" = "Todas las suscripciones";
+/* "All" button in the channel avatar bar */
+"subscriptions.allButton" = "Todas";
+"subscriptions.signIn" = "Inicia sesión para ver tus suscripciones";
+
+/* ===== Account (toolbar sheet) ===== */
+
+/* Fallback account name when the profile has none */
+"account.fallbackName" = "Cuenta";
+"account.signIn" = "Iniciar sesión";
+"account.myChannel" = "Mi canal";
+"account.signOut" = "Cerrar sesión";
+"account.notSignedIn" = "No has iniciado sesión";
+
+/* Generic error alert title */
+"common.error" = "Error";
+/* Channel screen failed to load */
+"channel.unavailable" = "Canal no disponible";
+
+/* ===== Settings: language section ===== */
+
+"settings.section.language" = "Idioma";
+"settings.footer.language" = "El idioma de la aplicación cambia tanto la interfaz como el contenido: los títulos, la búsqueda y los feeds lo siguen (YouTube traduce los metadatos en el servidor, como la app oficial). Los cambios se aplican por completo tras reiniciar la app.";
+/* Rows */
+"settings.row.appLanguage" = "Idioma de la app";
+"settings.row.region" = "Región";
+/* Picker option following the device language/region */
+"settings.language.system" = "Sistema";
+/* Alert after changing a language setting */
+"settings.language.restartTitle" = "Reinicio necesario";
+"settings.language.restartMessage" = "Los cambios se aplican completamente tras reiniciar la app.";
+
+/* Notification settings screen (pushed from Settings > Home) */
+"settings.row.appUpdates" = "Actualizaciones de la app";
+"settings.footer.notifications" = "La entrega puede retrasarse — iOS programa comprobaciones en segundo plano y no las ejecuta inmediatamente.";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "Actualización disponible: %@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "Notificaciones";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "No hay notificaciones aún";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "Marcar todo como leído";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "Las notificaciones del sistema están desactivadas, por lo que las alertas podrían no llegar fuera de la app.";
+"notifications.permissionBanner.enable" = "Activar notificaciones";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "Abrir";

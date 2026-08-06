@@ -1,6 +1,6 @@
 // Generates asset-catalog icons from SF Symbols as template PNGs.
 //
-//   swift scripts/make_icon.swift YTLite/Assets.xcassets [symbol:asset_name ...]
+//   swift scripts/make_icon.swift Opaline/Assets.xcassets [symbol:asset_name ...]
 //
 // With no pairs it regenerates the whole set defined in `map` below. iOS 12
 // has no SF Symbols API, so every icon ships as a pre-rendered template PNG

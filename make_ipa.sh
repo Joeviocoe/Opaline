@@ -1,7 +1,7 @@
 #!/bin/bash
 # make_ipa.sh — builds a distributable IPA for jailbroken devices (AppSync + Filza)
 # Usage: ./make_ipa.sh
-# Output: YTLite_<version>.ipa in the project root
+# Output: Opaline_<version>.ipa in the project root
 #
 # Env overrides (all optional; used by .github/workflows/build-release.yml):
 #   IPA_VERSION            version for the filename + CFBundleShortVersionString
@@ -13,9 +13,9 @@
 
 set -e
 
-APP_NAME="YTLite"
-PROJECT="YTLite.xcodeproj"
-SCHEME="YTVLite"
+APP_NAME="Opaline"
+PROJECT="Opaline.xcodeproj"
+SCHEME="Opaline"
 RELEASE_BUNDLE_ID="com.verback.YTLite"
 SOURCE_JSON="source/apps.json"
 BUILD_LOG=$(mktemp)

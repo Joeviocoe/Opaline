@@ -1,0 +1,334 @@
+/*
+  Opaline — Ukrainian.
+  Перекладайте лише значення (праворуч від "="), ніколи — ключі.
+  Плейсхолдери %1$@ / %1$d зберігаються дослівно.
+*/
+
+/* ===== Player: settings menu ===== */
+
+"player.menu.settings" = "Параметри відтворення";
+"player.menu.quality" = "Якість";
+"player.menu.audioTrack" = "Аудіодоріжка";
+"player.menu.stats" = "Статистика для сисадмінів";
+"player.menu.subtitles" = "Субтитри";
+
+/* ===== Player: pickers ===== */
+
+"player.subtitles.off" = "Вимк.";
+"player.subtitles.autoSuffix" = " (авто)";
+"player.audioTrack.aiSuffix" = " (ШІ)";
+
+/* ===== Player: status / errors ===== */
+
+"player.status.loading" = "Завантаження %1$@...";
+"player.status.resolving" = "Отримання потоку...";
+"player.status.botCheckRetry" = "Перевірка на бота — оновлюю сесію, пробую знову...";
+"player.error.playback" = "Не вдалося відтворити відео.";
+"player.error.botCheck" = "YouTube вимагає підтвердити, що ви не бот. Спробуйте ще раз за хвилину.";
+"player.error.qualitySwitch" = "Не вдалося змінити якість.";
+"player.error.audioTrackSwitch" = "Не вдалося змінити аудіодоріжку.";
+
+/* ===== Common ===== */
+
+"common.subscribe" = "Підписатися";
+"common.subscribed" = "Ви підписані";
+"common.cancel" = "Скасувати";
+"common.ok" = "OK";
+"common.save" = "Зберегти";
+"common.done" = "Готово";
+"common.edit" = "Редагувати";
+"common.delete" = "Видалити";
+"common.playlist" = "Список відтворення";
+"library.title" = "Бібліотека";
+
+/* ===== Player: status ===== */
+
+"player.status.preparing" = "Підготовка відео...";
+"player.status.refreshing" = "Оновлення потоку...";
+
+/* ===== Player: watch page ===== */
+
+"player.description.more" = "Ще";
+"player.description.less" = "Згорнути";
+"player.action.share" = "Поділитися";
+"player.action.save" = "Зберегти";
+"player.action.saveFailed" = "Не вдалося зберегти відео.";
+"player.action.saveTo" = "Зберегти в списку відтворення";
+"player.action.savedTo" = "Збережено в «%1$@»";
+"player.action.removedFrom" = "Видалено з «%1$@»";
+"player.action.download" = "Завантажити";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "Додати в чергу";
+"video.menu.watchLater" = "Дивитися пізніше";
+"video.menu.watchLaterName" = "Дивитися пізніше";
+"video.menu.removeFrom" = "Видалити з «%1$@»";
+"video.menu.queued" = "Додано до черги";
+
+/* ===== Player: comments ===== */
+
+"player.comments.title" = "Коментарі";
+"player.comments.titleCount" = "Коментарі (%1$d)";
+"player.comments.loading" = "Завантаження коментарів...";
+"player.comments.unavailable" = "Коментарі недоступні";
+"player.comments.unavailableYet" = "Коментарі поки недоступні.";
+"player.comments.loadMore" = "Більше коментарів";
+"player.comments.pinned" = "%1$@ • Закріплено";
+"player.comments.likes" = "Вподобань: %1$@";
+"player.comments.replies" = "Відповідей: %1$@";
+"player.comments.viewReplies" = "Показати відповіді";
+"player.comments.hideReplies" = "Сховати відповіді";
+"player.comments.moreReplies" = "Більше відповідей";
+
+/* ===== Player: autoplay overlay ===== */
+
+"player.autoplay.upNext" = "Далі";
+"player.autoplay.playNow" = "Дивитися зараз";
+
+/* ===== Player: related section ===== */
+
+"player.related.mix" = "Мікс";
+"player.related.title" = "Схожі";
+"player.error.withMessage" = "Помилка відтворення: %1$@";
+
+/* ===== Player: speed ===== */
+
+"player.speed.normal" = "Звичайна";
+
+/* ===== Player: seek HUD ===== */
+
+/* Accumulated seek offset shown while tapping ±10s repeatedly; %1$@ = signed seconds, e.g. "-90" */
+"player.seek.offset" = "%1$@ с";
+
+/* ===== SponsorBlock ===== */
+
+"sponsorblock.skip" = "Пропустити: %1$@";
+
+"sponsorblock.behavior.autoSkip" = "Автопропуск";
+"sponsorblock.behavior.showButton" = "Показувати кнопку";
+"sponsorblock.behavior.disabled" = "Вимкнути";
+
+"sponsorblock.attribution" = "Працює на основі SponsorBlock (sponsor.ajay.app) — відкритого проєкту спільноти.";
+"sponsorblock.segmentCategories" = "Категорії сегментів";
+
+"sponsorblock.category.sponsor.name" = "Спонсор";
+"sponsorblock.category.sponsor.description" = "Платне просування, платні реферали та пряма реклама. Не для самореклами чи безкоштовних згадок авторів, сайтів або продуктів, які подобаються автору.";
+"sponsorblock.category.selfpromo.name" = "Безкоштовна/самореклама";
+"sponsorblock.category.selfpromo.description" = "Як «Спонсор», але для безкоштовного просування чи самореклами: мерч, донати, інформація про співпрацю.";
+"sponsorblock.category.exclusive_access.name" = "Ексклюзивний доступ";
+"sponsorblock.category.exclusive_access.description" = "Лише для позначення цілих відео. Коли у відео показано продукт, послугу чи місце, доступ до яких автор отримав безкоштовно або зі знижкою.";
+"sponsorblock.category.interaction.name" = "Нагадування про взаємодію";
+"sponsorblock.category.interaction.description" = "Коротке нагадування поставити вподобання, підписатися чи стежити за сторінками посеред контенту. Якщо воно довге чи про щось конкретне — це самореклама.";
+"sponsorblock.category.highlight.name" = "Основний момент";
+"sponsorblock.category.highlight.description" = "Частина відео, заради якої більшість його відкриває. Аналог коментарів «відео починається з X».";
+"sponsorblock.category.intro.name" = "Заставка/інтро";
+"sponsorblock.category.intro.description" = "Інтервал без вмісту: пауза, статичний кадр, повторювана анімація. Не для переходів з інформацією.";
+"sponsorblock.category.outro.name" = "Титри/кінцівка";
+"sponsorblock.category.outro.description" = "Титри або кінцеві заставки YouTube. Не для висновків з інформацією.";
+"sponsorblock.category.preview.name" = "Прев'ю/повтор";
+"sponsorblock.category.preview.description" = "Нарізка кадрів про те, що буде далі в цьому чи інших відео серії, якщо вся інформація повторюється пізніше.";
+"sponsorblock.category.filler.name" = "Відступи/жарти";
+"sponsorblock.category.filler.description" = "Відступи та жарти, не потрібні для розуміння основного вмісту. Не включає сегменти з контекстом чи деталями.";
+"sponsorblock.category.music_offtopic.name" = "Немузична частина";
+"sponsorblock.category.music_offtopic.description" = "Лише для кліпів. Немузична частина музичного відео.";
+"sponsorblock.category.chapter.name" = "Розділ";
+"sponsorblock.category.chapter.description" = "Іменовані розділи відео.";
+
+/* ===== Settings ===== */
+
+"settings.title" = "Налаштування";
+
+"settings.section.theme" = "Тема";
+"settings.section.playback" = "Відтворення";
+"settings.section.autoDub" = "Дубляж";
+"settings.section.home" = "Головна";
+"settings.section.cache" = "Кеш";
+"settings.section.ryd" = "Return YouTube Dislike";
+"settings.section.sponsorblock" = "SponsorBlock";
+"settings.section.debug" = "Налагодження";
+
+"settings.footer.themeAutoSystem" = "«Авто» відповідає оформленню системи.";
+"settings.footer.themeAutoHours" = "«Авто» вмикає темну тему в години, вказані вище.";
+"settings.footer.playback" = "«Заповнення екрана» автоматично масштабує відео в повноекранному режимі, прибираючи чорні смуги. Жест щипка у плеєрі перевизначає це для конкретного відео.\n\n«Автовідтворення» запускає наступне рекомендоване відео після 5-секундного відліку. Перемикач «Мікс» застосовує те саме миттєво до черги міксу чи плейлиста.";
+"settings.footer.autoDub" = "Якщо мова оригіналу відео відрізняється від мови дубляжу, відповідна аудіодоріжка вмикається автоматично.";
+"settings.footer.home" = "Як показувати полиці рекомендацій: суцільна сітка або горизонтальні стрічки у стилі ТБ.";
+"settings.footer.ryd" = "Лічильники дизлайків працюють через Return YouTube Dislike (returnyoutubedislike.com) — відкритий проєкт спільноти.";
+"settings.footer.debug" = "Примусовий вибір джерела відтворення. Зазвичай використовується Android VR з автоматичним резервним джерелом. Solver server обслуговує джерело Mobile Web + pot (випуск pot і розв'язання n на iOS 12–13).";
+
+"settings.row.theme" = "Тема";
+"settings.theme.dark" = "Темна";
+"settings.theme.light" = "Світла";
+"settings.theme.auto" = "Авто";
+"settings.row.darkFrom" = "Темна тема з";
+"settings.row.darkUntil" = "Темна тема до";
+
+"settings.row.defaultQuality" = "Якість за замовчуванням";
+"settings.quality.auto" = "Авто";
+"settings.row.backgroundPlayback" = "Фонове відтворення";
+"settings.row.pip" = "Картинка в картинці";
+"settings.row.hideStatusBar" = "Приховувати рядок стану в повноекранному режимі";
+"settings.row.zoomToFill" = "Заповнювати екран у повноекранному режимі";
+"settings.row.showShorts" = "Показувати Shorts у підписках";
+"settings.row.autoplay" = "Автовідтворення";
+/* %1$@ = localized "Mix" term (player.related.mix) */
+"settings.row.autoplayMix" = "Автовідтворення (%1$@)";
+
+/* Auto-dub rows: master toggle, dub-language picker, AI-dub exclusion */
+"settings.row.autoDub" = "Запускати відео в дубляжі";
+"settings.row.autoDubLanguage" = "Мова дубляжу";
+"settings.row.autoDubIgnoreAI" = "Ігнорувати ШІ-дубляж";
+
+"settings.row.homeLayout" = "Вигляд головної";
+"settings.homeLayout.grid" = "Проста сітка";
+"settings.homeLayout.rails" = "Горизонтальні стрічки";
+
+"settings.section.notifications" = "Сповіщення";
+"settings.row.notifications" = "Сповіщення";
+
+"settings.row.feedCache" = "Кеш стрічки";
+"settings.row.feedCacheDuration" = "Строк кешу стрічки";
+"settings.row.imageCache" = "Кеш зображень";
+"settings.row.imageCacheDuration" = "Строк кешу зображень";
+"settings.row.clearCache" = "Очистити весь кеш";
+"settings.cache.clearedTitle" = "Кеш очищено";
+"settings.cache.clearedMessage" = "Весь кеш було очищено.";
+
+"settings.row.ryd" = "Return YouTube Dislike";
+"settings.row.sponsorblock" = "SponsorBlock";
+"settings.row.sponsorblockSettings" = "Налаштування SponsorBlock";
+
+"settings.row.playbackSource" = "Джерело";
+"settings.row.solverServer" = "Solver server";
+"settings.row.shareLog" = "Поділитися журналом налагодження";
+"settings.solver.message" = "Адреса solver server.";
+"settings.solver.reset" = "Скинути до типового";
+"settings.solver.defaultSuffix" = " (за замовчуванням)";
+"settings.log.noneTitle" = "Немає журналів";
+"settings.log.noneMessage" = "Журнали налагодження поки відсутні.";
+
+/* ===== Profile ===== */
+
+"profile.title" = "Профіль";
+"profile.signOut" = "Вийти";
+"profile.clearImageCache" = "Очистити кеш зображень";
+"profile.imageCacheCleared" = "Кеш зображень очищено.";
+
+/* ===== Search ===== */
+
+"search.title" = "Пошук";
+"search.placeholder" = "Пошук на YouTube";
+"search.recent" = "Останні пошукові запити";
+"search.filters" = "Фільтри";
+"search.filters.active" = "Фільтри •";
+"search.filters.title" = "Фільтри пошуку";
+"search.filters.reset" = "Скинути фільтри";
+"search.filters.sort" = "Сортування: %1$@";
+"search.filters.date" = "Дата: %1$@";
+"search.filters.type" = "Тип: %1$@";
+"search.filters.duration" = "Тривалість: %1$@";
+"search.filters.sortTitle" = "Сортувати за";
+"search.filters.dateTitle" = "Дата завантаження";
+"search.filters.typeTitle" = "Тип";
+"search.filters.durationTitle" = "Тривалість";
+
+"search.sort.relevance" = "Відповідність";
+"search.sort.rating" = "Рейтинг";
+"search.sort.uploadDate" = "Дата завантаження";
+"search.sort.viewCount" = "Кількість переглядів";
+"search.date.any" = "Будь-коли";
+"search.date.lastHour" = "За останню годину";
+"search.date.today" = "Сьогодні";
+"search.date.thisWeek" = "Цього тижня";
+"search.date.thisMonth" = "Цього місяця";
+"search.date.thisYear" = "Цього року";
+"search.type.any" = "Будь-який тип";
+"search.type.video" = "Відео";
+"search.type.channel" = "Канал";
+"search.type.playlist" = "Список відтворення";
+"search.duration.any" = "Будь-яка тривалість";
+"search.duration.short" = "До 4 хвилин";
+"search.duration.medium" = "4–20 хвилин";
+"search.duration.long" = "Понад 20 хвилин";
+
+/* ===== Home ===== */
+
+"home.title" = "Головна";
+"home.category.all" = "Усі";
+"home.category.live" = "Трансляції";
+"home.category.news" = "Новини";
+"home.category.gaming" = "Ігри";
+"home.category.sports" = "Спорт";
+"home.category.learning" = "Освіта";
+"home.category.fashion" = "Мода";
+"home.error.loadFailed" = "Не вдалося завантажити стрічку\nПотягніть вниз, щоб повторити";
+"home.signIn" = "Увійдіть, щоб бачити рекомендації";
+
+/* ===== Channel ===== */
+
+"channel.tab.videos" = "Відео";
+"channel.tab.live" = "Трансляції";
+"channel.tab.playlists" = "Списки відтворення";
+"channel.about.title" = "Про канал";
+"channel.about.close" = "Закрити";
+"channel.about.subscribers" = "Підписники";
+"channel.about.videos" = "Відео";
+"channel.about.description" = "Опис";
+"channel.about.contact" = "Контакти";
+
+/* ===== Library ===== */
+
+"library.history" = "Історія";
+"library.downloads" = "Завантаження";
+"library.playlists" = "Списки відтворення";
+"library.playlists.favorites" = "Вибране";
+"library.downloads.comingSoon" = "Завантаження скоро з'являться";
+"library.history.signIn" = "Увійдіть, щоб бачити історію переглядів";
+"library.history.empty" = "Історія переглядів порожня";
+"library.history.loadFailed" = "Не вдалося завантажити історію";
+"library.playlists.signIn" = "Увійдіть, щоб бачити плейлисти";
+"library.playlists.loadFailed" = "Не вдалося завантажити плейлисти";
+"library.playlist.empty" = "У цьому плейлисті немає відео";
+"library.playlist.loadFailed" = "Не вдалося завантажити плейлист";
+
+/* ===== Subscriptions ===== */
+
+"subscriptions.title" = "Підписки";
+"subscriptions.all" = "Усі підписки";
+"subscriptions.allButton" = "Усі";
+"subscriptions.signIn" = "Увійдіть, щоб бачити підписки";
+
+/* ===== Account (toolbar sheet) ===== */
+
+"account.fallbackName" = "Обліковий запис";
+"account.signIn" = "Увійти";
+"account.myChannel" = "Мій канал";
+"account.signOut" = "Вийти";
+"account.notSignedIn" = "Вхід не виконано";
+
+"common.error" = "Помилка";
+"channel.unavailable" = "Канал недоступний";
+
+/* ===== Settings: language section ===== */
+
+"settings.section.language" = "Мова";
+"settings.footer.language" = "Мова застосунку змінює і інтерфейс, і контент: назви відео, пошук та стрічки слідують за нею (YouTube перекладає метадані на сервері, як офіційний застосунок). Зміни повністю набувають чинності після перезапуску.";
+"settings.row.appLanguage" = "Мова застосунку";
+"settings.row.region" = "Регіон";
+"settings.language.system" = "Системна";
+"settings.language.restartTitle" = "Потрібен перезапуск";
+"settings.language.restartMessage" = "Зміни повністю набудуть чинності після перезапуску застосунку.";
+
+"settings.row.appUpdates" = "Оновлення додатку";
+"settings.footer.notifications" = "Доставка може затримуватися — iOS планує фонові перевірки і не виконує їх миттєво.";
+
+/* ===== Notifications ===== */
+
+"notifications.update.title" = "Доступне оновлення: %@";
+
+"notifications.title" = "Сповіщення";
+"notifications.empty" = "Сповіщень ще немає";
+"notifications.markAllRead" = "Позначити все як прочитане";
+"notifications.permissionBanner.message" = "Системні сповіщення вимкнені, тому оповіщення можуть не дійти поза додатком.";
+"notifications.permissionBanner.enable" = "Увімкнути сповіщення";
+"notifications.detail.openLink" = "Відкрити";

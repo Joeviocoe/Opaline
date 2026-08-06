@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate translation files against the English source of truth.
 
-For every `YTLite/xx.lproj/Localizable.strings` (xx != en):
+For every `Opaline/xx.lproj/Localizable.strings` (xx != en):
   - unknown keys (not present in en)          -> ERROR
   - format-placeholder mismatch vs en         -> ERROR
   - duplicate keys within one file            -> ERROR
@@ -15,7 +15,7 @@ import os
 import re
 import sys
 
-ROOT = os.path.join(os.path.dirname(__file__), "..", "YTLite")
+ROOT = os.path.join(os.path.dirname(__file__), "..", "Opaline")
 PAIR_RE = re.compile(r'^"((?:[^"\\]|\\.)+)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;\s*$')
 PLACEHOLDER_RE = re.compile(r"%(?:\d+\$)?[@dDuUxXoOfeEgGcCsSaAF]|%%")
 

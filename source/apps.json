@@ -1,12 +1,12 @@
 {
-  "name": "YTLite",
+  "name": "Opaline",
   "identifier": "com.verback.ytlite-source",
   "subtitle": "Lightweight YouTube client for iOS 12+",
   "description": "A lightweight YouTube client with SponsorBlock, Return YouTube Dislike, and up to 1080p playback. No ads, no tracking, no dependencies.",
   "website": "https://github.com/verback2308/YTLite",
   "apps": [
     {
-      "name": "YTLite",
+      "name": "Opaline",
       "bundleIdentifier": "com.verback.YTLite",
       "developerName": "verback2308",
       "subtitle": "YouTube client for iOS 12+",

@@ -1,0 +1,422 @@
+/*
+  Opaline — 繁體中文
+
+  Keys are stable API: never rename one casually — it orphans the key in
+  every translation. Comments give translator context. Positional
+  placeholders (%1$@) must be preserved verbatim in translations.
+*/
+
+/* ===== Player: settings menu ===== */
+
+/* Title of the gear menu in the player */
+"player.menu.settings" = "播放設定";
+/* Menu item + picker title: video quality */
+"player.menu.quality" = "畫質";
+/* Menu item + picker title: audio track (dub) selection */
+"player.menu.audioTrack" = "音軌";
+/* Menu item: toggles the playback statistics overlay */
+"player.menu.stats" = "統計資料";
+/* Picker title: subtitles */
+"player.menu.subtitles" = "字幕";
+
+/* ===== Player: pickers ===== */
+
+/* Subtitle picker: disables subtitles */
+"player.subtitles.off" = "關閉";
+/* Suffix on auto-generated subtitle tracks, e.g. "English (auto)" */
+"player.subtitles.autoSuffix" = "（自動）";
+/* Suffix on AI auto-dubbed audio tracks, e.g. "Russian (AI)" */
+"player.audioTrack.aiSuffix" = "（AI）";
+
+/* ===== Player: status / errors ===== */
+
+/* Status label while switching; %1$@ = quality label or track name */
+"player.status.loading" = "正在載入 %1$@...";
+/* Status label while the stream URL is being resolved */
+"player.status.resolving" = "正在解析串流...";
+"player.status.botCheckRetry" = "機器人驗證 — 正在更新工作階段並重試...";
+/* Shown when a video cannot be played at all */
+"player.error.playback" = "播放失敗。";
+"player.error.botCheck" = "YouTube 要求確認你不是機器人。請稍後再試。";
+/* Shown when switching video quality failed (playback continues) */
+"player.error.qualitySwitch" = "畫質切換失敗。";
+/* Shown when switching the audio track failed (playback continues) */
+"player.error.audioTrackSwitch" = "音軌切換失敗。";
+
+/* ===== Common ===== */
+
+/* Subscribe button, not-subscribed state */
+"common.subscribe" = "訂閱";
+/* Subscribe button, subscribed state */
+"common.subscribed" = "已訂閱";
+/* Generic cancel action */
+"common.cancel" = "取消";
+/* Generic confirmation button */
+"common.ok" = "好";
+/* Generic save action */
+"common.save" = "儲存";
+/* Generic done action */
+"common.done" = "完成";
+/* Fallback title/label of a playlist tile */
+"common.playlist" = "播放清單";
+/* Library tab title */
+"library.title" = "媒體庫";
+
+/* ===== Player: status ===== */
+
+/* Status label while the player prepares the first video */
+"player.status.preparing" = "正在準備影片...";
+/* Status label while an expired stream URL is re-resolved */
+"player.status.refreshing" = "正在重新整理串流...";
+
+/* ===== Player: watch page ===== */
+
+/* Expands the video description */
+"player.description.more" = "更多";
+/* Collapses the video description */
+"player.description.less" = "收合";
+/* Action bar: share the video */
+"player.action.share" = "分享";
+/* Action bar: save to playlist */
+"player.action.save" = "儲存";
+"player.action.saveFailed" = "無法儲存影片。";
+"player.action.saveTo" = "儲存至播放清單";
+"player.action.savedTo" = "已儲存至「%1$@」";
+"player.action.removedFrom" = "已從「%1$@」移除";
+/* Action bar: download */
+"player.action.download" = "下載";
+
+/* ===== Video action menu (shared "..." menu on video cells) ===== */
+
+"video.menu.playNext" = "新增至待播清單";
+"video.menu.watchLater" = "稍後觀看";
+"video.menu.watchLaterName" = "稍後觀看";
+"video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.queued" = "已加入佇列";
+
+/* ===== Player: comments ===== */
+
+/* Comments section header */
+"player.comments.title" = "留言";
+/* Comments header with count; %1$d = number of comments */
+"player.comments.titleCount" = "留言（%1$d）";
+/* Shown while comments load */
+"player.comments.loading" = "正在載入留言...";
+/* Shown when the comments request failed */
+"player.comments.unavailable" = "留言無法使用";
+/* Shown before the watch page has loaded enough to fetch comments */
+"player.comments.unavailableYet" = "留言暫時無法使用。";
+/* Button loading the next page of comments */
+"player.comments.loadMore" = "載入更多留言";
+/* Author line of a pinned comment; %1$@ = author name */
+"player.comments.pinned" = "%1$@ • 已置頂";
+/* Comment like count; %1$@ = formatted number */
+"player.comments.likes" = "%1$@個讚";
+/* Comment reply count; %1$@ = formatted number */
+"player.comments.replies" = "%1$@則回覆";
+
+/* ===== Player: autoplay overlay ===== */
+
+/* Header above the next video suggestion */
+"player.autoplay.upNext" = "接下來";
+/* Starts the suggested video immediately, skipping the countdown */
+"player.autoplay.playNow" = "立即播放";
+
+/* ===== Player: related section ===== */
+
+/* Header of an unnamed autoplay queue/playlist */
+"player.related.mix" = "混音";
+/* Header of the related-videos section */
+"player.related.title" = "相關";
+/* Status label on fatal playback failure; %1$@ = error description */
+"player.error.withMessage" = "播放錯誤：%1$@";
+
+/* ===== Player: speed ===== */
+
+/* The 1x playback speed */
+"player.speed.normal" = "正常";
+
+/* ===== Player: seek HUD ===== */
+
+/* Accumulated seek offset shown while tapping ±10s repeatedly; %1$@ = signed seconds, e.g. "-90" */
+"player.seek.offset" = "%1$@ 秒";
+
+/* ===== SponsorBlock ===== */
+
+/* Skip button; %1$@ = localized category name, e.g. "Skip Sponsor" */
+"sponsorblock.skip" = "略過%1$@";
+
+/* Skip-behavior options (per-category setting) */
+"sponsorblock.behavior.autoSkip" = "自動略過";
+"sponsorblock.behavior.showButton" = "顯示按鈕";
+"sponsorblock.behavior.disabled" = "停用";
+
+/* Footer under the SponsorBlock section (project attribution) */
+"sponsorblock.attribution" = "Powered by SponsorBlock (sponsor.ajay.app) — an open community project.";
+/* Header above the per-category skip settings */
+"sponsorblock.segmentCategories" = "片段分類";
+
+/* Category names (SponsorBlock project terms) and their descriptions */
+"sponsorblock.category.sponsor.name" = "贊助";
+"sponsorblock.category.sponsor.description" = "付費推廣、付費推薦及直接廣告。不適用於自我推廣或對創作者/網站/產品的免費推薦。";
+"sponsorblock.category.selfpromo.name" = "免費/自我推廣";
+"sponsorblock.category.selfpromo.description" = "與「贊助」類似，但為免費或自我推廣。包括關於商品、捐款或合作方的資訊。";
+"sponsorblock.category.exclusive_access.name" = "獨家存取";
+"sponsorblock.category.exclusive_access.description" = "僅用於標記整段影片。當影片展示免費或補助的產品、服務或地點時使用。";
+"sponsorblock.category.interaction.name" = "互動提醒（訂閱）";
+"sponsorblock.category.interaction.description" = "在內容中間簡短提醒按讚、訂閱或追蹤。如果較長或涉及特定內容，應歸入自我推廣。";
+"sponsorblock.category.highlight.name" = "精彩片段";
+"sponsorblock.category.highlight.description" = "大多數人在找的影片部分。類似於「x處開始」的留言。";
+"sponsorblock.category.intro.name" = "片頭動畫";
+"sponsorblock.category.intro.description" = "沒有實際內容的間隔。可能是停頓、靜止畫面或重複動畫。不應用於包含資訊的轉場。";
+"sponsorblock.category.outro.name" = "片尾畫面/鳴謝";
+"sponsorblock.category.outro.description" = "鳴謝或YouTube片尾畫面出現的部分。不適用於包含資訊的總結。";
+"sponsorblock.category.preview.name" = "預覽/回顧";
+"sponsorblock.category.preview.description" = "展示本影片或系列中其他影片即將出現內容的片段集。所有資訊稍後會在影片中重複。";
+"sponsorblock.category.filler.name" = "閒聊/笑話";
+"sponsorblock.category.filler.description" = "理解影片主要內容所不需要的閒聊或笑話。不應用於提供背景或上下文資訊的片段。";
+"sponsorblock.category.music_offtopic.name" = "非音樂部分";
+"sponsorblock.category.music_offtopic.description" = "僅適用於音樂影片。音樂影片中的非音樂部分。";
+"sponsorblock.category.chapter.name" = "章節";
+"sponsorblock.category.chapter.description" = "影片的自訂命名部分。";
+
+/* ===== Settings ===== */
+
+/* Settings sheet title */
+"settings.title" = "設定";
+
+/* Section headers */
+"settings.section.theme" = "主題";
+"settings.section.playback" = "播放";
+"settings.section.autoDub" = "配音";
+"settings.section.home" = "首頁";
+"settings.section.cache" = "快取";
+"settings.section.ryd" = "Return YouTube Dislike";
+"settings.section.sponsorblock" = "SponsorBlock";
+"settings.section.debug" = "除錯";
+
+/* Section footers */
+"settings.footer.themeAutoSystem" = "自動跟隨系統外觀。";
+"settings.footer.themeAutoHours" = "在上述時間段自動切換到深色主題。";
+"settings.footer.playback" = "縮放以填充會自動縮放全螢幕影片以消除黑邊。在播放器中縮放可按影片覆蓋。\n\n自動播放會在5秒倒數後播放下一個推薦影片。混音開關會立即將相同行為套用至混音/播放清單佇列。";
+"settings.footer.autoDub" = "當影片的原始語言與配音語言不同時，會自動選擇對應的音軌。";
+"settings.footer.home" = "推薦欄顯示方式：連續格線或電視風格水平軌道。";
+"settings.footer.ryd" = "不喜歡次數由 Return YouTube Dislike (returnyoutubedislike.com) 提供 — 開放社群專案。";
+"settings.footer.debug" = "強制使用特定播放來源。通常使用 Android VR 並自動回退。解算器伺服器為 Mobile Web + pot 來源提供支援（pot 鑄造和 iOS 12–13 上的 n-solving）。";
+
+/* Theme rows; segment labels for dark/light/auto modes */
+"settings.row.theme" = "主題";
+"settings.theme.dark" = "深色";
+"settings.theme.light" = "淺色";
+"settings.theme.auto" = "自動";
+/* Hour pickers bounding the iOS 12 scheduled dark mode */
+"settings.row.darkFrom" = "深色主題開始";
+"settings.row.darkUntil" = "深色主題結束";
+
+/* Playback rows */
+"settings.row.defaultQuality" = "預設畫質";
+/* The "Auto" entry of the default-quality picker (stored value stays English) */
+"settings.quality.auto" = "自動";
+"settings.row.backgroundPlayback" = "背景播放";
+"settings.row.pip" = "子母畫面";
+"settings.row.hideStatusBar" = "全螢幕時隱藏狀態列";
+"settings.row.zoomToFill" = "全螢幕時縮放以填充";
+"settings.row.showShorts" = "在訂閱中顯示 YouTube Shorts";
+"settings.row.autoplay" = "自動播放";
+/* %1$@ = localized "Mix" term (player.related.mix) */
+"settings.row.autoplayMix" = "自動播放（%1$@）";
+
+/* Auto-dub rows: master toggle, dub-language picker, AI-dub exclusion */
+"settings.row.autoDub" = "以配音播放影片";
+"settings.row.autoDubLanguage" = "配音語言";
+"settings.row.autoDubIgnoreAI" = "忽略 AI 配音";
+
+/* Home layout row + option names */
+"settings.row.homeLayout" = "首頁佈局";
+"settings.homeLayout.grid" = "格線";
+"settings.homeLayout.rails" = "橫向軌道";
+
+/* Notifications section */
+"settings.section.notifications" = "通知";
+"settings.row.notifications" = "通知";
+
+/* Cache rows */
+"settings.row.feedCache" = "動態快取";
+"settings.row.feedCacheDuration" = "動態快取時長";
+"settings.row.imageCache" = "圖片快取";
+"settings.row.imageCacheDuration" = "圖片快取時長";
+"settings.row.clearCache" = "清除所有快取";
+/* Alert after clearing all caches */
+"settings.cache.clearedTitle" = "快取已清除";
+"settings.cache.clearedMessage" = "所有快取已清除。";
+
+/* Integration rows */
+"settings.row.ryd" = "Return YouTube Dislike";
+"settings.row.sponsorblock" = "SponsorBlock";
+"settings.row.sponsorblockSettings" = "SponsorBlock 設定";
+
+/* Debug rows (values stay technical/English) */
+"settings.row.playbackSource" = "播放來源";
+"settings.row.solverServer" = "Solver server";
+"settings.row.shareLog" = "分享除錯記錄";
+/* Solver-server URL alert */
+"settings.solver.message" = "解算器伺服器的 URL。";
+"settings.solver.reset" = "重設為預設值";
+/* Suffix shown after the solver URL when it is the built-in default */
+"settings.solver.defaultSuffix" = "（預設）";
+/* Alert when no debug logs exist yet */
+"settings.log.noneTitle" = "無記錄";
+"settings.log.noneMessage" = "暫無除錯記錄。";
+
+/* ===== Profile ===== */
+
+"profile.title" = "個人檔案";
+"profile.signOut" = "登出";
+"profile.clearImageCache" = "清除圖片快取";
+"profile.imageCacheCleared" = "圖片快取已清除。";
+
+/* ===== Search ===== */
+
+"search.title" = "搜尋";
+/* Search bar placeholder */
+"search.placeholder" = "搜尋 YouTube";
+/* Header above the recent-search list */
+"search.recent" = "最近的搜尋";
+/* Filters toolbar button; the dotted variant marks active filters */
+"search.filters" = "篩選";
+"search.filters.active" = "篩選 •";
+/* Filters sheet title + reset action */
+"search.filters.title" = "搜尋篩選";
+"search.filters.reset" = "重設篩選";
+/* Filter rows; %1$@ = the current value */
+"search.filters.sort" = "排序：%1$@";
+"search.filters.date" = "日期：%1$@";
+"search.filters.type" = "類型：%1$@";
+"search.filters.duration" = "時長：%1$@";
+/* Sub-sheet titles */
+"search.filters.sortTitle" = "排序依據";
+"search.filters.dateTitle" = "上傳日期";
+"search.filters.typeTitle" = "類型";
+"search.filters.durationTitle" = "影片長度";
+
+/* Filter option values */
+"search.sort.relevance" = "關聯性";
+"search.sort.rating" = "評分";
+"search.sort.uploadDate" = "上傳日期";
+"search.sort.viewCount" = "觀看次數";
+"search.date.any" = "所有時間";
+"search.date.lastHour" = "最近一小時";
+"search.date.today" = "今天";
+"search.date.thisWeek" = "本週";
+"search.date.thisMonth" = "本月";
+"search.date.thisYear" = "今年";
+"search.type.any" = "所有類型";
+"search.type.video" = "影片";
+"search.type.channel" = "頻道";
+"search.type.playlist" = "播放清單";
+"search.duration.any" = "所有時長";
+"search.duration.short" = "4分鐘以下";
+"search.duration.medium" = "4–20分鐘";
+"search.duration.long" = "20分鐘以上";
+
+/* ===== Home ===== */
+
+"home.title" = "首頁";
+/* Chip resetting to the unfiltered feed */
+"home.category.all" = "全部";
+/* Static category chips (server shelf titles arrive already localized) */
+"home.category.live" = "直播";
+"home.category.news" = "新聞";
+"home.category.gaming" = "遊戲";
+"home.category.sports" = "體育";
+"home.category.learning" = "學習";
+"home.category.fashion" = "時尚";
+/* Error empty state (two lines) */
+"home.error.loadFailed" = "無法載入動態\n下拉重試";
+/* Signed-out empty state */
+"home.signIn" = "登入以查看推薦內容";
+
+/* ===== Channel ===== */
+
+/* Channel tab bar */
+"channel.tab.videos" = "影片";
+"channel.tab.live" = "直播";
+"channel.tab.playlists" = "播放清單";
+/* About sheet */
+"channel.about.title" = "簡介";
+"channel.about.close" = "關閉";
+"channel.about.subscribers" = "訂閱者";
+"channel.about.videos" = "影片";
+"channel.about.description" = "說明";
+"channel.about.contact" = "聯絡";
+
+/* ===== Library ===== */
+
+"library.history" = "觀看記錄";
+"library.downloads" = "已下載的內容";
+"library.playlists" = "播放清單";
+"library.playlists.favorites" = "收藏";
+"library.downloads.comingSoon" = "下載功能即將推出";
+"library.history.signIn" = "登入以查看觀看記錄";
+"library.history.empty" = "沒有觀看記錄";
+"library.history.loadFailed" = "無法載入觀看記錄";
+"library.playlists.signIn" = "登入以查看播放清單";
+"library.playlists.loadFailed" = "無法載入播放清單";
+"library.playlist.empty" = "此播放清單中沒有影片";
+"library.playlist.loadFailed" = "無法載入播放清單";
+
+/* ===== Subscriptions ===== */
+
+"subscriptions.title" = "訂閱內容";
+"subscriptions.all" = "全部訂閱";
+/* "All" button in the channel avatar bar */
+"subscriptions.allButton" = "全部";
+"subscriptions.signIn" = "登入以查看訂閱內容";
+
+/* ===== Account (toolbar sheet) ===== */
+
+/* Fallback account name when the profile has none */
+"account.fallbackName" = "帳戶";
+"account.signIn" = "登入";
+"account.myChannel" = "我的頻道";
+"account.signOut" = "登出";
+"account.notSignedIn" = "未登入";
+
+/* Generic error alert title */
+"common.error" = "錯誤";
+/* Channel screen failed to load */
+"channel.unavailable" = "頻道無法使用";
+
+/* ===== Settings: language section ===== */
+
+"settings.section.language" = "語言";
+"settings.footer.language" = "應用程式語言會同時改變介面和內容：標題、搜尋和動態都會隨之變化（與官方應用程式一樣，YouTube 會在伺服器端翻譯中繼資料）。變更在重新啟動應用程式後完全生效。";
+/* Rows */
+"settings.row.appLanguage" = "應用程式語言";
+"settings.row.region" = "地區";
+/* Picker option following the device language/region */
+"settings.language.system" = "系統";
+/* Alert after changing a language setting */
+"settings.language.restartTitle" = "需要重新啟動";
+"settings.language.restartMessage" = "變更在重新啟動應用程式後完全生效。";
+
+/* Notification settings screen (pushed from Settings > Home) */
+"settings.row.appUpdates" = "應用程式更新";
+"settings.footer.notifications" = "傳送可能延遲 — iOS 會排程背景檢查，但不會立即執行。";
+
+/* ===== Notifications ===== */
+
+/* Inbox item + system notification title when a newer app version is available; %@ = version */
+"notifications.update.title" = "有新版本可用：%@";
+
+/* Bell button inbox, presented as a sheet */
+"notifications.title" = "通知";
+/* Shown when the inbox has no notifications yet */
+"notifications.empty" = "暫無通知";
+/* Left nav bar button in the inbox; marks every notification as read */
+"notifications.markAllRead" = "全部標為已讀";
+/* Banner shown when system notifications are off */
+"notifications.permissionBanner.message" = "系統通知已關閉，因此警示可能無法在應用程式外送達。";
+"notifications.permissionBanner.enable" = "啟用通知";
+/* Detail screen action opening the notification's link */
+"notifications.detail.openLink" = "開啟";

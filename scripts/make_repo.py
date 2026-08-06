@@ -25,8 +25,8 @@ import shutil
 import tarfile
 from pathlib import Path
 
-REPO_LABEL = "YTLite"
-REPO_DESCRIPTION = "YTLite — lightweight YouTube client for iOS 12+"
+REPO_LABEL = "Opaline"
+REPO_DESCRIPTION = "Opaline — lightweight YouTube client for iOS 12+"
 ARCHITECTURES = "iphoneos-arm iphoneos-arm64"
 
 
@@ -248,7 +248,7 @@ def main():
     parser.add_argument("--out", required=True, type=Path, help="output directory for the repo")
     # Must be all-lowercase: Sileo/Cydia lowercase user-entered source URLs
     # and GitHub Pages paths are case-sensitive.
-    parser.add_argument("--repo-url", default="https://verback2308.github.io/ytlite/")
+    parser.add_argument("--repo-url", default="https://repo.verback2308.pp.ua/")
     parser.add_argument("--screenshots", type=Path, help="directory of package-page images")
     parser.add_argument("--changelog", type=Path, help="JSON Lines file of {tag, body}")
     args = parser.parse_args()

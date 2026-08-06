@@ -9,18 +9,18 @@
 # signature applied by make_ipa.sh (keychain items survive updates).
 #
 # Env overrides (all optional):
-#   APP_PATH     path to the built YTLite.app (default: from build settings)
+#   APP_PATH     path to the built Opaline.app (default: from build settings)
 #   DEB_VERSION  package version (default: CFBundleShortVersionString of the app)
 
 set -e
 
-APP_NAME="YTLite"
-PROJECT="YTLite.xcodeproj"
-SCHEME="YTVLite"
+APP_NAME="Opaline"
+PROJECT="Opaline.xcodeproj"
+SCHEME="Opaline"
 PACKAGE_ID="com.verback.ytlite"
 HOMEPAGE="https://github.com/verback2308/ytlite"
 ICON_URL="https://raw.githubusercontent.com/verback2308/ytlite/main/source/icon.png"
-REPO_URL="https://verback2308.github.io/ytlite/"
+REPO_URL="https://repo.verback2308.pp.ua/"
 
 if [ -z "${APP_PATH:-}" ]; then
   BUILD_DIR=$(xcodebuild \

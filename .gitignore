@@ -23,3 +23,5 @@ Config/Local.xcconfig
 CLAUDE.md
 AGENTS.md
 .mimocode/
+
+__pycache__/

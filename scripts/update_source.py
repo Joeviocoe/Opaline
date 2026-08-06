@@ -41,15 +41,17 @@ def release_url(download_url, version):
 def news_title(version, release_title):
     """The GitHub release title, prefixed with the app name (and the
     version, when the author included neither); bare/empty titles fall
-    back to 'YTLite <version>'."""
+    back to 'Opaline <version>'."""
     title = (release_title or "").strip()
     if not title or title == version:
-        return f"YTLite {version}"
-    if title.lower().startswith("ytlite"):
+        return f"Opaline {version}"
+    # "ytlite" stays accepted alongside the current name so that releases
+    # tagged before the rename still pass through unprefixed.
+    if title.lower().startswith(("opaline", "ytlite")):
         return title
     if title.startswith(version):
-        return f"YTLite {title}"
-    return f"YTLite {version} — {title}"
+        return f"Opaline {title}"
+    return f"Opaline {version} — {title}"
 
 
 def prepend_news(data, app, args, notes):

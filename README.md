@@ -1,11 +1,11 @@
 <div align="center">
 
-# YTLite
+# Opaline
 
 **A lightweight, native YouTube client for iOS 12+. No ads, no tracking, no dependencies.**
 
-[![Latest release](https://img.shields.io/github/v/release/verback2308/YTLite?label=release&color=blue)](https://github.com/verback2308/YTLite/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/verback2308/YTLite/total?color=brightgreen)](https://github.com/verback2308/YTLite/releases)
+[![Latest release](https://img.shields.io/github/v/release/verback2308/Opaline?label=release&color=blue)](https://github.com/verback2308/Opaline/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/verback2308/Opaline/total?color=brightgreen)](https://github.com/verback2308/Opaline/releases)
 ![iOS 12+](https://img.shields.io/badge/iOS-12%2B-lightgrey?logo=apple)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 
@@ -34,7 +34,7 @@
 
 ## Why
 
-When Google dropped support for the official YouTube app on older devices, there was no way to watch videos properly. Browsers capped quality at 360p — and even that barely ran. YTLite was born to restore what was lost: high-quality playback on hardware that still works fine, just ignored by Google. The "Lite" stands for a focused, lightweight client that does one thing well — let you watch YouTube.
+When Google dropped support for the official YouTube app on older devices, there was no way to watch videos properly. Browsers capped quality at 360p — and even that barely ran. Opaline was born to restore what was lost: high-quality playback on hardware that still works fine, just ignored by Google. The "Lite" stands for a focused, lightweight client that does one thing well — let you watch YouTube.
 
 > [!NOTE]
 > This project is not related to [dayanch96/YTLite](https://github.com/dayanch96/YTLite) (YouTube Plus). The name collision is accidental.
@@ -99,25 +99,25 @@ When Google dropped support for the official YouTube app on older devices, there
 
 ## Installation
 
-YTLite runs on devices with **iOS 12 and above**.
+Opaline runs on devices with **iOS 12 and above**.
 
 ### Non-jailbroken devices
 
 **Option 1 — Add source (recommended)**
 
-Add the YTLite source to your sideloading app to receive automatic updates:
+Add the Opaline source to your sideloading app to receive automatic updates:
 
 <a href="https://stikstore.app/altdirect/?url=https://repo.verback2308.pp.ua/apps.json"><img src="https://github.com/StikStore/altdirect/raw/main/assets/png/AltSource_Blue.png" height="55" alt="Add Source"></a>
 
 **Option 2 — Manual install**
 
-[Download the latest IPA](https://github.com/verback2308/YTLite/releases/latest) and install via **SideStore**, **AltStore**, or **LiveContainer**.
+[Download the latest IPA](https://github.com/verback2308/Opaline/releases/latest) and install via **SideStore**, **AltStore**, or **LiveContainer**.
 
 **Option 3 — Build from source**
 
 ```bash
-git clone https://github.com/verback2308/YTLite.git
-cd YTLite
+git clone https://github.com/verback2308/Opaline.git
+cd Opaline
 cp Config/Local.xcconfig.example Config/Local.xcconfig
 ./make_ipa.sh
 ```
@@ -126,7 +126,7 @@ cp Config/Local.xcconfig.example Config/Local.xcconfig
 
 **Option 1 — Cydia/Sileo repo (recommended)**
 
-Add the repo to your package manager to install YTLite and receive automatic updates:
+Add the repo to your package manager to install Opaline and receive automatic updates:
 
 ```
 https://repo.verback2308.pp.ua/
@@ -134,7 +134,7 @@ https://repo.verback2308.pp.ua/
 
 Rootful (`iphoneos-arm`) and rootless (`iphoneos-arm64`) packages are provided; Sileo, Zebra and Cydia are supported. Every released version stays available in the repo, so you can also install or roll back to an older one (Sileo/Zebra: package page → version list).
 
-Pick one channel and stay on it — the repo package and the IPA share a bundle identifier, and having both installed leaves an app icon the Home Screen cannot delete. Already have the other one? Remove it first: the IPA from the Home Screen, the repo package from your package manager (or `dpkg -r com.verback.ytlite` over SSH).
+Pick one channel and stay on it — the repo package and the IPA share a bundle identifier, and having both installed leaves an app icon the Home Screen cannot delete. Already have the other one? Remove it first: the IPA from the Home Screen, the repo package from your package manager (or `dpkg -r com.verback.opaline` over SSH).
 
 **Option 2 — Manual install**
 
@@ -149,7 +149,7 @@ Install the `.ipa` package directly:
 - Comments are read-only — you can browse and sort them and open replies, but not post, reply or like
 - Offline download is not yet available
 - Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
-- **Picture in Picture is limited by the system before iOS 15**, and no app can work around it: the window survives exactly one video, and switching to another one closes it and leaves audio playing — [the full findings are in issue #31](https://github.com/verback2308/ytlite/issues/31#issuecomment-5148224679)
+- **Picture in Picture is limited by the system before iOS 15**, and no app can work around it: the window survives exactly one video, and switching to another one closes it and leaves audio playing — [the full findings are in issue #31](https://github.com/verback2308/Opaline/issues/31#issuecomment-5148224679)
   - Before iOS 14.2 the system only starts PiP by itself from **fullscreen**. Leaving the app while the video plays inline gives background audio instead — the PiP button works in both cases
   - Before iOS 15 background audio requires the player to give up its video layer, and the system then refuses to open PiP for that video at all. So once a video has played in the background, automatic PiP no longer starts for it — the PiP button still does, and the next video starts clean
   - On a **jailbroken device** PiP may not start at all — confirmed on an iPad mini 2 running iOS 12.5.8 with Chimera, and likely the same on checkra1n. The jailbreak denies it, not the app; installing [ForceInPicture](https://github.com/PoomSmart/ForceInPicture) restores it
@@ -197,10 +197,10 @@ This generates a log file you can attach to your GitHub issue. The log includes 
 ## Building
 
 ```bash
-git clone https://github.com/verback2308/YTLite.git
-cd YTLite
+git clone https://github.com/verback2308/Opaline.git
+cd Opaline
 cp Config/Local.xcconfig.example Config/Local.xcconfig
-open YTLite.xcodeproj
+open Opaline.xcodeproj
 ```
 
 Edit `Config/Local.xcconfig` and set your own `PRODUCT_BUNDLE_IDENTIFIER`.
@@ -209,12 +209,12 @@ manifest — leave the default to follow this repository, or aim it at a file
 served from your own machine to test notifications. Release builds get the
 URL of whatever repository they are built from, written in by the workflow.
 
-Select the **YTVLite** scheme, choose your device or simulator, and build (⌘B).
+Select the **Opaline** scheme, choose your device or simulator, and build (⌘B).
 
 ## Architecture
 
 ```
-YTLite/
+Opaline/
 ├── App/              Composition root: AppDelegate, DI wiring, tab bar
 ├── Core/             Shared kernel (features depend on it, never on each other)
 │   ├── API/          YouTube Innertube API client
@@ -283,7 +283,7 @@ Please follow the existing code style. SwiftLint is configured and runs as a bui
 
 ## Support
 
-If YTLite keeps your old device alive, you can support development:
+If Opaline keeps your old device alive, you can support development:
 
 <a href="https://buymeacoffee.com/verback2308" target="_blank" rel="noopener noreferrer"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy me a coffee" height="45"></a>
 

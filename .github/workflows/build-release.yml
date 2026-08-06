@@ -70,7 +70,7 @@ jobs:
         run: |
           git fetch --tags --force --quiet
           MARKETING=$(sed -n 's/.*MARKETING_VERSION = \([^;]*\);.*/\1/p' \
-            YTLite.xcodeproj/project.pbxproj | head -1)
+            Opaline.xcodeproj/project.pbxproj | head -1)
           MAJOR_MINOR=$(echo "$MARKETING" | cut -d. -f1,2)
           PATCH=$(echo "$MARKETING" | cut -d. -f3)
           PATCH=${PATCH:-0}
@@ -112,7 +112,7 @@ jobs:
               gh api -X DELETE "repos/${{ github.repository }}/releases/$id"
             done
           gh release create "$VERSION" \
-            "YTLite_${VERSION}.ipa" \
+            "Opaline_${VERSION}.ipa" \
             "com.verback.ytlite_${VERSION}_iphoneos-arm.deb" \
             "com.verback.ytlite_${VERSION}_iphoneos-arm64.deb" \
             --draft \
