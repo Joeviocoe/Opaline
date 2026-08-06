@@ -150,18 +150,6 @@ final class ChannelViewController: VideosViewController {
     }
 
     override func openVideo(_ video: Video) {
-        if currentTab == .shorts {
-            // Keep swiping through this channel's shorts before YouTube's
-            // sequence takes over, the way the official app does.
-            let loaded = sections.flatMap { $0.videos }
-            let following = loaded
-                .drop { $0.id != video.id }
-                .dropFirst()
-            videoRouter.open(
-                video: video, from: self, following: Array(following)
-            )
-            return
-        }
         guard currentTab == .playlists,
               let playlist = playlistLookup[video.id] else {
             super.openVideo(video)
