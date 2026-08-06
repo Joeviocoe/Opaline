@@ -1,8 +1,8 @@
 #!/bin/bash
 # make_deb.sh — packages the app built by make_ipa.sh into Cydia/Sileo .deb files
 # Usage: ./make_ipa.sh && ./make_deb.sh
-# Output: com.verback.ytlite_<version>_iphoneos-arm.deb   (rootful,  /Applications)
-#         com.verback.ytlite_<version>_iphoneos-arm64.deb (rootless, /var/jb/Applications)
+# Output: Opaline_<version>_iphoneos-arm.deb   (rootful,  /Applications)
+#         Opaline_<version>_iphoneos-arm64.deb (rootless, /var/jb/Applications)
 #
 # Requires only stock macOS tools (bsdtar + ar) — no dpkg needed. The app is
 # taken as-is from the build products, so it carries the fixed ad-hoc
@@ -42,7 +42,12 @@ VERSION="${DEB_VERSION:-$(plutil -extract CFBundleShortVersionString raw -o - "$
 # $1 = architecture, $2 = install prefix ("" rootful, /var/jb rootless), $3 = min firmware
 build_deb() {
   local ARCH="$1" PREFIX="$2" MIN_FW="$3"
-  local OUTPUT="${PACKAGE_ID}_${VERSION}_${ARCH}.deb"
+  # Named after the app rather than after PACKAGE_ID, which Debian convention
+  # would use: the id is frozen at the pre-rename com.verback.ytlite so APT keeps
+  # offering upgrades, and putting that on the releases page under a project
+  # called Opaline confuses far more people than the broken convention does.
+  # Nothing resolves packages by filename -- APT follows Filename: in the index.
+  local OUTPUT="${APP_NAME}_${VERSION}_${ARCH}.deb"
   local STAGE
   STAGE=$(mktemp -d)
   local DATA="$STAGE/data" CTRL="$STAGE/control"
