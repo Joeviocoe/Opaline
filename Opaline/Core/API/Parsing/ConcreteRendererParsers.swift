@@ -105,3 +105,20 @@ struct ReelItemVideoRendererParser: VideoRendererParser {
         return InnertubeClient.parseReelItem(ri)
     }
 }
+
+// MARK: - ShortsLockupVideoParser
+
+/// Handles `shortsLockupViewModel` — the renderer that supplanted
+/// `reelItemRenderer` for Shorts grids (search, channel Shorts tab, shelves).
+struct ShortsLockupVideoParser: VideoRendererParser {
+    func video(from item: [String: Any]) -> Video? {
+        let lockup = item["shortsLockupViewModel"] as? [String: Any]
+            ?? item.digDict(
+                RendererKey.richItem, JSONKey.content, "shortsLockupViewModel"
+            )
+        guard let lockup else {
+            return nil
+        }
+        return InnertubeClient.parseShortsLockup(lockup)
+    }
+}

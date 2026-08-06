@@ -37,12 +37,20 @@ extension InnertubeClient {
             )
             return
         }
-        if !showShorts && isShortsShelf(shelf) {
+        let isShorts = isShortsShelf(shelf)
+        if !showShorts && isShorts {
             return
         }
         let title = shelfTitle(shelf)
         let before = acc.videos.count
         appendShelfVideos(from: sc, into: &acc.videos)
+        // The TV client has no shorts renderer — a short arrives as an
+        // ordinary tile and the SHELF is the only signal that it is one.
+        if isShorts {
+            for index in before ..< acc.videos.count {
+                acc.videos[index].isShort = true
+            }
+        }
         let added = acc.videos.count - before
         if added > 0 {
             recordShelf(title, added: added, content: sc, into: &acc)

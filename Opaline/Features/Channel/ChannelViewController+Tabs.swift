@@ -67,6 +67,8 @@ extension ChannelViewController {
         switch currentTab {
         case .videos:
             loadVideoTab(params: ChannelTabParams.videos)
+        case .shorts:
+            loadVideoTab(params: ChannelTabParams.shorts)
         case .live:
             loadVideoTab(params: ChannelTabParams.live)
         case .playlists:

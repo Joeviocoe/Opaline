@@ -26,6 +26,14 @@ protocol VideoRendererParser {
 ///     VideoRendererParserChain.shared.video(from: item)
 ///
 enum VideoRendererParserChain {
+    /// Renderer keys that can carry a short behind ordinary video chrome.
+    private static let videoRendererKeys = [
+        RendererKey.video,
+        RendererKey.compactVideo,
+        RendererKey.tile,
+        "gridVideoRenderer"
+    ]
+
     private static let parsers: [VideoRendererParser] = [
         TileVideoRendererParser(),
         DirectVideoRendererParser(),
@@ -35,7 +43,8 @@ enum VideoRendererParserChain {
         LockupViewModelVideoParser(),
         RadioRendererParser(),
         PlaylistRendererParser(),
-        ReelItemVideoRendererParser()
+        ReelItemVideoRendererParser(),
+        ShortsLockupVideoParser()
     ]
 
     static func video(from item: [String: Any]) -> Video? {
@@ -43,26 +52,30 @@ enum VideoRendererParserChain {
     }
 
     /// Returns true if `item` is a YouTube Short.
-    /// Shorts appear as:
-    ///   • richItemRenderer/content/reelItemRenderer
-    ///   • richItemRenderer/content/videoRenderer with reelWatchEndpoint navigation
+    /// A short reaches us in four shapes, depending on client and surface:
+    ///   • a dedicated `reelItemRenderer` / `shortsLockupViewModel`
+    ///   • either of those wrapped in a `richItemRenderer`
+    ///   • an ordinary video renderer (web/compact/grid/tile) whose
+    ///     navigation points at a `reelWatchEndpoint` — this is how the
+    ///     subscriptions feed serves them
     static func isShortFeedItem(_ item: [String: Any]) -> Bool {
-        guard let ri = item[RendererKey.richItem] as? [String: Any],
-              let content = ri[JSONKey.content] as? [String: Any]
-        else {
-            return false
-        }
+        let content = item.digDict(RendererKey.richItem, JSONKey.content)
+            ?? item
         if content["reelItemRenderer"] != nil
             || content["shortsLockupViewModel"] != nil {
             return true
         }
-        // Regular videoRenderer that navigates to /shorts/…
-        if let vr = content[RendererKey.video] as? [String: Any],
-           let nav = vr["navigationEndpoint"] as? [String: Any],
-           nav["reelWatchEndpoint"] != nil {
-            return true
+        return videoRendererKeys.contains { key in
+            (content[key] as? [String: Any])
+                .map(navigatesToReel) ?? false
         }
-        return false
+    }
+
+    /// True when any of the renderer's tap commands opens /shorts/….
+    private static func navigatesToReel(_ renderer: [String: Any]) -> Bool {
+        ["navigationEndpoint", "onSelectCommand", "onTap"].contains { key in
+            (renderer[key] as? [String: Any])?["reelWatchEndpoint"] != nil
+        }
     }
 
     /// Extracts a continuation token from a `continuationItemRenderer` item, if present.
@@ -87,7 +100,7 @@ enum VideoRendererParserChain {
                 storeInlineProgress(
                     item: item, videoId: parsed.id
                 )
-                return parsed
+                return marked(parsed, item: item)
             }
             return nil
         }
@@ -104,7 +117,7 @@ enum VideoRendererParserChain {
                 storeInlineProgress(
                     item: item, videoId: parsed.id
                 )
-                videos.append(parsed)
+                videos.append(marked(parsed, item: item))
             } else if continuation == nil,
                       let token = Self.continuation(from: item) {
                 continuation = token
@@ -201,6 +214,20 @@ enum VideoRendererParserChain {
     }
 
     // MARK: - Private
+
+    /// Flags the video as a short when its raw item says so — the renderer
+    /// parsers each see only their own shape, this sees the item every feed
+    /// passes through, so no surface can leak an unflagged short.
+    private static func marked(
+        _ video: Video, item: [String: Any]
+    ) -> Video {
+        guard !video.isShort, isShortFeedItem(item) else {
+            return video
+        }
+        var short = video
+        short.isShort = true
+        return short
+    }
 
     private static func filtered(_ items: [[String: Any]]) -> [[String: Any]] {
         let showShorts = UserDefaults.standard.bool(

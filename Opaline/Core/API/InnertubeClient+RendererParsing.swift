@@ -23,7 +23,9 @@ extension InnertubeClient {
             viewCount: views,
             publishedAt: nil,
             duration: nil,
-            isLive: false
+            isLive: false,
+            playlistId: nil,
+            isShort: true
         )
     }
 

@@ -26,6 +26,7 @@ enum ServiceContainer {
     static var watch: WatchService { client }
     static var engagement: EngagementService { client }
     static var account: AccountService { client }
+    static var shorts: ShortsService { client }
 
     /// Legacy accessor — prefer narrow protocols above for new code.
     static var video: VideoService { client }

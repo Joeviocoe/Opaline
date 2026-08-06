@@ -4,6 +4,8 @@ final class VideoRouter {
     static let shared = VideoRouter()
 
     var watchViewControllerFactory: ((Video) -> WatchViewController)?
+    /// Shorts open in their own full-screen vertical feed, not the watch screen.
+    var shortsViewControllerFactory: (([Video]) -> UIViewController)?
     /// Lets Core screens push a channel without importing Features.
     var channelViewControllerFactory: ((String, String) -> UIViewController)?
     private var panel: PlayerPanelViewController?
@@ -20,7 +22,21 @@ final class VideoRouter {
 
     private init() {}
 
-    func open(video: Video, from presenter: UIViewController) {
+    /// - Parameter following: shorts to swipe through before handing over to
+    ///   YouTube's own sequence. The channel Shorts tab passes its list so
+    ///   the feed stays on that channel first, as the official app does;
+    ///   everywhere else this is empty and the sequence starts immediately.
+    func open(
+        video: Video,
+        from presenter: UIViewController,
+        following: [Video] = []
+    ) {
+        if video.isShort, let makeShorts = shortsViewControllerFactory {
+            presenter.navigationController?.pushViewController(
+                makeShorts([video] + following), animated: true
+            )
+            return
+        }
         if let panel {
             panel.watchVC.loadVideo(video)
             panel.expand(animated: true)

@@ -367,6 +367,7 @@
 /* Channel tab bar */
 "channel.tab.videos" = "Videos";
 "channel.tab.live" = "Live";
+"channel.tab.shorts" = "Shorts";
 "channel.tab.playlists" = "Playlists";
 /* About sheet */
 "channel.about.title" = "About";

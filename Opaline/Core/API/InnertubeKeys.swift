@@ -109,6 +109,7 @@ enum InnertubeEndpoint {
     static let addToPlaylist = "/playlist/get_add_to_playlist"
     static let commentCreate = "/comment/create_comment"
     static let getComments   = "/comment/get_comments"
+    static let reelSequence  = "/reel/reel_watch_sequence"
 }
 
 // MARK: - Common JSON field names

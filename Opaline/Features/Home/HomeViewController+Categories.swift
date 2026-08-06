@@ -168,6 +168,16 @@ extension HomeViewController {
         }
         var page = page
         if isDrainingShelves {
+            // A drained shelf's continuation returns bare tiles — the shelf
+            // that identified them as shorts is no longer in the response,
+            // so carry the flag over from the shelf being drained.
+            if drainTitle?.lowercased() == "shorts" {
+                page.videos = page.videos.map { video in
+                    var short = video
+                    short.isShort = true
+                    return short
+                }
+            }
             if page.shelves == nil, !page.videos.isEmpty {
                 page.shelves = [
                     FeedShelf(title: drainTitle, count: page.videos.count)

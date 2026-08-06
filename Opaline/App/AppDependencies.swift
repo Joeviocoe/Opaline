@@ -11,6 +11,7 @@ struct AppDependencies {
     let engagementService: EngagementService
     let accountService: AccountService
     let subscribedChannelsService: SubscribedChannelsService
+    let shortsService: ShortsService
     let channelRSSService: ChannelRSSFeedService
     let localePreferences: LocalePreferences
 
@@ -26,6 +27,7 @@ struct AppDependencies {
             engagementService: ServiceContainer.engagement,
             accountService: ServiceContainer.account,
             subscribedChannelsService: ServiceContainer.subscribedChannels,
+            shortsService: ServiceContainer.shorts,
             channelRSSService: ServiceContainer.channelRSS,
             localePreferences: ServiceContainer.localePreferences
         )
@@ -45,6 +47,15 @@ struct AppDependencies {
             engagementService: engagementService,
             playlistService: playlistService,
             channelInfoStore: .shared,
+            channelViewControllerFactory: makeChannelViewController
+        )
+    }
+
+    func makeShortsViewController(seedVideos: [Video]) -> ShortsViewController {
+        ShortsViewController(
+            seedVideos: seedVideos,
+            shortsService: shortsService,
+            watchService: watchService,
             channelViewControllerFactory: makeChannelViewController
         )
     }

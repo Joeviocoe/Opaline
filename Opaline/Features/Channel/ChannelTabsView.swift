@@ -7,6 +7,20 @@ final class ChannelTabsView: UIView {
         case videos = 0
         case live = 1
         case playlists = 2
+        case shorts = 3
+
+        var title: String {
+            switch self {
+            case .videos:
+                return "channel.tab.videos".localized
+            case .shorts:
+                return "channel.tab.shorts".localized
+            case .live:
+                return "channel.tab.live".localized
+            case .playlists:
+                return "channel.tab.playlists".localized
+            }
+        }
     }
 
     static let preferredHeight: CGFloat = 40
@@ -18,7 +32,11 @@ final class ChannelTabsView: UIView {
     private let hairline = UIView()
     private var buttons: [UIButton] = []
     private var underlineRefs: [NSLayoutConstraint] = []
-    private var selectedIndex = Tab.videos.rawValue
+    private var selectedIndex = 0
+    /// Visible tabs in display order — Shorts only when the user wants them.
+    private let tabs: [Tab] = UserDefaults.standard.bool(
+        forKey: UserDefaultsKeys.Feed.showShorts
+    ) ? [.videos, .shorts, .live, .playlists] : [.videos, .live, .playlists]
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -68,14 +86,9 @@ final class ChannelTabsView: UIView {
     }
 
     private func buildButtons() {
-        let titles = [
-            "channel.tab.videos".localized,
-            "channel.tab.live".localized,
-            "channel.tab.playlists".localized
-        ]
-        buttons = titles.enumerated().map { index, title in
+        buttons = tabs.enumerated().map { index, tab in
             let button = UIButton(type: .system)
-            button.setTitle(title, for: .normal)
+            button.setTitle(tab.title, for: .normal)
             button.tag = index
             button.addTarget(
                 self, action: #selector(tabTapped(_:)), for: .touchUpInside
@@ -131,6 +144,6 @@ final class ChannelTabsView: UIView {
         selectedIndex = sender.tag
         applyTheme()
         moveUnderline(animated: true)
-        onTabSelected?(Tab(rawValue: selectedIndex) ?? .videos)
+        onTabSelected?(tabs[selectedIndex])
     }
 }

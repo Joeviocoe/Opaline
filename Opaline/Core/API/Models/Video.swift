@@ -20,6 +20,10 @@ struct Video: Codable {
     let duration: String?
     let isLive: Bool
     let playlistId: String?
+    /// YouTube Short — opens in the vertical swipe viewer, not the watch
+    /// screen. A var so the feed parser can flag renderers that carry a
+    /// short behind ordinary video chrome.
+    var isShort: Bool
 
     init(
         id: String,
@@ -32,7 +36,8 @@ struct Video: Codable {
         publishedAt: String?,
         duration: String?,
         isLive: Bool = false,
-        playlistId: String? = nil
+        playlistId: String? = nil,
+        isShort: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -45,6 +50,7 @@ struct Video: Codable {
         self.duration = duration
         self.isLive = isLive
         self.playlistId = playlistId
+        self.isShort = isShort
     }
 
     init(from decoder: Decoder) throws {
@@ -64,6 +70,7 @@ struct Video: Codable {
         duration = try container.decodeIfPresent(String.self, forKey: .duration)
         isLive = try container.decodeIfPresent(Bool.self, forKey: .isLive) ?? false
         playlistId = try container.decodeIfPresent(String.self, forKey: .playlistId)
+        isShort = try container.decodeIfPresent(Bool.self, forKey: .isShort) ?? false
     }
 }
 

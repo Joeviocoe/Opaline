@@ -17,7 +17,7 @@ struct ShelfContinuation: Codable {
 }
 
 struct FeedPage: Codable {
-    let videos: [Video]
+    var videos: [Video]
     var continuation: String?
     /// Subscribed channels found in the page (TV subscriptions
     /// responses include a channel row). Nil for other feeds.
@@ -176,6 +176,14 @@ protocol ChannelTabService: AnyObject {
     func fetchChannelPlaylistsNextPage(
         continuation: String,
         completion: @escaping (Result<PlaylistsPage, Error>) -> Void
+    )
+}
+
+/// The endless Shorts swipe feed.
+protocol ShortsService: AnyObject {
+    func fetchShortsSequence(
+        seed: String,
+        completion: @escaping (Result<ShortsSequencePage, Error>) -> Void
     )
 }
 
