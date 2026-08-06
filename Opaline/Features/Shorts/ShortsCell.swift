@@ -63,7 +63,13 @@ final class ShortsCell: UICollectionViewCell {
         channelButton.setTitle(video.channelName, for: .normal)
         channelButton.isHidden = video.channelName.isEmpty
         viewsLabel.text = video.viewCount
-        if let url = URL(string: video.thumbnailURL) {
+        // The short's own first frame, not the feed's thumbnail: a channel
+        // or subscriptions item carries a landscape cover, whose centre crop
+        // does not line up with the video and so visibly jumps the moment
+        // playback starts. frame0 is exactly what the player draws first.
+        if let url = URL(
+            string: "https://i.ytimg.com/vi/\(video.id)/frame0.jpg"
+        ) {
             poster.setImage(url: url)
         }
     }
