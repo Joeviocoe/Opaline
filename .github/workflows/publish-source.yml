@@ -58,11 +58,7 @@ jobs:
           git commit -m "Update source to $TAG [skip ci]"
           git push
 
-      # publish-repo.yml also fires on release:published, but it checks out
-      # main before the commit above lands, so its copy of apps.json would be
-      # one release behind. Re-run it now; the "pages" concurrency group makes
-      # this run supersede the other one.
-      - name: Redeploy Pages with the fresh source
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run publish-repo.yml --ref main
+      # Nothing is triggered from here on purpose. The apt repo pulls this
+      # file and the release debs itself, hourly, and reaching across repos
+      # to trigger it would need a PAT -- worth adding only if the wait ever
+      # actually bites.
