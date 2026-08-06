@@ -2,12 +2,34 @@
 
 # Opaline
 
+<img src="source/logo.png" width="128" alt="">
+
 **A lightweight, native YouTube client for iOS 12+. No ads, no tracking, no dependencies.**
 
 [![Latest release](https://img.shields.io/github/v/release/verback2308/Opaline?label=release&color=blue)](https://github.com/verback2308/Opaline/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/verback2308/Opaline/total?color=brightgreen)](https://github.com/verback2308/Opaline/releases)
 ![iOS 12+](https://img.shields.io/badge/iOS-12%2B-lightgrey?logo=apple)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
+
+</div>
+
+> ### YTLite is now Opaline
+>
+> The name was too close to [YTLite](https://github.com/dayanch96/YTLite), a
+> popular paid tweak for the official YouTube app, and the two were being
+> mistaken for each other. This project is unrelated to it and has been renamed.
+>
+> **The old repository and source have stopped updating — please re-add them:**
+>
+> | | |
+> |---|---|
+> | Jailbreak (Cydia, Sileo, Zebra) | `https://verback2308.github.io/repo/` |
+> | Sideloading (AltStore, SideStore, LiveContainer) | `https://verback2308.github.io/repo/apps.json` |
+>
+> Nothing else changes: the update installs over your current one and keeps your
+> account, settings and history.
+
+<div align="center">
 
 <br>
 
@@ -34,10 +56,7 @@
 
 ## Why
 
-When Google dropped support for the official YouTube app on older devices, there was no way to watch videos properly. Browsers capped quality at 360p — and even that barely ran. Opaline was born to restore what was lost: high-quality playback on hardware that still works fine, just ignored by Google. The "Lite" stands for a focused, lightweight client that does one thing well — let you watch YouTube.
-
-> [!NOTE]
-> This project is not related to [dayanch96/YTLite](https://github.com/dayanch96/YTLite) (YouTube Plus). The name collision is accidental.
+When Google dropped support for the official YouTube app on older devices, there was no way to watch videos properly. Browsers capped quality at 360p — and even that barely ran. Opaline was born to restore what was lost: high-quality playback on hardware that still works fine, just ignored by Google — a focused, lightweight client that does one thing well.
 
 ## Features
 
@@ -134,7 +153,7 @@ https://verback2308.github.io/repo/
 
 Rootful (`iphoneos-arm`) and rootless (`iphoneos-arm64`) packages are provided; Sileo, Zebra and Cydia are supported. Every released version stays available in the repo, so you can also install or roll back to an older one (Sileo/Zebra: package page → version list).
 
-Pick one channel and stay on it — the repo package and the IPA share a bundle identifier, and having both installed leaves an app icon the Home Screen cannot delete. Already have the other one? Remove it first: the IPA from the Home Screen, the repo package from your package manager (or `dpkg -r com.verback.opaline` over SSH).
+Pick one channel and stay on it — the repo package and the IPA share a bundle identifier, and having both installed leaves an app icon the Home Screen cannot delete. Already have the other one? Remove it first: the IPA from the Home Screen, the repo package from your package manager (or `dpkg -r com.verback.ytlite` over SSH).
 
 **Option 2 — Manual install**
 

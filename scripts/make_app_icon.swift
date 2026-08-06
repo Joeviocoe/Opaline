@@ -13,6 +13,7 @@
 //   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset light
 //   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset dark
 //   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/SplashMark.imageset launch
+//   /tmp/mkicon <Logo.png> source rounded
 
 import CoreGraphics
 import Foundation
@@ -45,9 +46,9 @@ func smoothstep(_ range: ClosedRange<Double>, _ value: Double) -> Double {
 }
 
 guard CommandLine.arguments.count == 4,
-      ["light", "dark", "launch"].contains(CommandLine.arguments[3])
+      ["light", "dark", "launch", "rounded"].contains(CommandLine.arguments[3])
 else {
-    let usage = "usage: make_app_icon.swift <Logo.png> <out.imageset> <light|dark|launch>\n"
+    let usage = "usage: make_app_icon.swift <Logo.png> <out.dir> <light|dark|launch|rounded>\n"
     FileHandle.standardError.write(Data(usage.utf8))
     exit(2)
 }
@@ -56,6 +57,13 @@ let outDir = URL(fileURLWithPath: CommandLine.arguments[2])
 let mode = CommandLine.arguments[3]
 let isDark = mode == "dark"
 let isLaunch = mode == "launch"
+let isRounded = mode == "rounded"
+
+/// "rounded" writes the one file iOS never renders for us: the icon with its corners
+/// already cut, for READMEs and web pages. 0.2237 of the side is Apple's own superellipse
+/// ratio; a plain rounded rect at that radius is indistinguishable at README sizes.
+let roundedSide = 512
+let cornerRatio = 0.2237
 
 /// Splash mark widths per scale. Both the launch storyboard and the splash draw the mark at
 /// 15% of the screen width, so even a 1024pt iPad only asks for ~310px; these leave room.
@@ -170,6 +178,30 @@ func write(_ image: CGImage, to url: URL) {
     }
     CGImageDestinationAddImage(dest, image, nil)
     guard CGImageDestinationFinalize(dest) else { exit(1) }
+}
+
+if isRounded {
+    let side = roundedSide
+    guard let ctx = CGContext(
+        data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: 0,
+        space: CGColorSpaceCreateDeviceRGB(),
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    ) else { exit(1) }
+    ctx.interpolationQuality = .high
+    let full = CGRect(x: 0, y: 0, width: side, height: side)
+    let path = CGPath(
+        roundedRect: full,
+        cornerWidth: CGFloat(side) * cornerRatio,
+        cornerHeight: CGFloat(side) * cornerRatio,
+        transform: nil
+    )
+    ctx.addPath(path)
+    ctx.clip()
+    ctx.draw(artwork, in: full)
+    guard let rendered = ctx.makeImage() else { exit(1) }
+    write(rendered, to: outDir.appendingPathComponent("logo.png"))
+    print("logo.png  \(side)x\(side)")
+    exit(0)
 }
 
 if isLaunch {
