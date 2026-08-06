@@ -35,8 +35,6 @@ final class ShortsViewController: UIViewController {
     var pages: [String: WatchPage] = [:]
     /// Like state the user changed here, which outranks the fetched page.
     var likeOverrides: [String: LikeStatus] = [:]
-    /// Avatars resolved separately — the watch page for a short has none.
-    var avatarURLs: [String: String] = [:]
 
     let playerView = ShortsPlayerView()
     let overlay = ShortsOverlayView()

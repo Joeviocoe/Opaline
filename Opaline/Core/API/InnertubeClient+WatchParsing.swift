@@ -85,25 +85,30 @@ extension InnertubeClient {
         _ json: [String: Any],
         video: Video
     ) -> Video {
-        guard video.channelId == nil else {
+        // Gate on what is actually missing, not on the channelId alone: a
+        // short opened from a feed already knows its channel but has no
+        // avatar, and the owner renderer is the only place the watch page
+        // carries one.
+        guard video.channelId == nil || video.channelAvatarURL == nil else {
             return video
         }
         let owner = extractOwnerInfo(json)
-        guard let chId = owner.channelId else {
+        guard owner.channelId != nil || owner.avatarURL != nil else {
             return video
         }
         return Video(
             id: video.id,
             title: video.title,
-            channelId: chId,
+            channelId: video.channelId ?? owner.channelId,
             channelName: video.channelName,
-            channelAvatarURL: owner.avatarURL,
+            channelAvatarURL: video.channelAvatarURL ?? owner.avatarURL,
             thumbnailURL: video.thumbnailURL,
             viewCount: video.viewCount,
             publishedAt: video.publishedAt,
             duration: video.duration,
             isLive: video.isLive,
-            playlistId: video.playlistId
+            playlistId: video.playlistId,
+            isShort: video.isShort
         )
     }
 

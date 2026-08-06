@@ -85,27 +85,6 @@ extension ShortsViewController {
             isShort: true
         )
         refreshOverlay(for: video.id)
-        fetchAvatarIfMissing(page)
-    }
-
-    /// The TV watch response for a short carries no channel thumbnail at all,
-    /// so the avatar comes from the shared channel store instead.
-    private func fetchAvatarIfMissing(_ page: WatchPage) {
-        guard page.channelInfo?.avatarURL == nil,
-              let channelId = page.video.channelId else {
-            return
-        }
-        let videoId = page.video.id
-        ChannelInfoStore.shared.fetch(
-            channelId: channelId
-        ) { [weak self] result in
-            guard case .success(let info) = result,
-                  let avatar = info.avatarURL else {
-                return
-            }
-            self?.avatarURLs[videoId] = avatar
-            self?.refreshOverlay(for: videoId)
-        }
     }
 
     func likeStatus(for videoId: String) -> LikeStatus? {
@@ -137,7 +116,6 @@ extension ShortsViewController {
             commentCount: page?.commentCount,
             likeStatus: likeStatus(for: videoId),
             avatarURL: page?.channelInfo?.avatarURL
-                ?? avatarURLs[videoId]
                 ?? videos[index].channelAvatarURL
         )
     }
