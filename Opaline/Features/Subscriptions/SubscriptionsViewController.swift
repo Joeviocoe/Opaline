@@ -202,15 +202,7 @@ extension SubscriptionsViewController: UITableViewDelegate {
         }
         let video = videos[indexPath.row]
         markWatchedLocally(video)
-        // This screen is not a VideosViewController, so it passes the shorts
-        // pool itself — a short opened here swipes on through the feed's
-        // other shorts before YouTube's sequence takes over.
-        let following = video.isShort
-            ? Array(
-                videos.dropFirst(indexPath.row + 1).filter { $0.isShort }
-            )
-            : []
-        videoRouter.open(video: video, from: self, following: following)
+        videoRouter.open(video: video, from: self)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

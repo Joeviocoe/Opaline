@@ -186,25 +186,7 @@ class VideosViewController: UIViewController, ScrollableToTop {
     func openVideo(_ video: Video) {
         videoRouter.open(
             video: video,
-            from: self,
-            following: shortsAfter(video)
-        )
-    }
-
-    /// The shorts left in this screen's loaded list after `video`. A shorts
-    /// feed swipes through the pool it was opened from before handing over
-    /// to YouTube's sequence, the way the official app does — from the
-    /// subscriptions list, a channel's Shorts tab, or anywhere else.
-    private func shortsAfter(_ video: Video) -> [Video] {
-        guard video.isShort else {
-            return []
-        }
-        let loaded = sections.flatMap { $0.videos }
-        return Array(
-            loaded
-                .drop { $0.id != video.id }
-                .dropFirst()
-                .filter { $0.isShort }
+            from: self
         )
     }
 

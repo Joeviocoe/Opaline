@@ -19,12 +19,40 @@ extension InnertubeClient: ShortsService {
         seed: String,
         completion: @escaping (Result<ShortsSequencePage, Error>) -> Void
     ) {
-        var body = webContext
+        // Signed in, the sequence is personalised — it comes back drawn from
+        // the subscribed channels, which is what the official app swipes
+        // through. Anonymously the same call returns generic recommendations.
+        // TVHTML5 is the client our device-flow token is valid for; the WEB
+        // client rejects it (the same reason the subscriptions feed uses TV).
+        guard OAuthClient.shared.isSignedIn else {
+            executeShortsSequence(seed: seed, token: nil, completion: completion)
+            return
+        }
+        OAuthClient.shared.validToken { [weak self] result in
+            switch result {
+            case .success(let token):
+                self?.executeShortsSequence(
+                    seed: seed, token: token, completion: completion
+                )
+            case .failure:
+                self?.executeShortsSequence(
+                    seed: seed, token: nil, completion: completion
+                )
+            }
+        }
+    }
+
+    private func executeShortsSequence(
+        seed: String,
+        token: String?,
+        completion: @escaping (Result<ShortsSequencePage, Error>) -> Void
+    ) {
+        var body = token == nil ? webContext : tvContext
         body["sequenceParams"] = seed
         execute(
             urlString: "\(baseURL)\(InnertubeEndpoint.reelSequence)",
             body: body,
-            headers: anonHeaders(),
+            headers: token.map { authHeaders(token: $0) } ?? anonHeaders(),
             logTag: "shortsSequence"
         ) { json -> ShortsSequencePage? in
             Self.parseShortsSequence(json)
