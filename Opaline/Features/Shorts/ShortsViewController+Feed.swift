@@ -30,7 +30,14 @@ extension ShortsViewController {
         }
         let range = videos.count ..< (videos.count + fresh.count)
         videos.append(contentsOf: fresh)
-        // Appending — never reloadData: that rebuilds the current cell and
+        guard playerView.superview != nil else {
+            // Nothing is playing yet and the collection may not have laid
+            // out — inserting into a view that never counted its items is an
+            // inconsistency, and there is no live player to protect.
+            collectionView.reloadData()
+            return
+        }
+        // Append rather than reload: a reload rebuilds the current cell and
         // tears the live player out of the view hierarchy mid-playback.
         collectionView.insertItems(
             at: range.map { IndexPath(item: $0, section: 0) }
@@ -105,7 +112,7 @@ extension ShortsViewController {
         (collectionView.cellForItem(at: indexPath) as? ShortsCell)?
             .configure(
                 likeCount: page?.likeCount,
-                commentCount: nil,
+                commentCount: page?.commentCount,
                 likeStatus: likeStatus(for: videoId),
                 avatarURL: page?.channelInfo?.avatarURL
                     ?? videos[index].channelAvatarURL

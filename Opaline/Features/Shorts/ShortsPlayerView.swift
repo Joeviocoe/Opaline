@@ -11,6 +11,9 @@ final class ShortsPlayerView: UIView {
     let facade = PlaybackFacade()
     private let player = AVPlayer()
     private let statusLabel = UILabel()
+    private let progressBar = UIView()
+    private var progressWidth: NSLayoutConstraint?
+    private var timeObserver: Any?
     private var currentItem: AVPlayerItem?
     /// Retained for the item's lifetime — dropping it kills the stream.
     private var resourceLoader: AVAssetResourceLoaderDelegate?
@@ -31,6 +34,7 @@ final class ShortsPlayerView: UIView {
         PlaybackBufferPolicy.configure(player: player)
         facade.context = self
         setupStatusLabel()
+        setupProgressBar()
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(itemDidEnd),
@@ -56,6 +60,7 @@ final class ShortsPlayerView: UIView {
     }
 
     func stop() {
+        setProgress(0)
         player.pause()
         player.replaceCurrentItem(with: nil)
         currentItem = nil
@@ -78,6 +83,42 @@ final class ShortsPlayerView: UIView {
         player.play()
     }
 
+    /// The thin line along the bottom edge, as in the official app — no
+    /// scrubbing, it only shows how far through the loop the short is.
+    private func setupProgressBar() {
+        progressBar.translatesAutoresizingMaskIntoConstraints = false
+        progressBar.backgroundColor = ThemeManager.shared.accent
+        addSubview(progressBar)
+        let width = progressBar.widthAnchor.constraint(equalToConstant: 0)
+        progressWidth = width
+        NSLayoutConstraint.activate([
+            progressBar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            progressBar.bottomAnchor.constraint(equalTo: bottomAnchor),
+            progressBar.heightAnchor.constraint(equalToConstant: 2),
+            width
+        ])
+        let interval = CMTime(seconds: 0.25, preferredTimescale: 600)
+        timeObserver = player.addPeriodicTimeObserver(
+            forInterval: interval, queue: .main
+        ) { [weak self] time in
+            self?.updateProgress(at: time)
+        }
+    }
+
+    private func updateProgress(at time: CMTime) {
+        guard let duration = player.currentItem?.duration,
+              duration.isNumeric, duration.seconds > 0 else {
+            setProgress(0)
+            return
+        }
+        setProgress(time.seconds / duration.seconds)
+    }
+
+    private func setProgress(_ fraction: Double) {
+        progressWidth?.constant = bounds.width
+            * CGFloat(min(max(fraction, 0), 1))
+    }
+
     private func setupStatusLabel() {
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.textColor = .white
@@ -96,6 +137,9 @@ final class ShortsPlayerView: UIView {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        if let timeObserver {
+            player.removeTimeObserver(timeObserver)
+        }
     }
 }
 

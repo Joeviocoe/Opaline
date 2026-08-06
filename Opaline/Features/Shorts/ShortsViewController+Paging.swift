@@ -28,7 +28,7 @@ extension ShortsViewController: UICollectionViewDataSource {
         let page = watchPage(for: video.id)
         shortsCell.configure(
             likeCount: page?.likeCount,
-            commentCount: nil,
+            commentCount: page?.commentCount,
             likeStatus: likeStatus(for: video.id),
             avatarURL: page?.channelInfo?.avatarURL ?? video.channelAvatarURL
         )

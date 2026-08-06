@@ -102,6 +102,9 @@ struct WatchPage {
     let relatedVideos: [Video]
     let likeCount: String?
     let likeStatus: LikeStatus?
+    /// Total comments as the server formats it ("13K") — the Shorts rail
+    /// shows it without paying for a comments fetch.
+    let commentCount: String?
     let nextVideo: Video?
     let playlistTitle: String?
     let playlistVideos: [Video]?

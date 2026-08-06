@@ -33,10 +33,32 @@ extension InnertubeClient {
             ),
             likeCount: likeInfo.likeCount,
             likeStatus: likeInfo.likeStatus,
+            commentCount: parseCommentCount(json),
             nextVideo: autoplayNextVideo(json),
             playlistTitle: pivot?.title,
             playlistVideos: pivot?.videos
         )
+    }
+
+    /// The comments engagement panel's header carries the total. Both the
+    /// TV and WEB clients put it there; only the comments panel has one.
+    static func parseCommentCount(_ json: [String: Any]) -> String? {
+        let panels = json["engagementPanels"] as? [[String: Any]] ?? []
+        for panel in panels {
+            guard let section = panel.digDict(
+                "engagementPanelSectionListRenderer"
+            ), (section["panelIdentifier"] as? String)?
+                .contains("comment") == true,
+                let header = section.digDict(
+                    JSONKey.header, "engagementPanelTitleHeaderRenderer"
+                ) else {
+                continue
+            }
+            if let text = header.runsText("contextualInfo") {
+                return text
+            }
+        }
+        return nil
     }
 
     static func parseWatchLikeInfo(
