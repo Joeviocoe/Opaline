@@ -42,11 +42,11 @@ final class ShortsOverlayView: UIView {
     func configure(with video: Video) {
         self.video = video
         titleLabel.text = video.title
-        // Never blanked: the channel row keeps whatever it had until a name
-        // arrives, instead of flashing empty between shorts.
-        if !video.channelName.isEmpty {
-            channelButton.setTitle(video.channelName, for: .normal)
-        }
+        // Always written, even when empty. Keeping the previous short's name
+        // and avatar looked steadier but attributed one video to another
+        // channel — the slots stay allocated instead, so the row holds its
+        // size while the real values load.
+        channelButton.setTitle(video.channelName, for: .normal)
         viewsLabel.text = video.viewCount ?? " "
     }
 
@@ -64,10 +64,12 @@ final class ShortsOverlayView: UIView {
         setAvatar(url: avatarURL)
     }
 
-    /// Keeps the current image until the new one is decoded — the slot is
-    /// always allocated, so nothing around it moves.
+    /// An unknown avatar clears to the placeholder rather than keeping the
+    /// previous short's — the slot is always allocated either way.
     private func setAvatar(url: String?) {
         guard let url, let parsed = URL(string: url) else {
+            avatar.cancel()
+            avatar.image = nil
             return
         }
         avatar.setImage(url: parsed)
@@ -120,6 +122,7 @@ final class ShortsOverlayView: UIView {
         avatar.maxPixelSize = 96
         avatar.layer.cornerRadius = 14
         avatar.clipsToBounds = true
+        avatar.backgroundColor = UIColor.white.withAlphaComponent(0.2)
         avatar.isUserInteractionEnabled = true
         avatar.addGestureRecognizer(
             UITapGestureRecognizer(
