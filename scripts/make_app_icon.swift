@@ -57,13 +57,9 @@ let mode = CommandLine.arguments[3]
 let isDark = mode == "dark"
 let isLaunch = mode == "launch"
 
-/// Splash mark widths per scale. The mark grows to 52% of the screen width, so each scale is
-/// sized by the widest device that actually uses it: @1x and @2x by a 1024pt iPad (~532 and
-/// ~1065px), @3x by a ~440pt iPhone (~687px) — no iPad is @3x, which is why @3x is the small
-/// one here rather than the large one. All three are emitted even though the app alone would
-/// happily downscale a single file: the launch storyboard is drawn out-of-process, and a
-/// scale the device asks for but the catalog lacks isn't worth risking to save one file.
-let launchWidths = [("@1x", 550), ("@2x", 1100), ("@3x", 720)]
+/// Splash mark widths per scale. Both the launch storyboard and the splash draw the mark at
+/// 15% of the screen width, so even a 1024pt iPad only asks for ~310px; these leave room.
+let launchWidths = [("@1x", 180), ("@2x", 360), ("@3x", 540)]
 
 guard let src = CGImageSourceCreateWithURL(sourceURL as CFURL, nil),
       let loaded = CGImageSourceCreateImageAtIndex(src, 0, nil)

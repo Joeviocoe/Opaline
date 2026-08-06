@@ -37,6 +37,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="SplashMark" width="550" height="559"/>
+        <image name="SplashMark" width="180" height="183"/>
     </resources>
 </document>

@@ -11,12 +11,10 @@ final class SplashViewController: UIViewController {
 
     var onComplete: (() -> Void)?
 
-    /// The triangle's share of the screen width — 0.15 matches the launch
-    /// storyboard exactly, so the handover from it is seamless, then it grows to
-    /// the 0.52 it occupies inside the app icon itself. Both themes grow the same
-    /// way: the dark app icon is this same triangle at this same size on black.
-    private let seamLogoWidth: CGFloat = 0.15
-    private let iconLogoWidth: CGFloat = 0.52
+    /// The triangle's share of the screen width, matching the launch storyboard
+    /// so the handover from it is seamless. Only the background changes after
+    /// that — the mark holds this size throughout, in both themes.
+    private let logoWidth: CGFloat = 0.15
 
     private let backgroundView = UIImageView()
     private let logoView = UIImageView()
@@ -60,6 +58,11 @@ final class SplashViewController: UIViewController {
         logoView.tintColor = showsGradient ? .white : ThemeManager.shared.primaryText
         logoView.contentMode = .scaleAspectFit
         logoView.translatesAutoresizingMaskIntoConstraints = false
+        // Faded in rather than matched to the storyboard's own mark: iOS 12 lays
+        // the storyboard's image view out but never draws its image, so there the
+        // handover is from bare black and a hard cut would pop. On iOS 13+ the
+        // storyboard does draw it, and this fades in over an identical mark.
+        logoView.alpha = 0
         view.addSubview(logoView)
 
         NSLayoutConstraint.activate([
@@ -71,7 +74,7 @@ final class SplashViewController: UIViewController {
             logoView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             logoView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             logoView.widthAnchor.constraint(
-                equalTo: view.widthAnchor, multiplier: seamLogoWidth
+                equalTo: view.widthAnchor, multiplier: logoWidth
             ),
             logoView.heightAnchor.constraint(equalTo: logoView.widthAnchor, multiplier: 1.017)
         ])
@@ -80,12 +83,9 @@ final class SplashViewController: UIViewController {
     // MARK: - Animation
 
     private func animateAndComplete() {
-        // Scaled by transform rather than by swapping the width constraint's
-        // multiplier, which isn't mutable.
-        let grow = iconLogoWidth / seamLogoWidth
         UIView.animate(withDuration: 0.35, delay: 0, options: .curveEaseOut) {
             self.backgroundView.alpha = self.showsGradient ? 1 : 0
-            self.logoView.transform = CGAffineTransform(scaleX: grow, y: grow)
+            self.logoView.alpha = 1
         } completion: { _ in
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 UIView.animate(withDuration: 0.25) {
