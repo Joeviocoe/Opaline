@@ -19,12 +19,16 @@
 > popular paid tweak for the official YouTube app, and the two were being
 > mistaken for each other. This project is unrelated to it and has been renamed.
 >
-> **The old repository and source have stopped updating — please re-add them:**
+> **These are the only addresses that stay:**
 >
 > | | |
 > |---|---|
 > | Jailbreak (Cydia, Sileo, Zebra) | `https://verback2308.github.io/repo/` |
 > | Sideloading (AltStore, SideStore, LiveContainer) | `https://verback2308.github.io/repo/apps.json` |
+>
+> Anything under `repo.verback2308.pp.ua` still answers for now, but it is on its
+> way out and will be switched off — move over while it works. The old
+> `verback2308.github.io/ytlite` repo is already gone.
 >
 > Nothing else changes: the update installs over your current one and keeps your
 > account, settings and history.
