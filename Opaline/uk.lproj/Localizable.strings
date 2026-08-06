@@ -201,6 +201,7 @@
 "settings.row.playbackSource" = "Джерело";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Поділитися журналом налагодження";
+"settings.row.feedback" = "Надіслати відгук";
 "settings.solver.message" = "Адреса solver server.";
 "settings.solver.reset" = "Скинути до типового";
 "settings.solver.defaultSuffix" = " (за замовчуванням)";

@@ -202,6 +202,7 @@
 "settings.row.playbackSource" = "Источник";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Поделиться логом отладки";
+"settings.row.feedback" = "Отправить отзыв";
 "settings.solver.message" = "Адрес solver server.";
 "settings.solver.reset" = "Сбросить по умолчанию";
 "settings.solver.defaultSuffix" = " (по умолчанию)";

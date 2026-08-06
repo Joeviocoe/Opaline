@@ -255,6 +255,7 @@
 "settings.row.playbackSource" = "Fonte de reprodução";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Compartilhar log de depuração";
+"settings.row.feedback" = "Enviar feedback";
 /* Solver-server URL alert */
 "settings.solver.message" = "URL do servidor solver.";
 "settings.solver.reset" = "Redefinir para padrão";

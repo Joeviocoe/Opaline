@@ -82,6 +82,13 @@ enum AppURLs {
         }
     }
 
+    /// Where the Settings feedback row sends people. The chooser rather than a
+    /// blank issue, so reports arrive shaped by the templates in
+    /// `.github/ISSUE_TEMPLATE/` instead of as free text.
+    enum Feedback {
+        static let issues = URL(string: "https://github.com/verback2308/Opaline/issues/new/choose")
+    }
+
     /// Remote GVS proof-of-origin (`pot`) provider — the `solver-server`'s
     /// `/get_pot` endpoint (BotGuard minting can't be done reliably on-device).
     /// `POST /get_pot {"content_binding": <videoId>}`.

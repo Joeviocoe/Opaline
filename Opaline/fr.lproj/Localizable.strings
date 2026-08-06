@@ -255,6 +255,7 @@
 "settings.row.playbackSource" = "Source de lecture";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Partager le journal de débogage";
+"settings.row.feedback" = "Envoyer des commentaires";
 /* Solver-server URL alert */
 "settings.solver.message" = "URL du serveur solveur.";
 "settings.solver.reset" = "Réinitialiser par défaut";

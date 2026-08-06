@@ -259,6 +259,7 @@
 "settings.row.playbackSource" = "Oynatma Kaynağı";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Hata Ayıklama Kaydını Paylaş";
+"settings.row.feedback" = "Geri bildirim gönder";
 /* Solver-server URL alert */
 "settings.solver.message" = "Çözücü sunucusunun URL'si.";
 "settings.solver.reset" = "Varsayılana sıfırla";

@@ -259,6 +259,7 @@
 "settings.row.playbackSource" = "播放源";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "分享调试日志";
+"settings.row.feedback" = "发送反馈";
 /* Solver-server URL alert */
 "settings.solver.message" = "求解器服务器的 URL。";
 "settings.solver.reset" = "恢复默认值";

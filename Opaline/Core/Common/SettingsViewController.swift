@@ -20,6 +20,7 @@ final class SettingsViewController: UIViewController {
         case solverEndpoint
         case mainThreadWatchdog
         case shareLog
+        case feedback
     }
     private struct Section {
         let header: String?
@@ -117,7 +118,7 @@ final class SettingsViewController: UIViewController {
                     .mainThreadWatchdog, .shareLog
                 ]
             ),
-            Section(header: nil, footer: appVersionFooter, rows: [])
+            Section(header: nil, footer: appVersionFooter, rows: [.feedback])
         ]
     }
 
@@ -386,6 +387,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return makeDisclosureCell("settings.row.notifications".localized)
         case .shareLog:
             return makeDisclosureCell("settings.row.shareLog".localized)
+        case .feedback:
+            return makeDisclosureCell("settings.row.feedback".localized)
         case .playbackSource:
             return makeDisclosureCell(
                 "settings.row.playbackSource".localized,
@@ -449,6 +452,10 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         switch row {
         case .shareLog:
             shareDebugLog()
+        case .feedback:
+            if let url = AppURLs.Feedback.issues {
+                UIApplication.shared.open(url)
+            }
         case .playbackSource:
             showPlaybackSourcePicker()
         case .solverEndpoint:
