@@ -101,7 +101,7 @@ final class ShortsCell: UICollectionViewCell {
 
     private func setupPoster() {
         poster.translatesAutoresizingMaskIntoConstraints = false
-        poster.contentMode = .scaleAspectFit
+        poster.contentMode = .scaleAspectFill
         poster.backgroundColor = .black
         contentView.addSubview(poster)
         pin(poster)

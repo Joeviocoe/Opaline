@@ -30,7 +30,8 @@ final class ShortsPlayerView: UIView {
         // the first decoded frame arrives.
         backgroundColor = .clear
         playerLayer?.player = player
-        playerLayer?.videoGravity = .resizeAspect
+        // Shorts fill the screen, as in the official app.
+        playerLayer?.videoGravity = .resizeAspectFill
         PlaybackBufferPolicy.configure(player: player)
         facade.context = self
         setupStatusLabel()
@@ -57,6 +58,22 @@ final class ShortsPlayerView: UIView {
             apiClient: watchService,
             cancellationToken: CancellationToken()
         )
+    }
+
+    /// Plays an already-resolved short with no status label and no round
+    /// trip. The facade is told what is playing so mid-playback recovery
+    /// still has a video and a source to fall back on.
+    func attach(
+        source: VideoSource,
+        playback: PreparedPlayback,
+        videoId: String,
+        watchService: WatchService
+    ) {
+        stop()
+        facade.currentVideoId = videoId
+        facade.currentApiClient = watchService
+        facade.activeVideoSource = source
+        attachPrepared(playback, resumeAt: nil)
     }
 
     func stop() {

@@ -48,8 +48,10 @@ extension ShortsViewController {
     /// page once a short is on screen.
     func fetchMetadata(for index: Int) {
         let video = videos[index]
-        guard video.title.isEmpty,
-              metadataFetched.insert(video.id).inserted else {
+        // Fetched for every short, not just the untitled ones from the
+        // sequence — the like count, comment count and channel avatar only
+        // exist on the watch page.
+        guard metadataFetched.insert(video.id).inserted else {
             return
         }
         watchService.fetchWatchPage(

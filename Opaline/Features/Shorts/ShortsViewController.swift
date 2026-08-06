@@ -23,6 +23,7 @@ final class ShortsViewController: UIViewController {
     var likeOverrides: [String: LikeStatus] = [:]
 
     let playerView = ShortsPlayerView()
+    lazy var prefetcher = ShortsPrefetcher(watchService: watchService)
     let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -56,6 +57,9 @@ final class ShortsViewController: UIViewController {
         // over from the video the user actually picked.
         seed = seedVideos.first.map { ShortsSeed.params(videoId: $0.id) }
         super.init(nibName: nil, bundle: nil)
+        // Shorts own the whole screen — no tab bar underneath, which is also
+        // what kept the progress bar off-screen.
+        hidesBottomBarWhenPushed = true
     }
 
     @available(*, unavailable)
@@ -67,11 +71,17 @@ final class ShortsViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .black
         setupCollectionView()
+        setupBackButton()
         // A seeded run (the channel Shorts tab) already has plenty to swipe
         // through — don't spend a request on the sequence until it thins out.
         if videos.count < 5 {
             loadNextPage()
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -84,6 +94,7 @@ final class ShortsViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
         playerView.stop()
     }
 
@@ -102,13 +113,35 @@ final class ShortsViewController: UIViewController {
             return
         }
         movePlayer(into: cell.playerContainer)
-        playerView.load(
-            videoId: videos[index].id, watchService: watchService
-        )
+        startPlayback(of: videos[index].id)
+        prefetchAround(index)
         fetchMetadata(for: index)
         if index >= videos.count - 3 {
             loadNextPage()
         }
+    }
+
+    /// Uses the prefetched stream when the swipe beat the resolver to it.
+    private func startPlayback(of videoId: String) {
+        if let entry = prefetcher.take(videoId: videoId) {
+            playerView.attach(
+                source: entry.source,
+                playback: entry.playback,
+                videoId: videoId,
+                watchService: watchService
+            )
+            return
+        }
+        playerView.load(videoId: videoId, watchService: watchService)
+    }
+
+    /// Resolves the next two shorts, buffering the immediate one.
+    private func prefetchAround(_ index: Int) {
+        let next = Array(videos.dropFirst(index + 1).prefix(2))
+        for (offset, video) in next.enumerated() {
+            prefetcher.prefetch(videoId: video.id, warm: offset == 0)
+        }
+        prefetcher.prune(keeping: Set(next.map { $0.id }))
     }
 
     private func movePlayer(into container: UIView) {
@@ -145,6 +178,29 @@ final class ShortsViewController: UIViewController {
             channelId, video.channelName
         )
         navigationController?.pushViewController(channelVC, animated: true)
+    }
+
+    /// With the navigation bar hidden the screen needs its own way back.
+    private func setupBackButton() {
+        let back = NavChevronButton(
+            kind: .back, target: self, action: #selector(backTapped)
+        )
+        back.tintColor = .white
+        back.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(back)
+        NSLayoutConstraint.activate([
+            back.leadingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8
+            ),
+            back.topAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8
+            )
+        ])
+    }
+
+    @objc
+    private func backTapped() {
+        navigationController?.popViewController(animated: true)
     }
 
     private func setupCollectionView() {
