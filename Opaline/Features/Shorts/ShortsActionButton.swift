@@ -5,11 +5,10 @@ import UIKit
 final class ShortsActionButton: UIView {
     var onTap: (() -> Void)?
 
+    /// Never hidden — an empty label holds the row's height steady while the
+    /// real value is still loading.
     var count: String? {
-        didSet {
-            label.text = count
-            label.isHidden = count == nil
-        }
+        didSet { label.text = count ?? " " }
     }
 
     var isHighlighted = false {
@@ -41,7 +40,7 @@ final class ShortsActionButton: UIView {
         label.font = .systemFont(ofSize: 12, weight: .semibold)
         label.textColor = .white
         label.textAlignment = .center
-        label.isHidden = true
+        label.text = " "
         let stack = UIStackView(arrangedSubviews: [button, label])
         stack.axis = .vertical
         stack.spacing = 2

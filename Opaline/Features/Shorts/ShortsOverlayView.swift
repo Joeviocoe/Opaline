@@ -10,6 +10,7 @@ final class ShortsOverlayView: UIView {
 
     private let scrim = GradientView()
     private let titleLabel = UILabel()
+    private let avatar = ThumbnailImageView(frame: .zero)
     private let channelButton = UIButton(type: .system)
     private let viewsLabel = UILabel()
     private var video: Video?
@@ -41,9 +42,12 @@ final class ShortsOverlayView: UIView {
     func configure(with video: Video) {
         self.video = video
         titleLabel.text = video.title
-        channelButton.setTitle(video.channelName, for: .normal)
-        channelButton.isHidden = video.channelName.isEmpty
-        viewsLabel.text = video.viewCount
+        // Never blanked: the channel row keeps whatever it had until a name
+        // arrives, instead of flashing empty between shorts.
+        if !video.channelName.isEmpty {
+            channelButton.setTitle(video.channelName, for: .normal)
+        }
+        viewsLabel.text = video.viewCount ?? " "
     }
 
     func configure(
@@ -57,7 +61,16 @@ final class ShortsOverlayView: UIView {
             commentCount: commentCount,
             likeStatus: likeStatus
         )
-        rail.setAvatar(url: avatarURL)
+        setAvatar(url: avatarURL)
+    }
+
+    /// Keeps the current image until the new one is decoded — the slot is
+    /// always allocated, so nothing around it moves.
+    private func setAvatar(url: String?) {
+        guard let url, let parsed = URL(string: url) else {
+            return
+        }
+        avatar.setImage(url: parsed)
     }
 
     @objc
@@ -102,21 +115,44 @@ final class ShortsOverlayView: UIView {
         ])
     }
 
-    private func setupText() {
-        titleLabel.textColor = .white
-        titleLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        titleLabel.numberOfLines = 2
+    private func setupChannelRow() -> UIStackView {
+        avatar.translatesAutoresizingMaskIntoConstraints = false
+        avatar.maxPixelSize = 96
+        avatar.layer.cornerRadius = 14
+        avatar.clipsToBounds = true
+        avatar.isUserInteractionEnabled = true
+        avatar.addGestureRecognizer(
+            UITapGestureRecognizer(
+                target: self, action: #selector(channelTapped)
+            )
+        )
         channelButton.setTitleColor(.white, for: .normal)
-        channelButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+        channelButton.titleLabel?.font = .systemFont(
+            ofSize: 14, weight: .semibold
+        )
         channelButton.contentHorizontalAlignment = .leading
         channelButton.addTarget(
             self, action: #selector(channelTapped), for: .touchUpInside
         )
+        let row = UIStackView(arrangedSubviews: [avatar, channelButton])
+        row.axis = .horizontal
+        row.spacing = 8
+        row.alignment = .center
+        NSLayoutConstraint.activate([
+            avatar.widthAnchor.constraint(equalToConstant: 28),
+            avatar.heightAnchor.constraint(equalToConstant: 28)
+        ])
+        return row
+    }
+
+    private func setupText() {
+        titleLabel.textColor = .white
+        titleLabel.font = .systemFont(ofSize: 15, weight: .medium)
+        titleLabel.numberOfLines = 2
         viewsLabel.textColor = UIColor.white.withAlphaComponent(0.8)
         viewsLabel.font = .systemFont(ofSize: 13)
-
         let stack = UIStackView(arrangedSubviews: [
-            channelButton, titleLabel, viewsLabel
+            setupChannelRow(), titleLabel, viewsLabel
         ])
         stack.axis = .vertical
         stack.spacing = 4

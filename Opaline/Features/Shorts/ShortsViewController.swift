@@ -7,16 +7,16 @@ import UIKit
 enum ShortsEntry {
     /// Swipe these in order, then fall through to the server (channel tab).
     case list([Video])
-    /// Candidates for the server to draw from and order (feeds, shelves).
+    /// Shorts of the surface it was opened from, swiped in a random order —
+    /// what the official app looks like from outside. Its own ordering comes
+    /// from a signed candidate pool we cannot reproduce, so shuffling the
+    /// same set is the closest honest approximation.
     case pool([Video])
 }
 
 /// The vertical swipe feed. Seeded with one short (tapped anywhere in the
 /// app) and extended endlessly from `reel_watch_sequence`.
 final class ShortsViewController: UIViewController {
-    /// Cap on candidates sent with the seed; a live one carried about 40.
-    private static let poolLimit = 50
-
     let shortsService: ShortsService
     let watchService: WatchService
     let engagementService: EngagementService
@@ -75,14 +75,10 @@ final class ShortsViewController: UIViewController {
             videos = [seedVideo] + following
             seed = ShortsSeed.params(videoId: seedVideo.id)
         case .pool(let candidates):
-            videos = [seedVideo]
-            // The pool is what keeps the feed inside the surface it came
-            // from — subscriptions shorts stay subscriptions shorts, but
-            // the server decides the order, as in the official app.
-            seed = ShortsSeed.params(
-                videoId: seedVideo.id,
-                pool: Array(candidates.prefix(Self.poolLimit)).map { $0.id }
-            )
+            videos = [seedVideo] + candidates
+                .filter { $0.id != seedVideo.id }
+                .shuffled()
+            seed = ShortsSeed.params(videoId: seedVideo.id)
         }
         super.init(nibName: nil, bundle: nil)
     }

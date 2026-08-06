@@ -60,42 +60,19 @@ extension InnertubeClient: ShortsService {
     }
 }
 
-/// Builds the `sequenceParams` protobuf that seeds a feed.
+/// Builds the `sequenceParams` protobuf that seeds a feed from one videoId.
+/// Field 1 (length-delimited) = the video the sequence continues from; the
+/// returned entries exclude it.
 ///
-/// Field 1 = the video the sequence continues from (excluded from the
-/// entries). Field 5 = the candidate pool, a repeated message of
-/// `{1: {1: videoId}}`. The pool is what keeps a feed on topic: sending the
-/// subscriptions shelf's shorts is how the official app stays inside
-/// subscribed channels while still letting the server pick the order. With
-/// no pool the server answers with generic recommendations — decoded from a
-/// live `reelWatchEndpoint`.
+/// A real one from the app also carries a candidate pool (field 5) and a
+/// context blob, but that cannot be forged: the server ignores a pool we
+/// build ourselves and rejects the params outright once the blob no longer
+/// matches (HTTP 400, verified against the live endpoint). Staying inside a
+/// surface therefore has to happen on our side.
 enum ShortsSeed {
-    static func params(videoId: String, pool: [String] = []) -> String {
-        var bytes = lengthDelimited(field: 1, payload: Array(videoId.utf8))
-        if !pool.isEmpty {
-            var entries: [UInt8] = []
-            for id in pool {
-                let inner = lengthDelimited(field: 1, payload: Array(id.utf8))
-                entries += lengthDelimited(field: 1, payload: inner)
-            }
-            bytes += lengthDelimited(field: 5, payload: entries)
-        }
-        return Data(bytes).base64EncodedString()
-    }
-
-    /// One length-delimited protobuf field. Lengths above 127 need a varint,
-    /// which a pool of more than a handful of ids always exceeds.
-    private static func lengthDelimited(
-        field: UInt8, payload: [UInt8]
-    ) -> [UInt8] {
-        var out: [UInt8] = [field << 3 | 2]
-        var length = payload.count
-        while length > 0x7F {
-            out.append(UInt8(length & 0x7F) | 0x80)
-            length >>= 7
-        }
-        out.append(UInt8(length))
-        return out + payload
+    static func params(videoId: String) -> String {
+        let id = Array(videoId.utf8)
+        return Data([UInt8(0x0A), UInt8(id.count)] + id).base64EncodedString()
     }
 }
 
