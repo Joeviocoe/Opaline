@@ -55,6 +55,7 @@
 "common.subscribed" = "Subscribed";
 /* Generic cancel action */
 "common.cancel" = "Cancel";
+"common.close" = "Close";
 /* Generic confirmation button */
 "common.ok" = "OK";
 /* Generic save action */

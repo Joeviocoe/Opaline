@@ -13,13 +13,19 @@ final class ShortsCell: UICollectionViewCell {
     private let viewsLabel = UILabel()
     private var video: Video?
 
-    var onChannelTap: ((Video) -> Void)?
+    let rail = ShortsActionRail()
+
+    /// Overlay actions, forwarded with the video the cell is showing.
+    var onAction: ((ShortsActionRail.Action, Video) -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.backgroundColor = .black
         setupPoster()
         setupPlayerContainer()
+        // Before the overlay — its title stack is constrained to the rail's
+        // leading edge, so the rail must already be in the hierarchy.
+        setupRail()
         setupOverlay()
     }
 
@@ -35,6 +41,22 @@ final class ShortsCell: UICollectionViewCell {
         poster.isHidden = false
     }
 
+    /// The engagement state that only the watch page knows; nil until it
+    /// lands, which is why it is separate from `configure(with:)`.
+    func configure(
+        likeCount: String?,
+        commentCount: String?,
+        likeStatus: LikeStatus?,
+        avatarURL: String?
+    ) {
+        rail.configure(
+            likeCount: likeCount,
+            commentCount: commentCount,
+            likeStatus: likeStatus
+        )
+        rail.setAvatar(url: avatarURL)
+    }
+
     func configure(with video: Video) {
         self.video = video
         titleLabel.text = video.title
@@ -48,10 +70,31 @@ final class ShortsCell: UICollectionViewCell {
 
     @objc
     private func channelTapped() {
+        emit(.channel)
+    }
+
+    private func emit(_ action: ShortsActionRail.Action) {
         guard let video else {
             return
         }
-        onChannelTap?(video)
+        onAction?(action, video)
+    }
+
+    private func setupRail() {
+        rail.translatesAutoresizingMaskIntoConstraints = false
+        rail.onAction = { [weak self] action in
+            self?.emit(action)
+        }
+        contentView.addSubview(rail)
+        NSLayoutConstraint.activate([
+            rail.trailingAnchor.constraint(
+                equalTo: contentView.trailingAnchor, constant: -12
+            ),
+            rail.bottomAnchor.constraint(
+                equalTo: contentView.safeAreaLayoutGuide.bottomAnchor,
+                constant: -24
+            )
+        ])
     }
 
     // MARK: - Layout
@@ -109,7 +152,7 @@ final class ShortsCell: UICollectionViewCell {
                 equalTo: contentView.leadingAnchor, constant: 16
             ),
             stack.trailingAnchor.constraint(
-                lessThanOrEqualTo: contentView.trailingAnchor, constant: -16
+                lessThanOrEqualTo: rail.leadingAnchor, constant: -12
             ),
             stack.bottomAnchor.constraint(
                 equalTo: contentView.safeAreaLayoutGuide.bottomAnchor,

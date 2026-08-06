@@ -3,18 +3,24 @@ import UIKit
 /// The vertical swipe feed. Seeded with one short (tapped anywhere in the
 /// app) and extended endlessly from `reel_watch_sequence`.
 final class ShortsViewController: UIViewController {
-    private let shortsService: ShortsService
-    private let watchService: WatchService
+    let shortsService: ShortsService
+    let watchService: WatchService
+    let engagementService: EngagementService
     private let channelViewControllerFactory: (String, String) -> UIViewController
 
-    private(set) var videos: [Video]
+    var videos: [Video]
     /// Continuation token, or the seed videoId params for the first page.
-    private var seed: String?
-    private var isLoading = false
+    var seed: String?
+    var isLoading = false
     /// Index of the page the player is attached to.
     private var currentIndex = 0
     /// Videos whose metadata has been (or is being) fetched.
-    private var metadataFetched = Set<String>()
+    var metadataFetched = Set<String>()
+    /// Watch pages keyed by videoId — the source of the overlay's like count,
+    /// like state and channel avatar.
+    var pages: [String: WatchPage] = [:]
+    /// Like state the user changed here, which outranks the fetched page.
+    var likeOverrides: [String: LikeStatus] = [:]
 
     let playerView = ShortsPlayerView()
     let collectionView: UICollectionView = {
@@ -38,10 +44,12 @@ final class ShortsViewController: UIViewController {
         seedVideos: [Video],
         shortsService: ShortsService,
         watchService: WatchService,
+        engagementService: EngagementService,
         channelViewControllerFactory: @escaping (String, String) -> UIViewController
     ) {
         self.shortsService = shortsService
         self.watchService = watchService
+        self.engagementService = engagementService
         self.channelViewControllerFactory = channelViewControllerFactory
         videos = seedVideos
         // When the seeded run is exhausted, YouTube's own sequence takes
@@ -127,83 +135,6 @@ final class ShortsViewController: UIViewController {
             return currentIndex
         }
         return Int((collectionView.contentOffset.y / height).rounded())
-    }
-
-    // MARK: - Data
-
-    private func loadNextPage() {
-        guard !isLoading, let seed else {
-            return
-        }
-        isLoading = true
-        shortsService.fetchShortsSequence(seed: seed) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.handlePage(result)
-            }
-        }
-    }
-
-    private func handlePage(_ result: Result<ShortsSequencePage, Error>) {
-        isLoading = false
-        guard case .success(let page) = result else {
-            AppLog.innertube("shorts sequence failed")
-            seed = nil
-            return
-        }
-        seed = page.continuation
-        let known = Set(videos.map { $0.id })
-        let fresh = page.videos.filter { !known.contains($0.id) }
-        guard !fresh.isEmpty else {
-            return
-        }
-        let range = videos.count ..< (videos.count + fresh.count)
-        videos.append(contentsOf: fresh)
-        // Appending — never reloadData: that rebuilds the current cell and
-        // tears the live player out of the view hierarchy mid-playback.
-        collectionView.insertItems(
-            at: range.map { IndexPath(item: $0, section: 0) }
-        )
-    }
-
-    /// The sequence endpoint returns no titles — fill them in from the watch
-    /// page once a short is on screen.
-    private func fetchMetadata(for index: Int) {
-        let video = videos[index]
-        guard video.title.isEmpty,
-              metadataFetched.insert(video.id).inserted else {
-            return
-        }
-        watchService.fetchWatchPage(
-            video: video, cancellationToken: nil
-        ) { [weak self] result in
-            DispatchQueue.main.async {
-                guard case .success(let page) = result else {
-                    return
-                }
-                self?.applyMetadata(page.video, at: index)
-            }
-        }
-    }
-
-    private func applyMetadata(_ video: Video, at index: Int) {
-        guard index < videos.count, videos[index].id == video.id else {
-            return
-        }
-        videos[index] = Video(
-            id: video.id,
-            title: video.title,
-            channelId: video.channelId,
-            channelName: video.channelName,
-            channelAvatarURL: video.channelAvatarURL,
-            thumbnailURL: videos[index].thumbnailURL,
-            viewCount: video.viewCount,
-            publishedAt: video.publishedAt,
-            duration: video.duration,
-            isShort: true
-        )
-        let indexPath = IndexPath(item: index, section: 0)
-        (collectionView.cellForItem(at: indexPath) as? ShortsCell)?
-            .configure(with: videos[index])
     }
 
     func openChannel(for video: Video) {

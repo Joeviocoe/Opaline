@@ -56,6 +56,7 @@ struct AppDependencies {
             seedVideos: seedVideos,
             shortsService: shortsService,
             watchService: watchService,
+            engagementService: engagementService,
             channelViewControllerFactory: makeChannelViewController
         )
     }
