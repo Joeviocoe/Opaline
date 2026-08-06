@@ -135,11 +135,11 @@ final class ShortsViewController: UIViewController {
         playerView.load(videoId: videoId, watchService: watchService)
     }
 
-    /// Resolves the next two shorts, buffering the immediate one.
+    /// Resolves the next two shorts so the swipe has a stream waiting.
     private func prefetchAround(_ index: Int) {
         let next = Array(videos.dropFirst(index + 1).prefix(2))
-        for (offset, video) in next.enumerated() {
-            prefetcher.prefetch(videoId: video.id, warm: offset == 0)
+        for video in next {
+            prefetcher.prefetch(videoId: video.id)
         }
         prefetcher.prune(keeping: Set(next.map { $0.id }))
     }
