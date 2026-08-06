@@ -10,7 +10,6 @@ xcuserdata/
 *.deb
 *.dSYM.zip
 *.dSYM
-YTVLite.xcodeproj
 
 # macOS
 .DS_Store
