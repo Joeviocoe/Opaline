@@ -274,10 +274,12 @@ private extension InnertubeClient {
         let status = (renderer["likeStatus"]
             as? String)
             .flatMap(LikeStatus.init(rawValue:))
+        // `likeCountText` is the TV client's key for the same value; without
+        // it a TV watch response parses as having no likes at all.
         let count = simpleText(
             from: renderer["likeCount"]
-        ) ?? (renderer["likeCountNotliked"]
-            as? String)
+        ) ?? simpleText(from: renderer["likeCountText"])
+            ?? (renderer["likeCountNotliked"] as? String)
         return (count, status)
     }
 }

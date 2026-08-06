@@ -160,8 +160,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         VideoRouter.shared.watchViewControllerFactory = { [dependencies] video in
             dependencies.makeWatchViewController(video: video)
         }
-        VideoRouter.shared.shortsViewControllerFactory = { [dependencies] videos in
-            dependencies.makeShortsViewController(seedVideos: videos)
+        let deps = dependencies
+        VideoRouter.shared.shortsViewControllerFactory = { video, entry in
+            deps.makeShortsViewController(seedVideo: video, entry: entry)
         }
     }
 

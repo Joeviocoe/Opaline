@@ -27,13 +27,16 @@ final class ShortsPlayerView: UIView {
     let facade = PlaybackFacade()
     private let player = AVQueuePlayer()
     private let statusLabel = UILabel()
-    private let progressBar = UIView()
-    private var progressWidth: NSLayoutConstraint?
     private var timeObserver: Any?
     /// Mirrors the player's queue: index 0 is playing, 1 is pre-rolling.
     private var entries: [Entry] = []
 
     var isPaused: Bool { player.rate == 0 }
+
+    /// Playback position as a 0...1 fraction, for the controller's progress
+    /// bar — which lives up there so it clears the tab bar and the display's
+    /// rounded corners.
+    var onProgress: ((Double) -> Void)?
 
     /// The short already queued behind the current one, if any.
     var queuedVideoId: String? {
@@ -56,7 +59,7 @@ final class ShortsPlayerView: UIView {
         player.actionAtItemEnd = .pause
         facade.context = self
         setupStatusLabel()
-        setupProgressBar()
+        setupTimeObserver()
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(itemDidEnd(_:)),
@@ -136,7 +139,7 @@ final class ShortsPlayerView: UIView {
         facade.currentApiClient = watchService
         facade.activeVideoSource = entries[0].source
         statusLabel.text = nil
-        setProgress(0)
+        onProgress?(0)
         player.play()
         return true
     }
@@ -151,7 +154,7 @@ final class ShortsPlayerView: UIView {
     }
 
     func stop() {
-        setProgress(0)
+        onProgress?(0)
         player.pause()
         player.removeAllItems()
         entries = []
@@ -176,40 +179,22 @@ final class ShortsPlayerView: UIView {
         player.play()
     }
 
-    /// The thin line along the bottom edge, as in the official app — no
-    /// scrubbing, it only shows how far through the loop the short is.
-    private func setupProgressBar() {
-        progressBar.translatesAutoresizingMaskIntoConstraints = false
-        progressBar.backgroundColor = ThemeManager.shared.accent
-        addSubview(progressBar)
-        let width = progressBar.widthAnchor.constraint(equalToConstant: 0)
-        progressWidth = width
-        NSLayoutConstraint.activate([
-            progressBar.leadingAnchor.constraint(equalTo: leadingAnchor),
-            progressBar.bottomAnchor.constraint(equalTo: bottomAnchor),
-            progressBar.heightAnchor.constraint(equalToConstant: 2),
-            width
-        ])
+    private func setupTimeObserver() {
         let interval = CMTime(seconds: 0.25, preferredTimescale: 600)
         timeObserver = player.addPeriodicTimeObserver(
             forInterval: interval, queue: .main
         ) { [weak self] time in
-            self?.updateProgress(at: time)
+            self?.reportProgress(at: time)
         }
     }
 
-    private func updateProgress(at time: CMTime) {
+    private func reportProgress(at time: CMTime) {
         guard let duration = player.currentItem?.duration,
               duration.isNumeric, duration.seconds > 0 else {
-            setProgress(0)
+            onProgress?(0)
             return
         }
-        setProgress(time.seconds / duration.seconds)
-    }
-
-    private func setProgress(_ fraction: Double) {
-        progressWidth?.constant = bounds.width
-            * CGFloat(min(max(fraction, 0), 1))
+        onProgress?(time.seconds / duration.seconds)
     }
 
     private func setupStatusLabel() {

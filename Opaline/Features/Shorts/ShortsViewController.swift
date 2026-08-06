@@ -1,8 +1,22 @@
 import UIKit
 
+/// How the feed continues past the short that was tapped. The official app
+/// follows one rule: entering from a full list swipes that list in its own
+/// order; entering from a shelf or a single item hands the surrounding
+/// shorts to the server as candidates and lets it pick the order.
+enum ShortsEntry {
+    /// Swipe these in order, then fall through to the server (channel tab).
+    case list([Video])
+    /// Candidates for the server to draw from and order (feeds, shelves).
+    case pool([Video])
+}
+
 /// The vertical swipe feed. Seeded with one short (tapped anywhere in the
 /// app) and extended endlessly from `reel_watch_sequence`.
 final class ShortsViewController: UIViewController {
+    /// Cap on candidates sent with the seed; a live one carried about 40.
+    private static let poolLimit = 50
+
     let shortsService: ShortsService
     let watchService: WatchService
     let engagementService: EngagementService
@@ -21,8 +35,13 @@ final class ShortsViewController: UIViewController {
     var pages: [String: WatchPage] = [:]
     /// Like state the user changed here, which outranks the fetched page.
     var likeOverrides: [String: LikeStatus] = [:]
+    /// Avatars resolved separately — the watch page for a short has none.
+    var avatarURLs: [String: String] = [:]
 
     let playerView = ShortsPlayerView()
+    let overlay = ShortsOverlayView()
+    let progressBar = UIView()
+    var progressWidth: NSLayoutConstraint?
     lazy var prefetcher = ShortsPrefetcher(watchService: watchService)
     let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -42,7 +61,8 @@ final class ShortsViewController: UIViewController {
     var attachedIndex: Int { currentIndex }
 
     init(
-        seedVideos: [Video],
+        seedVideo: Video,
+        entry: ShortsEntry,
         shortsService: ShortsService,
         watchService: WatchService,
         engagementService: EngagementService,
@@ -52,14 +72,21 @@ final class ShortsViewController: UIViewController {
         self.watchService = watchService
         self.engagementService = engagementService
         self.channelViewControllerFactory = channelViewControllerFactory
-        videos = seedVideos
-        // When the seeded run is exhausted, YouTube's own sequence takes
-        // over from the video the user actually picked.
-        seed = seedVideos.first.map { ShortsSeed.params(videoId: $0.id) }
+        switch entry {
+        case .list(let following):
+            videos = [seedVideo] + following
+            seed = ShortsSeed.params(videoId: seedVideo.id)
+        case .pool(let candidates):
+            videos = [seedVideo]
+            // The pool is what keeps the feed inside the surface it came
+            // from — subscriptions shorts stay subscriptions shorts, but
+            // the server decides the order, as in the official app.
+            seed = ShortsSeed.params(
+                videoId: seedVideo.id,
+                pool: Array(candidates.prefix(Self.poolLimit)).map { $0.id }
+            )
+        }
         super.init(nibName: nil, bundle: nil)
-        // Shorts own the whole screen — no tab bar underneath, which is also
-        // what kept the progress bar off-screen.
-        hidesBottomBarWhenPushed = true
     }
 
     @available(*, unavailable)
@@ -72,6 +99,7 @@ final class ShortsViewController: UIViewController {
         view.backgroundColor = .black
         setupCollectionView()
         setupBackButton()
+        setupOverlay()
         prefetcher.onReady = { [weak self] _ in
             guard let self else {
                 return
@@ -122,6 +150,7 @@ final class ShortsViewController: UIViewController {
         startPlayback(of: videos[index].id)
         prefetchAround(index)
         queueNext(after: index)
+        refreshOverlay(for: videos[index].id)
         fetchMetadata(for: index)
         if index >= videos.count - 3 {
             loadNextPage()
@@ -206,29 +235,6 @@ final class ShortsViewController: UIViewController {
             channelId, video.channelName
         )
         navigationController?.pushViewController(channelVC, animated: true)
-    }
-
-    /// With the navigation bar hidden the screen needs its own way back.
-    private func setupBackButton() {
-        let back = NavChevronButton(
-            kind: .back, target: self, action: #selector(backTapped)
-        )
-        back.tintColor = .white
-        back.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(back)
-        NSLayoutConstraint.activate([
-            back.leadingAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8
-            ),
-            back.topAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8
-            )
-        ])
-    }
-
-    @objc
-    private func backTapped() {
-        navigationController?.popViewController(animated: true)
     }
 
     private func setupCollectionView() {

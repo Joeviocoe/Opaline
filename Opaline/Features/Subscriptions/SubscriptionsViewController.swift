@@ -202,7 +202,13 @@ extension SubscriptionsViewController: UITableViewDelegate {
         }
         let video = videos[indexPath.row]
         markWatchedLocally(video)
-        videoRouter.open(video: video, from: self)
+        // This screen is not a VideosViewController, so it hands the shorts
+        // pool over itself — that is what keeps the feed on subscriptions.
+        videoRouter.open(
+            video: video,
+            from: self,
+            shorts: .pool(videos.filter { $0.isShort })
+        )
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

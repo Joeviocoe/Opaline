@@ -159,7 +159,7 @@ final class ChannelViewController: VideosViewController {
                 .drop { $0.id != video.id }
                 .dropFirst()
             videoRouter.open(
-                video: video, from: self, following: Array(following)
+                video: video, from: self, shorts: .list(Array(following))
             )
             return
         }

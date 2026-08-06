@@ -20,18 +20,7 @@ extension ShortsViewController: UICollectionViewDataSource {
         guard let shortsCell = cell as? ShortsCell else {
             return cell
         }
-        let video = videos[indexPath.item]
-        shortsCell.configure(with: video)
-        shortsCell.onAction = { [weak self] action, video in
-            self?.handle(action, for: video)
-        }
-        let page = watchPage(for: video.id)
-        shortsCell.configure(
-            likeCount: page?.likeCount,
-            commentCount: page?.commentCount,
-            likeStatus: likeStatus(for: video.id),
-            avatarURL: page?.channelInfo?.avatarURL ?? video.channelAvatarURL
-        )
+        shortsCell.configure(with: videos[indexPath.item])
         return shortsCell
     }
 }
