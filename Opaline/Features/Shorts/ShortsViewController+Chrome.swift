@@ -86,11 +86,17 @@ extension ShortsViewController {
             width
         ])
         playerView.onProgress = { [weak self] fraction in
-            guard let self else {
-                return
-            }
-            self.progressWidth?.constant = self.view.bounds.width
-                * CGFloat(min(max(fraction, 0), 1))
+            self?.applyProgress(fraction)
+        }
+    }
+
+    private func applyProgress(_ fraction: Double) {
+        progressWidth?.constant = view.bounds.width
+            * CGFloat(min(max(fraction, 0), 1))
+        // First non-zero position of the run: the picture is up.
+        if fraction > 0, !didLogFirstFrame {
+            didLogFirstFrame = true
+            logShortsTiming("first frame")
         }
     }
 }

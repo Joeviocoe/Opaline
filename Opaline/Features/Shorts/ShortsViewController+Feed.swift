@@ -18,8 +18,15 @@ extension ShortsViewController {
         }
     }
 
+    /// Milliseconds since the tab opened, for the first-short breakdown.
+    func logShortsTiming(_ stage: String) {
+        let ms = Int(Date().timeIntervalSince(openedAt) * 1_000)
+        AppLog.player("shorts timing: \(stage) at \(ms)ms")
+    }
+
     private func handlePage(_ result: Result<ShortsSequencePage, Error>) {
         isLoading = false
+        logShortsTiming("sequence loaded")
         guard case .success(let page) = result else {
             AppLog.innertube("shorts sequence failed")
             seed = nil
