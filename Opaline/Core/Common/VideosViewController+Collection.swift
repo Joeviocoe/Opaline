@@ -47,6 +47,18 @@ extension VideosViewController {
         collectionView?.refreshControl?.endRefreshing()
     }
 
+    func shortCell(
+        in collectionView: UICollectionView,
+        at indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: ShortThumbnailCell.reuseIdentifier,
+            for: indexPath
+        )
+        (cell as? ShortThumbnailCell)?.configure(with: video(at: indexPath))
+        return cell
+    }
+
     func updateItemSize() {
         guard let collectionView,
               let layout = collectionView
@@ -62,7 +74,10 @@ extension VideosViewController {
         let available = collectionView.bounds.width
             - inset - spacing
         let width = floor(available / CGFloat(columns))
-        let height: CGFloat = width * (9.0 / 16.0) + 92
+        let height: CGFloat = usesShortsGrid
+            ? width * ShortThumbnailCell.aspectRatio
+                + ShortThumbnailCell.captionHeight
+            : width * (9.0 / 16.0) + 92
         let newSize = CGSize(
             width: width,
             height: height
@@ -99,6 +114,9 @@ extension VideosViewController: UICollectionViewDataSource {
     ) -> UICollectionViewCell {
         if !isLoadingInitial, useRails {
             return railCell(in: collectionView, at: indexPath)
+        }
+        if !isLoadingInitial, usesShortsGrid {
+            return shortCell(in: collectionView, at: indexPath)
         }
         guard let cell = collectionView
             .dequeueReusableCell(

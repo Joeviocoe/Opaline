@@ -369,6 +369,7 @@
 "channel.tab.videos" = "Videos";
 "channel.tab.live" = "Live";
 "channel.tab.shorts" = "Shorts";
+"shorts.shelf.title" = "Shorts";
 "channel.tab.playlists" = "Playlists";
 /* About sheet */
 "channel.about.title" = "About";

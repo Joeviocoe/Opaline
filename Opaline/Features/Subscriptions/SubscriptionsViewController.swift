@@ -13,7 +13,10 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
         String
     ) -> UIViewController
     let videoRouter: VideoRouter
+    /// Long-form videos only — shorts are pulled out into their own shelf.
     var videos: [Video] = []
+    /// Shorts from the feed, shown in the shelf row rather than the list.
+    var shorts: [Video] = []
     var continuationToken: String?
     var isLoadingMore = false
     var seenVideoIds: Set<String> = []
@@ -143,11 +146,27 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
 }
 
 extension SubscriptionsViewController: UITableViewDataSource {
+    /// Row 0 is the Shorts shelf when there is one; the rest are videos.
+    var shortsShelfRows: Int { shorts.isEmpty ? 0 : 1 }
+
+    func videoIndex(for indexPath: IndexPath) -> Int {
+        indexPath.row - shortsShelfRows
+    }
+
+    func isShortsShelfRow(_ indexPath: IndexPath) -> Bool {
+        shortsShelfRows == 1 && indexPath.row == 0
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        isLoadingInitial ? SubscriptionsViewController.skeletonCount : videos.count
+        isLoadingInitial
+            ? SubscriptionsViewController.skeletonCount
+            : videos.count + shortsShelfRows
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if !isLoadingInitial, isShortsShelfRow(indexPath) {
+            return shortsShelfCell(for: indexPath)
+        }
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: SubscriptionVideoCell.reuseId,
             for: indexPath
@@ -158,10 +177,32 @@ extension SubscriptionsViewController: UITableViewDataSource {
             cell.configureSkeleton()
             return cell
         }
-        let video = videos[indexPath.row]
+        let video = videos[videoIndex(for: indexPath)]
         cell.configure(with: video)
         attachHandlers(to: cell, video: video)
         return cell
+    }
+
+    private func shortsShelfCell(for indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: ShortsShelfCell.reuseId, for: indexPath
+        ) as? ShortsShelfCell else {
+            return UITableViewCell()
+        }
+        cell.configure(with: shorts)
+        cell.onSelect = { [weak self] index in
+            self?.openShort(at: index)
+        }
+        return cell
+    }
+
+    private func openShort(at index: Int) {
+        guard index < shorts.count else {
+            return
+        }
+        videoRouter.open(
+            video: shorts[index], from: self, shorts: .pool(shorts)
+        )
     }
 
     private func attachHandlers(to cell: SubscriptionVideoCell, video: Video) {
@@ -200,19 +241,20 @@ extension SubscriptionsViewController: UITableViewDelegate {
         guard !isLoadingInitial else {
             return
         }
-        let video = videos[indexPath.row]
+        guard !isShortsShelfRow(indexPath) else {
+            return
+        }
+        let video = videos[videoIndex(for: indexPath)]
         markWatchedLocally(video)
-        // This screen is not a VideosViewController, so it hands the shorts
-        // pool over itself — that is what keeps the feed on subscriptions.
-        videoRouter.open(
-            video: video,
-            from: self,
-            shorts: .pool(videos.filter { $0.isShort })
-        )
+        videoRouter.open(video: video, from: self)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let title = isLoadingInitial ? "" : videos[indexPath.row].title
+        if !isLoadingInitial, isShortsShelfRow(indexPath) {
+            return ShortsShelfCell.rowHeight
+        }
+        let title = isLoadingInitial
+            ? "" : videos[videoIndex(for: indexPath)].title
         return SubscriptionVideoCell.rowHeight(forWidth: tableView.bounds.width, title: title)
     }
 

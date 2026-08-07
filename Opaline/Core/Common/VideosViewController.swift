@@ -8,6 +8,9 @@ class VideosViewController: UIViewController, ScrollableToTop {
     // MARK: - Instance Properties
 
     var columns: Int { 5 }
+    /// Lay the grid out with vertical Shorts cards instead of landscape
+    /// video cells. Screens that show a Shorts tab flip this per tab.
+    var usesShortsGrid: Bool { false }
 
     /// Whether pages' shelf partitions render as titled sections.
     /// Pages without shelf info look the same either way.
@@ -126,6 +129,10 @@ class VideosViewController: UIViewController, ScrollableToTop {
     }
 
     private func registerViews(in cv: UICollectionView) {
+        cv.register(
+            ShortThumbnailCell.self,
+            forCellWithReuseIdentifier: ShortThumbnailCell.reuseIdentifier
+        )
         cv.register(
             VideoCell.self,
             forCellWithReuseIdentifier: VideoCell.reuseId

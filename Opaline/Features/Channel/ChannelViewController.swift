@@ -28,7 +28,13 @@ final class ChannelViewController: VideosViewController {
         )
     }()
 
+    override var usesShortsGrid: Bool { currentTab == .shorts }
+
     override var columns: Int {
+        // Shorts are narrow, so they tile several to a row even on a phone.
+        if usesShortsGrid {
+            return UIDevice.current.userInterfaceIdiom == .phone ? 3 : 6
+        }
         if UIDevice.current.userInterfaceIdiom == .phone {
             return 1
         }

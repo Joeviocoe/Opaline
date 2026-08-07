@@ -56,6 +56,10 @@ extension SubscriptionsViewController {
             forCellReuseIdentifier:
                 SubscriptionVideoCell.reuseId
         )
+        tableView.register(
+            ShortsShelfCell.self,
+            forCellReuseIdentifier: ShortsShelfCell.reuseId
+        )
         tableView.dataSource = self
         tableView.delegate = self
         // Heights come from `heightForRowAt`; the estimate keeps the table
@@ -139,14 +143,19 @@ extension SubscriptionsViewController {
         seenVideoIds = []
         sortDatesByVideoId = [:]
         videos = []
+        shorts = []
         appendPage(page)
         refreshNewContentDots()
     }
 
     func appendPage(_ page: FeedPage) {
-        let newVideos = page.videos.filter {
+        let fresh = page.videos.filter {
             seenVideoIds.insert($0.id).inserted
         }
+        // Shorts are split off here so every consumer below — row heights,
+        // taps, the shelf — sees one list without them.
+        shorts.append(contentsOf: fresh.filter { $0.isShort })
+        let newVideos = fresh.filter { !$0.isShort }
         if !newVideos.isEmpty {
             videos.append(contentsOf: newVideos)
         }
