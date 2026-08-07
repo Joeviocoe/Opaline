@@ -207,6 +207,7 @@
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "主題";
+"settings.row.appIcon" = "應用程式圖示";
 "settings.theme.dark" = "深色";
 "settings.theme.light" = "淺色";
 "settings.theme.auto" = "自動";

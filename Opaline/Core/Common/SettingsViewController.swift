@@ -7,7 +7,7 @@ final class SettingsViewController: UIViewController {
     enum Row {
         case pageAppearance, pageLanguage, pagePlayback, pageShorts
         case pageSponsorBlock, pageCache, pageDebug
-        case theme, autoDarkStart, autoDarkEnd
+        case theme, autoDarkStart, autoDarkEnd, appIcon
         case appLanguage, region
         case quality, backgroundPlayback, pipEnabled, hideStatusBar, showShorts
         case autoZoomToFill
@@ -195,6 +195,11 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return UITableViewCell()  // unreachable: makePageCell handles these
         case .theme:
             return makeThemeCell()
+        case .appIcon:
+            return makeDisclosureCell(
+                "settings.row.appIcon".localized,
+                value: AppIcon.selected.displayName
+            )
         case .appLanguage:
             return makeAppLanguageCell()
         case .region:
@@ -515,6 +520,10 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             showAutoHourPicker(isStart: false)
         case .homeLayout:
             showHomeLayoutPicker()
+        case .appIcon:
+            navigationController?.pushViewController(
+                AppIconViewController(), animated: true
+            )
         case .defaultTab:
             showDefaultTabPicker()
         default:

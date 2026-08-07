@@ -207,6 +207,7 @@
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "Tema";
+"settings.row.appIcon" = "Uygulama simgesi";
 "settings.theme.dark" = "Koyu";
 "settings.theme.light" = "Açık";
 "settings.theme.auto" = "Otomatik";

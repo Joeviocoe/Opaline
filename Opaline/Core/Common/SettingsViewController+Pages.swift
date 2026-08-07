@@ -54,7 +54,7 @@ extension SettingsViewController {
             themeRows.append(contentsOf: [.autoDarkStart, .autoDarkEnd])
         }
         return [
-            Section(header: nil, footer: themeFooter, rows: themeRows),
+            Section(header: nil, footer: themeFooter, rows: themeRows + [.appIcon]),
             Section(
                 header: "settings.section.home".localized,
                 footer: "settings.footer.home".localized,

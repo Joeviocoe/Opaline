@@ -201,6 +201,7 @@
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "Design";
+"settings.row.appIcon" = "App-Symbol";
 "settings.theme.dark" = "Dunkel";
 "settings.theme.light" = "Hell";
 "settings.theme.auto" = "Auto";

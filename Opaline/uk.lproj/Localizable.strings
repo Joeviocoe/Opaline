@@ -158,6 +158,7 @@
 "settings.footer.debug" = "Примусовий вибір джерела відтворення. Зазвичай використовується Android VR з автоматичним резервним джерелом. Solver server обслуговує джерело Mobile Web + pot (випуск pot і розв'язання n на iOS 12–13).";
 
 "settings.row.theme" = "Тема";
+"settings.row.appIcon" = "Значок застосунку";
 "settings.theme.dark" = "Темна";
 "settings.theme.light" = "Світла";
 "settings.theme.auto" = "Авто";
