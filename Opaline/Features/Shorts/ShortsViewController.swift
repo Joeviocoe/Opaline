@@ -168,6 +168,14 @@ final class ShortsViewController: UIViewController {
     private func settle(on index: Int) {
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.layoutIfNeeded()
+        // The tab bar forwards size transitions to every tab, so this runs
+        // for a Shorts tab that was never opened and has no items to scroll
+        // to — backgrounding the app was enough to crash here.
+        guard index >= 0,
+              index < collectionView.numberOfItems(inSection: 0)
+        else {
+            return
+        }
         collectionView.scrollToItem(
             at: IndexPath(item: index, section: 0),
             at: .centeredVertically,
