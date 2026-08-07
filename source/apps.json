@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.7.2",
+          "date": "2026-08-07T00:05:08Z",
+          "localizedDescription": "## YTLite is now Opaline\n\nThe name was too close to YTLite, a popular paid tweak for the official YouTube app, and the two kept being mistaken for each other. This project is unrelated to it, so it has been renamed — new name, new icon, same app.\n\nYour account, settings, downloads and watch history are untouched: this installs over your current version like any other update.\n\n### Please check your sources\n\n- **Jailbreak (Cydia, Sileo, Zebra)** — if you added `verback2308.github.io/ytlite`, that address no longer works. Replace it with `https://verback2308.github.io/repo/`.\n- **Sideloading (AltStore, SideStore, LiveContainer)** — nothing to do, your source keeps working.\n\nEverything else about this release is unchanged from 1.7.1.",
+          "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.7.2/Opaline_1.7.2.ipa",
+          "size": 6224527,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.7.1",
           "date": "2026-08-05T13:28:18Z",
           "localizedDescription": "## New Features\n\n- Comments are reworked. Under the video you get a preview of the top comment; tapping it slides up a panel over the player instead of pushing the page around. Swipe it away — in landscape too\n- Replies open inline in the same list, no separate screen\n- Comments can be sorted by Top or Newest\n\n## Improvements\n\nThis one is mostly about the app feeling quicker on older devices.\n\n- Opening the Subscriptions screen used to freeze for most of a second with a lot of channels — the avatar bar now builds only the avatars you can see\n- Scrolling feeds does less work per card: no logging on the thumbnail path, cached title measurement, cancelled prefetches for cards you scrolled past, and watch progress written in batches instead of a queue hop per cell\n- History, playlists, search and subscriptions rows no longer run a full layout pass each — the height is arithmetic now\n- Opening a video does less: side effects run once instead of twice, related channel info loads as cells appear rather than ~20 requests up front, and new comments append instead of rebuilding the whole list\n- The player stopped rebuilding SponsorBlock markers, the time label and the subtitle scan ten times a second while the controls are hidden\n\n## Bug Fixes\n\n- The app installed but never launched on iOS 12.0-12.1 — the ad-hoc signature was killed on launch with no crash log. Release builds are re-signed with ldid now (#32)\n- Reduce White Point, Night Shift and True Tone had no effect on the video while the controls were hidden — the video was going straight to the display's video plane and skipping them",
@@ -116,14 +124,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.7.1",
-      "versionDate": "2026-08-05T13:28:18Z",
-      "versionDescription": "## New Features\n\n- Comments are reworked. Under the video you get a preview of the top comment; tapping it slides up a panel over the player instead of pushing the page around. Swipe it away — in landscape too\n- Replies open inline in the same list, no separate screen\n- Comments can be sorted by Top or Newest\n\n## Improvements\n\nThis one is mostly about the app feeling quicker on older devices.\n\n- Opening the Subscriptions screen used to freeze for most of a second with a lot of channels — the avatar bar now builds only the avatars you can see\n- Scrolling feeds does less work per card: no logging on the thumbnail path, cached title measurement, cancelled prefetches for cards you scrolled past, and watch progress written in batches instead of a queue hop per cell\n- History, playlists, search and subscriptions rows no longer run a full layout pass each — the height is arithmetic now\n- Opening a video does less: side effects run once instead of twice, related channel info loads as cells appear rather than ~20 requests up front, and new comments append instead of rebuilding the whole list\n- The player stopped rebuilding SponsorBlock markers, the time label and the subtitle scan ten times a second while the controls are hidden\n\n## Bug Fixes\n\n- The app installed but never launched on iOS 12.0-12.1 — the ad-hoc signature was killed on launch with no crash log. Release builds are re-signed with ldid now (#32)\n- Reduce White Point, Night Shift and True Tone had no effect on the video while the controls were hidden — the video was going straight to the display's video plane and skipping them",
-      "downloadURL": "https://github.com/verback2308/ytlite/releases/download/1.7.1/YTLite_1.7.1.ipa",
+      "version": "1.7.2",
+      "versionDate": "2026-08-07T00:05:08Z",
+      "versionDescription": "## YTLite is now Opaline\n\nThe name was too close to YTLite, a popular paid tweak for the official YouTube app, and the two kept being mistaken for each other. This project is unrelated to it, so it has been renamed — new name, new icon, same app.\n\nYour account, settings, downloads and watch history are untouched: this installs over your current version like any other update.\n\n### Please check your sources\n\n- **Jailbreak (Cydia, Sileo, Zebra)** — if you added `verback2308.github.io/ytlite`, that address no longer works. Replace it with `https://verback2308.github.io/repo/`.\n- **Sideloading (AltStore, SideStore, LiveContainer)** — nothing to do, your source keeps working.\n\nEverything else about this release is unchanged from 1.7.1.",
+      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.7.2/Opaline_1.7.2.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 4873779,
+      "size": 6224527,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -146,6 +154,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "Opaline 1.7.2 - YTLite is now Opaline",
+      "identifier": "release-1.7.2",
+      "caption": "Jailbreak (Cydia, Sileo, Zebra) — if you added `verback2308.github.io/ytlite`, that address no longer works. Replace…",
+      "date": "2026-08-07T00:05:08Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/Opaline/releases/tag/1.7.2"
+    },
     {
       "title": "YTLite 1.7.1 - Comments rework, legacy devices performance, iOS 12.0-12.1 launch fix",
       "identifier": "release-1.7.1",
