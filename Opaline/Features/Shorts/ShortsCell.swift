@@ -43,7 +43,11 @@ final class ShortsCell: UICollectionViewCell {
 
     private func setupPoster() {
         poster.translatesAutoresizingMaskIntoConstraints = false
+        // Fill, matching the gravity nearly every short ends up with, so the
+        // poster and the first frame line up. A square short is the exception
+        // and still steps out of the crop when it starts.
         poster.contentMode = .scaleAspectFill
+        poster.clipsToBounds = true
         poster.backgroundColor = .black
         contentView.addSubview(poster)
         pin(poster)
@@ -56,12 +60,18 @@ final class ShortsCell: UICollectionViewCell {
         pin(playerContainer)
     }
 
+    /// Full width, from the top of the screen down to the tab bar — not the
+    /// whole cell. The official app fills that region, which is why a 9:16
+    /// short loses about a tenth of its width there instead of a fifth, and
+    /// why a short as tall as the region shows no bands at all.
     private func pin(_ subview: UIView) {
         NSLayoutConstraint.activate([
             subview.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             subview.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             subview.topAnchor.constraint(equalTo: contentView.topAnchor),
-            subview.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            subview.bottomAnchor.constraint(
+                equalTo: contentView.safeAreaLayoutGuide.bottomAnchor
+            )
         ])
     }
 }

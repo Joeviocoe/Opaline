@@ -5,7 +5,7 @@ protocol ScrollableToTop: AnyObject {
 }
 
 class MainTabBarController: UITabBarController {
-    private let dependencies: AppDependencies
+    let dependencies: AppDependencies
     private weak var playerPanel: PlayerPanelViewController?
     private var miniPlayerBar: MiniPlayerBar?
     private var miniPlayerBarBottomConstraint: NSLayoutConstraint?
@@ -98,7 +98,16 @@ class MainTabBarController: UITabBarController {
     }
 
     private func buildTabs() -> [UIViewController] {
-        [makeHomeTab(), makeSubscriptionsTab(), makeLibraryTab()]
+        var tabs = [makeHomeTab(), makeSubscriptionsTab()]
+        // Only for users who want shorts at all — the same setting that
+        // hides them from every feed.
+        if UserDefaults.standard.bool(
+            forKey: UserDefaultsKeys.Feed.showShorts
+        ) {
+            tabs.append(makeShortsTab())
+        }
+        tabs.append(makeLibraryTab())
+        return tabs
     }
 
     private func makeHomeTab() -> UIViewController {

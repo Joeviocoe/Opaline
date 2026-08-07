@@ -13,6 +13,8 @@ enum ShortsEntry {
     /// (checked against a live authenticated feed), so there is nothing
     /// deeper to draw on before the server's sequence takes over.
     case pool([Video])
+    /// No starting video: the Shorts tab, bootstrapped from the server.
+    case cold
 }
 
 /// The vertical swipe feed. Seeded with one short (tapped anywhere in the
@@ -60,7 +62,7 @@ final class ShortsViewController: UIViewController {
     var attachedIndex: Int { currentIndex }
 
     init(
-        seedVideo: Video,
+        seedVideo: Video?,
         entry: ShortsEntry,
         shortsService: ShortsService,
         watchService: WatchService,
@@ -71,10 +73,19 @@ final class ShortsViewController: UIViewController {
         self.watchService = watchService
         self.engagementService = engagementService
         self.channelViewControllerFactory = channelViewControllerFactory
+        guard let seedVideo else {
+            videos = []
+            seed = ShortsSeed.cold
+            super.init(nibName: nil, bundle: nil)
+            return
+        }
+        seed = ShortsSeed.params(videoId: seedVideo.id)
         switch entry {
+        case .cold:
+            videos = []
+            seed = ShortsSeed.cold
         case .list(let following):
             videos = [seedVideo] + following
-            seed = ShortsSeed.params(videoId: seedVideo.id)
         case .pool(let candidates):
             // Shuffled, because that is what the official app looks like
             // from outside: its own ordering rides a signed candidate pool
@@ -82,7 +93,6 @@ final class ShortsViewController: UIViewController {
             videos = [seedVideo] + candidates
                 .filter { $0.id != seedVideo.id }
                 .shuffled()
-            seed = ShortsSeed.params(videoId: seedVideo.id)
         }
         super.init(nibName: nil, bundle: nil)
     }
@@ -113,7 +123,9 @@ final class ShortsViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
+        visibleNavigationController?
+            .setNavigationBarHidden(true, animated: animated)
+        setTabBarDark(true)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -126,7 +138,9 @@ final class ShortsViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
+        visibleNavigationController?
+            .setNavigationBarHidden(false, animated: animated)
+        setTabBarDark(false)
         playerView.stop()
     }
 
@@ -153,68 +167,6 @@ final class ShortsViewController: UIViewController {
         if index >= videos.count - 3 {
             loadNextPage()
         }
-    }
-
-    /// Uses the prefetched stream when the swipe beat the resolver to it.
-    private func startPlayback(of videoId: String) {
-        // Already pre-rolled behind the current short: this is the path that
-        // starts on the first frame instead of a poster.
-        if playerView.advance(to: videoId, watchService: watchService) {
-            return
-        }
-        if let entry = prefetcher.take(videoId: videoId) {
-            playerView.attach(
-                source: entry.source,
-                playback: entry.playback,
-                videoId: videoId,
-                watchService: watchService
-            )
-            return
-        }
-        playerView.load(videoId: videoId, watchService: watchService)
-    }
-
-    /// Hands the next short to the player so it pre-rolls behind the current
-    /// one. Called both on swipe and when a prefetch lands.
-    func queueNext(after index: Int) {
-        guard index == attachedIndex,
-              let next = videos.dropFirst(index + 1).first,
-              playerView.queuedVideoId != next.id,
-              let entry = prefetcher.take(videoId: next.id) else {
-            return
-        }
-        playerView.enqueue(
-            source: entry.source,
-            playback: entry.playback,
-            videoId: next.id
-        )
-    }
-
-    /// Resolves the next two shorts so the swipe has a stream waiting.
-    private func prefetchAround(_ index: Int) {
-        let next = Array(videos.dropFirst(index + 1).prefix(2))
-        for video in next {
-            prefetcher.prefetch(videoId: video.id)
-        }
-        prefetcher.prune(keeping: Set(next.map { $0.id }))
-    }
-
-    private func movePlayer(into container: UIView) {
-        playerView.removeFromSuperview()
-        playerView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(playerView)
-        NSLayoutConstraint.activate([
-            playerView.leadingAnchor.constraint(
-                equalTo: container.leadingAnchor
-            ),
-            playerView.trailingAnchor.constraint(
-                equalTo: container.trailingAnchor
-            ),
-            playerView.topAnchor.constraint(equalTo: container.topAnchor),
-            playerView.bottomAnchor.constraint(
-                equalTo: container.bottomAnchor
-            )
-        ])
     }
 
     func indexForCurrentOffset() -> Int {

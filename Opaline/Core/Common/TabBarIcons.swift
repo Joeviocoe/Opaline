@@ -4,6 +4,7 @@ enum TabBarIcons {
     static func home() -> UIImage? { icon("icon_House_Fill", size: 25) }
     static func subscriptions() -> UIImage? { icon("icon_Play_Rectangle", size: 25) }
     static func library() -> UIImage? { icon("icon_Square_Stack", size: 25) }
+    static func shorts() -> UIImage? { icon("icon_shorts", size: 25) }
 }
 
 private func icon(_ name: String, size: CGFloat) -> UIImage? {

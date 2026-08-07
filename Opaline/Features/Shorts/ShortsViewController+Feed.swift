@@ -25,7 +25,10 @@ extension ShortsViewController {
             seed = nil
             return
         }
+        // A bootstrap answer carries no continuation — re-seed from the last
+        // short so the feed keeps going instead of ending after one page.
         seed = page.continuation
+            ?? page.videos.last.map { ShortsSeed.params(videoId: $0.id) }
         append(page.videos)
     }
 
@@ -42,6 +45,10 @@ extension ShortsViewController {
             // out — inserting into a view that never counted its items is an
             // inconsistency, and there is no live player to protect.
             collectionView.reloadData()
+            // The tab starts with an empty feed, so this page is also what
+            // gives it something to play.
+            collectionView.layoutIfNeeded()
+            attachPlayer(to: attachedIndex)
             return
         }
         // Append rather than reload: a reload rebuilds the current cell and
@@ -121,13 +128,14 @@ extension ShortsViewController {
             return
         }
         let page = pages[videoId]
+        let avatarURL = page?.channelInfo?.avatarURL
+            ?? videos[index].channelAvatarURL
         overlay.configure(with: videos[index])
         overlay.configure(
             likeCount: page?.likeCount,
             commentCount: page?.commentCount,
             likeStatus: likeStatus(for: videoId),
-            avatarURL: page?.channelInfo?.avatarURL
-                ?? videos[index].channelAvatarURL
+            avatarURL: avatarURL
         )
     }
 }

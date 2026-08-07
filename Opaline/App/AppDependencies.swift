@@ -52,7 +52,7 @@ struct AppDependencies {
     }
 
     func makeShortsViewController(
-        seedVideo: Video, entry: ShortsEntry
+        seedVideo: Video?, entry: ShortsEntry
     ) -> ShortsViewController {
         ShortsViewController(
             seedVideo: seedVideo,

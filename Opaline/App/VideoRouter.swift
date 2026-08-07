@@ -30,7 +30,11 @@ final class VideoRouter {
         shorts: ShortsEntry = .pool([])
     ) {
         if video.isShort, let makeShorts = shortsViewControllerFactory {
-            presenter.navigationController?.pushViewController(
+            // The outermost one: Library's segments sit in an embedded
+            // navigation controller whose view stops below the status bar,
+            // and a full-screen feed pushed there leaves that strip showing
+            // the screen underneath.
+            presenter.visibleNavigationController?.pushViewController(
                 makeShorts(video, shorts), animated: true
             )
             return

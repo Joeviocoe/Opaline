@@ -3,18 +3,15 @@ import UIKit
 
 /// The one player the Shorts feed owns, moved between cells as the user
 /// swipes. Deliberately minimal — a short needs playback, looping and a tap
-/// to pause; everything the watch screen adds (quality menus, seek bar,
-/// captions, PiP) is not part of this surface.
+/// to pause, not the watch screen's quality menus, seek bar or PiP.
 ///
-/// An `AVQueuePlayer` so the next short can be queued behind the current one
-/// and pre-rolled by the same player. Handing a prepared item from a second
-/// player is not an option: AVFoundation detaches asynchronously and the
-/// attach throws (crashed on device, see [[ShortsPrefetcher]]).
-/// `actionAtItemEnd` is `.pause` — a queued short must not start on its own,
-/// shorts loop until the user swipes.
+/// An `AVQueuePlayer` so the next short pre-rolls in the same player: handing
+/// a prepared item over from a second one throws, AVFoundation detaches
+/// asynchronously (see [[ShortsPrefetcher]]). `actionAtItemEnd` is `.pause`,
+/// a queued short must not start on its own.
 final class ShortsPlayerView: UIView {
-    /// One queued short. The source and resource loader are retained for as
-    /// long as the item is in the queue — dropping either kills the stream.
+    /// One queued short. Source and loader are retained while the item is in
+    /// the queue — dropping either kills the stream.
     struct Entry {
         let videoId: String
         let item: AVPlayerItem
@@ -22,20 +19,31 @@ final class ShortsPlayerView: UIView {
         let loader: AVAssetResourceLoaderDelegate?
     }
 
+    /// Seconds of video kept ahead of the playhead. The watch screen's 20
+    /// makes the player fill a buffer longer than the short itself before it
+    /// starts — the delay between the swipe and the picture.
+    private static let forwardBuffer: TimeInterval = 3
+    /// How much shorter than its region a short may be and still fill it.
+    /// 9:16 against the region is 0.90 and fills; 1:1 is 0.51 and does not.
+    private static let minFillRatio: CGFloat = 0.75
+
     override static var layerClass: AnyClass { AVPlayerLayer.self }
 
     let facade = PlaybackFacade()
     private let player = AVQueuePlayer()
-    private let statusLabel = UILabel()
+    /// Internal, not private: the PlaybackContext conformance writes it
+    /// from ShortsPlayerView+Playback.swift.
+    let statusLabel = UILabel()
     private var timeObserver: Any?
     /// Mirrors the player's queue: index 0 is playing, 1 is pre-rolling.
     private var entries: [Entry] = []
+    /// The item whose first frame is awaited; nil once it has been drawn.
+    var awaitedItem: AVPlayerItem?
 
     var isPaused: Bool { player.rate == 0 }
 
     /// Playback position as a 0...1 fraction, for the controller's progress
-    /// bar — which lives up there so it clears the tab bar and the display's
-    /// rounded corners.
+    /// bar — which lives up there so it clears the tab bar.
     var onProgress: ((Double) -> Void)?
 
     /// The short already queued behind the current one, if any.
@@ -49,12 +57,15 @@ final class ShortsPlayerView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        // Transparent so the cell's poster frame shows through until
-        // the first decoded frame arrives.
-        backgroundColor = .clear
+        // Opaque: a fitted short would otherwise show the cell's poster in
+        // the bands beside it, doubling the picture. Covering the poster
+        // until the first frame is `alpha`'s job now.
+        backgroundColor = .black
         playerLayer?.player = player
-        // Shorts fill the screen, as in the official app.
         playerLayer?.videoGravity = .resizeAspectFill
+        // Keep the stalling policy on: without it a `play()` that lands
+        // before any data has arrived leaves the rate at zero and never
+        // resumes, so a swiped-to short sits on its poster until tapped.
         PlaybackBufferPolicy.configure(player: player)
         player.actionAtItemEnd = .pause
         facade.context = self
@@ -84,9 +95,8 @@ final class ShortsPlayerView: UIView {
         )
     }
 
-    /// Plays an already-resolved short with no status label and no round
-    /// trip. The facade is told what is playing so mid-playback recovery
-    /// still has a video and a source to fall back on.
+    /// Plays an already-resolved short with no round trip. The facade is told
+    /// what plays so mid-playback recovery still has a source to fall back on.
     func attach(
         source: VideoSource,
         playback: PreparedPlayback,
@@ -105,8 +115,7 @@ final class ShortsPlayerView: UIView {
         ))
     }
 
-    /// Queues a resolved short behind the current one so the player pre-rolls
-    /// it. Only one is ever queued — that is the one swipe ahead.
+    /// Queues a resolved short so the player pre-rolls it — one swipe ahead.
     func enqueue(
         source: VideoSource,
         playback: PreparedPlayback,
@@ -117,7 +126,9 @@ final class ShortsPlayerView: UIView {
               player.canInsert(playback.item, after: nil) else {
             return
         }
-        PlaybackBufferPolicy.configure(item: playback.item)
+        PlaybackBufferPolicy.configure(
+            item: playback.item, forwardBufferDuration: Self.forwardBuffer
+        )
         player.insert(playback.item, after: nil)
         entries.append(Entry(
             videoId: videoId,
@@ -127,12 +138,13 @@ final class ShortsPlayerView: UIView {
         ))
     }
 
-    /// Jumps to the queued short. Returns false when `videoId` is not the one
-    /// queued — a backward or skipping swipe, which has to resolve normally.
+    /// Jumps to the queued short. False when `videoId` is not the queued one
+    /// — a backward or skipping swipe, which has to resolve normally.
     func advance(to videoId: String, watchService: WatchService) -> Bool {
         guard queuedVideoId == videoId else {
             return false
         }
+        hideUntilFirstFrame(of: entries[1].item)
         player.advanceToNextItem()
         entries.removeFirst()
         facade.currentVideoId = videoId
@@ -144,8 +156,11 @@ final class ShortsPlayerView: UIView {
         return true
     }
 
-    private func play(entry: Entry) {
-        PlaybackBufferPolicy.configure(item: entry.item)
+    func play(entry: Entry) {
+        hideUntilFirstFrame(of: entry.item)
+        PlaybackBufferPolicy.configure(
+            item: entry.item, forwardBufferDuration: Self.forwardBuffer
+        )
         player.removeAllItems()
         player.insert(entry.item, after: nil)
         entries = [entry]
@@ -153,7 +168,21 @@ final class ShortsPlayerView: UIView {
         player.play()
     }
 
+    /// The layer keeps drawing the last frame of whatever played before, so
+    /// moving it into the next cell flashes the previous short over that
+    /// short's own poster. Stay invisible until `item` itself draws — keyed on
+    /// the item, because the clock keeps reporting the old one's position for
+    /// a tick after it leaves the queue and that revealed an empty layer.
+    private func hideUntilFirstFrame(of item: AVPlayerItem?) {
+        awaitedItem = item
+        alpha = 0
+        // What the next short gets if its size never resolves; almost every
+        // short is portrait and fills.
+        setGravity(.resizeAspectFill)
+    }
+
     func stop() {
+        hideUntilFirstFrame(of: nil)
         onProgress?(0)
         player.pause()
         player.removeAllItems()
@@ -179,8 +208,44 @@ final class ShortsPlayerView: UIView {
         player.play()
     }
 
-    private func setupTimeObserver() {
-        let interval = CMTime(seconds: 0.25, preferredTimescale: 600)
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        if let timeObserver {
+            player.removeTimeObserver(timeObserver)
+        }
+    }
+}
+
+// MARK: - Layer, gravity and progress
+
+private extension ShortsPlayerView {
+    /// Fills its region unless the short is far off its shape. The region is
+    /// the screen down to the tab bar, which the official app fills: a 9:16
+    /// short gives up about a tenth of its width there, a crop it survives.
+    /// A square one would give up half its height, so that is fitted instead.
+    func applyGravity() {
+        guard let size = player.currentItem?.presentationSize,
+              size.width > 0, size.height > 0, bounds.width > 0 else {
+            return
+        }
+        let fits = size.height / size.width
+            >= bounds.height / bounds.width * Self.minFillRatio
+        setGravity(fits ? .resizeAspectFill : .resizeAspect)
+    }
+
+    /// Actions off: otherwise this is a quarter-second zoom that plays out
+    /// after the layer is revealed rather than before it.
+    func setGravity(_ gravity: AVLayerVideoGravity) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        playerLayer?.videoGravity = gravity
+        CATransaction.commit()
+    }
+
+    func setupTimeObserver() {
+        // Short interval because this also drives the reveal of the new
+        // short — at 0.25s the poster lingers visibly after the swipe.
+        let interval = CMTime(seconds: 0.05, preferredTimescale: 600)
         timeObserver = player.addPeriodicTimeObserver(
             forInterval: interval, queue: .main
         ) { [weak self] time in
@@ -188,7 +253,15 @@ final class ShortsPlayerView: UIView {
         }
     }
 
-    private func reportProgress(at time: CMTime) {
+    func reportProgress(at time: CMTime) {
+        // The awaited item is current and its clock has moved off zero: it is
+        // decoding, so the layer no longer holds the previous short's frame.
+        if let awaited = awaitedItem, player.currentItem === awaited,
+           time.seconds > 0 {
+            awaitedItem = nil
+            applyGravity()
+            alpha = 1
+        }
         guard let duration = player.currentItem?.duration,
               duration.isNumeric, duration.seconds > 0 else {
             onProgress?(0)
@@ -197,7 +270,7 @@ final class ShortsPlayerView: UIView {
         onProgress?(time.seconds / duration.seconds)
     }
 
-    private func setupStatusLabel() {
+    func setupStatusLabel() {
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.textColor = .white
         statusLabel.font = .systemFont(ofSize: 13)
@@ -212,38 +285,4 @@ final class ShortsPlayerView: UIView {
             )
         ])
     }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-        if let timeObserver {
-            player.removeTimeObserver(timeObserver)
-        }
-    }
-}
-
-// MARK: - PlaybackContext
-
-extension ShortsPlayerView: PlaybackContext {
-    func attachPrepared(_ prepared: PreparedPlayback, resumeAt: CMTime?) {
-        play(entry: Entry(
-            videoId: facade.currentVideoId ?? "",
-            item: prepared.item,
-            source: facade.activeVideoSource,
-            loader: prepared.resourceLoader
-        ))
-    }
-
-    func updateStatusLabel(_ text: String) {
-        statusLabel.text = text
-    }
-
-    func showPlaybackError(_ message: String) {
-        statusLabel.text = message
-    }
-
-    func startObservingPlayerItem(_ item: AVPlayerItem) {}
-
-    func stopObservingPlayerItem(_ item: AVPlayerItem) {}
-
-    func setCaptionTracks(_ tracks: [SubtitleTrack]) {}
 }

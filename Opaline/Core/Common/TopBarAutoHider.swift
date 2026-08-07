@@ -18,21 +18,6 @@ final class TopBarAutoHider {
     private weak var owner: UIViewController?
     private var lastOffsetY: CGFloat = 0
 
-    /// The bar that is actually on screen — Library's segment children
-    /// live in an embedded navigation controller whose own bar is
-    /// permanently hidden, so climb to the outermost one.
-    private var navigationController: UINavigationController? {
-        var found: UINavigationController?
-        var node: UIViewController? = owner
-        while let current = node {
-            if let nav = current as? UINavigationController {
-                found = nav
-            }
-            node = current.parent
-        }
-        return found
-    }
-
     init(owner: UIViewController) {
         self.owner = owner
     }
@@ -83,12 +68,27 @@ final class TopBarAutoHider {
             return
         }
         isHidden = hidden
-        navigationController?.setNavigationBarHidden(hidden, animated: true)
+        owner?.visibleNavigationController?
+            .setNavigationBarHidden(hidden, animated: true)
         guard let onChange else {
             return
         }
         UIView.animate(withDuration: 0.22) {
             onChange(hidden)
         }
+    }
+}
+
+// MARK: - Finding the bar that is on screen
+
+extension UIViewController {
+    /// The outermost navigation controller above this one. Library's segment
+    /// children sit in an embedded navigation controller whose own bar is
+    /// permanently hidden, so the bar the user sees belongs further up —
+    /// hiding the nearest one there does nothing.
+    var visibleNavigationController: UINavigationController? {
+        sequence(first: self) { $0.parent }
+            .compactMap { $0 as? UINavigationController }
+            .last
     }
 }
