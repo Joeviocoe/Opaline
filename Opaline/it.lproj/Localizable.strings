@@ -230,6 +230,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "Layout home";
+"settings.row.defaultTab" = "Schermata iniziale";
 "settings.homeLayout.grid" = "Griglia semplice";
 "settings.homeLayout.rails" = "Corsie orizzontali";
 

@@ -230,6 +230,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "Mise en page de l'accueil";
+"settings.row.defaultTab" = "Écran de démarrage";
 "settings.homeLayout.grid" = "Grille simple";
 "settings.homeLayout.rails" = "Rails horizontaux";
 

@@ -230,6 +230,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "Layout da página inicial";
+"settings.row.defaultTab" = "Ecrã inicial";
 "settings.homeLayout.grid" = "Grade simples";
 "settings.homeLayout.rails" = "Trilhos";
 

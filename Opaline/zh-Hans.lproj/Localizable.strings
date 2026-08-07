@@ -234,6 +234,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "首页布局";
+"settings.row.defaultTab" = "启动屏幕";
 "settings.homeLayout.grid" = "网格";
 "settings.homeLayout.rails" = "横向轨道";
 

@@ -259,6 +259,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "Home Layout";
+"settings.row.defaultTab" = "Default Screen";
 "settings.homeLayout.grid" = "Plain Grid";
 "settings.homeLayout.rails" = "Shelf Rails";
 

@@ -234,6 +234,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "首頁佈局";
+"settings.row.defaultTab" = "啟動畫面";
 "settings.homeLayout.grid" = "格線";
 "settings.homeLayout.rails" = "橫向軌道";
 

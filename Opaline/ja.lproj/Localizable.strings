@@ -234,6 +234,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "ホームレイアウト";
+"settings.row.defaultTab" = "起動画面";
 "settings.homeLayout.grid" = "グリッド";
 "settings.homeLayout.rails" = "シェルフレール";
 

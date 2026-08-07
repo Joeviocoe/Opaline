@@ -13,7 +13,7 @@ final class SettingsViewController: UIViewController {
         case autoZoomToFill
         case autoplayEnabled, autoplayMixEnabled
         case autoDubEnabled, autoDubLanguage, autoDubIgnoreAI
-        case homeLayout
+        case homeLayout, defaultTab
         case persistCache, feedCacheDays
         case imageCacheEnabled, imageCacheDays
         case clearCache, rydEnabled
@@ -274,6 +274,11 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 "settings.row.homeLayout".localized,
                 value: HomeLayout.selected.displayName
             )
+        case .defaultTab:
+            return makeDisclosureCell(
+                "settings.row.defaultTab".localized,
+                value: DefaultTab.selected.displayName
+            )
         case .persistCache:
             return makeToggleCell(
                 "settings.row.feedCache".localized,
@@ -510,6 +515,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             showAutoHourPicker(isStart: false)
         case .homeLayout:
             showHomeLayoutPicker()
+        case .defaultTab:
+            showDefaultTabPicker()
         default:
             return false
         }
@@ -592,6 +599,30 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 self.tableView.reloadData()
             }
             if layout == HomeLayout.selected {
+                action.setValue(true, forKey: "checked")
+            }
+            sheet.addAction(action)
+        }
+        sheet.addAction(UIAlertAction(title: "common.cancel".localized, style: .cancel))
+        configureCenteredPopover(sheet)
+        present(sheet, animated: true)
+    }
+
+    private func showDefaultTabPicker() {
+        let sheet = UIAlertController(
+            title: "settings.row.defaultTab".localized,
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        for tab in DefaultTab.available {
+            let action = UIAlertAction(
+                title: tab.displayName,
+                style: .default
+            ) { _ in
+                DefaultTab.selected = tab
+                self.tableView.reloadData()
+            }
+            if tab == DefaultTab.selected {
                 action.setValue(true, forKey: "checked")
             }
             sheet.addAction(action)

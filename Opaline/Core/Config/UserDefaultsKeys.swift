@@ -48,6 +48,8 @@ enum UserDefaultsKeys {
     enum Feed {
         static let showShorts = "feed_showShorts"
         static let homeLayout = "feed_homeLayout"
+        /// `DefaultTab` raw value (= tab tag); absent = Home.
+        static let defaultTab = "feed_defaultTab"
     }
 
     enum Search {

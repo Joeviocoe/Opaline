@@ -230,6 +230,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "Diseño de inicio";
+"settings.row.defaultTab" = "Pantalla de inicio";
 "settings.homeLayout.grid" = "Cuadrícula sencilla";
 "settings.homeLayout.rails" = "Carriles";
 

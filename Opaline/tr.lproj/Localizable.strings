@@ -234,6 +234,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "Ana Sayfa Düzeni";
+"settings.row.defaultTab" = "Başlangıç ekranı";
 "settings.homeLayout.grid" = "Düz Izgara";
 "settings.homeLayout.rails" = "Raf Rayları";
 

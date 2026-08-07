@@ -228,6 +228,7 @@
 
 /* Home layout row + option names */
 "settings.row.homeLayout" = "Startseiten-Layout";
+"settings.row.defaultTab" = "Startbildschirm";
 "settings.homeLayout.grid" = "Einfaches Raster";
 "settings.homeLayout.rails" = "Bereichs-Schienen";
 

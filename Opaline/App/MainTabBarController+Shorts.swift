@@ -3,7 +3,7 @@ import UIKit
 // MARK: - Shorts tab
 
 extension MainTabBarController {
-    static let shortsTabTag = 3
+    static let shortsTabTag = DefaultTab.shorts.tabTag
 
     var wantsShortsTab: Bool {
         UserDefaults.standard.bool(forKey: UserDefaultsKeys.Feed.showShorts)

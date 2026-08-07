@@ -181,6 +181,7 @@
 "settings.row.autoDubIgnoreAI" = "Ігнорувати ШІ-дубляж";
 
 "settings.row.homeLayout" = "Вигляд головної";
+"settings.row.defaultTab" = "Екран за замовчуванням";
 "settings.homeLayout.grid" = "Проста сітка";
 "settings.homeLayout.rails" = "Горизонтальні стрічки";
 

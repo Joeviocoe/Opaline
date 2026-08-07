@@ -58,7 +58,7 @@ extension SettingsViewController {
             Section(
                 header: "settings.section.home".localized,
                 footer: "settings.footer.home".localized,
-                rows: [.hideStatusBar, .homeLayout]
+                rows: [.hideStatusBar, .homeLayout, .defaultTab]
             )
         ]
     }

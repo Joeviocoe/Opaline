@@ -182,6 +182,7 @@
 "settings.row.autoDubIgnoreAI" = "Игнорировать ИИ-дубляж";
 
 "settings.row.homeLayout" = "Вид главной";
+"settings.row.defaultTab" = "Экран по умолчанию";
 "settings.homeLayout.grid" = "Простая сетка";
 "settings.homeLayout.rails" = "Горизонтальные ленты";
 
