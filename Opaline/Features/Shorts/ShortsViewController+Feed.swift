@@ -7,17 +7,6 @@ extension ShortsViewController {
         guard !isLoading else {
             return
         }
-        // The shelf the pool came from comes first: its shorts are still the
-        // ones from this surface, while the sequence is the server's own pick.
-        if let shelf = shelfToken {
-            isLoading = true
-            feedService.fetchNextPage(continuation: shelf) { [weak self] result in
-                DispatchQueue.main.async {
-                    self?.handleShelfPage(result)
-                }
-            }
-            return
-        }
         guard let seed else {
             return
         }
@@ -27,24 +16,6 @@ extension ShortsViewController {
                 self?.handlePage(result)
             }
         }
-    }
-
-    /// A drained shelf page. Its shorts are shuffled in like the rest of the
-    /// pool; when the shelf runs dry the sequence takes over.
-    private func handleShelfPage(_ result: Result<FeedPage, Error>) {
-        isLoading = false
-        guard case .success(let page) = result else {
-            AppLog.innertube("shorts shelf drain failed")
-            shelfToken = nil
-            return
-        }
-        shelfToken = page.continuation
-        let shorts = page.videos.filter { $0.isShort }
-        AppLog.innertube(
-            "shorts shelf drain: \(page.videos.count) videos,"
-                + " \(shorts.count) shorts, more=\(page.continuation != nil)"
-        )
-        append(shorts.shuffled())
     }
 
     private func handlePage(_ result: Result<ShortsSequencePage, Error>) {

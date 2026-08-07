@@ -144,15 +144,6 @@ extension SubscriptionsViewController {
     }
 
     func appendPage(_ page: FeedPage) {
-        if let shelf = page.shelfContinuations?.first(where: {
-            $0.title?.lowercased() == "shorts"
-        }) {
-            shortsShelfToken = shelf.token
-        }
-        AppLog.subs(
-            "shelves=\(page.shelfContinuations?.compactMap { $0.title } ?? [])"
-                + " shortsShelfToken=\(shortsShelfToken != nil)"
-        )
         let newVideos = page.videos.filter {
             seenVideoIds.insert($0.id).inserted
         }

@@ -27,7 +27,7 @@ final class VideoRouter {
     func open(
         video: Video,
         from presenter: UIViewController,
-        shorts: ShortsEntry = .pool(ShortsPool([]))
+        shorts: ShortsEntry = .pool([])
     ) {
         if video.isShort, let makeShorts = shortsViewControllerFactory {
             presenter.navigationController?.pushViewController(

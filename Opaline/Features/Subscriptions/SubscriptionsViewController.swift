@@ -14,10 +14,6 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     ) -> UIViewController
     let videoRouter: VideoRouter
     var videos: [Video] = []
-    /// Continuation for the feed's Shorts shelf. The shorts a shorts feed
-    /// can swipe are otherwise limited to whatever this screen has loaded —
-    /// draining the shelf keeps it on subscriptions for longer.
-    var shortsShelfToken: String?
     var continuationToken: String?
     var isLoadingMore = false
     var seenVideoIds: Set<String> = []
@@ -211,11 +207,7 @@ extension SubscriptionsViewController: UITableViewDelegate {
         videoRouter.open(
             video: video,
             from: self,
-            shorts: .pool(
-                ShortsPool(
-                    videos.filter { $0.isShort }, shelf: shortsShelfToken
-                )
-            )
+            shorts: .pool(videos.filter { $0.isShort })
         )
     }
 

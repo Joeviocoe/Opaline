@@ -186,21 +186,3 @@ final class AppCache {
 
     // MARK: - Clear All
 }
-
-extension AppCache {
-    static func mergeFeeds(
-        existing: FeedPage,
-        fresh: FeedPage
-    ) -> FeedPage {
-        var seen = Set(existing.videos.map(\.id))
-        var merged = fresh.videos
-        for video in existing.videos where !seen.contains(video.id) {
-            merged.append(video)
-            seen.insert(video.id)
-        }
-        return FeedPage(
-            videos: merged,
-            continuation: fresh.continuation
-        )
-    }
-}
