@@ -423,7 +423,7 @@ extension VideoPlayerView {
 
     private func configureRewindButton() {
         rewindButton.setImage(
-            PlayerIcons.rewind10(),
+            PlayerIcons.previous(),
             for: .normal
         )
         rewindButton.tintColor = .white
@@ -448,7 +448,7 @@ extension VideoPlayerView {
 
     private func configureForwardButton() {
         forwardButton.setImage(
-            PlayerIcons.forward10(),
+            PlayerIcons.next(),
             for: .normal
         )
         forwardButton.tintColor = .white

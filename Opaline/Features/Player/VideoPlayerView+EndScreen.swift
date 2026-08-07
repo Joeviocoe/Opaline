@@ -20,21 +20,12 @@ extension VideoPlayerView {
         scheduleAutoHide()
     }
 
-    /// Swaps the centre trio between seek controls and the end screen.
+    /// Previous / Next never move; only the middle button changes, and
+    /// dead directions are dimmed rather than hidden — the trio's layout is
+    /// fixed, and a gap where a button was reads as a glitch.
     func updateCenterIcons() {
         updatePlayPauseIcon()
-        rewindButton.setImage(
-            isAtEnd ? PlayerIcons.previous() : PlayerIcons.rewind10(),
-            for: .normal
-        )
-        forwardButton.setImage(
-            isAtEnd ? PlayerIcons.next() : PlayerIcons.forward10(),
-            for: .normal
-        )
-        // Dimmed rather than hidden: the trio's layout is fixed, and a gap
-        // where a button was reads as a glitch.
-        setEnabled(rewindButton, !isAtEnd || hasPreviousVideo)
-        setEnabled(forwardButton, !isAtEnd || hasNextVideo)
+        setEnabled(rewindButton, hasPreviousVideo)
     }
 
     private func setEnabled(_ button: UIButton, _ enabled: Bool) {

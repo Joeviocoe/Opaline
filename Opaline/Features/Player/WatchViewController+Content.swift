@@ -123,6 +123,7 @@ extension WatchViewController {
         applyEngagementData(from: page)
         applyTheme()
         applyRelatedVideos(from: page)
+        updateTransportAvailability()
         startSideEffects(for: page.video.id)
         view.setNeedsLayout()
     }
@@ -375,6 +376,7 @@ extension WatchViewController {
         videoHistory.append(current)
         loadVideoInternal(video, keepFullscreen: isPlayerFullscreen)
         updateLeftBarButton()
+        updateTransportAvailability()
     }
 
     /// Go back to previous video in history stack.
@@ -383,6 +385,7 @@ extension WatchViewController {
         else { return }
         loadVideoInternal(previous)
         updateLeftBarButton()
+        updateTransportAvailability()
     }
 
     private func loadVideoInternal(

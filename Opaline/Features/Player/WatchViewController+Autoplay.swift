@@ -72,22 +72,25 @@ extension WatchViewController {
         ])
     }
 
-    /// Nothing plays after this video: swap the seek controls for
-    /// Previous / Replay / Next and keep them on screen.
+    /// Previous walks the session's own back stack, so it stays greyed out
+    /// until the first in-player navigation.
+    func updateTransportAvailability() {
+        videoPlayerView?.hasPreviousVideo = !videoHistory.isEmpty
+        videoPlayerView?.updateCenterIcons()
+    }
+
+    /// Nothing plays after this video: Play becomes Replay and the controls
+    /// stay on screen.
     func showEndScreen(reason: String) {
         AppLog.player("playToEnd: end screen — \(reason)")
         DispatchQueue.main.async { [weak self] in
-            guard let self, let playerView = self.videoPlayerView else {
+            guard let self else {
                 return
             }
-            playerView.hasNextVideo =
-                self.queue.nextVideo != nil || self.watchPage?.nextVideo != nil
-            // Previous walks the session's own back stack — on the first
-            // video of a session it would only restart, which Replay does.
-            playerView.hasPreviousVideo = !self.videoHistory.isEmpty
-            playerView.isAtEnd = true
-            playerView.setControls(visible: true, animated: true)
-            playerView.pauseAutoHide()
+            self.updateTransportAvailability()
+            self.videoPlayerView?.isAtEnd = true
+            self.videoPlayerView?.setControls(visible: true, animated: true)
+            self.videoPlayerView?.pauseAutoHide()
         }
     }
 

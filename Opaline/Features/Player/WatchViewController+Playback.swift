@@ -127,6 +127,7 @@ extension WatchViewController {
         playerView.onNext = { [weak self] in
             self?.playNextFromRemote()
         }
+        updateTransportAvailability()
         return playerView
     }
 

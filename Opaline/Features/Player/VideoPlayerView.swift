@@ -41,8 +41,8 @@ final class VideoPlayerView: UIView {
         }
     }
 
-    /// Grey out Next / Previous when there is nothing to go to.
-    var hasNextVideo = false
+    /// Greyed out until the session has something to go back to. Next
+    /// needs no such flag — there is always a suggestion to play.
     var hasPreviousVideo = false
 
     var player: AVPlayer?

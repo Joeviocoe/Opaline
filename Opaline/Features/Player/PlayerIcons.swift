@@ -30,14 +30,6 @@ enum PlayerIcons {
         }
     }
 
-    static func rewind10() -> UIImage {
-        playerIcon("icon_Gobackward_10", size: 36)
-    }
-
-    static func forward10() -> UIImage {
-        playerIcon("icon_Goforward_10", size: 36)
-    }
-
     static func settings() -> UIImage {
         playerIcon("icon_Gear", size: 26)
     }
