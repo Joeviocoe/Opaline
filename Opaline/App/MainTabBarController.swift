@@ -66,6 +66,12 @@ class MainTabBarController: UITabBarController {
             name: ThemeManager.didChangeNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleShowShortsTabChange),
+            name: .showShortsSettingDidChange,
+            object: nil
+        )
         applyTheme()
     }
 
@@ -101,9 +107,7 @@ class MainTabBarController: UITabBarController {
         var tabs = [makeHomeTab(), makeSubscriptionsTab()]
         // Only for users who want shorts at all — the same setting that
         // hides them from every feed.
-        if UserDefaults.standard.bool(
-            forKey: UserDefaultsKeys.Feed.showShorts
-        ) {
+        if wantsShortsTab {
             tabs.append(makeShortsTab())
         }
         tabs.append(makeLibraryTab())

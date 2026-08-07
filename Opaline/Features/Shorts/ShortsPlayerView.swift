@@ -199,6 +199,13 @@ final class ShortsPlayerView: UIView {
         }
     }
 
+    /// Rotation changes which gravity is right, and the first frame — where
+    /// it is otherwise decided — is long past by then.
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        applyGravity()
+    }
+
     @objc
     private func itemDidEnd(_ note: Notification) {
         guard (note.object as? AVPlayerItem) === player.currentItem else {
@@ -223,9 +230,13 @@ private extension ShortsPlayerView {
     /// the screen down to the tab bar, which the official app fills: a 9:16
     /// short gives up about a tenth of its width there, a crop it survives.
     /// A square one would give up half its height, so that is fitted instead.
+    /// A landscape region — an iPad on its side — never fills: the crop there
+    /// eats most of a portrait short, so it is fitted and takes side bands.
     func applyGravity() {
         guard let size = player.currentItem?.presentationSize,
-              size.width > 0, size.height > 0, bounds.width > 0 else {
+              size.width > 0, size.height > 0,
+              bounds.width > 0, bounds.height > bounds.width else {
+            setGravity(.resizeAspect)
             return
         }
         let fits = size.height / size.width

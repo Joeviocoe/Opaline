@@ -144,6 +144,37 @@ final class ShortsViewController: UIViewController {
         playerView.stop()
     }
 
+    /// Page size comes from the collection's own bounds, which the layout
+    /// caches — without invalidating it the cells keep their portrait size
+    /// after a rotation, and the picture is cropped to a frame that is no
+    /// longer there. Re-centring afterwards puts the page back on its edge.
+    override func viewWillTransition(
+        to size: CGSize,
+        with coordinator: UIViewControllerTransitionCoordinator
+    ) {
+        super.viewWillTransition(to: size, with: coordinator)
+        let index = attachedIndex
+        coordinator.animate(alongsideTransition: { [weak self] _ in
+            self?.settle(on: index)
+        }, completion: { [weak self] _ in
+            self?.settle(on: index)
+        })
+    }
+
+    /// Re-centres the page after the layout has been rebuilt. Inside the
+    /// rotation animation, not after it: the offset survives invalidation in
+    /// points, so at the new page height it lands between two shorts and the
+    /// neighbouring poster shows through for a frame.
+    private func settle(on index: Int) {
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.layoutIfNeeded()
+        collectionView.scrollToItem(
+            at: IndexPath(item: index, section: 0),
+            at: .centeredVertically,
+            animated: false
+        )
+    }
+
     // MARK: - Paging
 
     /// Moves the single player into the page at `index` and starts it.

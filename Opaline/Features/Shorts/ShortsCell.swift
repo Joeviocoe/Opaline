@@ -23,6 +23,14 @@ final class ShortsCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    /// Matches the player's gravity, which fits rather than fills once the
+    /// screen is on its side.
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        poster.contentMode = bounds.height > bounds.width
+            ? .scaleAspectFill : .scaleAspectFit
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
         poster.cancel()
