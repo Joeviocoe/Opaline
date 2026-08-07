@@ -65,9 +65,18 @@ enum VideoRendererParserChain {
             || content["shortsLockupViewModel"] != nil {
             return true
         }
-        return videoRendererKeys.contains { key in
+        if videoRendererKeys.contains(where: { key in
             (content[key] as? [String: Any])
                 .map(navigatesToReel) ?? false
+        }) {
+            return true
+        }
+        // TV history hands shorts over as ordinary tiles pointing at the
+        // watch page; the badge where a duration would sit is all that says
+        // otherwise, and without it they opened in the wide player.
+        return extractOverlays(from: item).contains { overlay in
+            (overlay[RendererKey.thumbnailOverlayTimeStatus]
+                as? [String: Any])?["style"] as? String == "SHORTS"
         }
     }
 

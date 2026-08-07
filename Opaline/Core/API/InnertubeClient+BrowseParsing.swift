@@ -96,8 +96,8 @@ private extension InnertubeClient {
             as? [String: Any],
            let items = gc["items"]
             as? [[String: Any]] {
-            let vids = VideoRendererParserChain
-                .videos(from: items)
+            let raw = VideoRendererParserChain.videos(from: items)
+            let vids = markingShorts(raw, fromHistory: items)
             let cont = nextContToken(from: gc)
             AppLog.innertube(
                 "TV history gridContinuation: "
@@ -130,8 +130,8 @@ private extension InnertubeClient {
         else {
             return nil
         }
-        let videos = VideoRendererParserChain
-            .videos(from: items)
+        let parsed = VideoRendererParserChain.videos(from: items)
+        let videos = markingShorts(parsed, fromHistory: items)
         let cont = nextContToken(from: grid)
         AppLog.innertube(
             "TV history gridRenderer: "
@@ -234,7 +234,6 @@ extension InnertubeClient {
 }
 
 // MARK: - Private History Helpers
-
 private extension InnertubeClient {
     static func extractProgressFromOverlays(
         _ overlays: [[String: Any]]

@@ -70,6 +70,11 @@ extension InnertubeClient: ShortsService {
 /// matches (HTTP 400, verified against the live endpoint). Staying inside a
 /// surface therefore has to happen on our side.
 enum ShortsSeed {
+    /// Seed for a feed with no starting video — the Shorts tab. Field 2
+    /// alone makes the server answer with one short of its choosing (and no
+    /// continuation), which is enough to seed a normal sequence from.
+    static let cold = Data([0x10, 0x01]).base64EncodedString()
+
     static func params(videoId: String) -> String {
         let id = Array(videoId.utf8)
         return Data([UInt8(0x0A), UInt8(id.count)] + id).base64EncodedString()
@@ -89,6 +94,13 @@ extension InnertubeClient {
             guard let endpoint = entry.digDict(
                 "command", "reelWatchEndpoint"
             ) else {
+                return nil
+            }
+            // Ad creatives ride in as ordinary entries and are otherwise
+            // indistinguishable from a brand's organic short — only this key
+            // marks them (6 of 53 entries in a live authenticated feed, all
+            // of them ads, none of the rest carrying it).
+            guard endpoint["adClientParams"] == nil else {
                 return nil
             }
             return shortsVideo(fromReelWatchEndpoint: endpoint)

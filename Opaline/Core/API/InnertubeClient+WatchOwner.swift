@@ -12,27 +12,34 @@ extension InnertubeClient {
     static func extractOwnerInfo(
         _ json: [String: Any]
     ) -> OwnerInfo {
-        // The same renderer name also wraps the player's "Channel" button,
-        // whose title is that literal word rather than the channel's name.
-        // The real owner is the one carrying a subscriber count, so it wins.
-        let owners = allOwnerRenderers(json).sorted {
-            ($0["subscriberCountText"] != nil ? 0 : 1)
-                < ($1["subscriberCountText"] != nil ? 0 : 1)
-        }
-        for owner in owners {
-            let chId = firstMatchingBrowseId(in: owner)
-                .flatMap { $0.isEmpty ? nil : $0 }
+        // A watch page carries the same owner two or three times and only
+        // one copy holds the browseId, in no fixed order — so the fields are
+        // merged across all of them. Reading them off the first renderer that
+        // matched dropped the channelId about half the time, and with it the
+        // whole ChannelInfo (verified against a live Shorts feed).
+        var info = OwnerInfo(channelId: nil, title: nil, avatarURL: nil)
+        var anyTitle: String?
+        for owner in allOwnerRenderers(json) {
             let title = simpleText(from: owner["title"])
-            let avatarURL = extractThumbnailURL(
-                from: owner["thumbnail"]
-            )
-            if chId != nil || avatarURL != nil {
-                return OwnerInfo(
-                    channelId: chId, title: title, avatarURL: avatarURL
+            anyTitle = anyTitle ?? title
+            info = OwnerInfo(
+                channelId: info.channelId ?? firstMatchingBrowseId(in: owner)
+                    .flatMap { $0.isEmpty ? nil : $0 },
+                // The renderer also wraps the player's "Channel" button,
+                // whose title is that literal word rather than the channel's
+                // name. Only the real owner carries a subscriber count.
+                title: info.title ?? (owner["subscriberCountText"] == nil
+                    ? nil : title),
+                avatarURL: info.avatarURL ?? extractThumbnailURL(
+                    from: owner["thumbnail"]
                 )
-            }
+            )
         }
-        return OwnerInfo(channelId: nil, title: nil, avatarURL: nil)
+        return OwnerInfo(
+            channelId: info.channelId,
+            title: info.title ?? anyTitle,
+            avatarURL: info.avatarURL
+        )
     }
 
     static func allOwnerRenderers(
