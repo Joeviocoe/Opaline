@@ -10,6 +10,20 @@ final class MultitaskPauseState {
 }
 
 extension VideoPlayerView {
+    /// The pause AVPlayer performs on reaching the end looks exactly like a
+    /// system pause. Resuming there plays nothing and parks the player in
+    /// `waitingToPlayAtSpecifiedRate` — a spinner that never clears.
+    private var hasPlayedToEnd: Bool {
+        guard let item = player?.currentItem,
+              item.duration.isNumeric
+        else {
+            return false
+        }
+        let remaining = CMTimeGetSeconds(item.duration)
+            - CMTimeGetSeconds(item.currentTime())
+        return remaining < 0.5
+    }
+
     /// A pause we did not ask for, while the app is on screen and active: iPad
     /// multitasking takes video away from an app the moment it stops being the
     /// frontmost one (dragged into Slide Over beside another app). Nothing
@@ -22,6 +36,7 @@ extension VideoPlayerView {
         }
         let now = CACurrentMediaTime()
         guard !isPiPActive,
+              !hasPlayedToEnd,
               UIApplication.shared.applicationState == .active,
               now - multitaskPause.lastUserPause > 0.5
         else {
