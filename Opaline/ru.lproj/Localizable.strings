@@ -140,6 +140,7 @@
 
 "settings.title" = "Настройки";
 
+"settings.section.appearance" = "Внешний вид";
 "settings.section.theme" = "Тема";
 "settings.section.playback" = "Воспроизведение";
 "settings.section.autoDub" = "Дубляж";

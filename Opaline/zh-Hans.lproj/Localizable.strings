@@ -186,6 +186,7 @@
 "settings.title" = "设置";
 
 /* Section headers */
+"settings.section.appearance" = "外观";
 "settings.section.theme" = "主题";
 "settings.section.playback" = "播放";
 "settings.section.autoDub" = "配音";

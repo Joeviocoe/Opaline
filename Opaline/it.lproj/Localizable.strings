@@ -182,6 +182,7 @@
 "settings.title" = "Impostazioni";
 
 /* Section headers */
+"settings.section.appearance" = "Aspetto";
 "settings.section.theme" = "Tema";
 "settings.section.playback" = "Riproduzione";
 "settings.section.autoDub" = "Doppiaggio";

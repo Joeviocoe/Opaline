@@ -211,6 +211,7 @@
 "settings.title" = "Settings";
 
 /* Section headers */
+"settings.section.appearance" = "Appearance";
 "settings.section.theme" = "Theme";
 "settings.section.playback" = "Playback";
 "settings.section.autoDub" = "Dubbing";

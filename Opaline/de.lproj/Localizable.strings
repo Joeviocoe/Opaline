@@ -180,6 +180,7 @@
 "settings.title" = "Einstellungen";
 
 /* Section headers */
+"settings.section.appearance" = "Darstellung";
 "settings.section.theme" = "Design";
 "settings.section.playback" = "Wiedergabe";
 "settings.section.autoDub" = "Synchronisation";

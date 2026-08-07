@@ -139,6 +139,7 @@
 
 "settings.title" = "Налаштування";
 
+"settings.section.appearance" = "Зовнішній вигляд";
 "settings.section.theme" = "Тема";
 "settings.section.playback" = "Відтворення";
 "settings.section.autoDub" = "Дубляж";

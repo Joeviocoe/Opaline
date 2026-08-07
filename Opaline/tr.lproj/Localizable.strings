@@ -186,6 +186,7 @@
 "settings.title" = "Ayarlar";
 
 /* Section headers */
+"settings.section.appearance" = "Görünüm";
 "settings.section.theme" = "Tema";
 "settings.section.playback" = "Oynatma";
 "settings.section.autoDub" = "Dublaj";
