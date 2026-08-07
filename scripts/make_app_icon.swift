@@ -1,19 +1,24 @@
-// Builds the app icon and launch logo from the finished Logo.png artwork.
+// Cuts the app icon, the launch mark and the README logo out of the designer's artwork.
 //
-// The source is a near-square composition (gradient background with a white play
-// triangle on it), so "light" is just a centre crop plus resizes. "dark" and "launch"
-// lift the triangle off its background with a luminance/saturation mask — the background
-// is a saturated gradient and the triangle is near-white, so the two separate cleanly —
-// then redraw it on black, or keep it transparent and cropped tight for the launch screen.
+// One input for every mode: the transparent triangle. The v2 mark carries the opal gradient
+// inside the shape, so an icon is just that triangle on a flat background — which is also
+// the only way to place it freely, since the designer's own light/dark files bake in a soft
+// shadow that spreads across the whole canvas and leaves a visible seam if repositioned.
+//
+//   light   -> every icon size, triangle on the light background
+//   dark    -> the 1024 dark icon (iOS scales the rest down itself)
+//   launch  -> SplashMark, the triangle alone, cropped tight
+//   rounded -> logo.png for the README, corners already cut
 //
 // Must be compiled, not run through the `swift` interpreter — the JIT can't resolve
 // CGContext.draw(_:in:):
 //
 //   swiftc -O -o /tmp/mkicon scripts/make_app_icon.swift
-//   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset light
-//   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset dark
-//   /tmp/mkicon <Logo.png> Opaline/Assets.xcassets/SplashMark.imageset launch
-//   /tmp/mkicon <Logo.png> source rounded
+//   /tmp/mkicon <Without Background Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset light
+//   /tmp/mkicon <Without Background Logo.png> Opaline/Assets.xcassets/AppIcon.appiconset dark
+//   /tmp/mkicon <Without Background Logo.png> Opaline/Assets.xcassets/SplashMark.imageset launch
+//   /tmp/mkicon <Without Background Logo.png> source rounded
+//   /tmp/mkicon <Without Background Logo.png> source rounded-dark
 
 import CoreGraphics
 import Foundation
@@ -35,29 +40,14 @@ let sizes: [(String, Int)] = [
 let darkSuffix = "-dark"
 let darkOnlySize = 1024
 
-/// A pixel is triangle, not background, when it is this bright and this unsaturated.
-/// Both are ramps rather than hard cuts, so the extracted edge keeps its antialiasing.
-let lumaRange: (ClosedRange<Double>) = 0.80 ... 0.90
-let saturationRange: (ClosedRange<Double>) = 0.03 ... 0.10
+/// The designer's backgrounds, sampled from their light and dark exports — near-white and
+/// near-black rather than pure, which is what keeps the icon from looking like a hole.
+let lightBackground = (245.0, 248.0, 250.0)
+let darkBackground = (15.0, 15.0, 16.0)
 
-func smoothstep(_ range: ClosedRange<Double>, _ value: Double) -> Double {
-    let t = min(max((value - range.lowerBound) / (range.upperBound - range.lowerBound), 0), 1)
-    return t * t * (3 - 2 * t)
-}
-
-guard CommandLine.arguments.count == 4,
-      ["light", "dark", "launch", "rounded"].contains(CommandLine.arguments[3])
-else {
-    let usage = "usage: make_app_icon.swift <Logo.png> <out.dir> <light|dark|launch|rounded>\n"
-    FileHandle.standardError.write(Data(usage.utf8))
-    exit(2)
-}
-let sourceURL = URL(fileURLWithPath: CommandLine.arguments[1])
-let outDir = URL(fileURLWithPath: CommandLine.arguments[2])
-let mode = CommandLine.arguments[3]
-let isDark = mode == "dark"
-let isLaunch = mode == "launch"
-let isRounded = mode == "rounded"
+/// The triangle's share of the icon's width. The mark fills its own canvas edge to edge, and
+/// at that size it reads as oversized on a home screen; 0.55 is what the pre-v2 icon used.
+let markWidth = 0.55
 
 /// "rounded" writes the one file iOS never renders for us: the icon with its corners
 /// already cut, for READMEs and web pages. 0.2237 of the side is Apple's own superellipse
@@ -69,54 +59,35 @@ let cornerRatio = 0.2237
 /// 15% of the screen width, so even a 1024pt iPad only asks for ~310px; these leave room.
 let launchWidths = [("@1x", 180), ("@2x", 360), ("@3x", 540)]
 
-guard let src = CGImageSourceCreateWithURL(sourceURL as CFURL, nil),
-      let loaded = CGImageSourceCreateImageAtIndex(src, 0, nil)
+guard CommandLine.arguments.count == 4,
+      ["light", "dark", "launch", "rounded", "rounded-dark"].contains(CommandLine.arguments[3])
 else {
-    FileHandle.standardError.write(Data("cannot read \(sourceURL.path)\n".utf8))
+    let modes = "light|dark|launch|rounded|rounded-dark"
+    let usage = "usage: make_app_icon.swift <transparent.png> <out.dir> <\(modes)>\n"
+    FileHandle.standardError.write(Data(usage.utf8))
+    exit(2)
+}
+let sourceURL = URL(fileURLWithPath: CommandLine.arguments[1])
+let outDir = URL(fileURLWithPath: CommandLine.arguments[2])
+let mode = CommandLine.arguments[3]
+let isDark = mode.hasSuffix("dark")
+let isLaunch = mode == "launch"
+let isRounded = mode.hasPrefix("rounded")
+
+func fail(_ message: String) -> Never {
+    FileHandle.standardError.write(Data("\(message)\n".utf8))
     exit(1)
 }
 
-/// Largest centred square of the source.
-func squareCrop(_ image: CGImage) -> CGImage? {
-    let side = min(image.width, image.height)
-    return image.cropping(to: CGRect(
-        x: (image.width - side) / 2,
-        y: (image.height - side) / 2,
-        width: side,
-        height: side
-    ))
-}
+guard let src = CGImageSourceCreateWithURL(sourceURL as CFURL, nil),
+      let loaded = CGImageSourceCreateImageAtIndex(src, 0, nil)
+else { fail("cannot read \(sourceURL.path)") }
 
-/// Same pixels, but alpha replaced by "how much this looks like the white triangle".
-func triangleMasked(_ image: CGImage) -> CGImage? {
-    let width = image.width, height = image.height
-    var pixels = [UInt8](repeating: 0, count: width * height * 4)
-    guard let ctx = CGContext(
-        data: &pixels, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
-        space: CGColorSpaceCreateDeviceRGB(),
-        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-    ) else { return nil }
-    ctx.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+/// Tight bounds of everything that isn't transparent, so neither the icon nor the storyboard's
+/// aspect constraint has to reason about dead margin. The threshold clears the soft shadow the
+/// artwork carries, which would otherwise pad the crop by a good 2%.
+let alphaThreshold: UInt8 = 40
 
-    for index in stride(from: 0, to: pixels.count, by: 4) {
-        let red = Double(pixels[index]) / 255
-        let green = Double(pixels[index + 1]) / 255
-        let blue = Double(pixels[index + 2]) / 255
-        let darkest = min(red, green, blue), brightest = max(red, green, blue)
-        let saturation = brightest > 0 ? (brightest - darkest) / brightest : 0
-
-        let alpha = smoothstep(lumaRange, darkest) * (1 - smoothstep(saturationRange, saturation))
-        // Premultiplied buffer: the colour channels have to be scaled to match.
-        pixels[index] = UInt8(red * alpha * 255)
-        pixels[index + 1] = UInt8(green * alpha * 255)
-        pixels[index + 2] = UInt8(blue * alpha * 255)
-        pixels[index + 3] = UInt8(alpha * 255)
-    }
-    return ctx.makeImage()
-}
-
-/// Tight bounds of everything the mask kept, so the launch logo has no dead margin for
-/// the storyboard's aspect constraint to reason about.
 func opaqueBounds(of image: CGImage) -> CGRect? {
     let width = image.width, height = image.height
     var pixels = [UInt8](repeating: 0, count: width * height * 4)
@@ -129,7 +100,7 @@ func opaqueBounds(of image: CGImage) -> CGRect? {
 
     var minX = width, minY = height, maxX = -1, maxY = -1
     for row in 0 ..< height {
-        for col in 0 ..< width where pixels[(row * width + col) * 4 + 3] > 8 {
+        for col in 0 ..< width where pixels[(row * width + col) * 4 + 3] > alphaThreshold {
             minX = min(minX, col); maxX = max(maxX, col)
             minY = min(minY, row); maxY = max(maxY, row)
         }
@@ -142,97 +113,87 @@ func opaqueBounds(of image: CGImage) -> CGRect? {
     )
 }
 
-func render(_ artwork: CGImage, at side: Int) -> CGImage? {
-    guard let ctx = CGContext(
-        data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: 0,
-        space: CGColorSpaceCreateDeviceRGB(),
-        bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
-    ) else { return nil }
-    ctx.interpolationQuality = .high
-
-    let full = CGRect(x: 0, y: 0, width: side, height: side)
-    if isDark {
-        ctx.setFillColor(CGColor(red: 0, green: 0, blue: 0, alpha: 1))
-        ctx.fill(full)
-    }
-    ctx.draw(artwork, in: full)
-    return ctx.makeImage()
-}
-
-guard let square = squareCrop(loaded) else {
-    FileHandle.standardError.write(Data("cannot crop \(loaded.width)x\(loaded.height)\n".utf8))
-    exit(1)
-}
-let artwork = isDark || isLaunch ? triangleMasked(square) : square
-guard let artwork else {
-    FileHandle.standardError.write(Data("cannot mask out the triangle\n".utf8))
-    exit(1)
-}
-print("source \(loaded.width)x\(loaded.height) -> square \(square.width)")
-
 func write(_ image: CGImage, to url: URL) {
-    guard let dest = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil)
-    else {
-        FileHandle.standardError.write(Data("cannot write \(url.path)\n".utf8))
-        exit(1)
-    }
+    guard let dest = CGImageDestinationCreateWithURL(
+        url as CFURL, UTType.png.identifier as CFString, 1, nil
+    ) else { fail("cannot write \(url.path)") }
     CGImageDestinationAddImage(dest, image, nil)
     guard CGImageDestinationFinalize(dest) else { exit(1) }
 }
 
-if isRounded {
-    let side = roundedSide
+guard let bounds = opaqueBounds(of: loaded), let mark = loaded.cropping(to: bounds) else {
+    fail("cannot crop the mark out of \(loaded.width)x\(loaded.height)")
+}
+let aspect = Double(mark.height) / Double(mark.width)
+print("source \(loaded.width)x\(loaded.height) -> mark \(mark.width)x\(mark.height), \(aspect)")
+
+/// The mark alone, at `width` — transparent, for the splash.
+func renderMark(width: Int) -> CGImage? {
+    let height = Int((Double(width) * aspect).rounded())
     guard let ctx = CGContext(
-        data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: 0,
+        data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
         space: CGColorSpaceCreateDeviceRGB(),
         bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-    ) else { exit(1) }
+    ) else { return nil }
     ctx.interpolationQuality = .high
+    ctx.draw(mark, in: CGRect(x: 0, y: 0, width: width, height: height))
+    return ctx.makeImage()
+}
+
+/// The icon: the mark centred on the flat theme background, optionally with Apple's corners
+/// cut. Stays opaque unless rounded — App Store artwork must not carry an alpha channel.
+func renderIcon(side: Int, rounded: Bool = false) -> CGImage? {
+    let format = rounded ? CGImageAlphaInfo.premultipliedLast : .noneSkipLast
+    guard let ctx = CGContext(
+        data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: 0,
+        space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: format.rawValue
+    ) else { return nil }
+    ctx.interpolationQuality = .high
+
     let full = CGRect(x: 0, y: 0, width: side, height: side)
-    let path = CGPath(
-        roundedRect: full,
-        cornerWidth: CGFloat(side) * cornerRatio,
-        cornerHeight: CGFloat(side) * cornerRatio,
-        transform: nil
-    )
-    ctx.addPath(path)
-    ctx.clip()
-    ctx.draw(artwork, in: full)
-    guard let rendered = ctx.makeImage() else { exit(1) }
-    write(rendered, to: outDir.appendingPathComponent("logo.png"))
-    print("logo.png  \(side)x\(side)")
-    exit(0)
+    if rounded {
+        ctx.addPath(CGPath(
+            roundedRect: full,
+            cornerWidth: CGFloat(side) * cornerRatio, cornerHeight: CGFloat(side) * cornerRatio,
+            transform: nil
+        ))
+        ctx.clip()
+    }
+    let background = isDark ? darkBackground : lightBackground
+    ctx.setFillColor(CGColor(
+        red: background.0 / 255, green: background.1 / 255, blue: background.2 / 255, alpha: 1
+    ))
+    ctx.fill(full)
+
+    let width = Double(side) * markWidth, height = width * aspect
+    ctx.draw(mark, in: CGRect(
+        x: (Double(side) - width) / 2, y: (Double(side) - height) / 2,
+        width: width, height: height
+    ))
+    return ctx.makeImage()
 }
 
 if isLaunch {
-    guard let bounds = opaqueBounds(of: artwork), let cropped = artwork.cropping(to: bounds) else {
-        FileHandle.standardError.write(Data("cannot crop the launch logo\n".utf8))
-        exit(1)
-    }
-    let aspect = CGFloat(cropped.height) / CGFloat(cropped.width)
-    print("launch logo \(cropped.width)x\(cropped.height), height/width = \(aspect)")
-
     for (scale, width) in launchWidths {
-        let height = Int((CGFloat(width) * aspect).rounded())
-        guard let ctx = CGContext(
-            data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        ) else { exit(1) }
-        ctx.interpolationQuality = .high
-        ctx.draw(cropped, in: CGRect(x: 0, y: 0, width: width, height: height))
-        guard let rendered = ctx.makeImage() else { exit(1) }
+        guard let rendered = renderMark(width: width) else { fail("render failed at \(width)") }
         write(rendered, to: outDir.appendingPathComponent("SplashMark\(scale).png"))
-        print("SplashMark\(scale).png  \(width)x\(height)")
+        print("SplashMark\(scale).png  \(width)x\(rendered.height)")
     }
+    exit(0)
+}
+
+if isRounded {
+    guard let rendered = renderIcon(side: roundedSide, rounded: true) else {
+        fail("render failed at \(roundedSide)")
+    }
+    let name = isDark ? "logo-dark.png" : "logo.png"
+    write(rendered, to: outDir.appendingPathComponent(name))
+    print("\(name)  \(roundedSide)x\(roundedSide)")
     exit(0)
 }
 
 for (name, side) in sizes where !isDark || side == darkOnlySize {
-    guard let rendered = render(artwork, at: side) else {
-        FileHandle.standardError.write(Data("render failed at \(side)\n".utf8))
-        exit(1)
-    }
+    guard let rendered = renderIcon(side: side) else { fail("render failed at \(side)") }
     let filename = "\(name)\(isDark ? darkSuffix : "").png"
     write(rendered, to: outDir.appendingPathComponent(filename))
     print("\(filename)  \(side)x\(side)")

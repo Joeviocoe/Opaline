@@ -2,7 +2,10 @@
 
 # Opaline
 
-<img src="source/logo.png" width="128" alt="">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="source/logo-dark.png">
+  <img src="source/logo.png" width="128" alt="">
+</picture>
 
 **A lightweight, native YouTube client for iOS 12+. No ads, no tracking, no dependencies.**
 
