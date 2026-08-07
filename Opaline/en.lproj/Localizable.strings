@@ -246,7 +246,7 @@
 "settings.row.pip" = "Picture-in-Picture";
 "settings.row.hideStatusBar" = "Hide Status Bar in Fullscreen";
 "settings.row.zoomToFill" = "Zoom to Fill in Fullscreen";
-"settings.row.showShorts" = "Show YouTube Shorts in Subscriptions";
+"settings.row.showShorts" = "Show Shorts";
 "settings.row.autoplay" = "Autoplay";
 /* %1$@ = localized "Mix" term (player.related.mix) */
 "settings.row.autoplayMix" = "Autoplay (%1$@)";

@@ -221,7 +221,7 @@
 "settings.row.pip" = "Picture-in-Picture";
 "settings.row.hideStatusBar" = "フルスクリーンでステータスバーを隠す";
 "settings.row.zoomToFill" = "フルスクリーンでズームしてフィル";
-"settings.row.showShorts" = "登録チャンネルでYouTube Shortsを表示";
+"settings.row.showShorts" = "ショート動画を表示";
 "settings.row.autoplay" = "自動再生";
 /* %1$@ = localized "Mix" term (player.related.mix) */
 "settings.row.autoplayMix" = "自動再生（%1$@）";
