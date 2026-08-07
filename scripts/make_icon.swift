@@ -40,7 +40,10 @@ let fullSet: [(String, String)] = [
     ("text.append", "icon_text_append"),
     ("clock", "icon_clock"),
     ("minus.circle", "icon_minus_circle"),
-    ("info.circle", "icon_info_circle")
+    ("info.circle", "icon_info_circle"),
+    ("arrow.counterclockwise", "icon_replay"),
+    ("backward.end.fill", "icon_previous"),
+    ("forward.end.fill", "icon_next")
 ]
 
 /// Renders the symbol huge, then reports the image plus its ink bounds so

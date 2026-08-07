@@ -207,7 +207,7 @@ extension WatchViewController {
         // peeked, not advanced: navigation syncs it via seekTo.
         if let next = queue.nextVideo {
             guard AutoplayPreference.isMixEnabled else {
-                AppLog.player("playToEnd: queue next=\(next.id) but mix autoplay disabled")
+                showEndScreen(reason: "queue next=\(next.id), mix autoplay off")
                 return
             }
             AppLog.player("playToEnd: queue next=\(next.id)")
@@ -218,7 +218,7 @@ extension WatchViewController {
         }
         guard AutoplayPreference.isEnabled,
               let nextVideo = watchPage?.nextVideo else {
-            AppLog.player("playToEnd: no next video or autoplay disabled")
+            showEndScreen(reason: "no next video or autoplay off")
             return
         }
         // applicationState is main-thread-only and this notification can

@@ -72,6 +72,25 @@ extension WatchViewController {
         ])
     }
 
+    /// Nothing plays after this video: swap the seek controls for
+    /// Previous / Replay / Next and keep them on screen.
+    func showEndScreen(reason: String) {
+        AppLog.player("playToEnd: end screen — \(reason)")
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let playerView = self.videoPlayerView else {
+                return
+            }
+            playerView.hasNextVideo =
+                self.queue.nextVideo != nil || self.watchPage?.nextVideo != nil
+            // Previous walks the session's own back stack — on the first
+            // video of a session it would only restart, which Replay does.
+            playerView.hasPreviousVideo = !self.videoHistory.isEmpty
+            playerView.isAtEnd = true
+            playerView.setControls(visible: true, animated: true)
+            playerView.pauseAutoHide()
+        }
+    }
+
     /// Control Center / AirPods "next": queue entry first, else the top
     /// suggestion — always instant, never the countdown overlay.
     func playNextFromRemote() {

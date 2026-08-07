@@ -93,7 +93,8 @@ extension PlayerIcons {
         }
     }
 
-    private static func playerIcon(_ name: String, size: CGFloat) -> UIImage {
+    /// Not private: the end-screen icons live in another file.
+    static func playerIcon(_ name: String, size: CGFloat) -> UIImage {
         let iconSize = CGSize(width: size, height: size)
         let renderer = UIGraphicsImageRenderer(size: iconSize)
         let img = renderer.image { _ in

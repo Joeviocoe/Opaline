@@ -126,6 +126,10 @@ extension VideoPlayerView {
         guard let player else {
             return
         }
+        if isAtEnd {
+            replay()
+            return
+        }
         if player.rate > 0 {
             multitaskPause.lastUserPause = CACurrentMediaTime()
             player.pause()
@@ -137,11 +141,23 @@ extension VideoPlayerView {
 
     @objc
     func rewindTapped() {
+        if isAtEnd {
+            if hasPreviousVideo {
+                onPrevious?()
+            }
+            return
+        }
         seek(direction: -1)
     }
 
     @objc
     func forwardTapped() {
+        if isAtEnd {
+            if hasNextVideo {
+                onNext?()
+            }
+            return
+        }
         seek(direction: 1)
     }
 
@@ -259,6 +275,10 @@ extension VideoPlayerView {
 
 extension VideoPlayerView {
     func updatePlayPauseIcon() {
+        if isAtEnd {
+            playPauseButton.setImage(PlayerIcons.replay(), for: .normal)
+            return
+        }
         let isPlaying = (player?.rate ?? 0) > 0
         let icon = isPlaying
             ? PlayerIcons.pause()
@@ -273,11 +293,5 @@ extension VideoPlayerView {
             ),
             for: .normal
         )
-    }
-
-    func setCenter(hidden: Bool) {
-        playPauseButton.isHidden = hidden
-        rewindButton.isHidden = hidden
-        forwardButton.isHidden = hidden
     }
 }

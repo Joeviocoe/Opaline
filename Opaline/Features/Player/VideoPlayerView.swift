@@ -29,6 +29,21 @@ final class VideoPlayerView: UIView {
     var onTimeUpdate: ((Double) -> Void)?
     var onSkipTapped: (() -> Void)?
     var onNeedsFreshPlayer: (() -> Void)?
+    var onPrevious: (() -> Void)?
+    var onNext: (() -> Void)?
+
+    /// End screen: the centre controls become Previous / Replay / Next.
+    /// Set when a video ends without anything playing after it; cleared as
+    /// soon as playback resumes (any path — button, seek bar, remote).
+    var isAtEnd = false {
+        didSet {
+            updateCenterIcons()
+        }
+    }
+
+    /// Grey out Next / Previous when there is nothing to go to.
+    var hasNextVideo = false
+    var hasPreviousVideo = false
 
     var player: AVPlayer?
 
@@ -247,54 +262,4 @@ final class VideoPlayerView: UIView {
         super.init(coder: coder)
         performSetup()
     }
-
-    // MARK: - Layout
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        // bounds+position instead of frame: frame is undefined while the
-        // layer carries the pinch-zoom scale transform.
-        playerLayer.bounds = bounds
-        playerLayer.position = CGPoint(
-            x: bounds.midX,
-            y: bounds.midY
-        )
-        topGradientLayer.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: bounds.width,
-            height: 80
-        )
-        bottomGradientLayer.frame = CGRect(
-            x: 0,
-            y: bounds.height - 110,
-            width: bounds.width,
-            height: 110
-        )
-    }
-}
-
-// MARK: - Helpers
-
-func formatTime(_ seconds: Double) -> String {
-    guard seconds.isFinite, seconds >= 0 else {
-        return "0:00"
-    }
-    let totalSeconds = Int(seconds)
-    let hours = totalSeconds / 3_600
-    let minutes = (totalSeconds % 3_600) / 60
-    let secs = totalSeconds % 60
-    if hours > 0 {
-        return String(
-            format: "%d:%02d:%02d",
-            hours,
-            minutes,
-            secs
-        )
-    }
-    return String(
-        format: "%d:%02d",
-        minutes,
-        secs
-    )
 }

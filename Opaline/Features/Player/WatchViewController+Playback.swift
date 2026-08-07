@@ -120,6 +120,13 @@ extension WatchViewController {
         playerView.onNeedsFreshPlayer = { [weak self] in
             self?.replacePlayerPreservingPlayback()
         }
+        // Same semantics as the Control Center transport controls.
+        playerView.onPrevious = { [weak self] in
+            self?.previousFromRemote()
+        }
+        playerView.onNext = { [weak self] in
+            self?.playNextFromRemote()
+        }
         return playerView
     }
 

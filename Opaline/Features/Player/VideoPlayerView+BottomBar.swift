@@ -49,6 +49,9 @@ extension VideoPlayerView {
                 toleranceBefore: .zero,
                 toleranceAfter: .zero
             )
+            // Scrubbing back from the end screen while paused leaves the
+            // rate at 0, so the observer would not clear it.
+            self.isAtEnd = false
             self.scheduleAutoHide()
         }
         seekBar.onScrubChanged = { [weak self] progress in
@@ -158,4 +161,29 @@ extension VideoPlayerView {
             )
         ])
     }
+}
+
+// MARK: - Helpers
+
+func formatTime(_ seconds: Double) -> String {
+    guard seconds.isFinite, seconds >= 0 else {
+        return "0:00"
+    }
+    let totalSeconds = Int(seconds)
+    let hours = totalSeconds / 3_600
+    let minutes = (totalSeconds % 3_600) / 60
+    let secs = totalSeconds % 60
+    if hours > 0 {
+        return String(
+            format: "%d:%02d:%02d",
+            hours,
+            minutes,
+            secs
+        )
+    }
+    return String(
+        format: "%d:%02d",
+        minutes,
+        secs
+    )
 }
