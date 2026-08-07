@@ -17,15 +17,24 @@ extension VideoPlayerView {
     /// Scale at which the video covers the whole view (no bars).
     /// 1 when the video already fills or its size is not yet known.
     var fillZoom: CGFloat {
-        let rect = playerLayer.videoRect
-        guard rect.width > 0, rect.height > 0,
+        // Derived from the item's size, not `playerLayer.videoRect`: the
+        // layer only catches up with a bounds change on the next layout
+        // pass, and fullscreen entry asks for the fill scale before that.
+        let video = playerLayer.player?.currentItem?.presentationSize
+            ?? .zero
+        guard video.width > 0, video.height > 0,
               bounds.width > 0, bounds.height > 0 else {
             return 1
         }
-        return max(
-            bounds.width / rect.width,
-            bounds.height / rect.height
+        let fit = min(
+            bounds.width / video.width,
+            bounds.height / video.height
         )
+        let fill = max(
+            bounds.width / video.width,
+            bounds.height / video.height
+        )
+        return fit > 0 ? fill / fit : 1
     }
 
     /// Animate to the fill scale when the setting is on and the user
