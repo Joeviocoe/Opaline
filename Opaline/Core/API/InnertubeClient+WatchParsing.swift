@@ -66,28 +66,45 @@ extension InnertubeClient {
         if let info = parseAvatarLockup(
             json, fallbackVideo: fallbackVideo
         ) {
-            // The lockup can parse without a thumbnail; returning it as-is
-            // meant the owner renderer — which does carry one — was never
-            // consulted, and the channel showed up with no avatar.
-            guard info.avatarURL == nil,
-                  let avatar = extractOwnerInfo(json).avatarURL else {
-                return info
-            }
-            return ChannelInfo(
-                id: info.id,
-                title: info.title,
-                avatarURL: avatar,
-                subscriberCountText: info.subscriberCountText,
-                bannerURL: info.bannerURL,
-                isVerified: info.isVerified,
-                description: info.description,
-                contactInfo: info.contactInfo,
-                videoCountText: info.videoCountText
-            )
+            return completed(info, from: json)
         }
-        let enriched = enrichWithOwnerInfo(
+        return derivedChannelInfo(json, fallbackVideo: fallbackVideo)
+    }
+
+    /// A lockup can parse without a thumbnail or a name; the owner renderer
+    /// carries both, so it fills whatever the lockup left empty.
+    private static func completed(
+        _ info: ChannelInfo, from json: [String: Any]
+    ) -> ChannelInfo {
+        let owner = extractOwnerInfo(json)
+        guard info.avatarURL == nil || info.title.isEmpty else {
+            return info
+        }
+        return ChannelInfo(
+            id: info.id,
+            title: info.title.isEmpty
+                ? (owner.title ?? info.title) : info.title,
+            avatarURL: info.avatarURL ?? owner.avatarURL,
+            subscriberCountText: info.subscriberCountText,
+            bannerURL: info.bannerURL,
+            isVerified: info.isVerified,
+            description: info.description,
+            contactInfo: info.contactInfo,
+            videoCountText: info.videoCountText
+        )
+    }
+
+    private static func derivedChannelInfo(
+        _ json: [String: Any],
+        fallbackVideo: Video
+    ) -> ChannelInfo? {
+        var enriched = enrichWithOwnerInfo(
             json, video: fallbackVideo
         )
+        if enriched.channelName.isEmpty,
+           let name = extractOwnerInfo(json).title {
+            enriched.channelName = name
+        }
         if let info = buildFallbackChannel(
             fallbackVideo: enriched
         ) {
@@ -149,31 +166,6 @@ extension InnertubeClient {
             contactInfo: nil,
             videoCountText: nil
         )
-    }
-
-    // Extract channelId + avatarURL from slimOwnerRenderer / videoOwnerRenderer
-    private static func extractOwnerInfo(
-        _ json: [String: Any]
-    ) -> (channelId: String?, avatarURL: String?) {
-        for name in [
-            "slimOwnerRenderer",
-            "videoOwnerRenderer",
-            "ownerRenderer",
-            "channelThumbnailWithLinkRenderer"
-        ] {
-            guard let owner = firstRenderer(
-                in: json, named: name
-            ) else { continue }
-            let chId = firstMatchingBrowseId(in: owner)
-                .flatMap { $0.isEmpty ? nil : $0 }
-            let avatarURL = extractThumbnailURL(
-                from: owner["thumbnail"]
-            )
-            if chId != nil || avatarURL != nil {
-                return (chId, avatarURL)
-            }
-        }
-        return (nil, nil)
     }
 }
 
