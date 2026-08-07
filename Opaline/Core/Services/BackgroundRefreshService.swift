@@ -16,14 +16,44 @@ final class BackgroundRefreshService {
     private static let budget: TimeInterval = 20
 
     private let feedService: FeedService
+    private let historyService: HistoryService
     private let cache: AppCache
 
     init(
         feedService: FeedService = ServiceContainer.feed,
+        historyService: HistoryService = ServiceContainer.history,
         cache: AppCache = .shared
     ) {
         self.feedService = feedService
+        self.historyService = historyService
         self.cache = cache
+    }
+
+    /// Fills the caches the *other* tabs read on their first open, so
+    /// arriving there doesn't start with a spinner. Runs one request at
+    /// a time and only once the home feed has settled — on a slow link
+    /// a parallel burst would just delay the screen the user is looking
+    /// at (the same reason the subscription dots defer their fetches).
+    func warmSecondaryCaches() {
+        guard !OAuthClient.shared.isAnonymous else {
+            return
+        }
+        fetchSubscriptions(into: nil) { [weak self] in
+            self?.warmHistory()
+        }
+    }
+
+    private func warmHistory() {
+        historyService.fetchHistory { [weak self] result in
+            DispatchQueue.main.async {
+                guard case .success(let page) = result else {
+                    AppLog.cache("warm: history failed")
+                    return
+                }
+                self?.cache.setHistoryFeed(page)
+                AppLog.cache("warm: history ok videos=\(page.videos.count)")
+            }
+        }
     }
 
     /// Fetches both feeds concurrently and stores whatever comes back.
@@ -62,18 +92,26 @@ final class BackgroundRefreshService {
         }
     }
 
-    private func fetchSubscriptions(into state: RefreshState) {
+    /// `state` is nil when warming caches in the foreground — same
+    /// fetch-and-store, no background-fetch bookkeeping.
+    private func fetchSubscriptions(
+        into state: RefreshState?,
+        then next: (() -> Void)? = nil
+    ) {
         feedService.fetchSubscriptionFeed { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let page):
                     self?.cache.setSubscriptionsFeed(page)
-                    AppLog.cache("background refresh: subs ok videos=\(page.videos.count)")
-                    state.subsSucceeded = true
+                    AppLog.cache("subs cached videos=\(page.videos.count)")
+                    state?.subsSucceeded = true
                 case .failure(let error):
-                    AppLog.cache("background refresh: subs failed \(error)")
+                    AppLog.cache("subs fetch failed \(error)")
                 }
-                self?.finishOne(state)
+                if let state {
+                    self?.finishOne(state)
+                }
+                next?()
             }
         }
     }
