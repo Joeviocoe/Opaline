@@ -48,6 +48,9 @@ extension WatchViewController {
         }
         overlay.onCancel = { [weak self] in
             self?.dismissAutoplayOverlay()
+            // The video is still parked on its last frame: pressing Play
+            // there resumes nothing and hangs on the spinner.
+            self?.showEndScreen(reason: "autoplay cancelled")
         }
         return overlay
     }
