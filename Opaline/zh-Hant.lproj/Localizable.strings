@@ -262,6 +262,7 @@
 "settings.row.playbackSource" = "播放來源";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "分享除錯記錄";
+"settings.row.support" = "支持開發";
 "settings.row.feedback" = "提供意見回饋";
 /* Solver-server URL alert */
 "settings.solver.message" = "解算器伺服器的 URL。";

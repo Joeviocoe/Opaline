@@ -258,6 +258,7 @@
 "settings.row.playbackSource" = "Fuente de reproducción";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Compartir registro de depuración";
+"settings.row.support" = "Apoyar el desarrollo";
 "settings.row.feedback" = "Enviar comentarios";
 /* Solver-server URL alert */
 "settings.solver.message" = "URL del servidor resolutor.";

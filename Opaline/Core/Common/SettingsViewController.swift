@@ -23,7 +23,7 @@ final class SettingsViewController: UIViewController {
         case solverEndpoint
         case mainThreadWatchdog
         case shareLog
-        case feedback
+        case feedback, support
     }
     enum Page {
         case root, appearance, language, playback, shorts
@@ -339,6 +339,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return makeDisclosureCell("settings.row.shareLog".localized)
         case .feedback:
             return makeDisclosureCell("settings.row.feedback".localized)
+        case .support:
+            return makeDisclosureCell("settings.row.support".localized)
         case .playbackSource:
             return makeDisclosureCell(
                 "settings.row.playbackSource".localized,
@@ -405,6 +407,10 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             shareDebugLog()
         case .feedback:
             if let url = AppURLs.Feedback.issues {
+                UIApplication.shared.open(url)
+            }
+        case .support:
+            if let url = URL(string: AppURLs.Support.donate) {
                 UIApplication.shared.open(url)
             }
         case .playbackSource:

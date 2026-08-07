@@ -262,6 +262,7 @@
 "settings.row.playbackSource" = "再生ソース";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "デバッグログを共有";
+"settings.row.support" = "開発を支援";
 "settings.row.feedback" = "フィードバックの送信";
 /* Solver-server URL alert */
 "settings.solver.message" = "ソルバーサーバーのURL。";

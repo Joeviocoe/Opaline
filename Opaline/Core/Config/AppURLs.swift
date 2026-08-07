@@ -70,6 +70,12 @@ enum AppURLs {
         static let youtubeV3 = "https://www.googleapis.com/youtube/v3"
     }
 
+    /// Donation page opened from Settings — most users install from the
+    /// repo or a bare IPA and never see the README link.
+    enum Support {
+        static let donate = "https://buymeacoffee.com/verback2308"
+    }
+
     /// Release manifest used to detect newer app versions for the
     /// in-app notification inbox ("app update available").
     /// The value is a build setting (`APP_MANIFEST_URL` in

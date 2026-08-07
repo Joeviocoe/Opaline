@@ -44,7 +44,11 @@ extension SettingsViewController {
                     .pageCache, .pageDebug
                 ]
             ),
-            Section(header: nil, footer: appVersionFooter, rows: [.feedback])
+            Section(
+                header: nil,
+                footer: appVersionFooter,
+                rows: [.feedback, .support]
+            )
         ]
     }
 
