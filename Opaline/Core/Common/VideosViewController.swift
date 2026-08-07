@@ -187,7 +187,11 @@ class VideosViewController: UIViewController, ScrollableToTop {
         videoRouter.open(
             video: video,
             from: self,
-            shorts: .pool(sections.flatMap { $0.videos }.filter { $0.isShort })
+            shorts: .pool(
+                ShortsPool(
+                    sections.flatMap { $0.videos }.filter { $0.isShort }
+                )
+            )
         )
     }
 

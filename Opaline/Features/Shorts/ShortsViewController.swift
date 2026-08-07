@@ -4,6 +4,18 @@ import UIKit
 /// follows one rule: entering from a full list swipes that list in its own
 /// order; entering from a shelf or a single item hands the surrounding
 /// shorts to the server as candidates and lets it pick the order.
+struct ShortsPool {
+    let candidates: [Video]
+    /// Continuation of the shelf the candidates came from, when the surface
+    /// has one — it is drained before the server's sequence takes over.
+    let shelf: String?
+
+    init(_ candidates: [Video], shelf: String? = nil) {
+        self.candidates = candidates
+        self.shelf = shelf
+    }
+}
+
 enum ShortsEntry {
     /// Swipe these in order, then fall through to the server (channel tab).
     case list([Video])
@@ -11,13 +23,14 @@ enum ShortsEntry {
     /// what the official app looks like from outside. Its own ordering comes
     /// from a signed candidate pool we cannot reproduce, so shuffling the
     /// same set is the closest honest approximation.
-    case pool([Video])
+    case pool(ShortsPool)
 }
 
 /// The vertical swipe feed. Seeded with one short (tapped anywhere in the
 /// app) and extended endlessly from `reel_watch_sequence`.
 final class ShortsViewController: UIViewController {
     let shortsService: ShortsService
+    let feedService: FeedService
     let watchService: WatchService
     let engagementService: EngagementService
     private let channelViewControllerFactory: (String, String) -> UIViewController
@@ -25,6 +38,9 @@ final class ShortsViewController: UIViewController {
     var videos: [Video]
     /// Continuation token, or the seed videoId params for the first page.
     var seed: String?
+    /// Shelf the pool came from, drained before falling back to the server's
+    /// own sequence so the feed stays on its source as long as it can.
+    var shelfToken: String?
     var isLoading = false
     /// Index of the page the player is attached to.
     private var currentIndex = 0
@@ -62,11 +78,13 @@ final class ShortsViewController: UIViewController {
         seedVideo: Video,
         entry: ShortsEntry,
         shortsService: ShortsService,
+        feedService: FeedService,
         watchService: WatchService,
         engagementService: EngagementService,
         channelViewControllerFactory: @escaping (String, String) -> UIViewController
     ) {
         self.shortsService = shortsService
+        self.feedService = feedService
         self.watchService = watchService
         self.engagementService = engagementService
         self.channelViewControllerFactory = channelViewControllerFactory
@@ -74,10 +92,11 @@ final class ShortsViewController: UIViewController {
         case .list(let following):
             videos = [seedVideo] + following
             seed = ShortsSeed.params(videoId: seedVideo.id)
-        case .pool(let candidates):
-            videos = [seedVideo] + candidates
+        case .pool(let pool):
+            videos = [seedVideo] + pool.candidates
                 .filter { $0.id != seedVideo.id }
                 .shuffled()
+            shelfToken = pool.shelf
             seed = ShortsSeed.params(videoId: seedVideo.id)
         }
         super.init(nibName: nil, bundle: nil)
