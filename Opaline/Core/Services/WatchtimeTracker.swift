@@ -20,6 +20,9 @@ final class WatchtimeTracker {
     /// Provides current playback position (seconds).
     /// Set by the host view controller before or after start().
     var timeProvider: (() -> TimeInterval)?
+    /// Provides the item's duration (seconds), for the local
+    /// progress fraction. Set alongside `timeProvider`.
+    var durationProvider: (() -> TimeInterval)?
 
     init(transport: HTTPTransport = ServiceContainer.transport) {
         self.transport = transport
@@ -74,6 +77,22 @@ final class WatchtimeTracker {
         timeProvider?() ?? 0
     }
 
+    /// Mirrors the position we just reported into the local store, so
+    /// reopening the video resumes where this device left off instead
+    /// of where the server's last sync thought it was.
+    private func recordLocalProgress(_ position: TimeInterval) {
+        guard let videoId,
+              let duration = durationProvider?(),
+              duration > 0, position > 0
+        else {
+            return
+        }
+        WatchProgressStore.shared.setLocalFraction(
+            videoId: videoId,
+            fraction: min(position / duration, 1)
+        )
+    }
+
     private func sendPlaybackPing(urls: WatchtimeURLs) {
         let pos = currentPosition()
         let extra = "ver=2&cpn=\(cpn)&cmt=\(fmt(pos))&el=detailpage"
@@ -93,6 +112,7 @@ final class WatchtimeTracker {
             return
         }
         lastPingedPosition = pos
+        recordLocalProgress(pos)
         let extra = "ver=2&cpn=\(cpn)"
             + "&cmt=\(fmt(pos))&el=detailpage"
             + "&st=0&et=\(fmt(pos))"
@@ -111,6 +131,7 @@ final class WatchtimeTracker {
         guard pos > 0 else {
             return
         }
+        recordLocalProgress(pos)
         let extra = "ver=2&cpn=\(cpn)"
             + "&cmt=\(fmt(pos))&el=detailpage"
             + "&st=0&et=\(fmt(pos))"

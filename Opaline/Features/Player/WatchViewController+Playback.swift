@@ -9,6 +9,12 @@ extension WatchViewController {
         playbackFacade.watchtimeTracker.timeProvider = { [weak self] in
             self?.videoPlayerView?.player?.currentTime().seconds ?? 0
         }
+        playbackFacade.watchtimeTracker.durationProvider = { [weak self] in
+            let duration = self?.videoPlayerView?.player?
+                .currentItem?.duration ?? .indefinite
+            let seconds = CMTimeGetSeconds(duration)
+            return seconds.isFinite ? seconds : 0
+        }
         playbackFacade.start(
             videoId: initialVideo.id,
             apiClient: client,
