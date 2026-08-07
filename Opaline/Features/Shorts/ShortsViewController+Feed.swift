@@ -39,7 +39,12 @@ extension ShortsViewController {
             return
         }
         shelfToken = page.continuation
-        append(page.videos.filter { $0.isShort }.shuffled())
+        let shorts = page.videos.filter { $0.isShort }
+        AppLog.innertube(
+            "shorts shelf drain: \(page.videos.count) videos,"
+                + " \(shorts.count) shorts, more=\(page.continuation != nil)"
+        )
+        append(shorts.shuffled())
     }
 
     private func handlePage(_ result: Result<ShortsSequencePage, Error>) {
@@ -107,7 +112,11 @@ extension ShortsViewController {
             id: video.id,
             title: video.title,
             channelId: video.channelId,
-            channelName: video.channelName,
+            // Sequence shorts arrive with no channel on them at all; the
+            // watch page's channel block is the only name they get.
+            channelName: video.channelName.isEmpty
+                ? (page.channelInfo?.title ?? "")
+                : video.channelName,
             channelAvatarURL: video.channelAvatarURL,
             thumbnailURL: videos[index].thumbnailURL,
             viewCount: video.viewCount,

@@ -66,7 +66,24 @@ extension InnertubeClient {
         if let info = parseAvatarLockup(
             json, fallbackVideo: fallbackVideo
         ) {
-            return info
+            // The lockup can parse without a thumbnail; returning it as-is
+            // meant the owner renderer — which does carry one — was never
+            // consulted, and the channel showed up with no avatar.
+            guard info.avatarURL == nil,
+                  let avatar = extractOwnerInfo(json).avatarURL else {
+                return info
+            }
+            return ChannelInfo(
+                id: info.id,
+                title: info.title,
+                avatarURL: avatar,
+                subscriberCountText: info.subscriberCountText,
+                bannerURL: info.bannerURL,
+                isVerified: info.isVerified,
+                description: info.description,
+                contactInfo: info.contactInfo,
+                videoCountText: info.videoCountText
+            )
         }
         let enriched = enrichWithOwnerInfo(
             json, video: fallbackVideo

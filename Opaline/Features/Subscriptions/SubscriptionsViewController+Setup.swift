@@ -149,6 +149,10 @@ extension SubscriptionsViewController {
         }) {
             shortsShelfToken = shelf.token
         }
+        AppLog.subs(
+            "shelves=\(page.shelfContinuations?.compactMap { $0.title } ?? [])"
+                + " shortsShelfToken=\(shortsShelfToken != nil)"
+        )
         let newVideos = page.videos.filter {
             seenVideoIds.insert($0.id).inserted
         }
