@@ -123,12 +123,17 @@ private extension ChannelRSSService {
             return
         }
         AppLog.subs("rss: fetching \(stale.count) channels")
+        let started = Date()
+        let count = stale.count
         let batch = FetchBatch(
             pending: stale,
             results: cached,
-            includeShorts: includeShorts,
-            completion: completion
-        )
+            includeShorts: includeShorts
+        ) { results in
+            let ms = Int(Date().timeIntervalSince(started) * 1_000)
+            AppLog.subs("rss: \(count) channels done in \(ms)ms")
+            completion(results)
+        }
         startNextFetches(in: batch)
     }
 
@@ -211,7 +216,17 @@ private extension ChannelRSSService {
                     completion(nil)
                     return
                 }
-                completion(ChannelRSSParser.parse(response.data))
+                // Parsing runs on the service queue, so a hundred feeds
+                // parse one after another — worth knowing what one costs
+                // before deciding this needs a server.
+                let t0 = Date()
+                let entries = ChannelRSSParser.parse(response.data)
+                let ms = Int(Date().timeIntervalSince(t0) * 1_000)
+                AppLog.subs(
+                    "rss parse \(ms)ms entries=\(entries?.count ?? -1)"
+                        + " bytes=\(response.data.count)"
+                )
+                completion(entries)
             }
         }
     }
