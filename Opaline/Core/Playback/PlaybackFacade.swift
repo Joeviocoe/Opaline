@@ -65,11 +65,15 @@ extension PlaybackFacade {
             .make(kind: kind)
         activeVideoSource = source
         context?.updateStatusLabel(statusKey.localized)
+        let t0 = Date()
         source.loadPlayback(
             videoId: videoId,
             cancellation: cancellationToken
         ) { [weak self] result in
             DispatchQueue.main.async {
+                let ms = Int(Date().timeIntervalSince(t0) * 1_000)
+                let verdict = (try? result.get()) == nil ? "failed" : "ok"
+                AppLog.player("resolve \(verdict) on \(kind) in \(ms)ms")
                 guard let self,
                       !cancellationToken.isCancelled else {
                     return

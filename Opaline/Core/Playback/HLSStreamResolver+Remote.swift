@@ -19,6 +19,18 @@ extension HLSStreamResolver {
     /// solver service, which runs the EJS solver on a modern engine and
     /// returns the solved value. No video id or user data is sent. Yields nil
     /// when no endpoint is set.
+    static func logRemoteOutcome(
+        kind: ChallengeKind,
+        solved: String?,
+        since: Date
+    ) {
+        let ms = Int(Date().timeIntervalSince(since) * 1_000)
+        AppLog.player(
+            "hlsResolve: remote \(kind.rawValue)"
+                + " \(solved == nil ? "failed" : "solved") in \(ms)ms"
+        )
+    }
+
     func solveRemote(
         kind: ChallengeKind,
         unsolved: String,
@@ -45,9 +57,15 @@ extension HLSStreamResolver {
         AppLog.player(
             "hlsResolve: remote solving \(kind.rawValue) via \(endpoint.host ?? "")"
         )
+        // Timed: this round trip is the price iOS 12 pays for not being able
+        // to run the challenge locally, and a cold server makes it the whole
+        // start-up cost — the log is what tells the two apart.
+        let t0 = Date()
         transport.send(request, cancellationToken: nil) { result in
             let data = try? result.get().data
-            completion(Self.parseRemoteSolved(data: data, unsolved: unsolved))
+            let solved = Self.parseRemoteSolved(data: data, unsolved: unsolved)
+            Self.logRemoteOutcome(kind: kind, solved: solved, since: t0)
+            completion(solved)
         }
     }
 }
