@@ -61,6 +61,12 @@ final class ShortsViewController: UIViewController {
 
     var attachedIndex: Int { currentIndex }
 
+    /// Start of the "why is the first short slow" measurement — the three
+    /// legs (sequence request, stream resolution, first frame) are logged
+    /// against it so the fix targets whichever one actually costs.
+    var openedAt = Date()
+    var didLogFirstFrame = false
+
     init(
         seedVideo: Video?,
         entry: ShortsEntry,
@@ -114,6 +120,7 @@ final class ShortsViewController: UIViewController {
             }
             self.queueNext(after: self.attachedIndex)
         }
+        openedAt = Date()
         // A seeded run (the channel Shorts tab) already has plenty to swipe
         // through — don't spend a request on the sequence until it thins out.
         if videos.count < 5 {

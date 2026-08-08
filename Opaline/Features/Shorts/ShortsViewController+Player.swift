@@ -5,6 +5,7 @@ import UIKit
 extension ShortsViewController {
     /// Uses the prefetched stream when the swipe beat the resolver to it.
     func startPlayback(of videoId: String) {
+        logShortsTiming("playback start")
         // Already pre-rolled behind the current short: this is the path that
         // starts on the first frame instead of a poster.
         if playerView.advance(to: videoId, watchService: watchService) {
