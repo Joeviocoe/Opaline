@@ -52,6 +52,9 @@ extension HomeViewController {
                     // what is already on screen.
                     self.beginChipDiscovery()
                     self.continueChipPrefetchIfNeeded()
+                    // Nothing else is going to hit the network for this
+                    // screen, so the other tabs may as well start now.
+                    self.postFeedDidSettle()
                     return
                 }
                 AppLog.home("revalidating feed in background")
@@ -107,6 +110,7 @@ extension HomeViewController {
                 let ms = Int(Date().timeIntervalSince(t0) * 1_000)
                 self.spinner.stopAnimating()
                 self.endRefreshing()
+                self.postFeedDidSettle()
                 switch result {
                 case .success(let page):
                     AppLog.home("network fetch done \(ms)ms videos=\(page.videos.count)")
@@ -125,6 +129,12 @@ extension HomeViewController {
         }
     }
 
+    private func postFeedDidSettle() {
+        NotificationCenter.default.post(
+            name: .homeFeedDidSettle, object: nil
+        )
+    }
+
     /// Replaces the session with a freshly fetched feed: cached and
     /// previously accumulated pages carry expiring continuation
     /// tokens, so runs and chips restart from this page.
@@ -137,4 +147,13 @@ extension HomeViewController {
         applyPendingChipReselect()
         continueChipPrefetchIfNeeded()
     }
+}
+
+extension Notification.Name {
+    /// The home feed's network fetch finished, one way or the other.
+    /// The launch path uses it to start warming the other tabs only
+    /// once the visible screen has stopped competing for the link.
+    static let homeFeedDidSettle = Notification.Name(
+        "homeFeedDidSettle"
+    )
 }
