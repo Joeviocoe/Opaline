@@ -53,6 +53,7 @@ class ThumbnailImageView: UIImageView {
         if let cached = ThumbnailImageView.cache.object(
             forKey: key
         ) {
+            Self.logLoad("mem", since: nil, url: url)
             image = cached
             isShowingFallback = false
             loadToken = nil
@@ -94,11 +95,13 @@ class ThumbnailImageView: UIImageView {
         cacheKey: String
     ) {
         let maxSz = maxPixelSize
+        let t0 = Date()
         guard let img = ThumbnailImageView.downsample(
             imageAt: fileURL, to: maxSz
         ) else {
             return
         }
+        Self.logLoad("disk", since: t0, url: url)
         ThumbnailImageView.cache.setObject(
             img,
             forKey: cacheKey,
@@ -139,10 +142,12 @@ class ThumbnailImageView: UIImageView {
         let maxSz = maxPixelSize
         let token = CancellationToken()
         loadToken = token
+        let t0 = Date()
         Self.transport.send(
             HTTPRequest(method: .get, url: url),
             cancellationToken: token
         ) { [weak self] result in
+            Self.logLoad("net", since: t0, url: url)
             self?.handleNetworkResponse(
                 data: try? result.get().data,
                 url: url,

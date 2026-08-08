@@ -14,18 +14,31 @@ extension ThumbnailImageView {
     private static var prefetchTokens: [String: CancellationToken] = [:]
     private static let prefetchLock = NSLock()
 
+    /// Where a thumbnail came from and how long it took — the grey-tile
+    /// complaint is unmeasurable without it. Logged per image, so the
+    /// counts per source are as interesting as the timings.
+    static func logLoad(_ source: String, since: Date?, url: URL) {
+        let name = url.lastPathComponent
+        guard let since else {
+            AppLog.img("\(source) \(name)")
+            return
+        }
+        let ms = Int(Date().timeIntervalSince(since) * 1_000)
+        AppLog.img("\(source) \(name) \(ms)ms")
+    }
+
     static func prefetch(url: URL) {
         let key = url.absoluteString
         guard cache.object(forKey: key) == nil else {
             return
         }
         DispatchQueue.global(qos: .utility).async {
-            if let cached = loadFromDiskCache(
-                url: url, key: key
-            ) {
+            let t0 = Date()
+            if loadFromDiskCache(url: url, key: key) != nil {
+                logLoad("prefetch-disk", since: t0, url: url)
                 return
             }
-            fetchAndCache(url: url, key: key)
+            fetchAndCache(url: url, key: key, since: t0)
         }
     }
 
@@ -98,7 +111,8 @@ extension ThumbnailImageView {
 
     private static func fetchAndCache(
         url: URL,
-        key: String
+        key: String,
+        since: Date
     ) {
         let token = CancellationToken()
         prefetchLock.lock()
@@ -118,6 +132,7 @@ extension ThumbnailImageView {
             guard let data = try? result.get().data else {
                 return
             }
+            logLoad("prefetch-net", since: since, url: url)
             if let img = downsample(data: data, to: 640) {
                 cache.setObject(
                     img,
