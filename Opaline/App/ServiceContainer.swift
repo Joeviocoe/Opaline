@@ -10,7 +10,24 @@ enum ServiceContainer {
 
     /// Undecorated transport for the high-volume media plane (images, avatars):
     /// no per-request logging spam and no auth (these requests are anonymous).
-    static let mediaTransport: HTTPTransport = URLSessionTransport()
+    ///
+    /// Its own session, capped: a page of twenty thumbnails fired at once
+    /// shares one narrow link and they all land together seconds later, so
+    /// the whole grid stays grey and then fills in a single blink. A few at
+    /// a time finish one after another and the grid fills as you read it —
+    /// each image costs 20-40ms on its own. The cap also keeps thumbnails
+    /// out of the API session's connection pool.
+    ///
+    /// ponytail: fixed cap; make it link-aware only if it misbehaves on wifi.
+    static let mediaTransport: HTTPTransport = URLSessionTransport(
+        session: URLSession(configuration: mediaSessionConfiguration)
+    )
+
+    private static var mediaSessionConfiguration: URLSessionConfiguration {
+        let config = URLSessionConfiguration.default
+        config.httpMaximumConnectionsPerHost = 3
+        return config
+    }
 
     // Single InnertubeClient instance shared across all service protocols.
     // Each property is typed to the narrowest protocol the caller needs — DIP in action.
