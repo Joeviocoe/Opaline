@@ -62,7 +62,7 @@ extension SettingsViewController {
             Section(
                 header: "settings.section.home".localized,
                 footer: "settings.footer.home".localized,
-                rows: [.hideStatusBar, .homeLayout, .defaultTab]
+                rows: [.homeLayout, .defaultTab]
             )
         ]
     }
@@ -88,7 +88,8 @@ extension SettingsViewController {
                 footer: "settings.footer.playback".localized,
                 rows: [
                     .quality, .backgroundPlayback, .pipEnabled,
-                    .autoZoomToFill, .autoplayEnabled, .autoplayMixEnabled
+                    .autoZoomToFill, .hideStatusBar,
+                    .autoplayEnabled, .autoplayMixEnabled
                 ]
             ),
             Section(
