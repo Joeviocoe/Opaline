@@ -39,7 +39,11 @@ final class AppCache {
         return TimeInterval(days) * 24 * 60 * 60
     }
     private let watchPageTTL: TimeInterval = 60 * 60
-    var channelInfoTTL: TimeInterval { feedTTL }
+    /// Deliberately not the feed's TTL: a feed goes stale in a day, but a
+    /// channel's name and avatar are effectively static, and the TV client
+    /// gives neither in its video tiles — every uncached channel on screen
+    /// costs its own browse request.
+    var channelInfoTTL: TimeInterval { 30 * 24 * 60 * 60 }
     let diskQueue = DispatchQueue(label: "com.verback.YTLite.AppCache.disk")
     var homeFeed: FeedPage?
     var subscriptionsFeed: FeedPage?
