@@ -68,6 +68,7 @@ When Google dropped support for the official YouTube app on older devices, there
 ## Features
 
 - **Video playback** — up to 1080p 60fps on every device; 2K/4K on hardware with AV1 decode (iPhone 15 Pro and newer, M3+ iPads)
+- **Shorts** — a native full-screen viewer with vertical swiping, likes, comments and sharing; the next short is preloaded so it opens on video rather than a poster. Tapping a short anywhere carries that list into the viewer, and the whole tab can be switched off
 - **Kids content** — plays videos the standard API sources refuse, via a dedicated playback source
 - **Pinch to zoom** — fill the screen in fullscreen with a pinch, or turn on Zoom to Fill to do it automatically
 - **Background audio** — continue listening with the screen off
@@ -82,9 +83,11 @@ When Google dropped support for the official YouTube app on older devices, there
 - **Smart home feed** — endless recommendations with category chips read from your feed's shelves
 - **Subscriptions** — follow channels with a local subscription feed
 - **Notifications** — a bell in the top bar collects app news and new-version announcements, with the full release notes in the message; system notifications are optional and everything still collects in-app if you decline
-- **Watch history** — progress indicators, synced across devices
-- **Autoplay** — automatically play the next related video
+- **Watch history** — progress indicators, synced across devices; a video resumes where you left it the moment you reopen it, without waiting for the server to catch up
+- **Autoplay** — automatically play the next related video, with replay, previous and next offered when one ends
 - **Auto theme** — follows system dark mode on iOS 13+, scheduled hours on iOS 12; manual override available
+- **Made for old hardware** — thumbnails and channel details are fetched and decoded a few at a time rather than all at once, which is what keeps scrolling smooth on a dual-core A7
+- **Your layout** — pick the tab the app opens on, force the icon light or dark, and browse settings as a nested menu instead of one long list
 
 <div align="center">
 
@@ -171,7 +174,6 @@ Install the `.ipa` package directly:
 ## Known Issues and Limitations
 
 - Playback speeds above 2x may cause issues
-- **Shorts** are not natively supported — they are treated as regular videos, but can be hidden from the subscriptions feed
 - Comments are read-only — you can browse and sort them and open replies, but not post, reply or like
 - Offline download is not yet available
 - Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
