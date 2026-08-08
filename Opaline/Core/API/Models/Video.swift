@@ -145,10 +145,22 @@ struct CommentSortOption {
 final class ChannelInfoStore {
     static let shared = ChannelInfoStore()
 
+    /// A feed page carries a hundred-odd distinct channels and each one
+    /// costs a browse request. Sent all at once they fill the six
+    /// connections iOS opens per host, and everything else queued behind
+    /// them — the next feed page waited ten seconds for avatars.
+    ///
+    /// ponytail: fixed cap; the number only matters relative to the
+    /// six-connection limit, so it needs no tuning knob.
+    private static let maxConcurrentFetches = 3
+
     private var channelService: ChannelService?
     private let queue = DispatchQueue(label: "com.ytvlite.channel-info-store")
     private var cache: [String: ChannelInfo] = [:]
     private var pending: [String: [(Result<ChannelInfo, Error>) -> Void]] = [:]
+    /// Both only touched on `queue`.
+    private var activeFetches = 0
+    private var waiting: [String] = []
 
     private init() {}
 
@@ -208,21 +220,50 @@ final class ChannelInfoStore {
             return
         }
         pending[channelId] = [completion]
-        AppLog.channel("info fetch \(channelId)")
+        guard activeFetches < Self.maxConcurrentFetches else {
+            waiting.append(channelId)
+            return
+        }
+        startFetch(channelId: channelId, service: channelService)
+    }
 
-        channelService.fetchChannelInfo(channelId: channelId) { result in
+    /// Call on `queue`.
+    private func startFetch(channelId: String, service: ChannelService) {
+        activeFetches += 1
+        AppLog.channel("info fetch \(channelId)")
+        service.fetchChannelInfo(channelId: channelId) { result in
             self.queue.async {
-                if case .success(let info) = result {
-                    self.cache[channelId] = info
-                    AppCache.shared.setChannelInfo(info, channelId: channelId)
-                } else if case .failure(let error) = result {
-                    AppLog.channel(
-                        "info fetch failed \(channelId): \(error)"
-                    )
-                }
+                self.activeFetches -= 1
+                self.storeResult(result, channelId: channelId)
                 let callbacks = self.pending.removeValue(forKey: channelId) ?? []
                 DispatchQueue.main.async { callbacks.forEach { $0(result) } }
+                self.startNextWaiting()
             }
         }
+    }
+
+    /// Call on `queue`.
+    private func storeResult(
+        _ result: Result<ChannelInfo, Error>,
+        channelId: String
+    ) {
+        switch result {
+        case .success(let info):
+            cache[channelId] = info
+            AppCache.shared.setChannelInfo(info, channelId: channelId)
+        case .failure(let error):
+            AppLog.channel("info fetch failed \(channelId): \(error)")
+        }
+    }
+
+    /// Call on `queue`.
+    private func startNextWaiting() {
+        guard activeFetches < Self.maxConcurrentFetches,
+              let service = channelService,
+              !waiting.isEmpty
+        else {
+            return
+        }
+        startFetch(channelId: waiting.removeFirst(), service: service)
     }
 }
