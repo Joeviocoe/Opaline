@@ -59,7 +59,7 @@ class ThumbnailImageView: UIImageView {
             loadToken = nil
             return
         }
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        ThumbnailImageView.decodeQueue.async { [weak self] in
             guard let self,
                   currentURL == url
             else {
@@ -169,12 +169,16 @@ class ThumbnailImageView: UIImageView {
         else {
             return
         }
-        cacheDownsampled(
-            data: data,
-            url: url,
-            cacheKey: cacheKey,
-            maxPixelSize: maxPixelSize
-        )
+        // Off the transport's callback thread and onto the one decode
+        // queue, so a page of arriving thumbnails can't swamp the CPU.
+        ThumbnailImageView.decodeQueue.async { [weak self] in
+            self?.cacheDownsampled(
+                data: data,
+                url: url,
+                cacheKey: cacheKey,
+                maxPixelSize: maxPixelSize
+            )
+        }
     }
 
     private func clearTaskOnMain(url: URL) {

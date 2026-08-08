@@ -14,6 +14,18 @@ extension ThumbnailImageView {
     private static var prefetchTokens: [String: CancellationToken] = [:]
     private static let prefetchLock = NSLock()
 
+    /// Every decode goes through this one queue. Decoding a thumbnail costs
+    /// ~25ms on a fast machine and several times that on an A7, and a page of
+    /// twenty fanned out across `global(qos: .userInitiated)` starved the main
+    /// thread on a two-core device — the scroll stuttered right after each
+    /// page load. Serial keeps a core free for the scroll.
+    ///
+    /// ponytail: serial; widen to two if images start arriving visibly later.
+    static let decodeQueue = DispatchQueue(
+        label: "com.ytvlite.thumbnail-decode",
+        qos: .utility
+    )
+
     /// Where a thumbnail came from and how long it took — the grey-tile
     /// complaint is unmeasurable without it. Logged per image, so the
     /// counts per source are as interesting as the timings.
@@ -32,7 +44,7 @@ extension ThumbnailImageView {
         guard cache.object(forKey: key) == nil else {
             return
         }
-        DispatchQueue.global(qos: .utility).async {
+        decodeQueue.async {
             let t0 = Date()
             if loadFromDiskCache(url: url, key: key) != nil {
                 logLoad("prefetch-disk", since: t0, url: url)
@@ -133,12 +145,14 @@ extension ThumbnailImageView {
                 return
             }
             logLoad("prefetch-net", since: since, url: url)
-            if let img = downsample(data: data, to: 640) {
-                cache.setObject(
-                    img,
-                    forKey: key,
-                    cost: img.memoryCost
-                )
+            decodeQueue.async {
+                if let img = downsample(data: data, to: 640) {
+                    cache.setObject(
+                        img,
+                        forKey: key,
+                        cost: img.memoryCost
+                    )
+                }
             }
             if cachingEnabled {
                 diskCache.store(data: data, for: url)
