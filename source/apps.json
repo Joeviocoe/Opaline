@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.8.0",
+          "date": "2026-08-08T09:17:36Z",
+          "localizedDescription": "## New Features\n\n- **Shorts** have their own tab and their own player now, instead of opening as regular videos. Swipe up and down, like, read the comments, share. The next one is loaded before you get to it, so it starts on video and not on a still frame. Tap a short in subscriptions, on a channel or in search and you swipe through that list first, then the app keeps going with recommendations. Don't want it? Settings → Shorts, turn it off and the tab is gone without a restart\n- **Pick the screen the app opens on.** Settings → Appearance → Default Screen\n- **Settings are grouped into sections** instead of one long scroll\n- **Four app icons** — Light, Dark, Clear Light and Clear Dark — or leave it on Auto to follow the system theme (#31). Settings → Appearance\n- **When a video ends** you get replay, previous and next. Cancel the autoplay countdown and you get replay too, instead of a dead screen (#26)\n- **A support link** in Settings, for anyone who wants to chip in\n\n## Improvements\n\n- **Scrolling doesn't stutter after loading more videos.** Every thumbnail was being decoded on all cores at once and left nothing for the interface. On an iPad mini 2 this was the worst of it\n- **Thumbnails show up much sooner.** They used to be asked for all at once, fight over the connection and then land together a few seconds later. Now they come in as you read the page\n- **The next page doesn't wait for avatars.** Channel info is fetched a few at a time instead of a hundred at once, and it's kept for a month now, not a day\n- **Subscriptions and Library open without a spinner** — they load in the background once the home feed is done\n- **Videos resume where you actually left off.** The position is saved on the device, so reopening a video you just watched no longer drops you where YouTube last knew you were\n- **The two 10-second buttons are previous and next** now\n- **Hide Status Bar in Fullscreen** moved from Appearance to Playback, where it belongs\n\n## Fixes\n\n- **Zoom to Fill** blew the picture up way past the point where it fills the screen\n- **A video watched to the end** no longer reopens at the very end",
+          "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.0/Opaline_1.8.0.ipa",
+          "size": 6092212,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.7.2",
           "date": "2026-08-07T00:05:08Z",
           "localizedDescription": "## YTLite is now Opaline\n\nThe name was too close to YTLite, a popular paid tweak for the official YouTube app, and the two kept being mistaken for each other. This project is unrelated to it, so it has been renamed — new name, new icon, same app.\n\nYour account, settings, downloads and watch history are untouched: this installs over your current version like any other update.\n\n### Please check your sources\n\n- **Jailbreak (Cydia, Sileo, Zebra)** — if you added `verback2308.github.io/ytlite`, that address no longer works. Replace it with `https://verback2308.github.io/repo/`.\n- **Sideloading (AltStore, SideStore, LiveContainer)** — nothing to do, your source keeps working.\n\nEverything else about this release is unchanged from 1.7.1.",
@@ -124,14 +132,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.7.2",
-      "versionDate": "2026-08-07T00:05:08Z",
-      "versionDescription": "## YTLite is now Opaline\n\nThe name was too close to YTLite, a popular paid tweak for the official YouTube app, and the two kept being mistaken for each other. This project is unrelated to it, so it has been renamed — new name, new icon, same app.\n\nYour account, settings, downloads and watch history are untouched: this installs over your current version like any other update.\n\n### Please check your sources\n\n- **Jailbreak (Cydia, Sileo, Zebra)** — if you added `verback2308.github.io/ytlite`, that address no longer works. Replace it with `https://verback2308.github.io/repo/`.\n- **Sideloading (AltStore, SideStore, LiveContainer)** — nothing to do, your source keeps working.\n\nEverything else about this release is unchanged from 1.7.1.",
-      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.7.2/Opaline_1.7.2.ipa",
+      "version": "1.8.0",
+      "versionDate": "2026-08-08T09:17:36Z",
+      "versionDescription": "## New Features\n\n- **Shorts** have their own tab and their own player now, instead of opening as regular videos. Swipe up and down, like, read the comments, share. The next one is loaded before you get to it, so it starts on video and not on a still frame. Tap a short in subscriptions, on a channel or in search and you swipe through that list first, then the app keeps going with recommendations. Don't want it? Settings → Shorts, turn it off and the tab is gone without a restart\n- **Pick the screen the app opens on.** Settings → Appearance → Default Screen\n- **Settings are grouped into sections** instead of one long scroll\n- **Four app icons** — Light, Dark, Clear Light and Clear Dark — or leave it on Auto to follow the system theme (#31). Settings → Appearance\n- **When a video ends** you get replay, previous and next. Cancel the autoplay countdown and you get replay too, instead of a dead screen (#26)\n- **A support link** in Settings, for anyone who wants to chip in\n\n## Improvements\n\n- **Scrolling doesn't stutter after loading more videos.** Every thumbnail was being decoded on all cores at once and left nothing for the interface. On an iPad mini 2 this was the worst of it\n- **Thumbnails show up much sooner.** They used to be asked for all at once, fight over the connection and then land together a few seconds later. Now they come in as you read the page\n- **The next page doesn't wait for avatars.** Channel info is fetched a few at a time instead of a hundred at once, and it's kept for a month now, not a day\n- **Subscriptions and Library open without a spinner** — they load in the background once the home feed is done\n- **Videos resume where you actually left off.** The position is saved on the device, so reopening a video you just watched no longer drops you where YouTube last knew you were\n- **The two 10-second buttons are previous and next** now\n- **Hide Status Bar in Fullscreen** moved from Appearance to Playback, where it belongs\n\n## Fixes\n\n- **Zoom to Fill** blew the picture up way past the point where it fills the screen\n- **A video watched to the end** no longer reopens at the very end",
+      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.0/Opaline_1.8.0.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 6224527,
+      "size": 6092212,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -154,6 +162,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "Opaline 1.8.0 - Shorts, faster feeds on old devices, player and settings rework",
+      "identifier": "release-1.8.0",
+      "caption": "Shorts have their own tab and their own player now, instead of opening as regular videos. Swipe up and down, like, re…",
+      "date": "2026-08-08T09:17:36Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/Opaline/releases/tag/1.8.0"
+    },
     {
       "title": "Opaline 1.7.2 - YTLite is now Opaline",
       "identifier": "release-1.7.2",
