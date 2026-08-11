@@ -316,6 +316,12 @@
 "account.signOut" = "Вийти";
 "account.notSignedIn" = "Вхід не виконано";
 
+/* Copies the OAuth device code shown on the sign-in screen */
+"auth.copyCode" = "Скопіювати код";
+/* Toast shown after the device code is copied */
+"auth.codeCopied" = "Код скопійовано";
+
+
 "common.error" = "Помилка";
 "channel.unavailable" = "Канал недоступний";
 
@@ -342,3 +348,15 @@
 "notifications.permissionBanner.message" = "Системні сповіщення вимкнені, тому оповіщення можуть не дійти поза додатком.";
 "notifications.permissionBanner.enable" = "Увімкнути сповіщення";
 "notifications.detail.openLink" = "Відкрити";
+
+/* ===== Sign-in (OAuth device code) screen ===== */
+
+"auth.title" = "Вхід у YouTube";
+"auth.instruction" = "Натисніть кнопку нижче й вставте код на сторінці, що відкриється.";
+"auth.openDevicePage" = "Відкрити google.com/device";
+"auth.continueAnonymously" = "Продовжити анонімно";
+"auth.fetchingCode" = "Отримання коду…";
+"auth.waiting" = "Очікування підтвердження…";
+"auth.failed" = "Не вдалося увійти";
+"auth.tryAgain" = "Повторити";
+"auth.offline" = "Немає з'єднання";

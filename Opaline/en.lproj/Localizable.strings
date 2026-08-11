@@ -422,6 +422,12 @@
 "account.signOut" = "Sign Out";
 "account.notSignedIn" = "Not signed in";
 
+/* Copies the OAuth device code shown on the sign-in screen */
+"auth.copyCode" = "Copy code";
+/* Toast shown after the device code is copied */
+"auth.codeCopied" = "Code copied";
+
+
 /* Generic error alert title */
 "common.error" = "Error";
 /* Channel screen failed to load */
@@ -460,3 +466,23 @@
 /* Notification settings screen (pushed from Settings > Home) */
 "settings.row.appUpdates" = "App Updates";
 "settings.footer.notifications" = "Delivery may be delayed — iOS schedules background checks and does not run them immediately.";
+
+/* ===== Sign-in (OAuth device code) screen ===== */
+
+"auth.title" = "Sign in to YouTube";
+/* Explains the two steps once a code is on screen */
+"auth.instruction" = "Tap the button below, then paste your code on the page that opens.";
+/* Opens Google's device-pairing page */
+"auth.openDevicePage" = "Open google.com/device";
+/* Skips sign-in entirely */
+"auth.continueAnonymously" = "Continue Anonymously";
+/* Status while a device code is being fetched */
+"auth.fetchingCode" = "Fetching code…";
+/* Status while waiting for the code to be approved on google.com/device */
+"auth.waiting" = "Waiting for authorization…";
+/* Status after repeated sign-in failures */
+"auth.failed" = "Sign-in failed";
+/* Button that starts the sign-in over with a fresh code */
+"auth.tryAgain" = "Try again";
+/* Status when the device has no working connection */
+"auth.offline" = "No connection";
