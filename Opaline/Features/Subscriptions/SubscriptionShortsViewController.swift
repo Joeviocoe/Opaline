@@ -110,31 +110,11 @@ private extension SubscriptionShortsViewController {
                 guard let channel = channels[channelId] else {
                     return []
                 }
-                return entries.map { ($0.published, video($0, channel)) }
+                return entries.map {
+                    ($0.published, Video(short: $0, channel: channel))
+                }
             }
             .sorted { $0.0 > $1.0 }
             .map { $0.1 }
-    }
-
-    private static func video(
-        _ entry: RSSVideoEntry,
-        _ channel: SubscribedChannel
-    ) -> Video {
-        Video(
-            id: entry.videoId,
-            title: entry.title,
-            channelId: channel.id,
-            channelName: channel.title,
-            channelAvatarURL: channel.avatarURL,
-            thumbnailURL: AppURLs.YouTube.thumbnailURL(
-                videoId: entry.videoId
-            ),
-            viewCount: entry.viewCount.map {
-                VideoFormatters.formatViewCount(String($0))
-            },
-            publishedAt: VideoFormatters.formatRelativeDate(entry.published),
-            duration: nil,
-            isShort: true
-        )
     }
 }

@@ -160,6 +160,9 @@ extension SubscriptionsViewController {
         switch result {
         case .success(let tabPage):
             setPage(enrichedWithSelectedChannel(tabPage.feedPage))
+            if let channel = selectedChannel {
+                loadChannelShorts(channel)
+            }
         case .failure(let error):
             AppLog.subs("channel filter load failed: \(error)")
             isLoadingInitial = false

@@ -73,11 +73,12 @@ extension SubscriptionsViewController: UITableViewDataSource {
     }
 
     /// The feed's twelve are all it has; the full list comes from the
-    /// channels' own feeds, fetched only when this screen opens.
+    /// channels' own feeds, fetched only when this screen opens. Under a
+    /// channel filter the screen stays scoped to that one channel.
     private func openAllShorts() {
         navigationController?.pushViewController(
             SubscriptionShortsViewController(
-                channels: subscribedChannels,
+                channels: selectedChannel.map { [$0] } ?? subscribedChannels,
                 rssService: channelRSSService,
                 channelViewControllerFactory: channelViewControllerFactory,
                 videoRouter: videoRouter
