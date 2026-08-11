@@ -173,6 +173,11 @@
 "settings.row.hideStatusBar" = "Скрывать статус-бар в полноэкранном режиме";
 "settings.row.zoomToFill" = "Заполнять экран в полноэкранном режиме";
 "settings.row.showShorts" = "Показывать Shorts";
+"settings.row.shortsPlayer" = "Открывать Shorts в";
+"settings.shortsPlayer.vertical" = "Вертикальном плеере";
+"settings.shortsPlayer.regular" = "Обычном плеере";
+"settings.row.shortsGrouping" = "Группировать в подписках";
+"settings.footer.shorts" = "При группировке Shorts каждой загруженной страницы ленты подписок собираются в отдельную полку. Выключите, чтобы видеть Shorts в ленте как обычные видео.";
 "settings.row.autoplay" = "Автовоспроизведение";
 /* %1$@ = localized "Mix" term (player.related.mix) */
 "settings.row.autoplayMix" = "Автовоспроизведение (%1$@)";

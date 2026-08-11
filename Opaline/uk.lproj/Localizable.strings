@@ -172,6 +172,11 @@
 "settings.row.hideStatusBar" = "Приховувати рядок стану в повноекранному режимі";
 "settings.row.zoomToFill" = "Заповнювати екран у повноекранному режимі";
 "settings.row.showShorts" = "Показувати Shorts";
+"settings.row.shortsPlayer" = "Відкривати Shorts у";
+"settings.shortsPlayer.vertical" = "Вертикальному плеєрі";
+"settings.shortsPlayer.regular" = "Звичайному плеєрі";
+"settings.row.shortsGrouping" = "Групувати в підписках";
+"settings.footer.shorts" = "При групуванні Shorts кожної завантаженої сторінки стрічки підписок збираються в окрему полицю. Вимкніть, щоб бачити Shorts у стрічці як звичайні відео.";
 "settings.row.autoplay" = "Автовідтворення";
 /* %1$@ = localized "Mix" term (player.related.mix) */
 "settings.row.autoplayMix" = "Автовідтворення (%1$@)";

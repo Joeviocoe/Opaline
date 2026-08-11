@@ -249,6 +249,11 @@
 "settings.row.hideStatusBar" = "Hide Status Bar in Fullscreen";
 "settings.row.zoomToFill" = "Zoom to Fill in Fullscreen";
 "settings.row.showShorts" = "Show Shorts";
+"settings.row.shortsPlayer" = "Open Shorts in";
+"settings.shortsPlayer.vertical" = "Vertical player";
+"settings.shortsPlayer.regular" = "Regular player";
+"settings.row.shortsGrouping" = "Group in Subscriptions";
+"settings.footer.shorts" = "Grouping collects each page of the subscriptions feed into its own Shorts shelf. Turn it off to see Shorts inline as ordinary videos.";
 "settings.row.autoplay" = "Autoplay";
 /* %1$@ = localized "Mix" term (player.related.mix) */
 "settings.row.autoplayMix" = "Autoplay (%1$@)";
