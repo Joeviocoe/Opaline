@@ -58,6 +58,9 @@ extension SubscriptionsViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         cell.configure(with: shorts)
+        cell.onSeeAll = { [weak self] in
+            self?.openAllShorts()
+        }
         cell.onSelect = { [weak self] index in
             guard let self, index < shorts.count else {
                 return
@@ -67,6 +70,20 @@ extension SubscriptionsViewController: UITableViewDataSource {
             )
         }
         return cell
+    }
+
+    /// The feed's twelve are all it has; the full list comes from the
+    /// channels' own feeds, fetched only when this screen opens.
+    private func openAllShorts() {
+        navigationController?.pushViewController(
+            SubscriptionShortsViewController(
+                channels: subscribedChannels,
+                rssService: channelRSSService,
+                channelViewControllerFactory: channelViewControllerFactory,
+                videoRouter: videoRouter
+            ),
+            animated: true
+        )
     }
 
     private func attachHandlers(to cell: SubscriptionVideoCell, video: Video) {
