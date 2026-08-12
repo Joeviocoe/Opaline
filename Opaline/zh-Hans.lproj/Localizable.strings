@@ -425,3 +425,17 @@
 "notifications.permissionBanner.enable" = "启用通知";
 /* Detail screen action opening the notification's link */
 "notifications.detail.openLink" = "打开";
+
+/* ===== Sign-in (OAuth device code) screen ===== */
+
+"auth.title" = "登录 YouTube";
+"auth.instruction" = "点按下方按钮，然后在打开的页面中粘贴验证码。";
+"auth.openDevicePage" = "打开 google.com/device";
+"auth.continueAnonymously" = "匿名继续";
+"auth.copyCode" = "复制验证码";
+"auth.codeCopied" = "已复制验证码";
+"auth.fetchingCode" = "正在获取验证码…";
+"auth.waiting" = "正在等待确认…";
+"auth.failed" = "登录失败";
+"auth.tryAgain" = "重试";
+"auth.offline" = "无网络连接";

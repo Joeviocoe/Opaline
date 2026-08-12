@@ -425,3 +425,17 @@
 "notifications.permissionBanner.enable" = "Bildirimleri Etkinleştir";
 /* Detail screen action opening the notification's link */
 "notifications.detail.openLink" = "Aç";
+
+/* ===== Sign-in (OAuth device code) screen ===== */
+
+"auth.title" = "YouTube'da oturum aç";
+"auth.instruction" = "Aşağıdaki düğmeye dokunun ve kodu açılan sayfaya yapıştırın.";
+"auth.openDevicePage" = "google.com/device adresini aç";
+"auth.continueAnonymously" = "Anonim olarak devam et";
+"auth.copyCode" = "Kodu kopyala";
+"auth.codeCopied" = "Kod kopyalandı";
+"auth.fetchingCode" = "Kod alınıyor…";
+"auth.waiting" = "Onay bekleniyor…";
+"auth.failed" = "Oturum açılamadı";
+"auth.tryAgain" = "Tekrar dene";
+"auth.offline" = "Bağlantı yok";

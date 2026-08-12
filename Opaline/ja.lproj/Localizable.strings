@@ -425,3 +425,17 @@
 "notifications.permissionBanner.enable" = "通知を有効にする";
 /* Detail screen action opening the notification's link */
 "notifications.detail.openLink" = "開く";
+
+/* ===== Sign-in (OAuth device code) screen ===== */
+
+"auth.title" = "YouTube にログイン";
+"auth.instruction" = "下のボタンをタップして、開いたページにコードを貼り付けてください。";
+"auth.openDevicePage" = "google.com/device を開く";
+"auth.continueAnonymously" = "ログインせずに続行";
+"auth.copyCode" = "コードをコピー";
+"auth.codeCopied" = "コードをコピーしました";
+"auth.fetchingCode" = "コードを取得しています…";
+"auth.waiting" = "承認を待っています…";
+"auth.failed" = "ログインできませんでした";
+"auth.tryAgain" = "再試行";
+"auth.offline" = "接続されていません";

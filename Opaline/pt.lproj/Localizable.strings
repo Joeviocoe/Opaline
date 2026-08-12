@@ -421,3 +421,17 @@
 "notifications.permissionBanner.enable" = "Ativar notificações";
 /* Detail screen action opening the notification's link */
 "notifications.detail.openLink" = "Abrir";
+
+/* ===== Sign-in (OAuth device code) screen ===== */
+
+"auth.title" = "Fazer login no YouTube";
+"auth.instruction" = "Toque no botão abaixo e cole o código na página que abrir.";
+"auth.openDevicePage" = "Abrir google.com/device";
+"auth.continueAnonymously" = "Continuar anonimamente";
+"auth.copyCode" = "Copiar código";
+"auth.codeCopied" = "Código copiado";
+"auth.fetchingCode" = "Obtendo código…";
+"auth.waiting" = "Aguardando confirmação…";
+"auth.failed" = "Não foi possível fazer login";
+"auth.tryAgain" = "Tentar novamente";
+"auth.offline" = "Sem conexão";

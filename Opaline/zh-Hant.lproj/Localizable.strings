@@ -425,3 +425,17 @@
 "notifications.permissionBanner.enable" = "啟用通知";
 /* Detail screen action opening the notification's link */
 "notifications.detail.openLink" = "開啟";
+
+/* ===== Sign-in (OAuth device code) screen ===== */
+
+"auth.title" = "登入 YouTube";
+"auth.instruction" = "輕觸下方按鈕，然後在開啟的頁面貼上驗證碼。";
+"auth.openDevicePage" = "開啟 google.com/device";
+"auth.continueAnonymously" = "以匿名方式繼續";
+"auth.copyCode" = "複製驗證碼";
+"auth.codeCopied" = "已複製驗證碼";
+"auth.fetchingCode" = "正在取得驗證碼…";
+"auth.waiting" = "正在等待確認…";
+"auth.failed" = "登入失敗";
+"auth.tryAgain" = "再試一次";
+"auth.offline" = "沒有網路連線";
