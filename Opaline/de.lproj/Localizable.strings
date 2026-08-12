@@ -437,3 +437,21 @@
 "auth.failed" = "Anmeldung fehlgeschlagen";
 "auth.tryAgain" = "Wiederholen";
 "auth.offline" = "Keine Verbindung";
+
+/* ===== Shorts settings, comments and shared actions ===== */
+
+"channel.tab.shorts" = "Shorts";
+"shorts.shelf.title" = "Shorts";
+"common.close" = "Schließen";
+"common.delete" = "Löschen";
+"common.edit" = "Bearbeiten";
+"player.menu.queue" = "Wiedergabeliste";
+"player.comments.viewReplies" = "Antworten ansehen";
+"player.comments.hideReplies" = "Antworten ausblenden";
+"player.comments.moreReplies" = "Weitere Antworten anzeigen";
+"settings.row.shortsPlayer" = "Shorts öffnen in";
+"settings.shortsPlayer.vertical" = "Vertikaler Player";
+"settings.shortsPlayer.regular" = "Normaler Player";
+"settings.row.shortsGrouping" = "In Abos gruppieren";
+"settings.footer.shorts" = "Beim Gruppieren wird jede Seite des Abo-Feeds zu einem eigenen Shorts-Regal zusammengefasst. Deaktiviere die Option, um Shorts wie normale Videos einzeln zu sehen.";
+"settings.row.mainThreadWatchdog" = "Main Thread Watchdog";

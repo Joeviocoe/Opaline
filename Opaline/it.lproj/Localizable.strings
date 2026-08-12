@@ -435,3 +435,21 @@
 "auth.failed" = "Accesso non riuscito";
 "auth.tryAgain" = "Riprova";
 "auth.offline" = "Nessuna connessione";
+
+/* ===== Shorts settings, comments and shared actions ===== */
+
+"channel.tab.shorts" = "Short";
+"shorts.shelf.title" = "Short";
+"common.close" = "Chiudi";
+"common.delete" = "Elimina";
+"common.edit" = "Modifica";
+"player.menu.queue" = "Coda";
+"player.comments.viewReplies" = "Mostra risposte";
+"player.comments.hideReplies" = "Nascondi risposte";
+"player.comments.moreReplies" = "Mostra altre risposte";
+"settings.row.shortsPlayer" = "Apri gli Short in";
+"settings.shortsPlayer.vertical" = "Player verticale";
+"settings.shortsPlayer.regular" = "Player normale";
+"settings.row.shortsGrouping" = "Raggruppa in Iscrizioni";
+"settings.footer.shorts" = "Il raggruppamento raccoglie ogni pagina del feed delle iscrizioni in uno scaffale Short dedicato. Disattivalo per vedere gli Short in linea come video normali.";
+"settings.row.mainThreadWatchdog" = "Main Thread Watchdog";

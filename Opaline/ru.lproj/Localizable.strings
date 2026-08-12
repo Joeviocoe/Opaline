@@ -361,3 +361,10 @@
 "auth.failed" = "Не удалось войти";
 "auth.tryAgain" = "Повторить";
 "auth.offline" = "Нет подключения";
+
+/* ===== Shorts and shared actions ===== */
+
+"channel.tab.shorts" = "Shorts";
+"shorts.shelf.title" = "Shorts";
+"common.close" = "Закрыть";
+"settings.row.mainThreadWatchdog" = "Main Thread Watchdog";

@@ -360,3 +360,11 @@
 "auth.failed" = "Не вдалося увійти";
 "auth.tryAgain" = "Повторити";
 "auth.offline" = "Немає з'єднання";
+
+/* ===== Shorts and shared actions ===== */
+
+"channel.tab.shorts" = "Відео Shorts";
+"shorts.shelf.title" = "Відео Shorts";
+"common.close" = "Закрити";
+"player.menu.queue" = "Черга";
+"settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
