@@ -42,8 +42,25 @@ final class AuthViewController: UIViewController {
             return
         }
         UIPasteboard.general.string = codeLabel.text
-        let safari = SFSafariViewController(url: url)
+        let safari = SFSafariViewController(url: localized(url))
         present(safari, animated: true)
+    }
+
+    /// Google picks the page language from the IP, not from
+    /// `Accept-Language` — a Japanese user on a foreign network lands on a
+    /// page they cannot read. `hl` overrides that with the app's language.
+    private func localized(_ url: URL) -> URL {
+        guard let code = AppLanguage.override?.rawValue
+            ?? Locale.preferredLanguages.first,
+            var components = URLComponents(
+                url: url, resolvingAgainstBaseURL: false
+            ) else {
+            return url
+        }
+        var items = components.queryItems ?? []
+        items.append(URLQueryItem(name: "hl", value: code))
+        components.queryItems = items
+        return components.url ?? url
     }
 
     @objc
