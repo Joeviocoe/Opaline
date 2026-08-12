@@ -424,7 +424,7 @@
 
 /* ===== Sign-in (OAuth device code) screen ===== */
 
-"auth.title" = "Iniciar sesión en YouTube";
+"auth.title" = "Acceder a YouTube";
 "auth.instruction" = "Toca el botón de abajo y pega el código en la página que se abre.";
 "auth.openDevicePage" = "Abrir google.com/device";
 "auth.continueAnonymously" = "Continuar de forma anónima";
@@ -432,16 +432,16 @@
 "auth.codeCopied" = "Código copiado";
 "auth.fetchingCode" = "Obteniendo código…";
 "auth.waiting" = "Esperando confirmación…";
-"auth.failed" = "No se ha podido iniciar sesión";
+"auth.failed" = "No se pudo acceder";
 "auth.tryAgain" = "Reintentar";
-"auth.offline" = "No hay conexión";
+"auth.offline" = "Sin conexión";
 
 /* ===== Shorts settings, comments and shared actions ===== */
 
 "channel.tab.shorts" = "Shorts";
 "shorts.shelf.title" = "Shorts";
 "common.close" = "Cerrar";
-"common.delete" = "Eliminar";
+"common.delete" = "Borrar";
 "common.edit" = "Editar";
 "player.menu.queue" = "Cola";
 "player.comments.viewReplies" = "Ver respuestas";
