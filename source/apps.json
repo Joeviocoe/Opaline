@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.8.2",
+          "date": "2026-08-13T23:03:34Z",
+          "localizedDescription": "## Improvements\n\n- **Audio-only playback.** A button in the player, or \"Audio only\" in the quality menu. No video segment is fetched, so it saves data; the choice is remembered for the session (#41)\n- **High-resolution thumbnails.** The default is picked from your device's memory to keep scrolling smooth, and you can override it in Settings → Appearance → Thumbnail Quality, up to YouTube's full 1280×720 file (#37, thanks @PoomSmart)\n- **Device Info.** About now shows your iOS version and device model, and every field there copies on tap (#43)\n\n## Fixes\n\n- **Fullscreen on iPhone.** Fixed how the app handles a device that is already held sideways when a video opens (#39)",
+          "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.2/Opaline_1.8.2.ipa",
+          "size": 6168698,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.8.1",
           "date": "2026-08-12T00:34:48Z",
           "localizedDescription": "## Improvements\n\n- **Shorts in Subscriptions got their own shelf**, with an \"All\" button that pulls every short your channels have posted, straight from the channel feeds. Two new switches in Settings → Shorts: which player they open in, and whether they group into the shelf or stay inline as ordinary videos (#34)\n- **Channel filter in Subscriptions now includes that channel's Shorts**, not just its long-form videos (#34)\n- **The sign-in screen has a \"Copy code\" button.** The code was already hitting your clipboard when you tapped \"Open google.com/device\", but nothing told you that, and it was useless if you were typing the code on a laptop (#35)\n- **The sign-in screen is translated** — it had been hardcoded English since the first version. It also passes your language to the Google page it opens, which otherwise picks one by IP (#35)\n\n## Fixes\n\n- **Sign-in survives an expired code.** Codes time out while you're typing them, and the screen would sit there with an untranslated error and no way forward except relaunching the app. It pulls a fresh code on its own now, with a \"Try again\" button as a fallback (#35)\n- **Videos no longer jump back to the start.** When the app re-resolved a stream (expired URL, mid-playback error), it read the position off the freshly created player, which is always zero. Most noticeable in the first minutes of a video, where recoveries are frequent\n- **Cards in Shelf Rails size to the screen.** They were fixed at 280 points, so on an iPad the next card sat almost entirely off the edge\n- **The app icon updates after the rename.** iOS was still serving the cached YTLite one",
@@ -140,14 +148,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.8.1",
-      "versionDate": "2026-08-12T00:34:48Z",
-      "versionDescription": "## Improvements\n\n- **Shorts in Subscriptions got their own shelf**, with an \"All\" button that pulls every short your channels have posted, straight from the channel feeds. Two new switches in Settings → Shorts: which player they open in, and whether they group into the shelf or stay inline as ordinary videos (#34)\n- **Channel filter in Subscriptions now includes that channel's Shorts**, not just its long-form videos (#34)\n- **The sign-in screen has a \"Copy code\" button.** The code was already hitting your clipboard when you tapped \"Open google.com/device\", but nothing told you that, and it was useless if you were typing the code on a laptop (#35)\n- **The sign-in screen is translated** — it had been hardcoded English since the first version. It also passes your language to the Google page it opens, which otherwise picks one by IP (#35)\n\n## Fixes\n\n- **Sign-in survives an expired code.** Codes time out while you're typing them, and the screen would sit there with an untranslated error and no way forward except relaunching the app. It pulls a fresh code on its own now, with a \"Try again\" button as a fallback (#35)\n- **Videos no longer jump back to the start.** When the app re-resolved a stream (expired URL, mid-playback error), it read the position off the freshly created player, which is always zero. Most noticeable in the first minutes of a video, where recoveries are frequent\n- **Cards in Shelf Rails size to the screen.** They were fixed at 280 points, so on an iPad the next card sat almost entirely off the edge\n- **The app icon updates after the rename.** iOS was still serving the cached YTLite one",
-      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.1/Opaline_1.8.1.ipa",
+      "version": "1.8.2",
+      "versionDate": "2026-08-13T23:03:34Z",
+      "versionDescription": "## Improvements\n\n- **Audio-only playback.** A button in the player, or \"Audio only\" in the quality menu. No video segment is fetched, so it saves data; the choice is remembered for the session (#41)\n- **High-resolution thumbnails.** The default is picked from your device's memory to keep scrolling smooth, and you can override it in Settings → Appearance → Thumbnail Quality, up to YouTube's full 1280×720 file (#37, thanks @PoomSmart)\n- **Device Info.** About now shows your iOS version and device model, and every field there copies on tap (#43)\n\n## Fixes\n\n- **Fullscreen on iPhone.** Fixed how the app handles a device that is already held sideways when a video opens (#39)",
+      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.2/Opaline_1.8.2.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 6129571,
+      "size": 6168698,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -170,6 +178,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "Opaline 1.8.2 - Audio only, high-resolution thumbnails",
+      "identifier": "release-1.8.2",
+      "caption": "Audio-only playback. A button in the player, or \"Audio only\" in the quality menu. No video segment is fetched, so it…",
+      "date": "2026-08-13T23:03:34Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/Opaline/releases/tag/1.8.2"
+    },
     {
       "title": "Opaline 1.8.1 - Seek fix, Shorts in Subscriptions, sign-in fixes",
       "identifier": "release-1.8.1",
