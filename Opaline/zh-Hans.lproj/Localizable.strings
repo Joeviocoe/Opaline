@@ -264,6 +264,13 @@
 "settings.row.shareLog" = "分享调试日志";
 "settings.row.support" = "支持开发";
 "settings.row.feedback" = "发送反馈";
+
+/* About section: values an issue report asks for, copied on tap */
+"settings.section.about" = "关于";
+"settings.footer.about" = "点按数值即可复制——反馈问题时需要这些信息。";
+"settings.about.version" = "版本";
+"settings.about.system" = "系统";
+"settings.about.model" = "型号";
 /* Solver-server URL alert */
 "settings.solver.message" = "求解器服务器的 URL。";
 "settings.solver.reset" = "恢复默认值";
@@ -446,6 +453,8 @@
 "shorts.shelf.title" = "Shorts";
 "common.close" = "关闭";
 "common.delete" = "删除";
+/* Toast shown after a value is copied */
+"common.copied" = "已复制";
 "common.edit" = "修改";
 "player.menu.queue" = "队列";
 "player.comments.viewReplies" = "查看回复";

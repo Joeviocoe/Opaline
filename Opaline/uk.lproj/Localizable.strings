@@ -38,6 +38,8 @@
 "common.done" = "Готово";
 "common.edit" = "Редагувати";
 "common.delete" = "Видалити";
+/* Toast shown after a value is copied */
+"common.copied" = "Скопійовано";
 "common.playlist" = "Список відтворення";
 "library.title" = "Бібліотека";
 
@@ -211,6 +213,13 @@
 "settings.row.shareLog" = "Поділитися журналом налагодження";
 "settings.row.support" = "Підтримати розробку";
 "settings.row.feedback" = "Надіслати відгук";
+
+/* About section: values an issue report asks for, copied on tap */
+"settings.section.about" = "Про застосунок";
+"settings.footer.about" = "Торкніться значення, щоб скопіювати його — ці дані потрібні у звітах про помилки.";
+"settings.about.version" = "Версія";
+"settings.about.system" = "Система";
+"settings.about.model" = "Модель";
 "settings.solver.message" = "Адреса solver server.";
 "settings.solver.reset" = "Скинути до типового";
 "settings.solver.defaultSuffix" = " (за замовчуванням)";

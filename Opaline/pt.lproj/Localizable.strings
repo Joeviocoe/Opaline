@@ -260,6 +260,13 @@
 "settings.row.shareLog" = "Compartilhar log de depuração";
 "settings.row.support" = "Apoiar o desenvolvimento";
 "settings.row.feedback" = "Enviar feedback";
+
+/* About section: values an issue report asks for, copied on tap */
+"settings.section.about" = "Informações";
+"settings.footer.about" = "Toque num valor para o copiar — os relatórios de erro pedem estes dados.";
+"settings.about.version" = "Versão";
+"settings.about.system" = "Sistema";
+"settings.about.model" = "Modelo";
 /* Solver-server URL alert */
 "settings.solver.message" = "URL do servidor solver.";
 "settings.solver.reset" = "Redefinir para padrão";
@@ -442,6 +449,8 @@
 "shorts.shelf.title" = "Shorts";
 "common.close" = "Fechar";
 "common.delete" = "Excluir";
+/* Toast shown after a value is copied */
+"common.copied" = "Copiado";
 "common.edit" = "Editar";
 "player.menu.queue" = "Fila";
 "player.comments.viewReplies" = "Ver respostas";

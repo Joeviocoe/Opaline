@@ -66,6 +66,8 @@
 "common.edit" = "Edit";
 /* Generic delete action */
 "common.delete" = "Delete";
+/* Toast shown after a value is copied */
+"common.copied" = "Copied";
 /* Fallback title/label of a playlist tile */
 "common.playlist" = "Playlist";
 /* Library tab title */
@@ -295,6 +297,13 @@
 "settings.row.shareLog" = "Share Debug Log";
 "settings.row.support" = "Support Development";
 "settings.row.feedback" = "Send feedback";
+
+/* About section: values an issue report asks for, copied on tap */
+"settings.section.about" = "About";
+"settings.footer.about" = "Tap a value to copy it — issue reports ask for these.";
+"settings.about.version" = "Version";
+"settings.about.system" = "System";
+"settings.about.model" = "Model";
 /* Solver-server URL alert */
 "settings.solver.message" = "URL of the solver server.";
 "settings.solver.reset" = "Reset to default";
