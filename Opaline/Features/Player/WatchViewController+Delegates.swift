@@ -54,6 +54,21 @@ extension WatchViewController: VideoPlayerViewDelegate {
         return items
     }
 
+    /// Same switch the quality ladder performs — the button is the shortcut
+    /// and the indicator, not a second mechanism.
+    func videoPlayerViewDidTapAudioOnly(_ playerView: VideoPlayerView) {
+        guard let source = playbackFacade.activeVideoSource else {
+            return
+        }
+        let target = AudioOnlyMode.isEnabled
+            ? AudioOnlyMode.videoQuality(in: source.availableQualities)
+            : AudioOnlyMode.quality
+        guard let target else {
+            return
+        }
+        selectSourceQuality(target, source: source)
+    }
+
     func videoPlayerViewDidTapFullscreen(_ playerView: VideoPlayerView) {
         // iPad rotates freely, so fullscreen there is a plain window fill.
         // iPhone is portrait-only outside the player: the button rotates the

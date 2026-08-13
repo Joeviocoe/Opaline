@@ -9,6 +9,9 @@ protocol VideoPlayerViewDelegate: AnyObject {
     func videoPlayerViewDidTapFullscreen(
         _ playerView: VideoPlayerView
     )
+    func videoPlayerViewDidTapAudioOnly(
+        _ playerView: VideoPlayerView
+    )
 }
 
 final class VideoPlayerView: UIView {
@@ -71,6 +74,10 @@ final class VideoPlayerView: UIView {
         return gradient
     }()
 
+    /// Covers the empty player layer in audio-only mode. Added before the
+    /// gradients so their sublayers stay on top and the controls stay legible.
+    let audioPlaceholderView = UIView()
+
     // MARK: - Controls
 
     let controlsView = UIView()
@@ -81,6 +88,7 @@ final class VideoPlayerView: UIView {
     let pipButton = UIButton(type: .system)
     let ccButton = UIButton(type: .system)
     let speedButton = UIButton(type: .system)
+    let audioOnlyButton = UIButton(type: .system)
     var pipController: AVPictureInPictureController?
     let rewindButton = UIButton(type: .system)
     let playPauseButton = UIButton(type: .system)

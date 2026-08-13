@@ -8,6 +8,8 @@
 "player.menu.settings" = "Impostazioni di riproduzione";
 /* Menu item + picker title: video quality */
 "player.menu.quality" = "Qualità";
+/* Quality tier that drops the video track to save data */
+"player.quality.audioOnly" = "Solo audio";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Traccia audio";
 /* Menu item: toggles the playback statistics overlay */

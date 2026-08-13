@@ -52,7 +52,18 @@ final class AndroidVRSource: VideoSource {
 
     /// One entry per tier label: with av01 admitted alongside avc1 the same
     /// height appears twice — keep the first (higher-bitrate) format.
+    ///
+    /// Audio-only leads the list. It needs a DASH pair to strip the video from,
+    /// so live and progressive videos never offer it.
     static func qualities(from info: DirectPlaybackInfo) -> [VideoQuality] {
+        let tiers = videoTiers(from: info)
+        guard !tiers.isEmpty, info.dashAudioFormat != nil else {
+            return tiers
+        }
+        return [AudioOnlyMode.quality] + tiers
+    }
+
+    private static func videoTiers(from info: DirectPlaybackInfo) -> [VideoQuality] {
         var seenLabels = Set<String>()
         return info.allDashVideoFormats.map { format in
             let fps = format.fps ?? 0
@@ -100,8 +111,8 @@ final class AndroidVRSource: VideoSource {
             return
         }
         guard let info,
-              let format = info.allDashVideoFormats.first(
-                  where: { "\($0.itag)" == quality.id }
+              let format = AudioOnlyMode.resolveFormat(
+                  for: quality, info: info, current: currentQuality
               ),
               let audio = info.dashAudioFormat else {
             completion(.failure(Self.noStreamError))
@@ -122,9 +133,12 @@ final class AndroidVRSource: VideoSource {
         self.info = info
         liveHLS.reset()
         availableQualities = Self.qualities(from: info)
-        currentQuality = info.dashVideoFormat.flatMap { selected in
+        let defaultQuality = info.dashVideoFormat.flatMap { selected in
             availableQualities.first { $0.id == "\(selected.itag)" }
         }
+        currentQuality = AudioOnlyMode.startQuality(
+            in: availableQualities, fallback: defaultQuality
+        )
         buildBest(info: info, completion: completion)
     }
 

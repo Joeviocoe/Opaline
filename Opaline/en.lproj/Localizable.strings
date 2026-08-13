@@ -12,6 +12,8 @@
 "player.menu.settings" = "Playback settings";
 /* Menu item + picker title: video quality */
 "player.menu.quality" = "Quality";
+/* Quality tier that drops the video track to save data */
+"player.quality.audioOnly" = "Audio only";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Audio track";
 /* Menu item + list title: the videos queued after this one */

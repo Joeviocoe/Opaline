@@ -200,7 +200,7 @@ private extension HLSPlaybackBuilder {
             elapsed
         )
         AppLog.hls(msg)
-        let urlStr = "\(HLSGenerator.scheme)://master.m3u8"
+        let urlStr = "\(HLSGenerator.scheme)://\(AudioOnlyMode.entryPlaylist)"
         guard let plURL = URL(string: urlStr) else {
             return nil
         }

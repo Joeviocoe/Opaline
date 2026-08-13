@@ -15,14 +15,33 @@ extension WatchViewController {
         if !prepared.captions.isEmpty {
             setCaptionTracks(prepared.captions)
         }
+        // After `attachPlayer` — it is what creates the player view on a
+        // first load, so an earlier call would land on nothing.
         attachPlayer(item: prepared.item)
+        videoPlayerView?.setAudioOnly(
+            active: AudioOnlyMode.isEnabled,
+            available: playbackFacade.activeVideoSource?.availableQualities
+                .contains { $0.id == AudioOnlyMode.qualityID } ?? false
+        )
         if let resumeAt, CMTimeGetSeconds(resumeAt) > 1 {
-            videoPlayerView?.player?.seek(
-                to: resumeAt,
-                toleranceBefore: CMTime(seconds: 1, preferredTimescale: 1_000),
-                toleranceAfter: CMTime(seconds: 1, preferredTimescale: 1_000)
-            )
+            pendingResumeSeek = resumeAt
         }
+    }
+
+    /// Seeks a freshly attached stream back to where the user was. Called from
+    /// the item's ready callback: issued any earlier the player is still
+    /// loading and silently drops it.
+    func applyResumeSeekIfNeeded() {
+        guard let target = pendingResumeSeek else {
+            return
+        }
+        pendingResumeSeek = nil
+        let tolerance = CMTime(seconds: 1, preferredTimescale: 1_000)
+        videoPlayerView?.player?.seek(
+            to: target,
+            toleranceBefore: tolerance,
+            toleranceAfter: tolerance
+        )
     }
 
     /// Source-agnostic quality menu: renders `source.availableQualities` and
@@ -40,7 +59,7 @@ extension WatchViewController {
         )
     }
 
-    private func selectSourceQuality(
+    func selectSourceQuality(
         _ quality: VideoQuality,
         source: VideoSource
     ) {
