@@ -468,3 +468,11 @@
 "settings.row.shortsGrouping" = "在订阅内容中分组";
 "settings.footer.shorts" = "分组会将订阅内容中每一页的 Shorts 收进单独的栏目。关闭后，Shorts 将像普通视频一样直接显示在列表中。";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "缩略图画质";
+"settings.thumbnailQuality.auto" = "自动";
+"settings.thumbnailQuality.low" = "低 (320×180)";
+"settings.thumbnailQuality.medium" = "中 (480×270)";
+"settings.thumbnailQuality.high" = "高 (640×360)";
+"settings.thumbnailQuality.maximum" = "最高 (1280×720)";
+"settings.footer.thumbnailQuality" = "“自动”会根据设备的内存大小选择画质。画质越高，下载的数据和每张缩略图占用的内存就越多，在内存较小的设备上可能会导致滚动变慢。";

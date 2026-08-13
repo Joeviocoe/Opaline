@@ -18,6 +18,7 @@ enum UserDefaultsKeys {
         static let feedCacheDays = "feedCacheDays"
         static let imageCacheEnabled = "imageCacheEnabled"
         static let imageCacheDays = "imageCacheDays"
+        static let thumbnailQuality = "thumbnailQuality"
 
         /// When a feed was last written — read on launch to decide whether
         /// the screen may skip its network revalidation. Cheaper than

@@ -497,3 +497,11 @@
 "auth.tryAgain" = "Try again";
 /* Status when the device has no working connection */
 "auth.offline" = "No connection";
+
+"settings.row.thumbnailQuality" = "Thumbnail Quality";
+"settings.thumbnailQuality.auto" = "Auto";
+"settings.thumbnailQuality.low" = "Low (320×180)";
+"settings.thumbnailQuality.medium" = "Medium (480×270)";
+"settings.thumbnailQuality.high" = "High (640×360)";
+"settings.thumbnailQuality.maximum" = "Maximum (1280×720)";
+"settings.footer.thumbnailQuality" = "Auto picks a level from the amount of memory your device has. Higher quality means larger downloads and more memory per thumbnail, which can slow scrolling on devices with little RAM.";

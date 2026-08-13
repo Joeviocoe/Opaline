@@ -379,3 +379,11 @@
 "shorts.shelf.title" = "Shorts";
 "common.close" = "Закрыть";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "Качество обложек";
+"settings.thumbnailQuality.auto" = "Авто";
+"settings.thumbnailQuality.low" = "Низкое (320×180)";
+"settings.thumbnailQuality.medium" = "Среднее (480×270)";
+"settings.thumbnailQuality.high" = "Высокое (640×360)";
+"settings.thumbnailQuality.maximum" = "Максимальное (1280×720)";
+"settings.footer.thumbnailQuality" = "В режиме «Авто» уровень выбирается по объёму памяти устройства. Чем выше качество, тем больше загрузка и расход памяти на каждую обложку — на устройствах с малым объёмом ОЗУ это может замедлять прокрутку.";

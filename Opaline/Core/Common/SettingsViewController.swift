@@ -16,7 +16,7 @@ final class SettingsViewController: UIViewController {
         case autoDubEnabled, autoDubLanguage, autoDubIgnoreAI
         case homeLayout, defaultTab
         case persistCache, feedCacheDays
-        case imageCacheEnabled, imageCacheDays
+        case imageCacheEnabled, imageCacheDays, thumbnailQuality
         case clearCache, rydEnabled
         case sponsorBlockEnabled, sponsorBlockSettings
         case notificationSettings
@@ -325,6 +325,11 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 "settings.row.imageCacheDuration".localized,
                 value: "settings.daysCount".localized(with: days)
             )
+        case .thumbnailQuality:
+            return makeDisclosureCell(
+                "settings.row.thumbnailQuality".localized,
+                value: ThumbnailQuality.selected.displayName
+            )
         case .clearCache:
             return makeDestructiveCell("settings.row.clearCache".localized)
         case .rydEnabled:
@@ -403,6 +408,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             showFeedCacheDaysPicker()
         case .imageCacheDays:
             showImageCacheDaysPicker()
+        case .thumbnailQuality:
+            showThumbnailQualityPicker()
         case .clearCache:
             clearCache()
         case .sponsorBlockSettings:
@@ -450,6 +457,29 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             )
             self.reloadSection(containing: .showShorts)
         }
+    }
+
+    private func showThumbnailQualityPicker() {
+        let sheet = UIAlertController(
+            title: "settings.row.thumbnailQuality".localized,
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        for quality in ThumbnailQuality.allCases {
+            let action = UIAlertAction(
+                title: quality.displayName, style: .default
+            ) { _ in
+                ThumbnailQuality.selected = quality
+                self.reloadAllSettings()
+            }
+            if quality == ThumbnailQuality.selected {
+                action.setValue(true, forKey: "checked")
+            }
+            sheet.addAction(action)
+        }
+        sheet.addAction(UIAlertAction(title: "common.cancel".localized, style: .cancel))
+        configureCenteredPopover(sheet)
+        present(sheet, animated: true)
     }
 
     private func showShortsPlayerPicker() {

@@ -464,3 +464,11 @@
 "settings.row.shortsGrouping" = "Agrupar nas Inscrições";
 "settings.footer.shorts" = "O agrupamento reúne cada página do feed de inscrições em uma prateleira de Shorts própria. Desative para ver os Shorts na linha do tempo como vídeos comuns.";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "Qualidade das miniaturas";
+"settings.thumbnailQuality.auto" = "Automática";
+"settings.thumbnailQuality.low" = "Baixa (320×180)";
+"settings.thumbnailQuality.medium" = "Média (480×270)";
+"settings.thumbnailQuality.high" = "Alta (640×360)";
+"settings.thumbnailQuality.maximum" = "Máxima (1280×720)";
+"settings.footer.thumbnailQuality" = "O modo automático escolhe o nível conforme a memória do seu dispositivo. Mais qualidade significa downloads maiores e mais memória por miniatura, o que pode deixar a rolagem mais lenta em dispositivos com pouca RAM.";

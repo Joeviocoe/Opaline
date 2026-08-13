@@ -464,3 +464,11 @@
 "settings.row.shortsGrouping" = "Agrupar en Suscripciones";
 "settings.footer.shorts" = "Al agrupar, cada página del feed de suscripciones se recoge en su propia sección de Shorts. Desactívalo para ver los Shorts intercalados como vídeos normales.";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "Calidad de las miniaturas";
+"settings.thumbnailQuality.auto" = "Automática";
+"settings.thumbnailQuality.low" = "Baja (320×180)";
+"settings.thumbnailQuality.medium" = "Media (480×270)";
+"settings.thumbnailQuality.high" = "Alta (640×360)";
+"settings.thumbnailQuality.maximum" = "Máxima (1280×720)";
+"settings.footer.thumbnailQuality" = "La opción automática elige el nivel según la memoria de tu dispositivo. Cuanta más calidad, mayores son las descargas y la memoria que ocupa cada miniatura, lo que puede ralentizar el desplazamiento en dispositivos con poca RAM.";
