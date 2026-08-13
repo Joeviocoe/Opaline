@@ -181,8 +181,10 @@ final class WatchViewController: UIViewController {
     var isLeavingFullscreen = false
     var channelTopToMeta, channelTopToDesc: NSLayoutConstraint?
     /// Pins the interface while a fullscreen toggle rotates it against the way
-    /// the device is physically held; cleared once the two agree again.
-    var orientationLock: UIInterfaceOrientationMask?
+    /// the device is physically held; cleared once the two agree again. `Held`
+    /// marks the lock taken at open instead: it waits for the phone to be
+    /// turned out of *that* hold, not for any particular orientation.
+    var orientationLock: UIInterfaceOrientationMask?, orientationLockHeld: UIDeviceOrientation?
 
     // MARK: - Computed Properties
 
@@ -236,6 +238,7 @@ final class WatchViewController: UIViewController {
         self.videoRouter = videoRouter
         super.init(nibName: nil, bundle: nil)
         playbackFacade.context = self
+        keepOpeningOrientation()
     }
 
     @available(*, unavailable)
@@ -285,9 +288,6 @@ final class WatchViewController: UIViewController {
     deinit {
         NotificationCenter.default
             .removeObserver(self)
-        if UIDevice.current.userInterfaceIdiom != .pad {
-            UIDevice.current.endGeneratingDeviceOrientationNotifications()
-        }
         statusObservation?.invalidate()
         statusObservation = nil
         if let item =

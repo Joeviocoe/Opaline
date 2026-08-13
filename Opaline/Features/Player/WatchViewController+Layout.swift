@@ -61,9 +61,9 @@ extension WatchViewController {
             object: nil
         )
         // Only to release the orientation lock a fullscreen toggle took — the
-        // rotation itself is UIKit's job.
+        // rotation itself is UIKit's job. Generation runs app-wide from
+        // `AppDelegate`, so there is nothing to start here.
         if UIDevice.current.userInterfaceIdiom != .pad {
-            UIDevice.current.beginGeneratingDeviceOrientationNotifications()
             nc.addObserver(
                 self,
                 selector: #selector(handleDeviceOrientationChange),

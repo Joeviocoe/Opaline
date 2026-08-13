@@ -16,6 +16,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         configureServices(application)
+        // The player has to know how the phone is held the moment it opens —
+        // too late to start asking then.
+        HeldOrientation.startTracking()
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = makeSplashViewController()
         window?.makeKeyAndVisible()

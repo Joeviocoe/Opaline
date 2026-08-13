@@ -58,6 +58,10 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
 
     func expand(animated: Bool) {
         isExpanded = true
+        // Expanding is what hands the orientation over to the player — every
+        // video after the first reuses this panel, so this, not the watch
+        // screen's init, is the moment to keep the orientation it opened in.
+        watchVC.keepOpeningOrientation()
         refreshSupportedOrientations()
         refreshMiniBar()
         let animations = {
