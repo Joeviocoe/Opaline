@@ -68,6 +68,11 @@ extension SettingsViewController {
                 header: "settings.section.home".localized,
                 footer: "settings.footer.home".localized,
                 rows: [.homeLayout, .defaultTab]
+            ),
+            Section(
+                header: nil,
+                footer: "settings.footer.thumbnailQuality".localized,
+                rows: [.thumbnailQuality]
             )
         ]
     }

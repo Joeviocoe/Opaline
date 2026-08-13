@@ -36,11 +36,25 @@ class ThumbnailImageView: UIImageView {
         backgroundColor = ThemeManager.shared.thumbnailPlaceholder
         contentMode = .scaleAspectFill
         clipsToBounds = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(qualityDidChange),
+            name: .thumbnailQualityDidChange,
+            object: nil
+        )
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) is not supported")
+    }
+
+    /// The ceiling moved, so re-resolve the target and reload at the new one.
+    @objc
+    private func qualityDidChange() {
+        currentPixelSize = 0
+        hasFailed = false
+        startLoadingIfNeeded()
     }
 
     override func layoutSubviews() {
@@ -91,6 +105,9 @@ class ThumbnailImageView: UIImageView {
         }
         loadToken?.cancel()
         currentPixelSize = target
+        if showCachedImage(url: url, target: target) {
+            return
+        }
         loadToken = ThumbnailLoader.shared.load(
             url: url,
             maxPixelSize: target,
@@ -102,6 +119,22 @@ class ThumbnailImageView: UIImageView {
                 target: target
             )
         }
+    }
+
+    /// Paints a memory-cached thumbnail synchronously, so a recycled cell
+    /// never flashes its placeholder before the async hit lands.
+    private func showCachedImage(url: URL, target: Int) -> Bool {
+        guard let cached = ThumbnailLoader.shared.cachedImage(
+            url: url,
+            maxPixelSize: target,
+            videoId: currentVideoId
+        ) else {
+            return false
+        }
+        loadToken = nil
+        image = cached
+        isShowingFallback = false
+        return true
     }
 
     private func shouldStartLoading(target: Int) -> Bool {

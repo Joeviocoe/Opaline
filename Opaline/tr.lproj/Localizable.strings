@@ -468,3 +468,11 @@
 "settings.row.shortsGrouping" = "Aboneliklerde grupla";
 "settings.footer.shorts" = "Gruplama, abonelik akışının her sayfasındaki Shorts videolarını kendi rafında toplar. Shorts videolarını normal videolar gibi akış içinde görmek için kapatın.";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "Küçük resim kalitesi";
+"settings.thumbnailQuality.auto" = "Otomatik";
+"settings.thumbnailQuality.low" = "Düşük (320×180)";
+"settings.thumbnailQuality.medium" = "Orta (480×270)";
+"settings.thumbnailQuality.high" = "Yüksek (640×360)";
+"settings.thumbnailQuality.maximum" = "En yüksek (1280×720)";
+"settings.footer.thumbnailQuality" = "Otomatik seçenek, düzeyi cihazınızın bellek miktarına göre belirler. Kalite arttıkça indirilen veri ve her küçük resmin kullandığı bellek de artar; bu da az RAM'e sahip cihazlarda kaydırmayı yavaşlatabilir.";

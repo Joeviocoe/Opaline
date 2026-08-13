@@ -379,3 +379,11 @@
 "common.close" = "Закрити";
 "player.menu.queue" = "Черга";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "Якість обкладинок";
+"settings.thumbnailQuality.auto" = "Авто";
+"settings.thumbnailQuality.low" = "Низька (320×180)";
+"settings.thumbnailQuality.medium" = "Середня (480×270)";
+"settings.thumbnailQuality.high" = "Висока (640×360)";
+"settings.thumbnailQuality.maximum" = "Максимальна (1280×720)";
+"settings.footer.thumbnailQuality" = "У режимі «Авто» рівень обирається за обсягом памʼяті пристрою. Що вища якість, то більше завантаження та витрати памʼяті на кожну обкладинку — на пристроях з малим обсягом ОЗП це може сповільнювати прокручування.";

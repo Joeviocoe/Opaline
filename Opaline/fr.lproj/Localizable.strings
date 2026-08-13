@@ -464,3 +464,11 @@
 "settings.row.shortsGrouping" = "Grouper dans Abonnements";
 "settings.footer.shorts" = "Le groupement rassemble chaque page du flux d'abonnements dans son propre rayon Shorts. Désactivez cette option pour voir les Shorts intégrés comme des vidéos ordinaires.";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "Qualité des miniatures";
+"settings.thumbnailQuality.auto" = "Auto";
+"settings.thumbnailQuality.low" = "Basse (320×180)";
+"settings.thumbnailQuality.medium" = "Moyenne (480×270)";
+"settings.thumbnailQuality.high" = "Élevée (640×360)";
+"settings.thumbnailQuality.maximum" = "Maximale (1280×720)";
+"settings.footer.thumbnailQuality" = "Le mode auto choisit le niveau selon la mémoire de votre appareil. Plus la qualité est élevée, plus les téléchargements et la mémoire utilisée par miniature augmentent, ce qui peut ralentir le défilement sur les appareils avec peu de RAM.";

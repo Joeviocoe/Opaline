@@ -466,3 +466,11 @@
 "settings.row.shortsGrouping" = "In Abos gruppieren";
 "settings.footer.shorts" = "Beim Gruppieren wird jede Seite des Abo-Feeds zu einem eigenen Shorts-Regal zusammengefasst. Deaktiviere die Option, um Shorts wie normale Videos einzeln zu sehen.";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "Vorschaubildqualität";
+"settings.thumbnailQuality.auto" = "Auto";
+"settings.thumbnailQuality.low" = "Niedrig (320×180)";
+"settings.thumbnailQuality.medium" = "Mittel (480×270)";
+"settings.thumbnailQuality.high" = "Hoch (640×360)";
+"settings.thumbnailQuality.maximum" = "Maximal (1280×720)";
+"settings.footer.thumbnailQuality" = "„Auto“ wählt die Stufe anhand des Arbeitsspeichers deines Geräts. Höhere Qualität bedeutet größere Downloads und mehr Speicher pro Vorschaubild, was das Scrollen auf Geräten mit wenig RAM verlangsamen kann.";

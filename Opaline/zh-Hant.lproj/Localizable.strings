@@ -468,3 +468,11 @@
 "settings.row.shortsGrouping" = "在訂閱內容中分組";
 "settings.footer.shorts" = "分組會將訂閱內容每一頁的 Shorts 收進獨立的區塊。關閉後，Shorts 會像一般影片一樣顯示在清單中。";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
+
+"settings.row.thumbnailQuality" = "縮圖畫質";
+"settings.thumbnailQuality.auto" = "自動";
+"settings.thumbnailQuality.low" = "低 (320×180)";
+"settings.thumbnailQuality.medium" = "中 (480×270)";
+"settings.thumbnailQuality.high" = "高 (640×360)";
+"settings.thumbnailQuality.maximum" = "最高 (1280×720)";
+"settings.footer.thumbnailQuality" = "「自動」會依裝置的記憶體大小選擇畫質。畫質越高，下載的資料量與每張縮圖佔用的記憶體就越多，在記憶體較小的裝置上可能會使捲動變慢。";

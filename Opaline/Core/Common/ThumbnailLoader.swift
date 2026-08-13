@@ -59,6 +59,30 @@ final class ThumbnailLoader {
         return token
     }
 
+    /// Synchronous memory-cache probe. `load` needs two queue hops even for
+    /// a cached image, so a recycled cell painted its grey placeholder for a
+    /// frame before the hit arrived. Callers on the main thread use this to
+    /// fill the view inside the same layout pass.
+    func cachedImage(
+        url: URL,
+        maxPixelSize: Int,
+        videoId: String? = nil
+    ) -> UIImage? {
+        let request = ThumbnailRequest(
+            url: url,
+            maxPixelSize: maxPixelSize,
+            videoId: videoId
+        )
+        for candidate in request.candidates {
+            if let image = memoryCache.object(
+                forKey: request.cacheKey(for: candidate)
+            ) {
+                return image
+            }
+        }
+        return nil
+    }
+
     func prefetch(
         url: URL,
         maxPixelSize: Int,
@@ -114,11 +138,11 @@ final class ThumbnailLoader {
     }
 
     func invalidate(url: URL) {
-        let request = ThumbnailRequest(
-            url: url,
-            maxPixelSize: ThumbnailSizing.defaultPixelSize
-        )
-        for candidate in request.candidates {
+        // Candidate stems depend on the decode target, so drop every step's.
+        let candidates = ThumbnailSizing.decodeSteps.flatMap {
+            ThumbnailRequest(url: url, maxPixelSize: $0).candidates
+        }
+        for candidate in Set(candidates) {
             for pixelSize in 1...ThumbnailSizing.maximumPixelSize {
                 memoryCache.remove(
                     url: "\(candidate.absoluteString)#\(pixelSize)"
