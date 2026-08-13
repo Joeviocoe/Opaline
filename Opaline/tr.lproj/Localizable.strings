@@ -12,6 +12,8 @@
 "player.menu.settings" = "Oynatma ayarları";
 /* Menu item + picker title: video quality */
 "player.menu.quality" = "Kalite";
+/* Quality tier that drops the video track to save data */
+"player.quality.audioOnly" = "Yalnızca ses";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Ses parçası";
 /* Menu item: toggles the playback statistics overlay */

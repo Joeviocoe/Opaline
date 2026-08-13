@@ -97,8 +97,8 @@ final class MWebSource: VideoSource {
             return
         }
         guard let info,
-              let format = info.allDashVideoFormats.first(
-                  where: { "\($0.itag)" == quality.id }
+              let format = AudioOnlyMode.resolveFormat(
+                  for: quality, info: info, current: currentQuality
               ),
               let audio = currentAudioFormat ?? info.dashAudioFormat else {
             completion(.failure(Self.noStreamError))
@@ -116,9 +116,12 @@ final class MWebSource: VideoSource {
         self.info = info
         liveHLS.reset()
         availableQualities = AndroidVRSource.qualities(from: info)
-        currentQuality = info.dashVideoFormat.flatMap { selected in
+        let defaultQuality = info.dashVideoFormat.flatMap { selected in
             availableQualities.first { $0.id == "\(selected.itag)" }
         }
+        currentQuality = AudioOnlyMode.startQuality(
+            in: availableQualities, fallback: defaultQuality
+        )
         updateAudioTrackState(from: info)
     }
 

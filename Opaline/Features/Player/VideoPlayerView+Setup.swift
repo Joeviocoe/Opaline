@@ -10,6 +10,7 @@ extension VideoPlayerView {
         backgroundColor = .black
         playerLayer.videoGravity = .resizeAspect
         layer.addSublayer(playerLayer)
+        setupAudioPlaceholder()
         topGradientLayer.opacity = 0
         bottomGradientLayer.opacity = 0
         layer.addSublayer(topGradientLayer)
@@ -23,7 +24,7 @@ extension VideoPlayerView {
 
     private func addControlFeedback() {
         for button in [
-            settingsButton, pipButton, ccButton, speedButton,
+            settingsButton, pipButton, ccButton, speedButton, audioOnlyButton,
             rewindButton, playPauseButton, forwardButton,
             fullscreenButton, skipButton
         ] {
@@ -195,6 +196,7 @@ extension VideoPlayerView {
         configurePipButton()
         configureCCButton()
         configureSpeedButton()
+        configureAudioOnlyButton()
         activateTopBarConstraints()
     }
 
@@ -233,14 +235,10 @@ extension VideoPlayerView {
     private func configureSpeedButton() {
         speedButton.tintColor = .white
         speedButton.titleLabel?.font = UIFont.systemFont(
-            ofSize: 10,
+            ofSize: 12,
             weight: .bold
         )
         speedButton.setTitleColor(.white, for: .normal)
-        speedButton.layer.borderColor = UIColor.white
-            .withAlphaComponent(0.6).cgColor
-        speedButton.layer.borderWidth = 1
-        speedButton.layer.cornerRadius = 4
         speedButton.translatesAutoresizingMaskIntoConstraints = false
         speedButton.addTarget(
             self,
@@ -324,10 +322,6 @@ extension VideoPlayerView {
             UIColor(red: 1, green: 0.84, blue: 0, alpha: 1),
             for: .selected
         )
-        ccButton.layer.borderColor = UIColor.white
-            .withAlphaComponent(0.6).cgColor
-        ccButton.layer.borderWidth = 1
-        ccButton.layer.cornerRadius = 4
     }
 
     private func setupSubtitleLabel() {
@@ -387,8 +381,8 @@ extension VideoPlayerView {
             ccButton.trailingAnchor.constraint(
                 equalTo: pipButton.leadingAnchor, constant: -4
             ),
-            ccButton.widthAnchor.constraint(equalToConstant: 32),
-            ccButton.heightAnchor.constraint(equalToConstant: 22)
+            ccButton.widthAnchor.constraint(equalToConstant: 36),
+            ccButton.heightAnchor.constraint(equalToConstant: 36)
         ])
     }
 
@@ -404,7 +398,7 @@ extension VideoPlayerView {
                 equalToConstant: 36
             ),
             speedButton.heightAnchor.constraint(
-                equalToConstant: 22
+                equalToConstant: 36
             )
         ])
     }

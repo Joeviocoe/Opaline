@@ -96,7 +96,7 @@ final class WatchViewController: UIViewController {
     var isRecoveringPlayback = false, hasSeenPlaybackError = false
     /// Frozen during a recovery seek: a fresh item's zeroed clock must not
     /// overwrite where the user actually was.
-    var lastPlaybackPosition = 0.0, pendingRecoverySeek = false
+    var lastPlaybackPosition = 0.0, pendingRecoverySeek = false, pendingResumeSeek: CMTime?
     let queue = PlaybackQueue.shared
 
     // MARK: - UI Elements

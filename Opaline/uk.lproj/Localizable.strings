@@ -8,6 +8,8 @@
 
 "player.menu.settings" = "Параметри відтворення";
 "player.menu.quality" = "Якість";
+/* Quality tier that drops the video track to save data */
+"player.quality.audioOnly" = "Лише звук";
 "player.menu.audioTrack" = "Аудіодоріжка";
 "player.menu.stats" = "Статистика для сисадмінів";
 "player.menu.subtitles" = "Субтитри";

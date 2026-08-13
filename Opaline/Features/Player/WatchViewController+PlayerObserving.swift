@@ -82,6 +82,9 @@ extension WatchViewController {
         if applyRecoverySeekIfNeeded(item) {
             return
         }
+        // Not an early return: a switched stream still needs its Now Playing
+        // session rebound to the new player below.
+        applyResumeSeekIfNeeded()
         let duration = CMTimeGetSeconds(item.duration)
         let tracks = item.tracks
             .map {
