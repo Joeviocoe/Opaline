@@ -39,6 +39,8 @@
 "common.done" = "Готово";
 "common.edit" = "Изменить";
 "common.delete" = "Удалить";
+/* Toast shown after a value is copied */
+"common.copied" = "Скопировано";
 "common.playlist" = "Плейлист";
 "library.title" = "Библиотека";
 
@@ -212,6 +214,13 @@
 "settings.row.shareLog" = "Поделиться логом отладки";
 "settings.row.support" = "Поддержать разработку";
 "settings.row.feedback" = "Отправить отзыв";
+
+/* About section: values an issue report asks for, copied on tap */
+"settings.section.about" = "О приложении";
+"settings.footer.about" = "Нажмите на значение, чтобы скопировать его — эти данные нужны в отчётах об ошибках.";
+"settings.about.version" = "Версия";
+"settings.about.system" = "Система";
+"settings.about.model" = "Модель";
 "settings.solver.message" = "Адрес solver server.";
 "settings.solver.reset" = "Сбросить по умолчанию";
 "settings.solver.defaultSuffix" = " (по умолчанию)";

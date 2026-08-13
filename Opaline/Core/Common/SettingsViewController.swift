@@ -25,6 +25,7 @@ final class SettingsViewController: UIViewController {
         case mainThreadWatchdog
         case shareLog
         case feedback, support
+        case aboutVersion, aboutSystem, aboutModel
     }
     enum Page {
         case root, appearance, language, playback, shorts
@@ -65,13 +66,6 @@ final class SettingsViewController: UIViewController {
             return "settings.footer.themeAutoSystem".localized
         }
         return "settings.footer.themeAutoHours".localized
-    }
-
-    var appVersionFooter: String {
-        let info = Bundle.main.infoDictionary
-        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
-        let build = info?["CFBundleVersion"] as? String ?? "?"
-        return "Opaline v\(version) (\(build))"
     }
 
     private var solverEndpointDisplay: String {
@@ -354,6 +348,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return makeDisclosureCell("settings.row.feedback".localized)
         case .support:
             return makeDisclosureCell("settings.row.support".localized)
+        case .aboutVersion, .aboutSystem, .aboutModel:
+            return makeAboutCell(row)
         case .playbackSource:
             return makeDisclosureCell(
                 "settings.row.playbackSource".localized,
@@ -391,7 +387,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             handlePageSelection,
             handleDebugSelection, handleThemeSelection,
             handleLanguageSelection, handleAutoDubSelection,
-            handleNotificationsSelection, handleGeneralSelection
+            handleNotificationsSelection, handleAboutSelection,
+            handleGeneralSelection
         ]
         _ = handlers.first { $0(row) }
     }

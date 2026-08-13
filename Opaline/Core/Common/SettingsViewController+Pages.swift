@@ -46,8 +46,13 @@ extension SettingsViewController {
             ),
             Section(
                 header: nil,
-                footer: appVersionFooter,
+                footer: nil,
                 rows: [.feedback, .support]
+            ),
+            Section(
+                header: "settings.section.about".localized,
+                footer: "settings.footer.about".localized,
+                rows: [.aboutVersion, .aboutSystem, .aboutModel]
             )
         ]
     }
