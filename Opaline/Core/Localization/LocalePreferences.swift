@@ -18,9 +18,14 @@ protocol LocalePreferences {
 struct DefaultLocalePreferences: LocalePreferences {
     var hl: String { AppLanguage.effective.rawValue }
 
+    /// `gl: "CN"` makes Innertube answer /search with a
+    /// `backgroundPromoRenderer` ("Something went wrong") instead of
+    /// results — YouTube does not serve that region. Devices set to China
+    /// land there through `Locale.current`, so map it to the default.
     var gl: String {
-        UserDefaults.standard.string(
+        let region = UserDefaults.standard.string(
             forKey: UserDefaultsKeys.Localization.region
         ) ?? Locale.current.regionCode ?? "US"
+        return region == "CN" ? "US" : region
     }
 }
