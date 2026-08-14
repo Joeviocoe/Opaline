@@ -136,6 +136,7 @@ enum PlaybackSource: String, CaseIterable {
     case androidVR = "android_vr"
     case progressive = "progressive"
     case mwebPot = "mweb_pot"
+    case sabr = "sabr"
 
     static var selected: PlaybackSource {
         let raw = UserDefaults.standard.string(
@@ -155,6 +156,8 @@ enum PlaybackSource: String, CaseIterable {
             return "Progressive (360p)"
         case .mwebPot:
             return "Mobile Web + pot (kids/dubbed)"
+        case .sabr:
+            return "SABR (no minute limit)"
         }
     }
 
@@ -168,6 +171,8 @@ enum PlaybackSource: String, CaseIterable {
             return .progressive
         case .mwebPot:
             return .mwebPot
+        case .sabr:
+            return .sabr
         }
     }
 }

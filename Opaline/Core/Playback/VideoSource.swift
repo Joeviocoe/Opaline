@@ -16,6 +16,8 @@ enum VideoSourceKind {
     case androidVR
     case progressive
     case mwebPot
+    /// SABR/UMP transport — no per-URL expiry, so no identity re-draw.
+    case sabr
 }
 
 /// A selectable quality level, expressed source-agnostically.

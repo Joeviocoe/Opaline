@@ -261,7 +261,8 @@ private extension InnertubeClient {
                 as? String,
             audioIsDefault:
                 (track?["audioIsDefault"] as? Bool)
-                    ?? false
+                    ?? false,
+            xtags: fmt["xtags"] as? String
         )
     }
     // swiftlint:enable function_parameter_count
