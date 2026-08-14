@@ -151,6 +151,17 @@ final class LocalMediaServer {
     // MARK: - Connections
 
     private func accept(_ connection: NWConnection) {
+        // Keep-alive means the player decides when a connection is done, so
+        // its end has to be noticed and the socket released — otherwise they
+        // pile up in CLOSE_WAIT for the whole session.
+        connection.stateUpdateHandler = { state in
+            switch state {
+            case .failed, .cancelled:
+                connection.cancel()
+            default:
+                break
+            }
+        }
         connection.start(queue: queue)
         receiveRequest(on: connection, buffer: Data())
     }
@@ -173,6 +184,8 @@ final class LocalMediaServer {
                 self.respond(to: request, on: connection)
                 return
             }
+            // isComplete here is the peer half-closing: nothing more is
+            // coming, so let the socket go instead of waiting on it.
             guard error == nil, !isComplete, buffer.count < 8 * 1_024 else {
                 connection.cancel()
                 return

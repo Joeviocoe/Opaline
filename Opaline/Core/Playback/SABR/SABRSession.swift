@@ -35,16 +35,18 @@ final class SABRSession {
     /// Rolling buffer ceiling. The iPad mini 2 is the target and the player
     /// itself only keeps 20-25s ahead, so holding more than this buys nothing
     /// and costs resident memory.
-    static let bufferLimit = 10 * 1_024 * 1_024
+    static let bufferLimit = 14 * 1_024 * 1_024
     /// How far ahead of the playhead the session keeps fetching on its own.
     /// Without this the pump only ran when a read was already waiting, so every
     /// segment cost a full request round-trip and the player reported
     /// "no response for media file" while it waited.
     static let prefetchMs = 15_000
-    /// Bytes kept behind the read position. Anything older has been handed to
-    /// AVPlayer already and will not be asked for again unless the user seeks
-    /// back, which restarts the session anyway.
-    static let keepBehind = 1 * 1_024 * 1_024
+    /// Bytes kept behind the read position. Must cover a few segments: the
+    /// player does re-request one it already fetched (after a timeout, say),
+    /// and if that lands before the buffer the session mistakes it for a seek
+    /// and restarts the stream — which made playback slower, causing more
+    /// timeouts, causing more restarts.
+    static let keepBehind = 4 * 1_024 * 1_024
     /// Consecutive responses that answer nobody before we call it a stall
     /// rather than looping forever.
     static let maxEmptyRounds = 8
@@ -70,6 +72,8 @@ final class SABRSession {
     var readOffsets: [Int: Int64] = [:]
     /// Timeline position of the furthest read served, for the prefetch window.
     var lastServedMs = 0
+    /// Whether the last response carried any media, for the stall guard.
+    var sawMediaInLastResponse = false
     var reachedEnd = false
 
     init(
@@ -154,7 +158,14 @@ final class SABRSession {
     /// the player moved away from where the server is streaming, otherwise the
     /// next chunk of the one already running.
     func nextBody(for request: SABRReadRequest) -> Data? {
-        guard !needsSeek(itag: request.itag, offset: request.offset) else {
+        // A retry of bytes already served must not restart the session: they
+        // merely fell out of the buffer, and the stream itself is still valid.
+        // Restarting on those threw away all progress, so the server resent the
+        // opening segments, which made playback slower, which caused more
+        // retries — the loop this guard exists to break.
+        let seeking = needsSeek(itag: request.itag, offset: request.offset)
+            && !isRetry(itag: request.itag, offset: request.offset)
+        guard !seeking else {
             resetBuffers()
             progress.removeAll()
             reachedEnd = false

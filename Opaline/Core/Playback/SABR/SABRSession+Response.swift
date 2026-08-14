@@ -57,6 +57,7 @@ extension SABRSession {
             .sorted()
             .joined(separator: " ")
         AppLog.hls("sabr got \(reached.isEmpty ? "no media" : reached)")
+        sawMediaInLastResponse = sawMedia
         if !sawMedia {
             // No media at all means the server declined rather than the stream
             // ending — some videos are simply not served over SABR, and the
@@ -75,6 +76,10 @@ extension SABRSession {
             let id = Protobuf.parse(part.payload).number(1) ?? 0
             headers[id] = MediaHeader(part.payload)
         case .media:
+            // Init segments do not count: at the end of a stream the server
+            // keeps answering with those alone, and treating them as media
+            // meant the session never noticed it had finished and asked again
+            // forever.
             return store(media: part.payload, headers: headers)
         case .nextRequestPolicy, .nextRequestPolicyAlt:
             if let cookie = Protobuf.parse(part.payload).data(7) {
@@ -112,6 +117,7 @@ extension SABRSession {
             return false
         }
         let data = payload[start..<payload.endIndex]
+        let isMedia = !header.isInit
         // Media arrives in several parts per segment; each continues where the
         // previous one stopped, so position by what is already buffered.
         let written = bufferedLength(itag: header.itag, from: header.startRange)
@@ -121,13 +127,13 @@ extension SABRSession {
             data: data,
             isInit: header.isInit
         ))
-        if !header.isInit {
+        if isMedia {
             advance(
                 itag: header.itag,
                 sequence: header.sequence,
                 bufferedMs: header.bufferedMs
             )
         }
-        return true
+        return isMedia
     }
 }

@@ -95,12 +95,24 @@ extension SABRSession {
         return buffer.end - offset
     }
 
-    /// A read is a seek when it lands before what the session still holds.
+    /// A read is a seek when it lands before what the session still holds
+    /// *and* before anything it has ever served — a repeat of a segment the
+    /// player already had is not a seek, it is a retry, and restarting the
+    /// session for it throws away all the progress made so far.
     func needsSeek(itag: Int, offset: Int64) -> Bool {
         guard let buffer = buffers[itag] else {
             return false
         }
         return offset < buffer.start
+    }
+
+    /// How far behind the read position a re-request may land before it counts
+    /// as a genuine backwards seek.
+    func isRetry(itag: Int, offset: Int64) -> Bool {
+        guard let served = readOffsets[itag] else {
+            return false
+        }
+        return offset < served
     }
 
     func resetBuffers() {

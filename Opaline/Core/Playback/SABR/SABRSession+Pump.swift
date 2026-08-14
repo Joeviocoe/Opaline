@@ -55,8 +55,11 @@ extension SABRSession {
     }
 
     func afterResponse() {
-        let served = serveWaiters()
-        emptyRounds = served || waiting.isEmpty ? 0 : emptyRounds + 1
+        serveWaiters()
+        // Counts responses that brought no media at all. Keying this off
+        // "nobody was served" instead would never fire during prefetch, when
+        // serving nobody is the normal case.
+        emptyRounds = sawMediaInLastResponse ? 0 : emptyRounds + 1
         guard emptyRounds < Self.maxEmptyRounds else {
             AppLog.hls("sabr pump: no progress in \(emptyRounds) rounds")
             finishWaiters(with: SABRError.stalled)
