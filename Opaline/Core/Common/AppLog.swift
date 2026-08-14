@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 /// Lightweight timestamped logger.
 /// Writes to both console and a rotating log file in Caches/Logs/.
@@ -129,4 +130,45 @@ enum AppLog {
     static func subscribe(_ msg: String) { log("Subscribe", msg) }
     static func notifications(_ msg: String) { log("Notifications", msg) }
     static func perf(_ msg: String) { log("Perf", msg) }
+
+    /// First line of every session: which build is running, on what. Without
+    /// it a log is ambiguous — the same symptom means different things on a
+    /// different device or an older build.
+    static func banner() {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        let device = UIDevice.current
+        log(
+            "App",
+            "Opaline \(version) (\(build)) built \(buildTimestamp()) — \(hardwareModel())"
+                + ", \(device.systemName) \(device.systemVersion)"
+        )
+    }
+
+    /// When the binary was linked. The version numbers are fixed in the project
+    /// file and only CI ever bumps them, so every local build would otherwise
+    /// look identical in the log — this is what tells two of them apart.
+    private static func buildTimestamp() -> String {
+        guard let url = Bundle.main.executableURL,
+              let values = try? url.resourceValues(forKeys: [.contentModificationDateKey]),
+              let date = values.contentModificationDate else {
+            return "?"
+        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMM HH:mm"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: date)
+    }
+
+    /// `iPad4,4` rather than the marketing name: the model identifier is what
+    /// actually tells the hardware generation apart.
+    private static func hardwareModel() -> String {
+        var info = utsname()
+        uname(&info)
+        let machine = withUnsafePointer(to: &info.machine) { pointer in
+            pointer.withMemoryRebound(to: CChar.self, capacity: 1) { String(cString: $0) }
+        }
+        return machine.isEmpty ? "unknown" : machine
+    }
 }
