@@ -78,7 +78,7 @@ When Google dropped support for the official YouTube app on older devices, there
 - **Return YouTube Dislike** — see dislike counts again
 - **Audio tracks** — switch dubbed audio on multi-language videos, or start videos dubbed in your language automatically; AI auto-dubs are marked "(AI)"
 - **Subtitles** — full subtitle/caption support with VTT parsing
-- **12 languages** — localized interface, with video titles/search/feeds following your language (see [Localization](#localization))
+- **13 languages** — localized interface, with video titles/search/feeds following your language (see [Localization](#localization))
 - **Search & browse** — live suggestions, recent-search history, filters (sort, upload date, type, duration), channel pages, playlists
 - **Smart home feed** — endless recommendations with category chips read from your feed's shelves
 - **Subscriptions** — follow channels with a local subscription feed
@@ -187,19 +187,18 @@ Install the `.ipa` package directly:
 The interface follows your system language by default and can be overridden in **Settings → Language**. The content language (video titles, search, feeds — translated server-side by YouTube, like the official app) follows the app language; the region can be set separately.
 
 > [!NOTE]
-> All translations except English, Russian and Ukrainian were produced with LLM assistance and then review-passed — mistakes are still possible. If you spot a wrong or awkward translation, please [open an issue](../../issues) describing where it appears and what the correct wording should be. To improve a whole language (or add a new one), see [TRANSLATING.md](TRANSLATING.md).
+> Wording follows the official YouTube app's own translations wherever it has an equivalent string, but mistakes are still possible. If you spot a wrong or awkward translation — or want a language that isn't here — please [open an issue](../../issues) describing where it appears and what the correct wording should be.
 
 <details>
-<summary><b>Available in 12 languages</b></summary>
+<summary><b>Available in 13 languages</b></summary>
 <br>
 
 | | | | |
 |---|---|---|---|
 | `en` English | `ru` Русский | `uk` Українська | `de` Deutsch |
 | `es` Español | `fr` Français | `it` Italiano | `ja` 日本語 |
-| `pt` Português | `tr` Türkçe | `zh-Hans` 简体中文 | `zh-Hant` 繁體中文 |
-
-Translations for 55 more languages are prepared on the `archive/all-languages` branch — if you want one of them shipped, [open an issue](../../issues).
+| `pt` Português | `tr` Türkçe | `vi` Tiếng Việt | `zh-Hans` 简体中文 |
+| `zh-Hant` 繁體中文 | | | |
 
 </details>
 

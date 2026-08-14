@@ -1,12 +1,10 @@
 import Foundation
 
 /// UI languages the app ships `.lproj` bundles for. Adding a language =
-/// adding its case + a translated `Localizable.strings`
-/// (see docs/plans/localization.md, Phase 4). The full 67-language set lives
-/// on the `archive/all-languages` branch — this list is the curated set
-/// (en/ru/uk + Steam/W3Techs web-population leaders); restore a language by
-/// cherry-picking its `.lproj` and re-adding the case. RTL languages are
-/// deferred until a leading/trailing constraint audit.
+/// adding its case + a translated `Localizable.strings`, worded from the
+/// official YouTube app's own `.lproj` for that language (see the
+/// Localization section in AGENTS.md). RTL languages are deferred until a
+/// leading/trailing constraint audit.
 enum AppLanguage: String, CaseIterable {
     case english = "en"
     case russian = "ru"
@@ -18,6 +16,7 @@ enum AppLanguage: String, CaseIterable {
     case japanese = "ja"
     case portuguese = "pt"
     case turkish = "tr"
+    case vietnamese = "vi"
     case chineseSimplified = "zh-Hans"
     case chineseTraditional = "zh-Hant"
 
@@ -86,6 +85,8 @@ extension AppLanguage {
             "Português"
         case .turkish:
             "Türkçe"
+        case .vietnamese:
+            "Tiếng Việt"
         case .chineseSimplified:
             "简体中文"
         case .chineseTraditional:

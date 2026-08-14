@@ -79,9 +79,26 @@ enum ContentKeywords {
         years: ["рік", "рок"]
     )
 
+    /// "lượt xem" not the bare "xem": on its own the verb means "watch" and
+    /// appears in ordinary UI text ("Xem sau"), which would classify any
+    /// metadata line as a view count.
+    static let vietnamese = ContentKeywordTable(
+        viewCount: ["lượt xem", "đang xem"],
+        published: ["trước", "giây", "phút", "giờ", "ngày", "tuần", "tháng", "năm"],
+        subscribers: ["người đăng ký"],
+        videos: ["video"],
+        seconds: ["giây"],
+        minutes: ["phút"],
+        hours: ["giờ"],
+        days: ["ngày"],
+        weeks: ["tuần"],
+        months: ["tháng"],
+        years: ["năm"]
+    )
+
     /// Every shipped table — matching is language-agnostic (a Russian UI
     /// still parses cached English strings and vice versa).
-    static let all: [ContentKeywordTable] = [english, russian, ukrainian]
+    static let all: [ContentKeywordTable] = [english, russian, ukrainian, vietnamese]
 
     static func isViewCount(_ text: String) -> Bool {
         all.contains { table in
