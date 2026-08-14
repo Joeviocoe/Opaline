@@ -14,6 +14,8 @@
 "player.menu.quality" = "Quality";
 /* Quality tier that drops the video track to save data */
 "player.quality.audioOnly" = "Audio only";
+/* Player control-row toggle: repeat the current video */
+"player.loop" = "Loop video";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Audio track";
 /* Menu item + list title: the videos queued after this one */

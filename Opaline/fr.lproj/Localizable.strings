@@ -10,6 +10,7 @@
 "player.menu.quality" = "Qualité";
 /* Quality tier that drops the video track to save data */
 "player.quality.audioOnly" = "Audio seul";
+"player.loop" = "Lire en boucle";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Piste audio";
 /* Menu item: toggles the playback statistics overlay */

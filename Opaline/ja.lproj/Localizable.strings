@@ -14,6 +14,7 @@
 "player.menu.quality" = "画質";
 /* Quality tier that drops the video track to save data */
 "player.quality.audioOnly" = "音声のみ";
+"player.loop" = "動画のループ再生";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "音声トラック";
 /* Menu item: toggles the playback statistics overlay */

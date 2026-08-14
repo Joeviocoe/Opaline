@@ -14,6 +14,7 @@
 "player.menu.quality" = "画质";
 /* Quality tier that drops the video track to save data */
 "player.quality.audioOnly" = "仅音频";
+"player.loop" = "循环播放视频";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "音轨";
 /* Menu item: toggles the playback statistics overlay */
