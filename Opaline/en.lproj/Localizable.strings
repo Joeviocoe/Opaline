@@ -294,6 +294,7 @@
 
 /* Debug rows (values stay technical/English) */
 "settings.row.playbackSource" = "Playback Source";
+"settings.row.streamDelivery" = "Stream delivery";
 "settings.row.solverServer" = "Solver Server";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
 "settings.row.shareLog" = "Share Debug Log";

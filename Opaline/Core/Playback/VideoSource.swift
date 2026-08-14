@@ -16,8 +16,6 @@ enum VideoSourceKind {
     case androidVR
     case progressive
     case mwebPot
-    /// SABR/UMP transport — no per-URL expiry, so no identity re-draw.
-    case sabr
 }
 
 /// A selectable quality level, expressed source-agnostically.
@@ -120,6 +118,12 @@ protocol VideoSource: AnyObject {
         videoId: String,
         completion: @escaping ([AudioTrack]) -> Void
     )
+
+    /// Drops whatever this source is holding for playback that is no longer
+    /// on screen. A composite keeps every inner source alive for the whole
+    /// video, so without this a SABR session — its socket, its server and its
+    /// buffer — would outlive the switch to another source.
+    func releaseResources()
 }
 
 extension VideoSource {
@@ -159,6 +163,10 @@ extension VideoSource {
     ) {
         completion([])
     }
+
+    /// Nothing to release by default — only delivery-backed sources hold
+    /// anything between plays.
+    func releaseResources() {}
 }
 
 /// Creates the right `VideoSource` for a kind (abstract factory).

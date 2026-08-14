@@ -14,18 +14,32 @@ final class AndroidVRSource: VideoSource {
     let kind: VideoSourceKind = .androidVR
     var supportsQualitySelection: Bool { !availableQualities.isEmpty }
     var currentCodecs: String? {
-        Self.codecsLine(info: info, quality: currentQuality)
+        guard let line = Self.codecsLine(info: info, quality: currentQuality) else {
+            return nil
+        }
+        guard let delivery, delivery.label != "range" else {
+            return line
+        }
+        return "\(line) [\(delivery.label)]"
     }
     private(set) var availableQualities: [VideoQuality] = []
     private(set) var currentQuality: VideoQuality?
 
     private let apiClient: WatchService
+    let transport: HTTPTransport
+    /// How the bytes are arriving right now — byte ranges or SABR.
+    var delivery: StreamDelivery?
     private let liveHLS: LiveHLSPlayback
     private let client: DirectPlaybackClient = .androidVR
     private var info: DirectPlaybackInfo?
 
-    init(apiClient: WatchService, resolver: HLSStreamResolver = .shared) {
+    init(
+        apiClient: WatchService,
+        transport: HTTPTransport = ServiceContainer.mediaTransport,
+        resolver: HLSStreamResolver = .shared
+    ) {
         self.apiClient = apiClient
+        self.transport = transport
         liveHLS = LiveHLSPlayback(resolver: resolver)
     }
 
@@ -102,6 +116,10 @@ final class AndroidVRSource: VideoSource {
         }
     }
 
+    func releaseResources() {
+        releaseDelivery()
+    }
+
     func selectQuality(
         _ quality: VideoQuality,
         resumeAt: Double?,
@@ -121,7 +139,11 @@ final class AndroidVRSource: VideoSource {
         }
         currentQuality = quality
         buildGeneratedHLS(
-            info: info, video: format, audio: audio, completion: completion
+            info: info,
+            video: format,
+            audio: audio,
+            resumeAt: resumeAt,
+            completion: completion
         )
     }
 
@@ -165,29 +187,13 @@ final class AndroidVRSource: VideoSource {
         info: DirectPlaybackInfo,
         video: DashFormatInfo,
         audio: DashFormatInfo,
+        resumeAt: Double? = nil,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        let input = HLSPlaybackBuilder.BuildInput(
-            videoURL: client.directURL(baseURL: video.url, poToken: nil),
-            audioURL: client.directURL(baseURL: audio.url, poToken: nil),
-            videoFormat: video,
-            audioFormat: audio,
-            headers: client.streamHeaders(visitorData: info.visitorData)
+        deliver(
+            DeliveryRequest(info: info, video: video, audio: audio, resumeAt: resumeAt),
+            completion: completion
         )
-        HLSPlaybackBuilder.build(input: input) { result in
-            guard let result else {
-                completion(.failure(Self.noStreamError))
-                return
-            }
-            completion(.success(
-                PreparedPlayback(
-                    item: result.playerItem,
-                    resourceLoader: result.loader,
-                    captions: info.captionTracks,
-                    duration: info.duration
-                )
-            ))
-        }
     }
 
     private func progressiveItem(

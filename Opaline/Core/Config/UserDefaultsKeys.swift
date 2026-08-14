@@ -109,6 +109,7 @@ enum UserDefaultsKeys {
 
     enum Debug {
         static let playbackSource = "debug_playbackSource"
+        static let streamDelivery = "debug_streamDelivery"
         static let serverBaseURL = "debug_serverBaseURL"
         static let mainThreadWatchdog = "debug_mainThreadWatchdog"
     }
@@ -136,7 +137,6 @@ enum PlaybackSource: String, CaseIterable {
     case androidVR = "android_vr"
     case progressive = "progressive"
     case mwebPot = "mweb_pot"
-    case sabr = "sabr"
 
     static var selected: PlaybackSource {
         let raw = UserDefaults.standard.string(
@@ -156,8 +156,20 @@ enum PlaybackSource: String, CaseIterable {
             return "Progressive (360p)"
         case .mwebPot:
             return "Mobile Web + pot (kids/dubbed)"
-        case .sabr:
-            return "SABR (no minute limit)"
+        }
+    }
+
+    /// Whether this source has a choice of delivery at all.
+    ///
+    /// Only the android_vr path has two ways to fetch its bytes. Progressive
+    /// plays a single muxed URL, and mweb is built around its own pot-bound
+    /// URLs — neither has anything to switch between.
+    var supportsDeliveryChoice: Bool {
+        switch self {
+        case .auto, .androidVR:
+            return true
+        case .progressive, .mwebPot:
+            return false
         }
     }
 
@@ -171,8 +183,37 @@ enum PlaybackSource: String, CaseIterable {
             return .progressive
         case .mwebPot:
             return .mwebPot
-        case .sabr:
-            return .sabr
+        }
+    }
+}
+
+// MARK: - StreamDeliveryPreference
+
+/// How playback should fetch its bytes, when the user wants a say.
+///
+/// `auto` is the shipping behaviour: the source picks per response — byte
+/// ranges while formats carry URLs, SABR when they do not, each falling back
+/// to the other. The explicit options pin one delivery and disable the
+/// fallback, which is what makes them useful for testing: a failure stays a
+/// failure instead of being papered over.
+enum StreamDeliveryPreference: String, CaseIterable {
+    case automatic = "auto"
+    case byteRange = "range"
+    case sabrOnly = "sabr"
+
+    static var selected: StreamDeliveryPreference {
+        UserDefaults.standard.string(forKey: UserDefaultsKeys.Debug.streamDelivery)
+            .flatMap(StreamDeliveryPreference.init) ?? .automatic
+    }
+
+    var displayName: String {
+        switch self {
+        case .automatic:
+            return "Auto (by response)"
+        case .byteRange:
+            return "Byte ranges only"
+        case .sabrOnly:
+            return "SABR only"
         }
     }
 }

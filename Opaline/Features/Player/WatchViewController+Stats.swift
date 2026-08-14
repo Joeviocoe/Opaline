@@ -82,8 +82,6 @@ extension WatchViewController {
             return "mweb+pot"
         case .progressive:
             return "progressive"
-        case .sabr:
-            return "sabr"
         case .auto:
             return "auto"
         case nil:

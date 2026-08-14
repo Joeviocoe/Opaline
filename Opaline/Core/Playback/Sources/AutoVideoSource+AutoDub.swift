@@ -105,6 +105,7 @@ extension AutoVideoSource {
         switch result {
         case .success:
             if let fallback {
+                primary.releaseResources()
                 active = fallback
             }
             completion(result)

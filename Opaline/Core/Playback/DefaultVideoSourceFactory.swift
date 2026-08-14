@@ -14,18 +14,16 @@ struct DefaultVideoSourceFactory: VideoSourceFactory {
         switch kind {
         case .auto:
             return AutoVideoSource(
-                primary: AndroidVRSource(apiClient: apiClient)
+                primary: AndroidVRSource(apiClient: apiClient, transport: transport)
             ) { [apiClient] in
                 MWebSource(apiClient: apiClient)
             }
         case .androidVR:
-            return AndroidVRSource(apiClient: apiClient)
+            return AndroidVRSource(apiClient: apiClient, transport: transport)
         case .progressive:
             return ProgressiveSource(apiClient: apiClient)
         case .mwebPot:
             return MWebSource(apiClient: apiClient)
-        case .sabr:
-            return SABRSource(apiClient: apiClient, transport: transport)
         }
     }
 }

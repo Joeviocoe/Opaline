@@ -3,7 +3,7 @@ import Foundation
 
 // MARK: - Serving the streams to AVPlayer
 
-extension SABRSource {
+extension SABRDelivery {
     /// What the server currently serves: one session and its two tracks.
     struct Route {
         let generation: Int
@@ -168,13 +168,13 @@ extension SABRSource {
     /// listeners stopped coming up at all — which showed up as quality
     /// switching doing nothing.
     func buildPlayback(
-        _ stream: Stream,
+        _ request: DeliveryRequest,
         session: SABRSession,
         inits: [Int: Data],
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        let info = stream.info
-        guard let tracks = Self.tracks(inits: inits, info: info, video: stream.video) else {
+        let info = request.info
+        guard let tracks = Self.tracks(inits: inits, info: info, video: request.video) else {
             completion(.failure(SABRError.noInitSegment))
             return
         }

@@ -113,10 +113,11 @@ final class LocalMediaServer {
         case .failed(let error):
             AppLog.hls("local server failed: \(error.localizedDescription)")
             once.report(nil)
-        case .waiting(let error):
-            // Resources unavailable — leaked sockets from earlier sessions,
-            // typically. Worth seeing rather than hanging.
-            AppLog.hls("local server waiting: \(error.localizedDescription)")
+        case .waiting:
+            // Not worth logging: the listener passes through .waiting on its
+            // way to .ready every single time. A listener that genuinely
+            // cannot start is caught by the timeout below instead.
+            break
         default:
             break
         }

@@ -120,6 +120,7 @@ final class AutoVideoSource: VideoSource {
         )
         fallback.selectAudioTrack(track) { [weak self] result in
             if case .success = result {
+                self?.primary.releaseResources()
                 self?.active = fallback
             }
             completion(result)
