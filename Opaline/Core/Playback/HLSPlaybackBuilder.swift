@@ -31,42 +31,21 @@ enum HLSPlaybackBuilder {
         completion: @escaping (Result?) -> Void
     ) {
         let startTime = CACurrentMediaTime()
-        fetchSidxPair(input: input) { videoData, audioData in
-            let result = processSidxData(
-                input: input,
-                videoData: videoData,
-                audioData: audioData,
-                startTime: startTime
-            )
-            completion(result)
-        }
-    }
-
-    /// Fetch a byte range from a URL with custom headers.
-    static func fetchRangeData(
-        request: RangeRequest,
-        completion: @escaping (Data?) -> Void
-    ) {
-        var urlReq = URLRequest(url: request.url)
-        for (headerKey, headerVal) in request.headers {
-            urlReq.setValue(headerVal, forHTTPHeaderField: headerKey)
-        }
-        let rv = "bytes=\(request.start)-\(request.end)"
-        urlReq.setValue(rv, forHTTPHeaderField: HTTPHeader.range)
-        let task = URLSession.shared.dataTask(with: urlReq) { data, response, error in
-            if let error {
-                AppLog.hls("range fetch failed: \(error.localizedDescription)")
+        probeIdentity(input: input) { healthy in
+            guard healthy else {
                 completion(nil)
                 return
             }
-            let http = response as? HTTPURLResponse
-            let code = http?.statusCode ?? 0
-            if code != 206, code != 200 {
-                logRangeFailure(code: code, request: request, http: http, data: data)
+            fetchSidxPair(input: input) { videoData, audioData in
+                let result = processSidxData(
+                    input: input,
+                    videoData: videoData,
+                    audioData: audioData,
+                    startTime: startTime
+                )
+                completion(result)
             }
-            completion(data)
         }
-        task.resume()
     }
 }
 

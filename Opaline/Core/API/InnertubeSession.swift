@@ -102,11 +102,18 @@ final class InnertubeSession {
 // MARK: - Visitor identity
 
 extension InnertubeSession {
+    /// Bumped every time the visitor identity is dropped. Callers that kicked
+    /// off work under the old identity compare this before and after to tell a
+    /// "the identity was replaced, try again" failure from a real one.
+    private(set) static var identityGeneration = 0
+
     /// Drops the persisted visitor identity and its paired visitor cookies so
     /// the next request mints a fresh one. Called when /player answers the bot
-    /// check — a flagged identity would otherwise stay cached for the full TTL
-    /// and keep every source failing. Account cookies are left untouched.
-    static func invalidateVisitorIdentity() {
+    /// check, and when googlevideo throttles the identity — either way it would
+    /// otherwise stay cached for the full TTL and keep every source failing.
+    /// Account cookies are left untouched: minting is fully anonymous.
+    static func invalidateVisitorIdentity(reason: String = "bot check") {
+        identityGeneration += 1
         let defaults = UserDefaults.standard
         defaults.removeObject(forKey: UserDefaultsKeys.Innertube.visitorData)
         defaults.removeObject(forKey: UserDefaultsKeys.Innertube.visitorDataDate)
@@ -116,6 +123,6 @@ extension InnertubeSession {
         HTTPCookieStorage.shared.cookies(for: base)?
             .filter { $0.name.hasPrefix("VISITOR_") }
             .forEach(HTTPCookieStorage.shared.deleteCookie)
-        AppLog.innertube("visitor identity invalidated after bot check")
+        AppLog.innertube("visitor identity invalidated after \(reason)")
     }
 }

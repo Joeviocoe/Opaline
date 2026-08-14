@@ -33,6 +33,11 @@ final class PlaybackFacade {
     /// Recoveries closer together than this are one failing streak; a lone
     /// one hours later (URL expiry) starts the ladder over.
     private static let recoveryStreakWindow: TimeInterval = 60
+    /// Bound on visitor identities burned per video: churning them is itself a
+    /// bot signal, and the clean one that lands is cached for every later video.
+    static let maxIdentityRedraws = 5
+    /// Breathing room between draws, so a run of them is not a burst.
+    static let identityRedrawDelay: TimeInterval = 0.4
 
     weak var context: PlaybackContext?
     /// The active source — owns stream resolution and quality selection.
@@ -47,6 +52,9 @@ final class PlaybackFacade {
     /// When the last recovery started — an isolated one (URL expiry hours
     /// later) must not count against the ladder.
     var lastRecoveryAt: Date?
+    /// Visitor identities burned on the current video because googlevideo
+    /// throttled them.
+    var identityRedraws = 0
 }
 
 // MARK: - Public API
@@ -59,28 +67,50 @@ extension PlaybackFacade {
         kind: VideoSourceKind = PlaybackSource.selected.sourceKind,
         statusKey: String = "player.status.resolving"
     ) {
+        if videoId != currentVideoId {
+            identityRedraws = 0
+        }
         currentVideoId = videoId
         currentApiClient = apiClient
         let source = DefaultVideoSourceFactory(apiClient: apiClient)
             .make(kind: kind)
         activeVideoSource = source
         context?.updateStatusLabel(statusKey.localized)
-        let t0 = Date()
+        let attempt = ResolveAttempt(
+            videoId: videoId,
+            apiClient: apiClient,
+            cancellationToken: cancellationToken,
+            kind: kind,
+            startedAt: Date(),
+            identityGeneration: InnertubeSession.identityGeneration
+        )
         source.loadPlayback(
             videoId: videoId,
             cancellation: cancellationToken
         ) { [weak self] result in
             DispatchQueue.main.async {
-                let ms = Int(Date().timeIntervalSince(t0) * 1_000)
-                let verdict = (try? result.get()) == nil ? "failed" : "ok"
-                AppLog.player("resolve \(verdict) on \(kind) in \(ms)ms")
-                guard let self,
-                      !cancellationToken.isCancelled else {
-                    return
-                }
-                self.handlePrepared(result, cancellation: cancellationToken)
+                self?.finishResolve(result, attempt: attempt)
             }
         }
+    }
+
+    private func finishResolve(
+        _ result: Swift.Result<PreparedPlayback, Error>,
+        attempt: ResolveAttempt
+    ) {
+        let ms = Int(Date().timeIntervalSince(attempt.startedAt) * 1_000)
+        let verdict = (try? result.get()) == nil ? "failed" : "ok"
+        AppLog.player(
+            "resolve \(verdict) on \(attempt.kind) in \(ms)ms"
+        )
+        guard !attempt.cancellationToken.isCancelled else {
+            return
+        }
+        if retryOnFreshIdentity(result, attempt: attempt) {
+            return
+        }
+        identityRedraws = 0
+        handlePrepared(result, cancellation: attempt.cancellationToken)
     }
 
     /// Restarts playback after a mid-playback failure (segment 403, fatal
@@ -201,5 +231,6 @@ extension PlaybackFacade {
         botCheckRetriedVideoId = nil
         recoveryAttempts = 0
         lastRecoveryAt = nil
+        identityRedraws = 0
     }
 }
