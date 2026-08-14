@@ -145,9 +145,6 @@ final class SABRSession {
 
     private func collectedInits() -> [Int: Data] {
         let inits = initSegments
-        AppLog.hls(
-            "sabr inits: got \(inits.keys.sorted()) want [\(audio.itag), \(video.itag)]"
-        )
         return inits
     }
 
@@ -215,12 +212,6 @@ final class SABRSession {
               let videoProgress = progress[video.itag] else {
             return nil
         }
-        AppLog.hls(
-            "sabr continue: playerMs=\(timeMs)"
-                + " audio(seq=\(audioProgress.lastSequence), buf=\(audioProgress.bufferedMs))"
-                + " video(seq=\(videoProgress.lastSequence), buf=\(videoProgress.bufferedMs))"
-                + " cookie=\(playbackCookie?.count ?? -1)"
-        )
         return SABRRequest.continuation(
             ustreamerConfig: ustreamerConfig,
             state: SABRRequest.Continuation(

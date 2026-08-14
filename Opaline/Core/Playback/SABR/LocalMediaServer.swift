@@ -191,10 +191,16 @@ final class LocalMediaServer {
     private func respond(to request: Request, on connection: NWConnection) {
         let started = CACurrentMediaTime()
         handler(request.path) { body, contentType in
+            // Only the interesting ones: a miss, or a wait long enough that
+            // the player might notice it.
             let elapsed = (CACurrentMediaTime() - started) * 1_000
-            let size = body?.count ?? -1
-            let label = "\(request.method) \(request.path)"
-            AppLog.hls(String(format: "serve %@ -> %d bytes in %.0f ms", label, size, elapsed))
+            if body == nil || elapsed > 1_000 {
+                let label = "\(request.method) \(request.path)"
+                let size = body?.count ?? -1
+                AppLog.hls(String(
+                    format: "serve %@ -> %d bytes in %.0f ms", label, size, elapsed
+                ))
+            }
             let response = Self.response(for: request, body: body, contentType: contentType)
             let body = response.body
             connection.send(

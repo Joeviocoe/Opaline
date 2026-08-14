@@ -51,13 +51,6 @@ extension SABRSession {
             }
             sawMedia = apply(part, headers: &headers) || sawMedia
         }
-        let reached = headers.values
-            .filter { !$0.isInit }
-            .map { "\($0.itag):seq\($0.sequence)" }
-            .sorted()
-            .joined(separator: " ")
-        AppLog.hls("sabr got \(reached.isEmpty ? "no media" : reached)")
-        sawMediaInLastResponse = sawMedia
         if !sawMedia {
             // No media at all means the server declined rather than the stream
             // ending — some videos are simply not served over SABR, and the
