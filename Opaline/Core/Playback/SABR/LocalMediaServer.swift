@@ -24,6 +24,25 @@ final class LocalMediaServer {
         _ completion: @escaping (Data?, String) -> Void
     ) -> Void
 
+    /// Calls back at most once, whichever comes first: the listener settling
+    /// or the start timeout.
+    final class Reporter {
+        private(set) var done = false
+        private let completion: (URL?) -> Void
+
+        init(completion: @escaping (URL?) -> Void) {
+            self.completion = completion
+        }
+
+        func report(_ url: URL?) {
+            guard !done else {
+                return
+            }
+            done = true
+            completion(url)
+        }
+    }
+
     /// One parsed request — everything this server acts on.
     struct Request {
         let method: String
@@ -32,9 +51,14 @@ final class LocalMediaServer {
         let range: (start: Int, end: Int?)?
     }
 
+    private static let startTimeout: TimeInterval = 5
     private let listener: NWListener
     private let handler: Handler
     private let queue = DispatchQueue(label: "com.ytvlite.local-media-server")
+    /// Accepted connections, so stopping the server takes them down too —
+    /// cancelling the listener alone leaves them open for the rest of the
+    /// session, one set per video watched.
+    private var connections: [NWConnection] = []
 
     /// The port the listener settled on, once it is ready.
     private(set) var port: UInt16?
@@ -51,101 +75,53 @@ final class LocalMediaServer {
         self.handler = handler
     }
 
-    /// Parses the request head once it has fully arrived.
-    static func parseRequest(in buffer: Data) -> Request? {
-        guard let text = String(data: buffer, encoding: .utf8),
-              text.contains("\r\n\r\n") else {
-            return nil
-        }
-        let lines = text.components(separatedBy: "\r\n")
-        let parts = lines.first?.split(separator: " ") ?? []
-        guard parts.count >= 2 else {
-            return nil
-        }
-        let range = lines
-            .first { $0.lowercased().hasPrefix("range:") }
-            .flatMap(byteRange(in:))
-        return Request(method: String(parts[0]), path: String(parts[1]), range: range)
-    }
-
-    /// `Range: bytes=start-end`, where the end may be absent.
-    static func byteRange(in header: String) -> (start: Int, end: Int?)? {
-        guard let spec = header.split(separator: "=").last else {
-            return nil
-        }
-        let bounds = spec
-            .trimmingCharacters(in: .whitespaces)
-            .split(separator: "-", omittingEmptySubsequences: false)
-        guard let start = Int(bounds.first ?? "") else {
-            return nil
-        }
-        return (start, bounds.count > 1 ? Int(bounds[1]) : nil)
-    }
-
-    /// Builds the response, honouring HEAD (headers only) and Range (206).
-    /// Head and body separately — concatenating them copied every segment,
-    /// which on a 3MB video segment is a visible memory spike.
-    static func response(
-        for request: Request,
-        body: Data?,
-        contentType: String
-    ) -> (head: Data, body: Data) {
-        guard let body else {
-            AppLog.hls("local server: 404 \(request.path)")
-            return (Data(
-                "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: keep-alive\r\n\r\n".utf8
-            ), Data())
-        }
-        var slice = body
-        var status = "200 OK"
-        var extra = ""
-        if let range = request.range, range.start < body.count {
-            let last = min(range.end ?? body.count - 1, body.count - 1)
-            slice = body.slice(from: range.start, length: last + 1 - range.start) ?? body
-            status = "206 Partial Content"
-            extra = "Content-Range: bytes \(range.start)-\(last)/\(body.count)\r\n"
-        }
-        var head = "HTTP/1.1 \(status)\r\n"
-        head += "Content-Type: \(contentType)\r\n"
-        head += "Content-Length: \(slice.count)\r\n"
-        head += "Accept-Ranges: bytes\r\n"
-        head += extra
-        head += "Connection: keep-alive\r\n\r\n"
-        return request.method == "HEAD" ? (Data(head.utf8), Data()) : (Data(head.utf8), slice)
-    }
-
     /// Starts listening and calls back with the base URL once the port is known.
     func start(completion: @escaping (URL?) -> Void) {
-        var reported = false
+        let once = Reporter(completion: completion)
         listener.stateUpdateHandler = { [weak self] state in
-            guard let self, !reported else {
-                return
-            }
-            switch state {
-            case .ready:
-                reported = true
-                self.port = self.listener.port?.rawValue
-                let url = self.listener.port.flatMap {
-                    URL(string: "http://127.0.0.1:\($0.rawValue)")
-                }
-                AppLog.hls("local server ready on \(url?.absoluteString ?? "?")")
-                completion(url)
-            case .failed(let error):
-                reported = true
-                AppLog.hls("local server failed: \(error.localizedDescription)")
-                completion(nil)
-            default:
-                break
-            }
+            self?.handle(state, once: once)
         }
         listener.newConnectionHandler = { [weak self] connection in
             self?.accept(connection)
         }
         listener.start(queue: queue)
+        // A listener that never reaches .ready would otherwise leave the caller
+        // waiting forever, which reads as "quality switching does nothing"
+        // rather than as a failure.
+        queue.asyncAfter(deadline: .now() + Self.startTimeout) {
+            guard !once.done else {
+                return
+            }
+            AppLog.hls("local server did not start within \(Self.startTimeout)s")
+            once.report(nil)
+        }
+    }
+
+    private func handle(_ state: NWListener.State, once: Reporter) {
+        switch state {
+        case .ready:
+            port = listener.port?.rawValue
+            let url = listener.port.flatMap { URL(string: "http://127.0.0.1:\($0.rawValue)") }
+            AppLog.hls("local server ready on \(url?.absoluteString ?? "?")")
+            once.report(url)
+        case .failed(let error):
+            AppLog.hls("local server failed: \(error.localizedDescription)")
+            once.report(nil)
+        case .waiting(let error):
+            // Resources unavailable — leaked sockets from earlier sessions,
+            // typically. Worth seeing rather than hanging.
+            AppLog.hls("local server waiting: \(error.localizedDescription)")
+        default:
+            break
+        }
     }
 
     func stop() {
         listener.cancel()
+        queue.async {
+            self.connections.forEach { $0.cancel() }
+            self.connections.removeAll()
+        }
     }
 
     // MARK: - Connections
@@ -154,16 +130,24 @@ final class LocalMediaServer {
         // Keep-alive means the player decides when a connection is done, so
         // its end has to be noticed and the socket released — otherwise they
         // pile up in CLOSE_WAIT for the whole session.
-        connection.stateUpdateHandler = { state in
+        connections.append(connection)
+        connection.stateUpdateHandler = { [weak self] state in
             switch state {
             case .failed, .cancelled:
                 connection.cancel()
+                self?.forget(connection)
             default:
                 break
             }
         }
         connection.start(queue: queue)
         receiveRequest(on: connection, buffer: Data())
+    }
+
+    private func forget(_ connection: NWConnection) {
+        queue.async {
+            self.connections.removeAll { $0 === connection }
+        }
     }
 
     /// Reads until the end of the request head. No bodies: these are all GETs
@@ -221,6 +205,6 @@ final class LocalMediaServer {
     }
 
     deinit {
-        listener.cancel()
+        stop()
     }
 }

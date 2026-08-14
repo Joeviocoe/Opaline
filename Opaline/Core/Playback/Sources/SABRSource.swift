@@ -20,6 +20,7 @@ import Foundation
 final class SABRSource: VideoSource {
     /// What one resolved player response yields for a SABR session.
     struct Stream {
+        let info: DirectPlaybackInfo
         let url: URL
         let config: Data
         let video: DashFormatInfo
@@ -48,8 +49,13 @@ final class SABRSource: VideoSource {
     private let apiClient: WatchService
     private var info: DirectPlaybackInfo?
     private var session: SABRSession?
-    /// Held for the lifetime of playback: AVPlayer fetches every segment from it.
+    /// One server for the whole source; sessions come and go behind it.
     var server: LocalMediaServer?
+    var serverBase: URL?
+    /// Bumped per session so each one gets fresh playlist URLs.
+    var generation = 0
+    /// What the server routes to right now.
+    var route: Route?
 
     init(apiClient: WatchService, transport: HTTPTransport) {
         self.apiClient = apiClient
@@ -94,7 +100,7 @@ final class SABRSource: VideoSource {
               let audio = info.dashAudioFormat else {
             return nil
         }
-        return Stream(url: url, config: config, video: video, audio: audio)
+        return Stream(info: info, url: url, config: config, video: video, audio: audio)
     }
 
     // MARK: - VideoSource
@@ -134,9 +140,15 @@ final class SABRSource: VideoSource {
             completion(.failure(SABRError.server("no such quality")))
             return
         }
-        currentQuality = quality
-        server?.stop()
-        openAndStart(stream, completion: completion)
+        openAndStart(stream) { [weak self] result in
+            // Only adopt the new quality if the switch actually produced
+            // playback — otherwise the overlay claims a resolution that is not
+            // playing, which is what made this look like it half-worked.
+            if case .success = result {
+                self?.currentQuality = quality
+            }
+            completion(result)
+        }
     }
 
     // MARK: - Preparation
@@ -198,10 +210,7 @@ final class SABRSource: VideoSource {
                 completion(.failure(error))
             case .success(let inits):
                 self?.buildPlayback(
-                    session: session,
-                    inits: inits,
-                    info: info,
-                    completion: completion
+                    stream, session: session, inits: inits, completion: completion
                 )
             }
         }

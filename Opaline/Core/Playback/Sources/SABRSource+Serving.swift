@@ -4,61 +4,72 @@ import Foundation
 // MARK: - Serving the streams to AVPlayer
 
 extension SABRSource {
+    /// What the server currently serves: one session and its two tracks.
+    struct Route {
+        let generation: Int
+        let tracks: [Track]
+        let session: SABRSession
+    }
+
     /// Routes one HTTP path to the bytes behind it.
     ///
-    /// Paths are `/master.m3u8`, `/<track>.m3u8` and `/s/<track>/<n>` (or
-    /// `/s/<track>/init`). Segment numbers come from the `sidx` in the init
-    /// segment, so each one maps to a byte range of the same file the legacy
-    /// URL would serve, and the session answers it.
+    /// Paths are `/g<n>/master.m3u8`, `/g<n>/<track>.m3u8` and
+    /// `/g<n>/s/<track>/<index>` (or `.../init`). The generation is what makes
+    /// a quality switch work on one server: AVPlayer caches playlists per URL,
+    /// so reusing paths would hand it the previous playlist. Requests for a
+    /// retired generation are refused — that item is gone.
     static func route(
         path: String,
-        tracks: [Track],
-        session: SABRSession,
+        route: Route?,
         completion: @escaping (Data?, String) -> Void
     ) {
         let parts = path.split(separator: "/").map(String.init)
-        if path == "/master.m3u8" {
-            completion(Data(mainPlaylist(tracks: tracks).utf8), "application/vnd.apple.mpegurl")
+        guard let route, parts.first == "g\(route.generation)" else {
+            completion(nil, "")
             return
         }
-        if parts.count == 1, parts[0].hasSuffix(".m3u8") {
-            let name = String(parts[0].dropLast(5))
-            guard let track = tracks.first(where: { $0.path == name }) else {
+        let rest = Array(parts.dropFirst())
+        let playlistType = "application/vnd.apple.mpegurl"
+        if rest == ["master.m3u8"] {
+            completion(Data(mainPlaylist(route: route).utf8), playlistType)
+            return
+        }
+        if rest.count == 1, rest[0].hasSuffix(".m3u8") {
+            guard let track = route.tracks.first(where: { $0.path == String(rest[0].dropLast(5)) })
+            else {
                 completion(nil, "")
                 return
             }
             let playlist = HLSGenerator.segmentedPlaylist(
-                base: "/s/\(track.path)", segments: track.segments
+                base: "/g\(route.generation)/s/\(track.path)", segments: track.segments
             )
-            completion(Data(playlist.utf8), "application/vnd.apple.mpegurl")
+            completion(Data(playlist.utf8), playlistType)
             return
         }
-        guard parts.count == 3, parts[0] == "s",
-              let track = tracks.first(where: { $0.path == parts[1] }) else {
+        guard rest.count == 3, rest[0] == "s",
+              let track = route.tracks.first(where: { $0.path == rest[1] }) else {
             completion(nil, "")
             return
         }
-        serveSegment(parts[2], of: track, session: session, completion: completion)
+        serveSegment(rest[2], of: track, session: route.session, completion: completion)
     }
 
     /// Main playlist pointing at the two media playlists.
-    static func mainPlaylist(tracks: [Track]) -> String {
-        guard let video = tracks.first, let audio = tracks.last, tracks.count == 2 else {
+    static func mainPlaylist(route: Route) -> String {
+        guard route.tracks.count == 2,
+              let video = route.tracks.first,
+              let audio = route.tracks.last else {
             return ""
         }
-        let audioPeak = HLSGenerator.peakBitrate(
-            audio.segments, fallback: audio.format.bitrate
-        )
-        let videoPeak = HLSGenerator.peakBitrate(
-            video.segments, fallback: video.format.bitrate
-        )
+        let audioPeak = HLSGenerator.peakBitrate(audio.segments, fallback: audio.format.bitrate)
+        let videoPeak = HLSGenerator.peakBitrate(video.segments, fallback: video.format.bitrate)
         return HLSGenerator.mainPlaylist(
             bandwidth: videoPeak + audioPeak,
             codecs: "\(video.format.codecs),\(audio.format.codecs)",
             resolution: "\(video.format.width ?? 1_280)x\(video.format.height ?? 720)",
             uris: HLSGenerator.PlaylistURIs(
-                video: "/\(video.path).m3u8",
-                audio: "/\(audio.path).m3u8"
+                video: "/g\(route.generation)/\(video.path).m3u8",
+                audio: "/g\(route.generation)/\(audio.path).m3u8"
             )
         )
     }
@@ -120,11 +131,16 @@ extension SABRSource {
         return Int(elapsed * 1_000)
     }
 
-    /// Pairs each format with its segment index. The init segment carries the
-    /// `sidx`, so both come out of what the session already fetched.
-    static func tracks(inits: [Int: Data], info: DirectPlaybackInfo) -> [Track]? {
-        guard let video = info.dashVideoFormat,
-              let audio = info.dashAudioFormat,
+    /// Pairs each format with its segment index, taking the video format the
+    /// session actually runs rather than the response's default — a quality
+    /// switch changes the former only, and building playlists from the latter
+    /// meant the picture never changed no matter what was selected.
+    static func tracks(
+        inits: [Int: Data],
+        info: DirectPlaybackInfo,
+        video: DashFormatInfo
+    ) -> [Track]? {
+        guard let audio = info.dashAudioFormat,
               let videoInit = inits[video.itag],
               let audioInit = inits[audio.itag],
               let videoSegments = HLSGenerator.parseSidx(data: videoInit),
@@ -137,40 +153,59 @@ extension SABRSource {
         ]
     }
 
-    /// Brings up the loopback server and hands AVPlayer its playlist URL.
+    /// Points the server at a new session and hands AVPlayer its playlist URL.
+    ///
+    /// One server outlives the sessions it serves: a quality switch swaps what
+    /// it routes to instead of starting another listener. Starting a listener
+    /// per switch leaked a socket set each time, and once enough had leaked new
+    /// listeners stopped coming up at all — which showed up as quality
+    /// switching doing nothing.
     func buildPlayback(
+        _ stream: Stream,
         session: SABRSession,
         inits: [Int: Data],
-        info: DirectPlaybackInfo,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        guard let tracks = Self.tracks(inits: inits, info: info) else {
+        let info = stream.info
+        guard let tracks = Self.tracks(inits: inits, info: info, video: stream.video) else {
             completion(.failure(SABRError.noInitSegment))
             return
         }
-        let server = LocalMediaServer { path, done in
-            Self.route(path: path, tracks: tracks, session: session, completion: done)
-        }
-        guard let server else {
-            completion(.failure(SABRError.server("could not start the local server")))
-            return
-        }
-        self.server = server
-        server.start { base in
-            guard let url = base.map({ $0.appendingPathComponent("master.m3u8") }) else {
+        generation += 1
+        route = Route(generation: generation, tracks: tracks, session: session)
+        let path = "g\(generation)/master.m3u8"
+        withServer { base in
+            guard let base else {
                 completion(.failure(SABRError.server("local server did not come up")))
                 return
             }
-            let item = AVPlayerItem(asset: AVURLAsset(url: url))
-            // Left at the default: lowering `preferredForwardBufferDuration`
-            // for SABR changed nothing — AVPlayer treats it as a hint for HLS
-            // and kept 20-25s of buffer health regardless (device-checked).
+            let item = AVPlayerItem(asset: AVURLAsset(url: base.appendingPathComponent(path)))
             PlaybackBufferPolicy.configure(item: item)
             completion(.success(PreparedPlayback(
                 item: item,
                 captions: info.captionTracks,
                 duration: info.duration
             )))
+        }
+    }
+
+    /// The single server for this source, started on first use.
+    private func withServer(_ completion: @escaping (URL?) -> Void) {
+        if let base = serverBase {
+            completion(base)
+            return
+        }
+        let server = LocalMediaServer { [weak self] path, done in
+            Self.route(path: path, route: self?.route, completion: done)
+        }
+        guard let server else {
+            completion(nil)
+            return
+        }
+        self.server = server
+        server.start { [weak self] base in
+            self?.serverBase = base
+            completion(base)
         }
     }
 }
