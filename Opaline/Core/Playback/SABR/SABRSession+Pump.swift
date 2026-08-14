@@ -13,12 +13,24 @@ extension SABRSession {
         guard !reachedEnd, !progress.isEmpty else {
             return false
         }
-        let held = buffers.values.reduce(0) { $0 + $1.data.count }
-        guard held < Self.bufferLimit * 3 / 4 else {
+        // Only bytes the player has not taken yet count towards the ceiling.
+        // Counting everything held meant video — segments ten times the size
+        // of audio — filled the quota on its own, the pump went quiet, and the
+        // audio track stopped being fetched even though it was the one running
+        // behind. That is what produced 40-second waits on audio segments.
+        guard unreadBytes < Self.bufferLimit * 3 / 4 else {
             return false
         }
         let buffered = progress.values.map(\.bufferedMs).min() ?? 0
         return buffered - lastServedMs < Self.prefetchMs
+    }
+
+    /// Bytes buffered ahead of what has already been handed to the player.
+    private var unreadBytes: Int {
+        buffers.reduce(0) { total, entry in
+            let read = readOffsets[entry.key] ?? entry.value.start
+            return total + max(0, Int(entry.value.end - max(read, entry.value.start)))
+        }
     }
 
     /// Keeps exactly one request in flight while there is something to fetch:
