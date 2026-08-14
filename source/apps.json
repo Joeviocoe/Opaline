@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.8.3",
+          "date": "2026-08-14T12:18:14Z",
+          "localizedDescription": "This update is required. On 14 August YouTube started cutting playback off after about a minute — the video stops, the player gives up, and reopening it only buys another minute. Every earlier version is affected and there is no way around it from your side. Install this build to keep watching.\n\nFixes\n\n- Playback no longer dies after a minute. YouTube now throttles per anonymous session, and a session that draws the wrong bucket is cut off after roughly 65 seconds of video on every source. Opaline now checks the session before playback starts and quietly draws a new one until it gets a healthy one.\n- Search works again on devices set to the China region — it returned an empty list on every query.\n\nNew\n\n- Vietnamese interface.",
+          "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.3/Opaline_1.8.3.ipa",
+          "size": 6185741,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.8.2",
           "date": "2026-08-13T23:03:34Z",
           "localizedDescription": "## Improvements\n\n- **Audio-only playback.** A button in the player, or \"Audio only\" in the quality menu. No video segment is fetched, so it saves data; the choice is remembered for the session (#41)\n- **High-resolution thumbnails.** The default is picked from your device's memory to keep scrolling smooth, and you can override it in Settings → Appearance → Thumbnail Quality, up to YouTube's full 1280×720 file (#37, thanks @PoomSmart)\n- **Device Info.** About now shows your iOS version and device model, and every field there copies on tap (#43)\n\n## Fixes\n\n- **Fullscreen on iPhone.** Fixed how the app handles a device that is already held sideways when a video opens (#39)",
@@ -148,14 +156,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.8.2",
-      "versionDate": "2026-08-13T23:03:34Z",
-      "versionDescription": "## Improvements\n\n- **Audio-only playback.** A button in the player, or \"Audio only\" in the quality menu. No video segment is fetched, so it saves data; the choice is remembered for the session (#41)\n- **High-resolution thumbnails.** The default is picked from your device's memory to keep scrolling smooth, and you can override it in Settings → Appearance → Thumbnail Quality, up to YouTube's full 1280×720 file (#37, thanks @PoomSmart)\n- **Device Info.** About now shows your iOS version and device model, and every field there copies on tap (#43)\n\n## Fixes\n\n- **Fullscreen on iPhone.** Fixed how the app handles a device that is already held sideways when a video opens (#39)",
-      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.2/Opaline_1.8.2.ipa",
+      "version": "1.8.3",
+      "versionDate": "2026-08-14T12:18:14Z",
+      "versionDescription": "This update is required. On 14 August YouTube started cutting playback off after about a minute — the video stops, the player gives up, and reopening it only buys another minute. Every earlier version is affected and there is no way around it from your side. Install this build to keep watching.\n\nFixes\n\n- Playback no longer dies after a minute. YouTube now throttles per anonymous session, and a session that draws the wrong bucket is cut off after roughly 65 seconds of video on every source. Opaline now checks the session before playback starts and quietly draws a new one until it gets a healthy one.\n- Search works again on devices set to the China region — it returned an empty list on every query.\n\nNew\n\n- Vietnamese interface.",
+      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.8.3/Opaline_1.8.3.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 6168698,
+      "size": 6185741,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -178,6 +186,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "Opaline 1.8.3 - 1 min playback workaround; Vietnamese translation; Fix search in CN region",
+      "identifier": "release-1.8.3",
+      "caption": "Playback no longer dies after a minute. YouTube now throttles per anonymous session, and a session that draws the wro…",
+      "date": "2026-08-14T12:18:14Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/Opaline/releases/tag/1.8.3"
+    },
     {
       "title": "Opaline 1.8.2 - Audio only, high-resolution thumbnails",
       "identifier": "release-1.8.2",
