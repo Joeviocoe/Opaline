@@ -35,11 +35,6 @@ final class WatchViewController: UIViewController {
     let engagementClient: EngagementService
     let playlistClient: PlaylistService
     let channelInfoStore: ChannelInfoStore
-    let channelViewControllerFactory: (
-        String,
-        String
-    )
-        -> UIViewController
     let videoRouter: VideoRouter
     let cache = AppCache.shared
 
@@ -212,11 +207,6 @@ final class WatchViewController: UIViewController {
         engagementService: EngagementService,
         playlistService: PlaylistService,
         channelInfoStore: ChannelInfoStore,
-        channelViewControllerFactory: @escaping (
-            String,
-            String
-        )
-            -> UIViewController,
         videoRouter: VideoRouter = .shared
     ) {
         let portraitLayout = makePortraitRelatedLayout()
@@ -234,7 +224,6 @@ final class WatchViewController: UIViewController {
         engagementClient = engagementService
         playlistClient = playlistService
         self.channelInfoStore = channelInfoStore
-        self.channelViewControllerFactory = channelViewControllerFactory
         self.videoRouter = videoRouter
         super.init(nibName: nil, bundle: nil)
         playbackFacade.context = self

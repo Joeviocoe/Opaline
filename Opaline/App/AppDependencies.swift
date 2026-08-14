@@ -46,8 +46,7 @@ struct AppDependencies {
             watchService: watchService,
             engagementService: engagementService,
             playlistService: playlistService,
-            channelInfoStore: .shared,
-            channelViewControllerFactory: makeChannelViewController
+            channelInfoStore: .shared
         )
     }
 

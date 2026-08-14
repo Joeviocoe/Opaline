@@ -67,6 +67,19 @@ final class VideoRouter {
         panel?.collapse(animated: true)
     }
 
+    /// Pushes a channel screen onto the tab underneath the player and
+    /// collapses the player to the mini bar — matching the official app,
+    /// which never lets a pushed screen cover the expanded player.
+    func openChannel(id: String, name: String) {
+        guard let factory = channelViewControllerFactory,
+              let tabNav = panel?.owner?.selectedViewController as? UINavigationController
+        else {
+            return
+        }
+        tabNav.pushViewController(factory(id, name), animated: true)
+        minimize()
+    }
+
     /// Brings the full player back — used when PiP asks the app to restore
     /// its own playback UI, which AVKit expects to be on screen.
     func expandPanel() {
