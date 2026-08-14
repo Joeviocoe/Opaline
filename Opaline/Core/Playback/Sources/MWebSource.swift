@@ -90,6 +90,7 @@ final class MWebSource: VideoSource {
 
     func selectQuality(
         _ quality: VideoQuality,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         if liveHLS.isActive {

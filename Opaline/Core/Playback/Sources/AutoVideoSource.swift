@@ -92,8 +92,10 @@ final class AutoVideoSource: VideoSource {
 
     func selectQuality(
         _ quality: VideoQuality,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
+        _ = resumeAt
         active.selectQuality(quality, completion: completion)
     }
 
@@ -118,6 +120,7 @@ final class AutoVideoSource: VideoSource {
         )
         fallback.selectAudioTrack(track) { [weak self] result in
             if case .success = result {
+                self?.primary.releaseResources()
                 self?.active = fallback
             }
             completion(result)

@@ -70,7 +70,9 @@ extension WatchViewController {
         playerStatusLabel.text = "player.status.loading"
             .localized(with: quality.label)
         playerStatusLabel.isHidden = false
-        source.selectQuality(quality) { [weak self] result in
+        source.selectQuality(
+            quality, resumeAt: resumeTime.map(CMTimeGetSeconds)
+        ) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let prepared):

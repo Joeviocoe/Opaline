@@ -35,6 +35,11 @@ struct DashFormatInfo {
     let audioTrackId: String?
     let audioTrackName: String?
     let audioIsDefault: Bool
+    /// `xtags` — the track's encoded attributes (`acont`, `lang`). SABR needs
+    /// it in `FormatId` or the server serves no media at all: verified
+    /// 2026-08-14, a request carrying only the itag is answered with policy
+    /// and zero `MEDIA` parts whenever the format has xtags.
+    let xtags: String?
 
     /// The upload-language track — id suffix ".4" (`acont=original`).
     var audioIsOriginal: Bool { audioTrackId?.hasSuffix(".4") == true }

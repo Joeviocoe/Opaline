@@ -15,6 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        AppLog.banner()
         configureServices(application)
         // The player has to know how the phone is held the moment it opens —
         // too late to start asking then.

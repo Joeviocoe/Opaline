@@ -112,39 +112,38 @@ final class HLSPlaylistLoader: NSObject,
 
 // MARK: - Data Big-Endian Helpers
 
+// Offsets below are relative to the start of the data, and `Data` is not
+// always indexed from zero — a slice keeps its parent's indices. Every access
+// therefore goes through `startIndex`.
 extension Data {
+    func byte(at offset: Int) -> UInt8 {
+        self[startIndex + offset]
+    }
+
     func readBigUInt32(at offset: Int) -> UInt32 {
-        guard offset + 4 <= count else {
+        guard offset >= 0, offset + 4 <= count else {
             return 0
         }
-        return UInt32(self[offset]) << 24
-            | UInt32(self[offset + 1]) << 16
-            | UInt32(self[offset + 2]) << 8
-            | UInt32(self[offset + 3])
+        return UInt32(byte(at: offset)) << 24
+            | UInt32(byte(at: offset + 1)) << 16
+            | UInt32(byte(at: offset + 2)) << 8
+            | UInt32(byte(at: offset + 3))
     }
 
     func readBigUInt64(at offset: Int) -> UInt64 {
-        guard offset + 8 <= count else {
+        guard offset >= 0, offset + 8 <= count else {
             return 0
         }
-        let b0 = UInt64(self[offset]) << 56
-        let b1 = UInt64(self[offset + 1]) << 48
-        let b2 = UInt64(self[offset + 2]) << 40
-        let b3 = UInt64(self[offset + 3]) << 32
-        let b4 = UInt64(self[offset + 4]) << 24
-        let b5 = UInt64(self[offset + 5]) << 16
-        let b6 = UInt64(self[offset + 6]) << 8
-        let b7 = UInt64(self[offset + 7])
-        return b0 | b1 | b2 | b3 | b4 | b5 | b6 | b7
+        return (0..<8).reduce(UInt64(0)) { value, index in
+            value << 8 | UInt64(byte(at: offset + index))
+        }
     }
 
     func readFourCC(at offset: Int) -> String {
-        guard offset + 4 <= count else {
+        guard offset >= 0, offset + 4 <= count else {
             return ""
         }
-        return String(
-            bytes: self[offset..<offset + 4],
-            encoding: .ascii
-        ) ?? ""
+        let base = startIndex + offset
+        return String(bytes: self[base..<(base + 4)], encoding: .ascii) ?? ""
     }
 }

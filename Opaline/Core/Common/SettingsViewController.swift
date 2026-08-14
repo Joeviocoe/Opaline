@@ -21,6 +21,7 @@ final class SettingsViewController: UIViewController {
         case sponsorBlockEnabled, sponsorBlockSettings
         case notificationSettings
         case playbackSource
+        case streamDelivery
         case solverEndpoint
         case mainThreadWatchdog
         case shareLog
@@ -360,6 +361,11 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 "settings.row.playbackSource".localized,
                 value: PlaybackSource.selected.displayName
             )
+        case .streamDelivery:
+            return makeDisclosureCell(
+                "settings.row.streamDelivery".localized,
+                value: StreamDeliveryPreference.selected.displayName
+            )
         case .solverEndpoint:
             return makeDisclosureCell(
                 "settings.row.solverServer".localized,
@@ -432,10 +438,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             if let url = URL(string: AppURLs.Support.donate) {
                 UIApplication.shared.open(url)
             }
-        case .playbackSource:
-            showPlaybackSourcePicker()
-        case .solverEndpoint:
-            showSolverEndpointPicker()
+        case .playbackSource, .streamDelivery, .solverEndpoint:
+            showDebugPicker(for: row)
         default:
             return false
         }
@@ -762,6 +766,44 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 self.tableView.reloadData()
             }
             if source == current {
+                action.setValue(true, forKey: "checked")
+            }
+            sheet.addAction(action)
+        }
+        sheet.addAction(
+            UIAlertAction(title: "common.cancel".localized, style: .cancel)
+        )
+        configureCenteredPopover(sheet)
+        present(sheet, animated: true)
+    }
+
+    private func showDebugPicker(for row: Row) {
+        switch row {
+        case .playbackSource:
+            showPlaybackSourcePicker()
+        case .streamDelivery:
+            showStreamDeliveryPicker()
+        default:
+            showSolverEndpointPicker()
+        }
+    }
+
+    private func showStreamDeliveryPicker() {
+        let sheet = UIAlertController(
+            title: "settings.row.streamDelivery".localized,
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        let current = StreamDeliveryPreference.selected
+        for option in StreamDeliveryPreference.allCases {
+            let action = UIAlertAction(title: option.displayName, style: .default) { _ in
+                UserDefaults.standard.set(
+                    option.rawValue,
+                    forKey: UserDefaultsKeys.Debug.streamDelivery
+                )
+                self.tableView.reloadData()
+            }
+            if option == current {
                 action.setValue(true, forKey: "checked")
             }
             sheet.addAction(action)

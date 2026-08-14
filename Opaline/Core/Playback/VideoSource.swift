@@ -94,8 +94,14 @@ protocol VideoSource: AnyObject {
     )
 
     /// Switches quality; the source rebuilds playback its own way.
+    ///
+    /// `resumeAt` is where the player currently stands. Sources that refetch
+    /// by URL can ignore it — the shell seeks after attaching — but a source
+    /// that streams sequentially needs it, or it fetches from the start of the
+    /// video while the player waits for the middle.
     func selectQuality(
         _ quality: VideoQuality,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     )
 
@@ -112,6 +118,12 @@ protocol VideoSource: AnyObject {
         videoId: String,
         completion: @escaping ([AudioTrack]) -> Void
     )
+
+    /// Drops whatever this source is holding for playback that is no longer
+    /// on screen. A composite keeps every inner source alive for the whole
+    /// video, so without this a SABR session — its socket, its server and its
+    /// buffer — would outlive the switch to another source.
+    func releaseResources()
 }
 
 extension VideoSource {
@@ -122,6 +134,14 @@ extension VideoSource {
     var supportsAudioTrackSelection: Bool { availableAudioTracks.count > 1 }
     var availableAudioTracks: [AudioTrack] { [] }
     var currentAudioTrack: AudioTrack? { nil }
+
+    /// Convenience for callers with no playhead to offer.
+    func selectQuality(
+        _ quality: VideoQuality,
+        completion: @escaping (Result<PreparedPlayback, Error>) -> Void
+    ) {
+        selectQuality(quality, resumeAt: nil, completion: completion)
+    }
 
     func selectAudioTrack(
         _ track: AudioTrack,
@@ -143,6 +163,10 @@ extension VideoSource {
     ) {
         completion([])
     }
+
+    /// Nothing to release by default — only delivery-backed sources hold
+    /// anything between plays.
+    func releaseResources() {}
 }
 
 /// Creates the right `VideoSource` for a kind (abstract factory).
