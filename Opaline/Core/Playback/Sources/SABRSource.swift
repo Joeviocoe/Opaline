@@ -54,8 +54,29 @@ final class SABRSource: VideoSource {
     var serverBase: URL?
     /// Bumped per session so each one gets fresh playlist URLs.
     var generation = 0
+    /// Where the next attached item should start, set by a quality switch.
+    var pendingStartAt: Double?
     /// What the server routes to right now.
-    var route: Route?
+    ///
+    /// Written when playback is built and read by the server on its own queue,
+    /// so every access takes the lock. An unsynchronised struct holding an
+    /// array is exactly the kind of data race that corrupts memory and then
+    /// crashes somewhere unrelated.
+    private var storedRoute: Route?
+    private let routeLock = NSLock()
+
+    var route: Route? {
+        get {
+            routeLock.lock()
+            defer { routeLock.unlock() }
+            return storedRoute
+        }
+        set {
+            routeLock.lock()
+            storedRoute = newValue
+            routeLock.unlock()
+        }
+    }
 
     init(apiClient: WatchService, transport: HTTPTransport) {
         self.apiClient = apiClient
@@ -132,6 +153,7 @@ final class SABRSource: VideoSource {
     /// exactly as the legacy source does it.
     func selectQuality(
         _ quality: VideoQuality,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         guard let info,
@@ -140,7 +162,12 @@ final class SABRSource: VideoSource {
             completion(.failure(SABRError.server("no such quality")))
             return
         }
-        openAndStart(stream) { [weak self] result in
+        // The shell's playhead, not the session's own estimate: the session
+        // only knows which segment it last handed over, which lags where the
+        // player actually stands.
+        let playhead = resumeAt.map { Int($0 * 1_000) } ?? route?.session.lastServedMs ?? 0
+        pendingStartAt = Double(playhead) / 1_000
+        openAndStart(stream, resumeAt: playhead) { [weak self] result in
             // Only adopt the new quality if the switch actually produced
             // playback — otherwise the overlay claims a resolution that is not
             // playing, which is what made this look like it half-worked.
@@ -197,6 +224,7 @@ final class SABRSource: VideoSource {
 
     private func openAndStart(
         _ stream: Stream,
+        resumeAt: Int = 0,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         guard let info else {
@@ -204,7 +232,7 @@ final class SABRSource: VideoSource {
             return
         }
         let session = openSession(stream)
-        session.start { [weak self] result in
+        session.start(resumeAt: resumeAt) { [weak self] result in
             switch result {
             case .failure(let error):
                 completion(.failure(error))

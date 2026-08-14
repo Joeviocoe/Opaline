@@ -9,6 +9,8 @@ extension SABRSource {
         let generation: Int
         let tracks: [Track]
         let session: SABRSession
+        /// Where playback should pick up, for `EXT-X-START`.
+        let startAt: Double?
     }
 
     /// Routes one HTTP path to the bytes behind it.
@@ -35,15 +37,8 @@ extension SABRSource {
             return
         }
         if rest.count == 1, rest[0].hasSuffix(".m3u8") {
-            guard let track = route.tracks.first(where: { $0.path == String(rest[0].dropLast(5)) })
-            else {
-                completion(nil, "")
-                return
-            }
-            let playlist = HLSGenerator.segmentedPlaylist(
-                base: "/g\(route.generation)/s/\(track.path)", segments: track.segments
-            )
-            completion(Data(playlist.utf8), playlistType)
+            let name = String(rest[0].dropLast(5))
+            completion(mediaPlaylist(named: name, route: route), playlistType)
             return
         }
         guard rest.count == 3, rest[0] == "s",
@@ -52,6 +47,18 @@ extension SABRSource {
             return
         }
         serveSegment(rest[2], of: track, session: route.session, completion: completion)
+    }
+
+    /// One track's playlist, or nil when the name is not one of ours.
+    static func mediaPlaylist(named name: String, route: Route) -> Data? {
+        guard let track = route.tracks.first(where: { $0.path == name }) else {
+            return nil
+        }
+        return Data(HLSGenerator.segmentedPlaylist(
+            base: "/g\(route.generation)/s/\(track.path)",
+            segments: track.segments,
+            startAt: route.startAt
+        ).utf8)
     }
 
     /// Main playlist pointing at the two media playlists.
@@ -171,8 +178,28 @@ extension SABRSource {
             completion(.failure(SABRError.noInitSegment))
             return
         }
+        // Everything below touches state the server reads: the generation
+        // counter, the server handle and its base URL. This runs on the
+        // session's queue, so it is pinned to main to keep a single writer.
+        DispatchQueue.main.async {
+            self.attach(tracks: tracks, session: session, info: info, completion: completion)
+        }
+    }
+
+    private func attach(
+        tracks: [Track],
+        session: SABRSession,
+        info: DirectPlaybackInfo,
+        completion: @escaping (Result<PreparedPlayback, Error>) -> Void
+    ) {
         generation += 1
-        route = Route(generation: generation, tracks: tracks, session: session)
+        route = Route(
+            generation: generation,
+            tracks: tracks,
+            session: session,
+            startAt: pendingStartAt
+        )
+        pendingStartAt = nil
         let path = "g\(generation)/master.m3u8"
         withServer { base in
             guard let base else {
@@ -204,8 +231,10 @@ extension SABRSource {
         }
         self.server = server
         server.start { [weak self] base in
-            self?.serverBase = base
-            completion(base)
+            DispatchQueue.main.async {
+                self?.serverBase = base
+                completion(base)
+            }
         }
     }
 }

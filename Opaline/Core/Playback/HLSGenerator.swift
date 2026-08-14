@@ -66,11 +66,23 @@ enum HLSGenerator {
     /// SABR delivers a sequential stream, so the player must ask for segments
     /// in order — byte ranges over a single URL let it seek around the file and
     /// leave the session fetching megabytes to reach an offset.
-    static func segmentedPlaylist(base: String, segments: [SidxSegment]) -> String {
+    /// `startAt` becomes an `EXT-X-START` tag, telling the player where to
+    /// begin. Without it a freshly attached item buffers from zero and only
+    /// then honours the seek — so a mid-video quality switch fetches the
+    /// opening segments nobody will watch, and the session gets dragged back
+    /// and forth between the start and the playhead.
+    static func segmentedPlaylist(
+        base: String,
+        segments: [SidxSegment],
+        startAt: Double? = nil
+    ) -> String {
         let maxDur = segments.map(\.duration).max() ?? 5
         var lines = ["#EXTM3U", "#EXT-X-VERSION:7"]
         lines.append("#EXT-X-TARGETDURATION:\(Int(ceil(maxDur)))")
         lines.append("#EXT-X-PLAYLIST-TYPE:VOD")
+        if let startAt, startAt > 0 {
+            lines.append(String(format: "#EXT-X-START:TIME-OFFSET=%.3f,PRECISE=YES", startAt))
+        }
         lines.append("#EXT-X-MAP:URI=\"\(base)/init\"")
         for (index, segment) in segments.enumerated() {
             lines.append(String(format: "#EXTINF:%.3f,", segment.duration))

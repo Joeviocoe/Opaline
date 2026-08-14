@@ -94,7 +94,13 @@ final class SABRSession {
 
     /// Opens the session and returns the init segment of each stream — the
     /// `ftyp/moov/sidx` prefix AVPlayer needs before any media.
-    func start(completion: @escaping (Result<[Int: Data], Error>) -> Void) {
+    /// `resumeAt` starts the stream at the playhead instead of at zero —
+    /// switching quality mid-video otherwise streams the opening again while
+    /// the player waits for the part it is actually on.
+    func start(
+        resumeAt: Int = 0,
+        completion: @escaping (Result<[Int: Data], Error>) -> Void
+    ) {
         queue.async {
             let body = SABRRequest.startup(
                 ustreamerConfig: self.ustreamerConfig,
@@ -114,9 +120,27 @@ final class SABRSession {
                     completion(.failure(SABRError.noInitSegment))
                     return
                 }
-                completion(.success(inits))
+                guard resumeAt > 0 else {
+                    completion(.success(inits))
+                    return
+                }
+                self.jump(to: resumeAt) { completion(.success(inits)) }
             }
         }
+    }
+
+    /// Repositions the stream, keeping the init segments already collected.
+    private func jump(to timeMs: Int, completion: @escaping () -> Void) {
+        resetBuffers()
+        progress.removeAll()
+        lastServedMs = timeMs
+        let body = SABRRequest.jump(
+            ustreamerConfig: ustreamerConfig,
+            audio: audio,
+            video: video,
+            playerMs: timeMs
+        )
+        send(body) { _ in completion() }
     }
 
     private func collectedInits() -> [Int: Data] {
@@ -144,7 +168,10 @@ final class SABRSession {
                 itag: request.itag, offset: request.offset, length: request.length
             ) {
                 self.markRead(
-                    itag: request.itag, offset: request.offset, length: request.length
+                    itag: request.itag,
+                    offset: request.offset,
+                    length: request.length,
+                    timeMs: request.timeMs
                 )
                 completion(.success(data))
                 return
@@ -169,10 +196,15 @@ final class SABRSession {
             resetBuffers()
             progress.removeAll()
             reachedEnd = false
-            return SABRRequest.startup(
+            lastServedMs = request.timeMs
+            // Jump rather than start over: a startup request would stream from
+            // the beginning of the video again, and the player would sit
+            // waiting while the session ground its way back to the playhead.
+            return SABRRequest.jump(
                 ustreamerConfig: ustreamerConfig,
                 audio: audio,
-                video: video
+                video: video,
+                playerMs: request.timeMs
             )
         }
         return reachedEnd ? nil : continuationBody(timeMs: request.timeMs)

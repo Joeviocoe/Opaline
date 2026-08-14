@@ -42,6 +42,28 @@ enum SABRRequest {
         return body
     }
 
+    /// Jumps the stream to `playerMs`.
+    ///
+    /// A startup request cannot do this — with a non-zero player time it comes
+    /// back empty (verified 2026-08-14). What works is a continuation that
+    /// claims everything up to the target is already buffered, which is true
+    /// enough: the player is not going to ask for those bytes.
+    static func jump(
+        ustreamerConfig: Data,
+        audio: SabrFormatInfo,
+        video: SabrFormatInfo,
+        playerMs: Int
+    ) -> Data {
+        let held = SABRStreamProgress(format: audio, lastSequence: 1, bufferedMs: playerMs)
+        let heldVideo = SABRStreamProgress(format: video, lastSequence: 1, bufferedMs: playerMs)
+        return continuation(
+            ustreamerConfig: ustreamerConfig,
+            state: Continuation(
+                audio: held, video: heldVideo, playerMs: playerMs, playbackCookie: nil
+            )
+        )
+    }
+
     /// Every request after the first: same shape plus what we already have.
     static func continuation(ustreamerConfig: Data, state: Continuation) -> Data {
         let (audio, video) = (state.audio, state.video)

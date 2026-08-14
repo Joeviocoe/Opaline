@@ -92,8 +92,10 @@ final class AutoVideoSource: VideoSource {
 
     func selectQuality(
         _ quality: VideoQuality,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
+        _ = resumeAt
         active.selectQuality(quality, completion: completion)
     }
 

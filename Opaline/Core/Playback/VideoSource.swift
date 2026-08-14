@@ -96,8 +96,14 @@ protocol VideoSource: AnyObject {
     )
 
     /// Switches quality; the source rebuilds playback its own way.
+    ///
+    /// `resumeAt` is where the player currently stands. Sources that refetch
+    /// by URL can ignore it — the shell seeks after attaching — but a source
+    /// that streams sequentially needs it, or it fetches from the start of the
+    /// video while the player waits for the middle.
     func selectQuality(
         _ quality: VideoQuality,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     )
 
@@ -124,6 +130,14 @@ extension VideoSource {
     var supportsAudioTrackSelection: Bool { availableAudioTracks.count > 1 }
     var availableAudioTracks: [AudioTrack] { [] }
     var currentAudioTrack: AudioTrack? { nil }
+
+    /// Convenience for callers with no playhead to offer.
+    func selectQuality(
+        _ quality: VideoQuality,
+        completion: @escaping (Result<PreparedPlayback, Error>) -> Void
+    ) {
+        selectQuality(quality, resumeAt: nil, completion: completion)
+    }
 
     func selectAudioTrack(
         _ track: AudioTrack,

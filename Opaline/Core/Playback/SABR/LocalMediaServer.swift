@@ -58,7 +58,13 @@ final class LocalMediaServer {
     /// Accepted connections, so stopping the server takes them down too —
     /// cancelling the listener alone leaves them open for the rest of the
     /// session, one set per video watched.
+    ///
+    /// Guarded by a lock rather than the queue: `stop()` runs from `deinit`,
+    /// and dispatching there captures an object that is already being torn
+    /// down — a retain on a dead reference, which crashes on whichever thread
+    /// happens to be running.
     private var connections: [NWConnection] = []
+    private let connectionsLock = NSLock()
 
     /// The port the listener settled on, once it is ready.
     private(set) var port: UInt16?
@@ -118,10 +124,11 @@ final class LocalMediaServer {
 
     func stop() {
         listener.cancel()
-        queue.async {
-            self.connections.forEach { $0.cancel() }
-            self.connections.removeAll()
-        }
+        connectionsLock.lock()
+        let live = connections
+        connections.removeAll()
+        connectionsLock.unlock()
+        live.forEach { $0.cancel() }
     }
 
     // MARK: - Connections
@@ -130,7 +137,9 @@ final class LocalMediaServer {
         // Keep-alive means the player decides when a connection is done, so
         // its end has to be noticed and the socket released — otherwise they
         // pile up in CLOSE_WAIT for the whole session.
+        connectionsLock.lock()
         connections.append(connection)
+        connectionsLock.unlock()
         connection.stateUpdateHandler = { [weak self] state in
             switch state {
             case .failed, .cancelled:
@@ -145,9 +154,9 @@ final class LocalMediaServer {
     }
 
     private func forget(_ connection: NWConnection) {
-        queue.async {
-            self.connections.removeAll { $0 === connection }
-        }
+        connectionsLock.lock()
+        connections.removeAll { $0 === connection }
+        connectionsLock.unlock()
     }
 
     /// Reads until the end of the request head. No bodies: these are all GETs

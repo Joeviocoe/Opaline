@@ -88,11 +88,11 @@ extension SABRSession {
         }
         waiting = stillWaiting
         for entry in ready {
-            lastServedMs = max(lastServedMs, entry.waiter.request.timeMs)
             markRead(
                 itag: entry.waiter.request.itag,
                 offset: entry.waiter.request.offset,
-                length: entry.waiter.request.length
+                length: entry.waiter.request.length,
+                timeMs: entry.waiter.request.timeMs
             )
             entry.waiter.completion(.success(entry.data))
         }

@@ -82,8 +82,9 @@ extension SABRSession {
     /// Records how far a stream has been handed out. Kept separate from
     /// `buffered` on purpose: that one is called from inside `removeAll`, and
     /// mutating the session from there trips exclusive-access enforcement.
-    func markRead(itag: Int, offset: Int64, length: Int) {
+    func markRead(itag: Int, offset: Int64, length: Int, timeMs: Int) {
         readOffsets[itag] = max(readOffsets[itag] ?? 0, offset + Int64(length))
+        lastServedMs = max(lastServedMs, timeMs)
     }
 
     /// How many bytes are already held contiguously from `offset` — the write
