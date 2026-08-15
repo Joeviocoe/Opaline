@@ -24,6 +24,11 @@ struct SABRReadRequest {
     let length: Int
     /// Where `offset` falls in the video, used to reposition after a seek.
     let timeMs: Int
+    /// Which segment this is, counting from 1 as SABR does. A jump claims
+    /// everything up to the target is buffered, and claiming 30 minutes of it
+    /// while saying "last segment: 1" is contradictory enough that the server
+    /// answers with policy and no media.
+    let sequence: Int
 }
 
 /// One SABR playback session: POSTs `VideoPlaybackAbrRequest`, folds the UMP
@@ -138,7 +143,10 @@ final class SABRSession {
             ustreamerConfig: ustreamerConfig,
             audio: audio,
             video: video,
-            playerMs: timeMs
+            playerMs: timeMs,
+            // Segments run about five seconds; the exact figure does not matter,
+            // only that it is consistent with the buffer being claimed.
+            sequence: max(1, timeMs / 5_000)
         )
         send(body) { _ in completion() }
     }
@@ -201,7 +209,8 @@ final class SABRSession {
                 ustreamerConfig: ustreamerConfig,
                 audio: audio,
                 video: video,
-                playerMs: request.timeMs
+                playerMs: request.timeMs,
+                sequence: request.sequence
             )
         }
         return reachedEnd ? nil : continuationBody(timeMs: request.timeMs)

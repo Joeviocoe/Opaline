@@ -52,10 +52,15 @@ enum SABRRequest {
         ustreamerConfig: Data,
         audio: SabrFormatInfo,
         video: SabrFormatInfo,
-        playerMs: Int
+        playerMs: Int,
+        sequence: Int = 1
     ) -> Data {
-        let held = SABRStreamProgress(format: audio, lastSequence: 1, bufferedMs: playerMs)
-        let heldVideo = SABRStreamProgress(format: video, lastSequence: 1, bufferedMs: playerMs)
+        let held = SABRStreamProgress(
+            format: audio, lastSequence: sequence, bufferedMs: playerMs
+        )
+        let heldVideo = SABRStreamProgress(
+            format: video, lastSequence: sequence, bufferedMs: playerMs
+        )
         return continuation(
             ustreamerConfig: ustreamerConfig,
             state: Continuation(

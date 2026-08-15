@@ -101,7 +101,8 @@ extension SABRDelivery {
             itag: track.format.itag,
             offset: range.offset,
             length: range.length,
-            timeMs: timeMs(at: range.offset, in: track)
+            timeMs: timeMs(at: range.offset, in: track),
+            sequence: (Int(name) ?? 0) + 1
         )) { result in
             switch result {
             case .success(let data):

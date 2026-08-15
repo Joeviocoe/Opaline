@@ -117,6 +117,7 @@ final class SABRDelivery: StreamDelivery {
             video: Self.formatInfo(request.video)
         )
         self.session = session
+        PlaybackProgress.step("player.status.openingSABR")
         session.start(resumeAt: request.resumeAt == nil ? 0 : playhead) { [weak self] result in
             switch result {
             case .failure(let error):
