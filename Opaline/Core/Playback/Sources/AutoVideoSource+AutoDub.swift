@@ -37,6 +37,7 @@ extension AutoVideoSource {
             AppLog.player(
                 "auto: \(primary.kind) failed (\(error)), falling back"
             )
+            PlaybackProgress.step("player.status.tryingFallback")
             loadFallback(
                 videoId: videoId,
                 cancellation: cancellation,

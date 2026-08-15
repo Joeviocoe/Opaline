@@ -22,6 +22,7 @@ final class SettingsViewController: UIViewController {
         case notificationSettings
         case playbackSource
         case streamDelivery
+        case resetIdentity
         case solverEndpoint
         case mainThreadWatchdog
         case shareLog
@@ -366,6 +367,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 "settings.row.streamDelivery".localized,
                 value: StreamDeliveryPreference.selected.displayName
             )
+        case .resetIdentity:
+            return makeDisclosureCell("settings.row.resetIdentity".localized)
         case .solverEndpoint:
             return makeDisclosureCell(
                 "settings.row.solverServer".localized,
@@ -440,6 +443,13 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             }
         case .playbackSource, .streamDelivery, .solverEndpoint:
             showDebugPicker(for: row)
+        case .resetIdentity:
+            // A spent identity is behind most "it plays on one device but not
+            // the other" reports: mweb, the range path and the TV watchtime
+            // request all depend on it, and only SABR does not.
+            InnertubeSession.invalidateVisitorIdentity(reason: "manual reset")
+            AppLog.innertube("visitor identity reset by hand")
+            tableView.reloadData()
         default:
             return false
         }

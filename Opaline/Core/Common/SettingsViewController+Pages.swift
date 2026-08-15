@@ -164,7 +164,9 @@ extension SettingsViewController {
         if PlaybackSource.selected.supportsDeliveryChoice {
             rows.append(.streamDelivery)
         }
-        rows.append(contentsOf: [.solverEndpoint, .mainThreadWatchdog, .shareLog])
+        rows.append(contentsOf: [
+            .resetIdentity, .solverEndpoint, .mainThreadWatchdog, .shareLog
+        ])
         return [
             Section(
                 header: nil,

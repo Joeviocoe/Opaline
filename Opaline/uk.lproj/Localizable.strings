@@ -24,6 +24,12 @@
 
 "player.status.loading" = "Завантаження %1$@...";
 "player.status.resolving" = "Отримання потоку...";
+"player.status.identityRedraw" = "Оновлення сесії (%1$@)...";
+"player.status.tryingFallback" = "Пробуємо інше джерело...";
+"player.status.switchingToSABR" = "Перехід на SABR...";
+"player.status.switchingToRanges" = "Перехід на прямі потоки...";
+"player.status.openingSABR" = "Відкриття сесії SABR...";
+"player.status.solving" = "Розшифрування підписів...";
 "player.status.botCheckRetry" = "Перевірка на бота — оновлюю сесію, пробую знову...";
 "player.error.playback" = "Не вдалося відтворити відео.";
 "player.error.botCheck" = "YouTube вимагає підтвердити, що ви не бот. Спробуйте ще раз за хвилину.";
@@ -211,6 +217,8 @@
 "settings.row.sponsorblockSettings" = "Налаштування SponsorBlock";
 
 "settings.row.playbackSource" = "Джерело";
+"settings.row.streamDelivery" = "Доставка потоку";
+"settings.row.resetIdentity" = "Скинути visitor identity";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Поділитися журналом налагодження";
 "settings.row.support" = "Підтримати розробку";

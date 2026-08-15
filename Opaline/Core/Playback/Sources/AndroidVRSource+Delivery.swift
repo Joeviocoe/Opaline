@@ -82,6 +82,11 @@ extension AndroidVRSource {
                 "delivery \(first.label) failed (\(error.localizedDescription)),"
                     + " falling back to \(second.label)"
             )
+            PlaybackProgress.step(
+                second.label == "sabr"
+                    ? "player.status.switchingToSABR"
+                    : "player.status.switchingToRanges"
+            )
             self?.delivery = second
             second.prepare(request, completion: completion)
         }

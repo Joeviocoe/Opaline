@@ -38,6 +38,12 @@
 "player.status.loading" = "Loading %1$@...";
 /* Status label while the stream URL is being resolved */
 "player.status.resolving" = "Resolving stream...";
+"player.status.identityRedraw" = "Renewing session (%1$@)...";
+"player.status.tryingFallback" = "Trying another source...";
+"player.status.switchingToSABR" = "Switching to SABR...";
+"player.status.switchingToRanges" = "Switching to direct streams...";
+"player.status.openingSABR" = "Opening SABR session...";
+"player.status.solving" = "Solving signatures...";
 /* Status label while a bot check is being retried with a fresh session */
 "player.status.botCheckRetry" = "Bot check — renewing session, retrying...";
 /* Shown when a video cannot be played at all */
@@ -295,6 +301,7 @@
 /* Debug rows (values stay technical/English) */
 "settings.row.playbackSource" = "Playback Source";
 "settings.row.streamDelivery" = "Stream delivery";
+"settings.row.resetIdentity" = "Reset visitor identity";
 "settings.row.solverServer" = "Solver Server";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
 "settings.row.shareLog" = "Share Debug Log";

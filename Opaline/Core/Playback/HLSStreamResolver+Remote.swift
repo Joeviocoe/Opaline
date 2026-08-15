@@ -57,6 +57,7 @@ extension HLSStreamResolver {
         AppLog.player(
             "hlsResolve: remote solving \(kind.rawValue) via \(endpoint.host ?? "")"
         )
+        PlaybackProgress.step("player.status.solving")
         // Timed: this round trip is the price iOS 12 pays for not being able
         // to run the challenge locally, and a cold server makes it the whole
         // start-up cost — the log is what tells the two apart.

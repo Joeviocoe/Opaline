@@ -25,6 +25,12 @@
 
 "player.status.loading" = "Загрузка %1$@...";
 "player.status.resolving" = "Получение потока...";
+"player.status.identityRedraw" = "Обновление сессии (%1$@)...";
+"player.status.tryingFallback" = "Пробуем другой источник...";
+"player.status.switchingToSABR" = "Переход на SABR...";
+"player.status.switchingToRanges" = "Переход на прямые потоки...";
+"player.status.openingSABR" = "Открытие сессии SABR...";
+"player.status.solving" = "Расшифровка подписей...";
 "player.status.botCheckRetry" = "Проверка на бота — обновляю сессию, пробую снова...";
 "player.error.playback" = "Не удалось воспроизвести видео.";
 "player.error.botCheck" = "YouTube требует подтвердить, что вы не бот. Повторите попытку через минуту.";
@@ -212,6 +218,8 @@
 "settings.row.sponsorblockSettings" = "Настройки SponsorBlock";
 
 "settings.row.playbackSource" = "Источник";
+"settings.row.streamDelivery" = "Доставка потока";
+"settings.row.resetIdentity" = "Сбросить visitor identity";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Поделиться логом отладки";
 "settings.row.support" = "Поддержать разработку";

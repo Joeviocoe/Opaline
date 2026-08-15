@@ -35,6 +35,10 @@ extension PlaybackFacade {
         AppLog.player(
             "identity redraw \(identityRedraws)/\(Self.maxIdentityRedraws)"
         )
+        PlaybackProgress.step(
+            "player.status.identityRedraw",
+            "\(identityRedraws)/\(Self.maxIdentityRedraws)"
+        )
         DispatchQueue.main.asyncAfter(
             deadline: .now() + Self.identityRedrawDelay
         ) { [weak self] in

@@ -597,12 +597,15 @@ extension InnertubeClient {
         let pt = json["playbackTracking"]
             as? [String: Any]
         if pt == nil {
-            let ps = (json["playabilityStatus"]
-                as? [String: Any])?["status"]
-                ?? "nil"
+            let status = json["playabilityStatus"] as? [String: Any]
+            // The reason separates "this account/session is not allowed" from
+            // "the client needs attestation" — the TV client answers the latter
+            // with "The page needs to be reloaded", and without it the log says
+            // only that something was refused.
             AppLog.innertube(
                 "watchtimeURLs: no playbackTracking"
-                    + " playabilityStatus=\(ps)"
+                    + " playabilityStatus=\(status?["status"] ?? "nil")"
+                    + " reason=\(status?["reason"] ?? "nil")"
             )
         }
         guard let pbURL = (pt?["videostatsPlaybackUrl"]

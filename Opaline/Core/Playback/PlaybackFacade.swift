@@ -76,6 +76,9 @@ extension PlaybackFacade {
             .make(kind: kind)
         activeVideoSource = source
         context?.updateStatusLabel(statusKey.localized)
+        PlaybackProgress.report = { [weak self] text in
+            self?.context?.updateStatusLabel(text)
+        }
         let attempt = ResolveAttempt(
             videoId: videoId,
             apiClient: apiClient,
@@ -169,6 +172,7 @@ extension PlaybackFacade {
         _ result: Result<PreparedPlayback, Error>,
         cancellation: CancellationToken
     ) {
+        PlaybackProgress.report = nil
         switch result {
         case .success(let prepared):
             let kind = activeVideoSource?.kind
