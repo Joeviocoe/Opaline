@@ -84,10 +84,7 @@ extension InnertubeClient {
             poToken: poToken,
             signatureTimestamp: signatureTimestamp
         )
-        let headers = client.apiHeaders(
-            token: token,
-            visitorData: visitorData
-        )
+        let headers = client.apiHeaders(token: token, visitorData: visitorData)
         let playerURL = "\(baseURL)/player\(client.playerURLSuffix)"
         var hitBotCheck = false
         execute(
@@ -202,7 +199,10 @@ extension InnertubeClient {
         body["videoId"] = videoId
         body["racyCheckOk"] = true
         body["contentCheckOk"] = true
-        if let sts = signatureTimestamp {
+        // TV wants its own timestamp format: the web value with a "001" suffix
+        // (web 20522 → tv 20522001). Sending the web one back is what makes it
+        // answer UNPLAYABLE "The page needs to be reloaded".
+        if let sts = signatureTimestamp.flatMap({ Int("\($0)001") }) {
             body["playbackContext"] = [
                 "contentPlaybackContext": [
                     "signatureTimestamp": sts

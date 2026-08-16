@@ -17,6 +17,14 @@ final class APIClient {
     ) -> Result<Data, Error> {
         result.flatMap { response in
             if let error = APIError.from(status: response.status) {
+                // Innertube explains itself in the body ("Request contains an
+                // invalid argument"); without this a 400 is just a status code.
+                let body = String(
+                    data: response.data.prefix(300), encoding: .utf8
+                ) ?? ""
+                AppLog.innertube(
+                    "HTTP \(response.status): \(body.replacingOccurrences(of: "\n", with: " "))"
+                )
                 return .failure(error)
             }
             return .success(response.data)
