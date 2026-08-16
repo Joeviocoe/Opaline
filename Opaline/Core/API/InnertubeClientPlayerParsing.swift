@@ -304,10 +304,9 @@ private extension InnertubeClient {
     ) -> [DashFormatInfo] {
         var bestPerTrack: [String: DashFormatInfo] = [:]
         adaptive
-            .filter {
-                fmtDirectURL($0) != nil
-                    && fmtMimeType($0).contains("audio/mp4")
-            }
+            // No URL filter: a SABR-only response (TV) describes every format
+            // without one and addresses them by id — see [[buildDashInfo]].
+            .filter { fmtMimeType($0).contains("audio/mp4") }
             .compactMap(buildDashInfo)
             .forEach { format in
                 guard let trackId = format.audioTrackId else {
@@ -336,10 +335,9 @@ private extension InnertubeClient {
         from adaptive: [[String: Any]]
     ) -> [DashFormatInfo] {
         adaptive
+            // No URL filter, for the same reason as [[buildAllDashAudio]].
             .filter {
-                fmtDirectURL($0) != nil
-                    && fmtIsPlayableVideo($0)
-                    && fmtHeight($0) > 0
+                fmtIsPlayableVideo($0) && fmtHeight($0) > 0
             }
             .compactMap(buildDashInfo)
             .sorted { lhs, rhs in

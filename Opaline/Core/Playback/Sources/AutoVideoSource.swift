@@ -95,8 +95,7 @@ final class AutoVideoSource: VideoSource {
         resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        _ = resumeAt
-        active.selectQuality(quality, completion: completion)
+        active.selectQuality(quality, resumeAt: resumeAt, completion: completion)
     }
 
     /// Delegates when the active source owns the track; otherwise rebuilds on
@@ -104,10 +103,13 @@ final class AutoVideoSource: VideoSource {
     /// failed switch leaves the current playback untouched.
     func selectAudioTrack(
         _ track: AudioTrack,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         if active.availableAudioTracks.contains(track) {
-            active.selectAudioTrack(track, completion: completion)
+            active.selectAudioTrack(
+                track, resumeAt: resumeAt, completion: completion
+            )
             return
         }
         guard let fallback,
@@ -118,7 +120,7 @@ final class AutoVideoSource: VideoSource {
         AppLog.player(
             "auto: switching to \(fallback.kind) for audio track \(track.id)"
         )
-        fallback.selectAudioTrack(track) { [weak self] result in
+        fallback.selectAudioTrack(track, resumeAt: resumeAt) { [weak self] result in
             if case .success = result {
                 self?.primary.releaseResources()
                 self?.active = fallback

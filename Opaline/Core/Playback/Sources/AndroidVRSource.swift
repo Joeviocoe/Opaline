@@ -19,7 +19,9 @@ final class AndroidVRSource: VideoSource {
     let kind: VideoSourceKind
     var supportsQualitySelection: Bool { !availableQualities.isEmpty }
     var currentCodecs: String? {
-        guard let line = Self.codecsLine(info: info, quality: currentQuality) else {
+        guard let line = Self.codecsLine(
+            info: info, quality: currentQuality, audio: currentAudioFormat
+        ) else {
             return nil
         }
         guard let delivery, delivery.label != "range" else {
@@ -29,6 +31,12 @@ final class AndroidVRSource: VideoSource {
     }
     private(set) var availableQualities: [VideoQuality] = []
     private(set) var currentQuality: VideoQuality?
+    // Written by the audio-track extension; see AndroidVRSource+AudioTracks.
+    var availableAudioTracks: [AudioTrack] = []
+    var currentAudioTrack: AudioTrack?
+    /// The audio format playback is built with — the picked dub, or the
+    /// format the response defaulted to.
+    var currentAudioFormat: DashFormatInfo?
 
     private let apiClient: WatchService
     let transport: HTTPTransport
@@ -36,7 +44,7 @@ final class AndroidVRSource: VideoSource {
     var delivery: StreamDelivery?
     private let liveHLS: LiveHLSPlayback
     let client: DirectPlaybackClient
-    private var info: DirectPlaybackInfo?
+    private(set) var info: DirectPlaybackInfo?
     let poTokenProvider: PoTokenProvider
 
     init(
@@ -150,7 +158,7 @@ final class AndroidVRSource: VideoSource {
               let format = AudioOnlyMode.resolveFormat(
                   for: quality, info: info, current: currentQuality
               ),
-              let audio = info.dashAudioFormat else {
+              let audio = audioFormat(in: info) else {
             completion(.failure(Self.noStreamError))
             return
         }
@@ -172,6 +180,7 @@ final class AndroidVRSource: VideoSource {
     ) {
         self.info = info
         liveHLS.reset()
+        updateAudioTrackState(from: info)
         availableQualities = Self.qualities(from: info)
         let defaultQuality = info.dashVideoFormat.flatMap { selected in
             availableQualities.first { $0.id == "\(selected.itag)" }
@@ -186,7 +195,7 @@ final class AndroidVRSource: VideoSource {
         info: DirectPlaybackInfo,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        if let video = info.dashVideoFormat, let audio = info.dashAudioFormat {
+        if let video = info.dashVideoFormat, let audio = audioFormat(in: info) {
             buildGeneratedHLS(
                 info: info, video: video, audio: audio, completion: completion
             )
@@ -200,7 +209,7 @@ final class AndroidVRSource: VideoSource {
         }
     }
 
-    private func buildGeneratedHLS(
+    func buildGeneratedHLS(
         info: DirectPlaybackInfo,
         video: DashFormatInfo,
         audio: DashFormatInfo,

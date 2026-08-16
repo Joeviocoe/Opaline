@@ -3,8 +3,11 @@ import Foundation
 // MARK: - Audio-track (dub) selection
 
 extension MWebSource {
+    /// `resumeAt` is unused here: this source refetches by URL and the shell
+    /// seeks after attaching.
     func selectAudioTrack(
         _ track: AudioTrack,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         // Probe-only state (IOS-client metadata, no mweb /player yet): run
