@@ -53,9 +53,19 @@ enum UserAgent {
         "Chrome/122.0.0.0 Safari/537.36"
     ].joined(separator: " ")
 
-    /// Cobalt (TV embedded browser) — used for TV/Onesie/OAuth requests.
+    /// Cobalt (TV embedded browser) — used for the OAuth device flow.
     static let cobaltTV =
         "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version"
+
+    /// Cobalt on Fire TV — a real TVHTML5 user agent, used for TV playback.
+    /// SmartTube settled on this one after Chrome-engine UAs got throttled.
+    static let cobaltFireTV = [
+        "Mozilla/5.0 (Linux armeabi-v7a; Android 7.1.2; Fire OS 6.0)",
+        "Cobalt/22.lts.3.306369-gold (unlike Gecko)",
+        "v8/8.8.278.8-jit gles Starboard/13,",
+        "Amazon_ATV_mediatek8695_2019/NS6294 (Amazon, AFTMM, Wireless)",
+        "com.amazon.firetv.youtube/22.3.r2.v66.0"
+    ].joined(separator: " ")
 
     /// Mobile Safari on iPhone — used for the anonymous MWEB playback client.
     static let mobileSafari = [

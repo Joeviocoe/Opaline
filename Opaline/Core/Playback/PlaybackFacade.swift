@@ -163,7 +163,7 @@ extension PlaybackFacade {
         switch kind {
         case .auto, .androidVR, .progressive:
             return .mwebPot
-        case .mwebPot:
+        case .mwebPot, .tv:
             return .androidVR
         }
     }

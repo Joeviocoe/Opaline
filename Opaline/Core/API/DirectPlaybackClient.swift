@@ -4,6 +4,9 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
     case androidVR
     case web
     case mweb
+    /// The living-room client. The only one our device-code OAuth token is
+    /// accepted by, and SABR-only: its formats carry no `url`.
+    case tv
 
     var description: String {
         clientName
@@ -17,6 +20,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             "WEB"
         case .mweb:
             "MWEB"
+        case .tv:
+            "TVHTML5"
         }
     }
 
@@ -28,6 +33,10 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             "2.20231121.08.00"
         case .mweb:
             "2.20250101.00.00"
+        case .tv:
+            // Downgraded on purpose: on the current 7.x version TV serves
+            // SABR only, on 5.x it still hands out stream URLs.
+            "5.20260707"
         }
     }
 
@@ -39,6 +48,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             "1"
         case .mweb:
             "2"
+        case .tv:
+            "7"
         }
     }
 
@@ -52,6 +63,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             UserAgent.chromeMac
         case .mweb:
             UserAgent.mobileSafari
+        case .tv:
+            UserAgent.cobaltTV
         }
     }
 
@@ -60,7 +73,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .androidVR, .mweb:
             true
-        case .web:
+        // The TV client authenticates with the OAuth Bearer, like WEB.
+        case .web, .tv:
             false
         }
     }
@@ -77,7 +91,7 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .mweb:
             false
-        case .androidVR, .web:
+        case .androidVR, .web, .tv:
             true
         }
     }
@@ -90,6 +104,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             InnertubeContexts.web
         case .mweb:
             InnertubeContexts.mweb
+        case .tv:
+            InnertubeContexts.tv
         }
     }
 
@@ -97,8 +113,20 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .androidVR, .mweb:
             "?prettyPrint=false"
-        case .web:
+        case .web, .tv:
             ""
+        }
+    }
+
+    /// Web and TV signature timestamps diverged in August 2026: TV wants the
+    /// web value with a "001" suffix (web 20522 → tv 20522001) and answers
+    /// UNPLAYABLE "The page needs to be reloaded" for anything else.
+    func signatureTimestamp(from webValue: Int) -> Int {
+        switch self {
+        case .tv:
+            return Int("\(webValue)001") ?? webValue
+        case .androidVR, .web, .mweb:
+            return webValue
         }
     }
 
@@ -135,7 +163,7 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             headers[HTTPHeader.referer] = AppURLs.YouTube.base + "/"
             headers[HTTPHeader.origin] = AppURLs.YouTube.base
             headers[HTTPHeader.xOrigin] = AppURLs.YouTube.base
-        case .androidVR, .mweb:
+        case .androidVR, .mweb, .tv:
             break
         }
         if let visitorData, !visitorData.isEmpty {
@@ -156,6 +184,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .web:
             break
+        case .tv:
+            headers[HTTPHeader.referer] = AppURLs.YouTube.base + "/tv"
         case .androidVR, .mweb:
             if let visitorData, !visitorData.isEmpty {
                 headers[HTTPHeader.xGoogVisitorId] = visitorData

@@ -1,9 +1,14 @@
 import AVFoundation
 import Foundation
 
-/// Innertube android_vr source: fetches adaptive DASH formats and plays them as
-/// a SIDX-generated HLS stream (with native-HLS / progressive fallbacks). Owns
-/// quality selection from the DASH ladder.
+/// Innertube adaptive-format source: fetches adaptive DASH formats and plays
+/// them as a SIDX-generated HLS stream (with native-HLS / progressive
+/// fallbacks). Owns quality selection from the DASH ladder.
+///
+/// Serves two clients through one code path, because the difference between
+/// them is the request, not the playback: `androidVR` (anonymous, formats carry
+/// URLs) and `tv` (OAuth, SABR-only). Which delivery runs follows from what the
+/// response carries, so the TV client lands on SABR without a branch here.
 final class AndroidVRSource: VideoSource {
     private static let noStreamError = NSError(
         domain: "AndroidVRSource",
@@ -11,7 +16,7 @@ final class AndroidVRSource: VideoSource {
         userInfo: [NSLocalizedDescriptionKey: "No playable stream"]
     )
 
-    let kind: VideoSourceKind = .androidVR
+    let kind: VideoSourceKind
     var supportsQualitySelection: Bool { !availableQualities.isEmpty }
     var currentCodecs: String? {
         guard let line = Self.codecsLine(info: info, quality: currentQuality) else {
@@ -30,16 +35,23 @@ final class AndroidVRSource: VideoSource {
     /// How the bytes are arriving right now — byte ranges or SABR.
     var delivery: StreamDelivery?
     private let liveHLS: LiveHLSPlayback
-    private let client: DirectPlaybackClient = .androidVR
+    let client: DirectPlaybackClient
     private var info: DirectPlaybackInfo?
+    let poTokenProvider: PoTokenProvider
 
     init(
         apiClient: WatchService,
         transport: HTTPTransport = ServiceContainer.mediaTransport,
-        resolver: HLSStreamResolver = .shared
+        resolver: HLSStreamResolver = .shared,
+        client: DirectPlaybackClient = .androidVR,
+        kind: VideoSourceKind = .androidVR,
+        poTokenProvider: PoTokenProvider = RemotePoTokenService.shared
     ) {
         self.apiClient = apiClient
         self.transport = transport
+        self.client = client
+        self.kind = kind
+        self.poTokenProvider = poTokenProvider
         liveHLS = LiveHLSPlayback(resolver: resolver)
     }
 
@@ -101,17 +113,22 @@ final class AndroidVRSource: VideoSource {
         cancellation: CancellationToken?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        apiClient.fetchDirectPlayback(
-            videoId: videoId,
-            client: client,
-            poToken: nil,
-            cancellationToken: cancellation
-        ) { [weak self] result in
-            switch result {
-            case .failure(let error):
-                completion(.failure(error))
-            case .success(let info):
-                self?.handleInfo(info, completion: completion)
+        mintingTokenIfNeeded { [weak self] poToken in
+            guard let self else {
+                return
+            }
+            apiClient.fetchDirectPlayback(
+                videoId: videoId,
+                client: client,
+                poToken: poToken,
+                cancellationToken: cancellation
+            ) { [weak self] result in
+                switch result {
+                case .failure(let error):
+                    completion(.failure(error))
+                case .success(let info):
+                    self?.handleInfo(info, completion: completion)
+                }
             }
         }
     }

@@ -20,6 +20,10 @@ struct DefaultVideoSourceFactory: VideoSourceFactory {
             }
         case .androidVR:
             return AndroidVRSource(apiClient: apiClient, transport: transport)
+        case .tv:
+            return AndroidVRSource(
+                apiClient: apiClient, transport: transport, client: .tv, kind: .tv
+            )
         case .progressive:
             return ProgressiveSource(apiClient: apiClient)
         case .mwebPot:

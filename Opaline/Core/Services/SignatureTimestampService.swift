@@ -7,7 +7,13 @@ import Foundation
 final class SignatureTimestampService {
     static let shared = SignatureTimestampService()
 
+    /// Path to the player JS the cached STS came from. The n-solver needs the
+    /// SAME player the timestamp belongs to — scraping them from one response
+    /// is what keeps them in step.
+    private(set) var jsPath: String?
+
     private let tsKey = "SignatureTimestamp.value"
+    private let jsPathKey = "SignatureTimestamp.jsPath"
     private let dateKey = "SignatureTimestamp.fetchedAt"
     private let ttl: TimeInterval = 7 * 24 * 3_600
     private let queue = DispatchQueue(
@@ -15,7 +21,7 @@ final class SignatureTimestampService {
         attributes: .concurrent
     )
 
-    private let transport: HTTPTransport
+    let transport: HTTPTransport
 
     private var _cached: Int?
     private var cached: Int? {
@@ -47,13 +53,19 @@ final class SignatureTimestampService {
             return
         }
         _cached = ts
+        jsPath = defaults.string(forKey: jsPathKey)
     }
 
     private func saveToDefaults(_ ts: Int) {
         let defaults = UserDefaults.standard
         defaults.set(ts, forKey: tsKey)
         defaults.set(Date(), forKey: dateKey)
+        defaults.set(jsPath, forKey: jsPathKey)
     }
+
+    /// `"jsUrl":"/s/player/<hash>/tv-player-es6.vflset/tv-player-es6.js"` —
+    /// the TV page names its player `tv-player-es6.js`, the web one `base.js`,
+    /// so match the path rather than a fixed file name.
 
     private func fetchFromNetwork(
         completion: @escaping (Int?) -> Void
@@ -90,9 +102,7 @@ final class SignatureTimestampService {
             if case .success(let response) = result,
                let html = String(data: response.data, encoding: .utf8),
                let ts = self.extractSTS(from: html) {
-                AppLog.log("SigTS", "signatureTimestamp=\(ts)")
-                self.cached = ts
-                self.saveToDefaults(ts)
+                self.store(ts: ts, html: html)
                 completion(ts)
             } else {
                 self.fetchSTS(
@@ -102,6 +112,13 @@ final class SignatureTimestampService {
                 )
             }
         }
+    }
+
+    private func store(ts: Int, html: String) {
+        jsPath = Self.playerPath(in: html)
+        AppLog.log("SigTS", "signatureTimestamp=\(ts) jsPath=\(jsPath ?? "nil")")
+        cached = ts
+        saveToDefaults(ts)
     }
 
     private func extractSTS(from html: String) -> Int? {

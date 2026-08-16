@@ -14,6 +14,8 @@ enum VideoSourceKind {
     /// factory input — a playing source always reports a concrete kind.
     case auto
     case androidVR
+    /// Signed-in living-room client, played over SABR.
+    case tv
     case progressive
     case mwebPot
 }

@@ -36,7 +36,6 @@ extension SABRSession {
     /// the state carried by the next request.
     func consume(_ response: HTTPResponse) -> Result<Void, Error> {
         guard response.status == 200 else {
-            AppLog.hls("sabr HTTP \(response.status)")
             return .failure(SABRError.server("HTTP \(response.status)"))
         }
         let reader = UMPReader()
@@ -74,10 +73,15 @@ extension SABRSession {
             // meant the session never noticed it had finished and asked again
             // forever.
             return store(media: part.payload, headers: headers)
-        case .nextRequestPolicy, .nextRequestPolicyAlt:
+        case .nextRequestPolicy:
             if let cookie = Protobuf.parse(part.payload).data(7) {
                 setPlaybackCookie(cookie)
             }
+        case .streamProtectionStatus:
+            // 1 = OK, 2 = attestation pending, 3 = attestation required. The
+            // only direct answer to "does this session need a PO token".
+            let status = Protobuf.parse(part.payload).number(1) ?? 0
+            AppLog.hls("sabr stream protection status: \(status)")
         default:
             break
         }
@@ -128,5 +132,22 @@ extension SABRSession {
             )
         }
         return isMedia
+    }
+}
+
+enum SABRError: LocalizedError {
+    case noInitSegment
+    case stalled
+    case server(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .noInitSegment:
+            "SABR returned no init segment"
+        case .stalled:
+            "SABR stopped returning media"
+        case .server(let detail):
+            "SABR error: \(detail)"
+        }
     }
 }

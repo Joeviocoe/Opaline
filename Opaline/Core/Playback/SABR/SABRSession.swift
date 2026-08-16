@@ -233,6 +233,11 @@ final class SABRSession {
     }
 
     // MARK: - Transport
+    private func sabrHeaders() -> [String: String] {
+        var headers = [HTTPHeader.contentType: "application/x-protobuf"]
+        headers[HTTPHeader.userAgent] = SABRRequest.client.userAgent
+        return headers
+    }
 
     func send(_ body: Data, completion: @escaping (Result<Void, Error>) -> Void) {
         requestNumber += 1
@@ -240,10 +245,7 @@ final class SABRSession {
             method: .post,
             // The streaming URL always carries a query, so appending is safe.
             url: URL(string: "\(url.absoluteString)&rn=\(requestNumber)") ?? url,
-            headers: [
-                "Content-Type": "application/x-protobuf",
-                "User-Agent": DirectPlaybackClient.androidVR.userAgent
-            ],
+            headers: sabrHeaders(),
             body: body,
             // Anonymous, like the spike this ports: cookies were tried on
             // device and changed nothing.
@@ -252,13 +254,14 @@ final class SABRSession {
         let sent = body.count
         transport.send(request, cancellationToken: nil) { [weak self] result in
             self?.queue.async {
-                self?.handle(result, sent: sent, completion: completion)
+                self?.handle(result, request: request, sent: sent, completion: completion)
             }
         }
     }
 
     private func handle(
         _ result: Result<HTTPResponse, Error>,
+        request: HTTPRequest,
         sent: Int,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
@@ -266,29 +269,22 @@ final class SABRSession {
         case .failure(let error):
             AppLog.hls("sabr request failed: \(error.localizedDescription)")
             completion(.failure(error))
+        case .success(let response) where response.status != 200:
+            // A refusal with no body never reaches the SABR protocol at all —
+            // googlevideo rejected the URL itself. Dump the whole exchange so
+            // it can be replayed off-device: rebuilding the app to try one
+            // header at a time is the slow way to answer this.
+            // TODO(OPALINE-82): drop once the TV path plays.
+            AppLog.hls("sabr HTTP \(response.status) refused")
+            AppLog.hls("sabr replay url: \(request.url.absoluteString)")
+            AppLog.hls("sabr replay body: \(request.body?.base64EncodedString() ?? "")")
+            completion(consume(response))
         case .success(let response):
             AppLog.hls(
                 "sabr #\(requestNumber) sent \(sent)B"
                     + " -> HTTP \(response.status), \(response.data.count)B"
             )
             completion(consume(response))
-        }
-    }
-}
-
-enum SABRError: LocalizedError {
-    case noInitSegment
-    case stalled
-    case server(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .noInitSegment:
-            "SABR returned no init segment"
-        case .stalled:
-            "SABR stopped returning media"
-        case .server(let detail):
-            "SABR error: \(detail)"
         }
     }
 }

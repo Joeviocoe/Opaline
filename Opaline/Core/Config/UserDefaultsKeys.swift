@@ -88,6 +88,12 @@ enum UserDefaultsKeys {
         static let autoZoomToFill = "player_autoZoomToFill"
     }
 
+    enum Playback {
+        /// The made-up television id the TV client presents once and keeps;
+        /// its proof-of-origin token is bound to this exact string.
+        static let livingRoomPoTokenId = "playback_livingRoomPoTokenId"
+    }
+
     enum AutoDub {
         static let enabled = "autoDub_enabled"
         static let ignoreAIDubs = "autoDub_ignoreAIDubs"
@@ -137,6 +143,7 @@ enum PlaybackSource: String, CaseIterable {
     case androidVR = "android_vr"
     case progressive = "progressive"
     case mwebPot = "mweb_pot"
+    case tv = "tv"
 
     static var selected: PlaybackSource {
         let raw = UserDefaults.standard.string(
@@ -156,6 +163,8 @@ enum PlaybackSource: String, CaseIterable {
             return "Progressive (360p)"
         case .mwebPot:
             return "Mobile Web + pot (kids/dubbed)"
+        case .tv:
+            return "TV (signed in, SABR)"
         }
     }
 
@@ -168,7 +177,8 @@ enum PlaybackSource: String, CaseIterable {
         switch self {
         case .auto, .androidVR:
             return true
-        case .progressive, .mwebPot:
+        // TV serves no stream URLs at all — SABR is its only delivery.
+        case .progressive, .mwebPot, .tv:
             return false
         }
     }
@@ -183,6 +193,8 @@ enum PlaybackSource: String, CaseIterable {
             return .progressive
         case .mwebPot:
             return .mwebPot
+        case .tv:
+            return .tv
         }
     }
 }

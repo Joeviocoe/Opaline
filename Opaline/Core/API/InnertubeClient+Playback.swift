@@ -199,10 +199,9 @@ extension InnertubeClient {
         body["videoId"] = videoId
         body["racyCheckOk"] = true
         body["contentCheckOk"] = true
-        // TV wants its own timestamp format: the web value with a "001" suffix
-        // (web 20522 → tv 20522001). Sending the web one back is what makes it
-        // answer UNPLAYABLE "The page needs to be reloaded".
-        if let sts = signatureTimestamp.flatMap({ Int("\($0)001") }) {
+        if let sts = signatureTimestamp.map(
+            DirectPlaybackClient.tv.signatureTimestamp(from:)
+        ) {
             body["playbackContext"] = [
                 "contentPlaybackContext": [
                     "signatureTimestamp": sts
@@ -239,8 +238,8 @@ private extension InnertubeClient {
             var playbackCtx: [String: Any] = [
                 "html5Preference": "HTML5_PREF_WANTS"
             ]
-            if let signatureTimestamp {
-                playbackCtx["signatureTimestamp"] = signatureTimestamp
+            if let sts = signatureTimestamp {
+                playbackCtx["signatureTimestamp"] = client.signatureTimestamp(from: sts)
             }
             body["playbackContext"] = [
                 "contentPlaybackContext": playbackCtx
@@ -251,6 +250,26 @@ private extension InnertubeClient {
                 "poToken": poToken
             ]
         }
+        if case .tv = client {
+            addTVAppInfo(to: &body)
+        }
         return body
+    }
+
+    /// A television names itself in the player context, and the id it gives is
+    /// the one its token is bound to. Without the pair the response still says
+    /// `OK`, but the stream it points at is not the one a TV would get.
+    func addTVAppInfo(to body: inout [String: Any]) {
+        guard var context = body["context"] as? [String: Any],
+              var client = context["client"] as? [String: Any] else {
+            return
+        }
+        client["tvAppInfo"] = [
+            "livingRoomPoTokenId": TVDeviceIdentity.livingRoomPoTokenId,
+            "signedInAccountCount": 1,
+            "appQuality": "TV_APP_QUALITY_FULL_ANIMATION"
+        ]
+        context["client"] = client
+        body["context"] = context
     }
 }

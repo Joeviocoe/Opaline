@@ -12,6 +12,7 @@ extension InnertubeClient {
     static func parseDirectPlaybackInfo(
         _ json: [String: Any]
     ) -> DirectPlaybackInfo? {
+        logFormatKeys(json)
         guard let sd = json["streamingData"]
             as? [String: Any]
         else {
@@ -121,9 +122,7 @@ private extension InnertubeClient {
         from adaptive: [[String: Any]]
     ) -> [String: Any]? {
         let pool = adaptive.filter {
-            fmtDirectURL($0) != nil
-                && fmtMimeType($0)
-                    .contains("audio/mp4")
+            fmtMimeType($0).contains("audio/mp4")
         }
         let originals = pool.filter {
             (($0["audioTrack"] as? [String: Any])?["id"]
@@ -161,8 +160,9 @@ private extension InnertubeClient {
     ) -> [String: Any]? {
         adaptive
             .filter { fmt in
-                fmtDirectURL(fmt) != nil
-                    && fmtIsPlayableVideo(fmt)
+                // No URL filter: SABR-only responses (TV) describe every
+                // format without one, and address them by id instead.
+                fmtIsPlayableVideo(fmt)
                     && fmtHeight(fmt) > 0
                     && maxHeight.map {
                         fmtHeight(fmt) <= $0
@@ -205,8 +205,10 @@ private extension InnertubeClient {
             as? [String: Any]
         let indexRange = fmt["indexRange"]
             as? [String: Any]
-        guard let url = fmtDirectURL(fmt),
-              let tag = fmtItag(fmt),
+        // A TV response describes every format but hands out no URL at all —
+        // those are playable over SABR, which addresses formats by id.
+        let url = fmtDirectURL(fmt) ?? DashFormatInfo.noDirectURL
+        guard let tag = fmtItag(fmt),
               let initEnd = intVal(initRange?["end"]),
               let indexStart = intVal(indexRange?["start"]),
               let indexEnd = intVal(indexRange?["end"]),
@@ -256,6 +258,8 @@ private extension InnertubeClient {
             qualityLabel: fmt["qualityLabel"] as? String,
             sigChallenge: fmt[sigChallengeKey] as? String,
             sigParam: fmt[sigParamKey] as? String,
+            lastModified: (fmt["lastModified"] as? String)
+                ?? (fmt["lmt"] as? String),
             audioTrackId: track?["id"] as? String,
             audioTrackName: track?["displayName"]
                 as? String,
@@ -507,6 +511,15 @@ private extension InnertubeClient {
             ?? (sel.audio?[key] as? String)
         return ms.flatMap(Double.init)
             .map { $0 / 1_000.0 }
+    }
+
+    static func logFormatKeys(_ json: [String: Any]) {
+        let sd = json["streamingData"] as? [String: Any]
+        let ad = sd?["adaptiveFormats"] as? [[String: Any]] ?? []
+        guard let first = ad.first else {
+            return
+        }
+        AppLog.innertube("fmt keys: \(first.keys.sorted().joined(separator: ","))")
     }
 
     static func logStreamingDataSummary(

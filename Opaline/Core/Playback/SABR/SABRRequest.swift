@@ -21,6 +21,16 @@ enum SABRRequest {
         let playbackCookie: Data?
     }
 
+    /// Which client's session these requests belong to. Set by the delivery
+    /// before a session opens; the bodies carry it in `streamerContext`.
+    static var client: DirectPlaybackClient = .androidVR
+
+    /// The proof-of-origin token this session streams under, already decoded
+    /// from its web-safe base64. A television sends it on every request, bound
+    /// to the same id its `/player` call named; android_vr sends none, which is
+    /// why it is the one client that plays without minting anything.
+    static var poToken: Data?
+
     /// The first request of a session.
     ///
     /// Deliberately carries neither `selectedFormatIds` (2) nor `bufferedRanges`
@@ -91,6 +101,59 @@ enum SABRRequest {
     // MARK: - Messages
 
     private static func clientAbrState(video: SabrFormatInfo, playerMs: Int) -> Data {
+        client == .tv
+            ? tvAbrState(video: video, playerMs: playerMs)
+            : androidVRAbrState(video: video, playerMs: playerMs)
+    }
+
+    /// Field for field what a television sends, captured from a live TV session
+    /// 2026-08-16. The set it uses is not the one android_vr uses — no
+    /// `enabledTrackTypes`, `visibility` is 0 rather than 1, and it states DRC
+    /// and codec preferences the other client leaves out.
+    private static func tvAbrState(video: SabrFormatInfo, playerMs: Int) -> Data {
+        var state = Protobuf.int(18, 1_920)        // clientViewportWidth
+        state += Protobuf.int(19, 1_080)           // clientViewportHeight
+        state += Protobuf.int(21, 0)               // stickyResolution
+        if let bitrate = video.bitrate, bitrate > 0 {
+            state += Protobuf.int(23, bitrate)     // bandwidthEstimate
+        }
+        state += Protobuf.int(28, playerMs)
+        state += Protobuf.int(34, 0)               // visibility
+        state += Protobuf.bool(46, true)           // drcEnabled
+        state += Protobuf.bool(58, false)          // preferVp9
+        state += Protobuf.int(59, 1_080)           // av1QualityThreshold
+        state += Protobuf.bytes(72, decodeCeilings())
+        state += Protobuf.int(73, 2)
+        state += Protobuf.bytes(79, playbackAuthorization())
+        state += Protobuf.int(80, 1)
+        state += Protobuf.int(85, 1)
+        return state
+    }
+
+    /// What the set can decode, capped at 1080p — the shape a television sends.
+    private static func decodeCeilings() -> Data {
+        var caps = Protobuf.int(1, 0)
+        caps += Protobuf.int(2, 1_080)
+        caps += Protobuf.int(3, 0)
+        caps += Protobuf.int(4, 0)
+        caps += Protobuf.int(5, 1_080)
+        caps += Protobuf.int(6, 0)
+        return caps
+    }
+
+    /// `PlaybackAuthorization`: which track types this client may be served, and
+    /// whether HDR is allowed for each. A television claims audio, SDR video and
+    /// HDR video — the same three entries every time.
+    private static func playbackAuthorization() -> Data {
+        let entries = [(1, false), (2, false), (2, true)]
+        return entries.reduce(Data()) { authorization, entry in
+            var format = Protobuf.int(1, entry.0)   // trackType
+            format += Protobuf.bool(2, entry.1)     // isHdr
+            return authorization + Protobuf.bytes(1, format)
+        }
+    }
+
+    private static func androidVRAbrState(video: SabrFormatInfo, playerMs: Int) -> Data {
         var state = Protobuf.int(28, playerMs)
         if let height = video.height, height > 0 {
             state += Protobuf.int(21, height)      // stickyResolution
@@ -127,16 +190,39 @@ enum SABRRequest {
 
     private static func streamerContext(playbackCookie: Data?) -> Data {
         var context = Protobuf.bytes(1, clientInfo())
+        if let poToken, !poToken.isEmpty {
+            context += Protobuf.bytes(2, poToken)
+        }
         if let playbackCookie, !playbackCookie.isEmpty {
             context += Protobuf.bytes(3, playbackCookie)
         }
         return context
     }
 
-    /// ANDROID_VR, matching `DirectPlaybackClient.androidVR`. No PO token: this
-    /// client is served without one, `visitorData` on the /player call is what
-    /// keeps the identity valid.
+    /// Describes the client the SABR URL was minted for — it has to match the
+    /// /player call, the server reads this to size and sign what it serves.
     private static func clientInfo() -> Data {
+        client == .tv ? tvClientInfo() : androidVRClientInfo()
+    }
+
+    private static func tvClientInfo() -> Data {
+        var info = Protobuf.int(16, 7)
+        info += Protobuf.string(17, DirectPlaybackClient.tv.clientVersion)
+        info += Protobuf.string(18, "Cobalt")
+        info += Protobuf.string(19, "22.lts.3.306369-gold")
+        info += Protobuf.string(21, "en-US")
+        info += Protobuf.string(22, "US")
+        info += Protobuf.int(37, 1_920)
+        info += Protobuf.int(38, 1_080)
+        info += Protobuf.int(41, 1)
+        info += Protobuf.int(46, 2)
+        info += Protobuf.int(55, 1_920)
+        info += Protobuf.int(56, 1_080)
+        info += Protobuf.float(65, 1.0)
+        return info
+    }
+
+    private static func androidVRClientInfo() -> Data {
         var info = Protobuf.string(12, "Oculus")
         info += Protobuf.string(13, "Quest 3")
         info += Protobuf.int(16, 28)

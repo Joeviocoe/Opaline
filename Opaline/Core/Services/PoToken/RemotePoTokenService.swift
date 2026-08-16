@@ -5,8 +5,12 @@ protocol PoTokenProvider: AnyObject {
     /// - Parameter identifier: the content binding. For the mweb client this is
     ///   the VIDEO ID (YouTube's current experiment binds the pot to the video,
     ///   not visitorData).
+    /// - Parameter client: which client's attestation the token must carry.
+    ///   The stream server checks it against the client that minted the
+    ///   playback URL, so a WEB token is refused on a television's stream.
     func fetchSessionToken(
         identifier: String,
+        client: String,
         completion: @escaping (Result<String, Error>) -> Void
     )
 
@@ -45,18 +49,23 @@ final class RemotePoTokenService: PoTokenProvider {
         self.transport = transport
     }
 
+    /// - Parameter client: which client's attestation the token must carry.
+    ///   The stream server checks it against the client that minted the
+    ///   playback URL, so a WEB token is refused on a television's stream.
     func fetchSessionToken(
         identifier: String,
+        client: String,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
-        if let cached = cachedToken(for: identifier) {
-            AppLog.poToken("cache hit for \(identifier)")
+        let key = "\(client)|\(identifier)"
+        if let cached = cachedToken(for: key) {
+            AppLog.poToken("cache hit for \(key)")
             completion(.success(cached))
             return
         }
         guard let endpoint = AppURLs.PoTokenProvider.endpoint,
               let body = try? JSONSerialization.data(
-                  withJSONObject: requestPayload(identifier: identifier)
+                  withJSONObject: requestPayload(identifier: identifier, client: client)
               ) else {
             completion(.failure(ProviderError.notConfigured))
             return
@@ -70,7 +79,7 @@ final class RemotePoTokenService: PoTokenProvider {
         )
         AppLog.poToken("requesting pot for \(identifier) via \(endpoint.host ?? "")")
         transport.send(request, cancellationToken: nil) { [weak self] result in
-            self?.handle(result: result, identifier: identifier, completion: completion)
+            self?.handle(result: result, identifier: key, completion: completion)
         }
     }
 
@@ -112,10 +121,10 @@ final class RemotePoTokenService: PoTokenProvider {
     /// `bypass_cache` asks the bgutil provider to re-mint instead of serving
     /// its own cached token (which is what just got rejected); providers that
     /// predate the flag simply ignore it.
-    private func requestPayload(identifier: String) -> [String: Any] {
+    private func requestPayload(identifier: String, client: String) -> [String: Any] {
         lock.lock()
         defer { lock.unlock() }
-        var payload: [String: Any] = ["content_binding": identifier]
+        var payload: [String: Any] = ["content_binding": identifier, "client": client]
         if bypassProviderCache.remove(identifier) != nil {
             payload["bypass_cache"] = true
         }
