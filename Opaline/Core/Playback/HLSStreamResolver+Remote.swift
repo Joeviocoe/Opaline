@@ -62,6 +62,11 @@ extension HLSStreamResolver {
             url: endpoint,
             headers: [HTTPHeader.contentType: HTTPHeaderValue.contentTypeJSON],
             body: body,
+            // A warm solver answers in 200 ms and a cold container in eight.
+            // Past that it is down, and the session default — a full minute —
+            // is a minute of black screen before the fallback source gets its
+            // turn. Failing is the faster answer.
+            timeout: 8,
             isPlayback: true
         )
         AppLog.player(
