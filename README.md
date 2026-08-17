@@ -16,25 +16,30 @@
 
 </div>
 
-> ### YTLite is now Opaline
+> ### What broke on 14 August, and what is fixed
 >
-> The name was too close to [YTLite](https://github.com/dayanch96/YTLite), a
-> popular paid tweak for the official YouTube app, and the two were being
-> mistaken for each other. This project is unrelated to it and has been renamed.
+> On 14 August YouTube changed the way it hands out video, and it broke playback
+> here for everyone. Videos stopped after about a minute or refused to start.
+> Dubbed audio tracks stopped working, and so did anything marked as made for
+> kids. Watch history and Continue watching stopped updating.
 >
-> **These are the only addresses that stay:**
+> **All of it works again. Update to the latest version.**
 >
-> | | |
-> |---|---|
-> | Jailbreak (Cydia, Sileo, Zebra) | `https://verback2308.github.io/repo/` |
-> | Sideloading (AltStore, SideStore, LiveContainer) | `https://verback2308.github.io/repo/apps.json` |
+> Fixing it meant changing how the app gets video underneath. Opaline now asks
+> for it the way a smart TV does, and when you are signed in it plays as your
+> account instead of anonymously. What that gets you:
 >
-> Anything under `repo.verback2308.pp.ua` still answers for now, but it is on its
-> way out and will be switched off — move over while it works. The old
-> `verback2308.github.io/ytlite` repo is already gone.
+> - videos no longer cut out a minute in
+> - dubbed audio is back, and a video with a dub in your language starts in it
+> - videos made for kids play again
+> - what you watch lands in your history and in Continue watching
 >
-> Nothing else changes: the update installs over your current one and keeps your
-> account, settings and history.
+> There is nothing to do beyond updating — your account, settings and history are
+> untouched. One thing is still broken: livestreams on kids channels do not play
+> yet.
+>
+> <sub>Opaline was released as YTLite until August. It was renamed to avoid
+> confusion with an unrelated tweak of the same name and is not related to it.</sub>
 
 <div align="center">
 
@@ -174,6 +179,7 @@ Install the `.ipa` package directly:
 ## Known Issues and Limitations
 
 - Playback speeds above 2x may cause issues
+- Livestreams on kids channels don't play — no source hands out a stream we can read ([#83](https://github.com/verback2308/Opaline/issues/83))
 - Comments are read-only — you can browse and sort them and open replies, but not post, reply or like
 - Offline download is not yet available
 - Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
@@ -204,7 +210,9 @@ The interface follows your system language by default and can be overridden in *
 
 ## Playback Helper Server
 
-The Mobile Web playback source (used for videos the primary source can't open, e.g. kids content) relies on a small companion service. Preparing these streams requires evaluating JavaScript from YouTube's public player page — something iOS 12-era devices can't do on-device. The app delegates that single step to the helper server and receives the computed result back.
+Signed-in playback relies on a small companion service, and so does the Mobile Web source it falls back to. Preparing these streams requires evaluating JavaScript from YouTube's public player page — something iOS 12-era devices can't do on-device. The app delegates that single step to the helper server and receives the computed result back.
+
+Since 14 August this covers more than it used to. Dubbed audio and videos made for kids are prepared this way, so if the service is unreachable, dubs quietly fall back to the original audio and kids videos won't play until it's back.
 
 **What it sees:** no account data, no tokens, no cookies, no watch history — only the challenge strings taken from the public player code and the ID of the video being prepared. If you're inspecting traffic and wondering about requests to a non-YouTube host — that's this.
 
