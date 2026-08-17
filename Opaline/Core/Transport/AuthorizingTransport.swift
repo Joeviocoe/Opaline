@@ -20,10 +20,29 @@ final class AuthorizingTransport: HTTPTransport {
         completion: @escaping (Result<HTTPResponse, Error>) -> Void
     ) {
         wrapped.send(request, cancellationToken: cancellationToken) { result in
-            if case .success(let response) = result, response.status == 401 {
-                OAuthClient.shared.tryRefreshIfNeeded()
-            }
-            completion(result)
+            completion(self.noticing401(result))
         }
+    }
+
+    func stream(
+        _ request: HTTPRequest,
+        cancellationToken: CancellationToken?,
+        onChunk: @escaping (Data) -> Bool,
+        completion: @escaping (Result<HTTPResponse, Error>) -> Void
+    ) {
+        wrapped.stream(
+            request, cancellationToken: cancellationToken, onChunk: onChunk
+        ) { result in
+            completion(self.noticing401(result))
+        }
+    }
+
+    private func noticing401(
+        _ result: Result<HTTPResponse, Error>
+    ) -> Result<HTTPResponse, Error> {
+        if case .success(let response) = result, response.status == 401 {
+            OAuthClient.shared.tryRefreshIfNeeded()
+        }
+        return result
     }
 }

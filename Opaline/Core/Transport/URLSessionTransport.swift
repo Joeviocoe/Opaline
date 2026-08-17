@@ -20,6 +20,8 @@ final class URLSessionTransport: HTTPTransport {
         attributes: .concurrent
     )
 
+    /// The delegate-backed session behind `stream`, built on first use.
+    private let streaming = StreamingSession()
     private let session: URLSession
     /// A session with no cookie storage — used for requests that opt out of
     /// cookies (`sendsCookies == false`). Guarantees the shared jar is never
@@ -70,6 +72,34 @@ final class URLSessionTransport: HTTPTransport {
                 result[key] = value
             }
         }
+    }
+
+    func stream(
+        _ request: HTTPRequest,
+        cancellationToken: CancellationToken?,
+        onChunk: @escaping (Data) -> Bool,
+        completion: @escaping (Result<HTTPResponse, Error>) -> Void
+    ) {
+        streaming.start(
+            urlRequest(for: request),
+            cancellationToken: cancellationToken,
+            onChunk: onChunk,
+            completion: completion
+        )
+    }
+
+    private func urlRequest(for request: HTTPRequest) -> URLRequest {
+        var urlRequest = URLRequest(url: request.url)
+        urlRequest.httpMethod = request.method.rawValue
+        urlRequest.httpBody = request.body
+        urlRequest.httpShouldHandleCookies = request.sendsCookies
+        if let timeout = request.timeout {
+            urlRequest.timeoutInterval = timeout
+        }
+        request.headers.forEach {
+            urlRequest.setValue($1, forHTTPHeaderField: $0)
+        }
+        return urlRequest
     }
 
     func send(

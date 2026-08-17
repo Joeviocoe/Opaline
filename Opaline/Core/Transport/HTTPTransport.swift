@@ -62,4 +62,44 @@ protocol HTTPTransport: AnyObject {
         cancellationToken: CancellationToken?,
         completion: @escaping (Result<HTTPResponse, Error>) -> Void
     )
+
+    /// Same, but hands the body over as it arrives.
+    ///
+    /// For a response that is one media segment this is an optimisation. For
+    /// SABR, where a single response carries ten megabytes and several
+    /// segments, it is the difference between working and not: waiting for the
+    /// last byte before looking at the first one made the player wait five to
+    /// sixteen seconds for a segment whose bytes had arrived seconds earlier.
+    ///
+    /// `onChunk` runs on the delivering queue, in order, and returns whether
+    /// the caller wants more: returning false stops the transfer there and
+    /// completes normally. A SABR response carries the segment that was asked
+    /// for and then keeps going with several more; reading past the one that
+    /// was wanted is megabytes of pure waste.
+    ///
+    /// The completion still reports the status, with an empty `data` —
+    /// everything was handed over as it arrived.
+    func stream(
+        _ request: HTTPRequest,
+        cancellationToken: CancellationToken?,
+        onChunk: @escaping (Data) -> Bool,
+        completion: @escaping (Result<HTTPResponse, Error>) -> Void
+    )
+}
+
+extension HTTPTransport {
+    /// The fallback for transports that do not stream: one chunk, at the end.
+    func stream(
+        _ request: HTTPRequest,
+        cancellationToken: CancellationToken?,
+        onChunk: @escaping (Data) -> Bool,
+        completion: @escaping (Result<HTTPResponse, Error>) -> Void
+    ) {
+        send(request, cancellationToken: cancellationToken) { result in
+            if case .success(let response) = result {
+                _ = onChunk(response.data)
+            }
+            completion(result)
+        }
+    }
 }

@@ -29,7 +29,7 @@ final class SABRDelivery: StreamDelivery {
     let label = "sabr"
 
     private let transport: HTTPTransport
-    private var session: SABRSession?
+    private var fetcher: SABRFetcher?
     /// One server for the whole delivery; sessions come and go behind it.
     var server: LocalMediaServer?
     var serverBase: URL?
@@ -111,6 +111,35 @@ final class SABRDelivery: StreamDelivery {
         info.serverAbrStreamingURL != nil && info.videoPlaybackUstreamerConfig != nil
     }
 
+    /// The two init requests an open needs: each format's opening, with the
+    /// other one declined.
+    ///
+    /// They carry the position playback is about to start from, not zero:
+    /// that is what googlevideo's adapter sends for an init segment, and it is
+    /// what has the server open the session where the viewer actually is.
+    private static func initRequests(for request: DeliveryRequest) -> [SABRSegmentRequest] {
+        let audio = formatInfo(request.audio)
+        let video = formatInfo(request.video)
+        let audioEnd = request.info.dashAudioFormat?.indexRangeEnd ?? 0
+        let startMs = Int((request.resumeAt ?? 0) * 1_000)
+        return [
+            SABRSegmentRequest(
+                format: video,
+                other: audio,
+                sequence: 1,
+                timeMs: startMs,
+                initRange: request.video.indexRangeEnd + 1
+            ),
+            SABRSegmentRequest(
+                format: audio,
+                other: video,
+                sequence: 1,
+                timeMs: startMs,
+                initRange: audioEnd + 1
+            )
+        ]
+    }
+
     func prepare(
         _ request: DeliveryRequest,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
@@ -121,9 +150,7 @@ final class SABRDelivery: StreamDelivery {
             completion(.failure(SABRError.server("player response carries no SABR stream")))
             return
         }
-        let playhead = request.resumeAt.map { Int($0 * 1_000) }
-            ?? route?.session.lastServedMs ?? 0
-        pendingStartAt = request.resumeAt.map { _ in Double(playhead) / 1_000 }
+        pendingStartAt = request.resumeAt
         PlaybackProgress.step("player.status.openingSABR")
         Self.solvingThrottle(url) { [weak self] solved in
             self?.openSession(request, url: solved, config: config) { result in
@@ -141,36 +168,66 @@ final class SABRDelivery: StreamDelivery {
         }
     }
 
+    /// Fetches the two init segments — `ftyp/moov/sidx`, everything AVPlayer
+    /// needs before any media — and builds the playback around them.
     private func openSession(
         _ request: DeliveryRequest,
         url: URL,
         config: Data,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        let playhead = request.resumeAt.map { Int($0 * 1_000) }
-            ?? route?.session.lastServedMs ?? 0
-        let session = SABRSession(
+        let fetcher = SABRFetcher(
             transport: transport,
             url: url,
             ustreamerConfig: config,
-            audio: Self.formatInfo(request.audio),
-            video: Self.formatInfo(request.video),
             identity: identity
         )
-        self.session = session
-        session.start(resumeAt: request.resumeAt == nil ? 0 : playhead) { [weak self] result in
+        self.fetcher = fetcher
+        fetchInits(with: fetcher, for: request) { [weak self] result in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let inits):
-                self?.buildPlayback(request, session: session, inits: inits, completion: completion)
+                self?.buildPlayback(
+                    request, fetcher: fetcher, inits: inits, completion: completion
+                )
             }
         }
     }
 
-    /// Playback moving elsewhere drops this delivery; the loopback server has
-    /// to go with it rather than linger until collection.
+    /// Both init segments at once — they are independent requests and the
+    /// player needs both before it can build anything.
+    private func fetchInits(
+        with fetcher: SABRFetcher,
+        for request: DeliveryRequest,
+        completion: @escaping (Result<[Int: Data], Error>) -> Void
+    ) {
+        let group = DispatchGroup()
+        let lock = NSLock()
+        var inits: [Int: Data] = [:]
+        var failure: Error?
+        for want in Self.initRequests(for: request) {
+            group.enter()
+            fetcher.fetch(want) { result in
+                lock.lock()
+                inits[want.format.itag] = try? result.get()
+                if case .failure(let error) = result {
+                    failure = error
+                }
+                lock.unlock()
+                group.leave()
+            }
+        }
+        group.notify(queue: .global(qos: .userInitiated)) {
+            completion(failure.map { .failure($0) } ?? .success(inits))
+        }
+    }
+
+    /// Playback moving elsewhere drops this delivery; the loopback server and
+    /// the session have to go with it rather than linger until collection. A
+    /// session left running keeps fetching the video that was closed.
     deinit {
         server?.stop()
+        route?.fetcher.stop()
     }
 }

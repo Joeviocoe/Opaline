@@ -1,10 +1,20 @@
 import Foundation
 
-/// What we already hold for one stream, so the server knows where to resume.
-struct SABRStreamProgress {
+/// What the last response delivered for one stream.
+///
+/// This is what a request acknowledges, and it is deliberately *not* a running
+/// total: the server tracks the whole picture itself through the playback
+/// cookie, and only needs to hear which segments just landed. Claiming
+/// everything from zero instead — as this once did — states that the bytes
+/// behind the playhead are already held, so the server never sends them again
+/// and rewinding cannot work at all.
+struct SABRBufferedRange {
     let format: SabrFormatInfo
-    let lastSequence: Int
-    let bufferedMs: Int
+    let startMs: Int
+    let durationMs: Int
+    let startSequence: Int
+    let endSequence: Int
+    let timescale: Int
 }
 
 /// Who a SABR session streams as. Held per session rather than globally: a
@@ -27,10 +37,16 @@ struct SABRIdentity {
 /// `docs/plans/issue-78-sabr.md`. They are inlined next to each message rather
 /// than named constants because they only mean anything in that one position.
 enum SABRRequest {
-    /// Everything the server needs to resume where the session left off.
-    struct Continuation {
-        let audio: SABRStreamProgress
-        let video: SABRStreamProgress
+    /// One segment's worth of request: which format it is for, what is already
+    /// held of it, and where the player wants bytes from.
+    struct Fetch {
+        let format: SabrFormatInfo
+        /// The stream this request is *not* about.
+        let other: SabrFormatInfo
+        /// The last segment received of `format`, acknowledged so the server
+        /// carries on rather than resending it.
+        let held: SABRBufferedRange?
+        let isInit: Bool
         let playerMs: Int
         let playbackCookie: Data?
     }
@@ -61,62 +77,56 @@ enum SABRRequest {
         return body
     }
 
-    // swiftlint:disable function_parameter_count
-    /// Jumps the stream to `playerMs`.
+    /// A request for one segment of one format.
     ///
-    /// A startup request cannot do this — with a non-zero player time it comes
-    /// back empty (verified 2026-08-14). What works is a continuation that
-    /// claims everything up to the target is already buffered, which is true
-    /// enough: the player is not going to ask for those bytes.
-    static func jump(
-        ustreamerConfig: Data,
-        audio: SabrFormatInfo,
-        video: SabrFormatInfo,
-        identity: SABRIdentity,
-        playerMs: Int,
-        sequence: Int = 1
+    /// The other format is declined rather than merely not asked for: a
+    /// buffered range claiming all of it, which is what googlevideo's own
+    /// adapter sends to mean "do not send this one". Without it every request
+    /// for a video segment also drags the audio down, and the response is
+    /// several times the size of what was wanted.
+    static func segment(
+        ustreamerConfig: Data, state: Fetch, identity: SABRIdentity
     ) -> Data {
-        let held = SABRStreamProgress(
-            format: audio, lastSequence: sequence, bufferedMs: playerMs
-        )
-        let heldVideo = SABRStreamProgress(
-            format: video, lastSequence: sequence, bufferedMs: playerMs
-        )
-        // swiftlint:enable function_parameter_count
-        return continuation(
-            ustreamerConfig: ustreamerConfig,
-            state: Continuation(
-                audio: held, video: heldVideo, playerMs: playerMs, playbackCookie: nil
-            ),
-            identity: identity
-        )
-    }
-
-    /// Every request after the first: same shape plus what we already have.
-    static func continuation(
-        ustreamerConfig: Data, state: Continuation, identity: SABRIdentity
-    ) -> Data {
-        let (audio, video) = (state.audio, state.video)
+        let isVideo = state.format.height ?? 0 > 0
+        let video = isVideo ? state.format : state.other
         var body = Protobuf.bytes(
-            1,
-            clientAbrState(
-                video: video.format, playerMs: state.playerMs, identity: identity
-            )
+            1, clientAbrState(video: video, playerMs: state.playerMs, identity: identity)
         )
-        for stream in [audio, video] {
-            body += Protobuf.bytes(2, formatId(stream.format))
+        body += Protobuf.bytes(2, formatId(state.other))
+        // An init request must not claim the format is playing, or the server
+        // withholds the initialization metadata and starts at the first media
+        // byte — leaving a segment no decoder can be built from.
+        if !state.isInit {
+            body += Protobuf.bytes(2, formatId(state.format))
         }
-        for stream in [audio, video] {
-            body += Protobuf.bytes(3, bufferedRange(stream))
+        body += Protobuf.bytes(3, fullBufferedRange(state.other))
+        if let held = state.held {
+            body += Protobuf.bytes(3, bufferedRange(held))
         }
         body += Protobuf.bytes(5, ustreamerConfig)
-        body += Protobuf.bytes(16, formatId(audio.format))
-        body += Protobuf.bytes(17, formatId(video.format))
+        let audio = isVideo ? state.other : state.format
+        body += Protobuf.bytes(16, formatId(audio))
+        body += Protobuf.bytes(17, formatId(video))
         body += Protobuf.bytes(
             19,
             streamerContext(playbackCookie: state.playbackCookie, identity: identity)
         )
         return body
+    }
+
+    /// A range claiming the whole of a format is already held, so the server
+    /// sends none of it.
+    private static func fullBufferedRange(_ format: SabrFormatInfo) -> Data {
+        let max = Int(Int32.max)
+        var range = Protobuf.bytes(1, formatId(format))
+        range += Protobuf.int(2, 0)                       // startTimeMs
+        range += Protobuf.int(3, max)                     // durationMs
+        range += Protobuf.int(4, max)                     // startSegmentIndex
+        range += Protobuf.int(5, max)                     // endSegmentIndex
+        var timeRange = Protobuf.int(1, 0)
+        timeRange += Protobuf.int(2, max)
+        timeRange += Protobuf.int(3, 1_000)
+        return range + Protobuf.bytes(6, timeRange)
     }
 
     // MARK: - Messages
@@ -207,15 +217,15 @@ enum SABRRequest {
         return data
     }
 
-    private static func bufferedRange(_ stream: SABRStreamProgress) -> Data {
-        var range = Protobuf.bytes(1, formatId(stream.format))
-        range += Protobuf.int(2, 0)                       // startTimeMs
-        range += Protobuf.int(3, stream.bufferedMs)       // durationMs
-        range += Protobuf.int(4, 1)                       // startSegmentIndex
-        range += Protobuf.int(5, stream.lastSequence)     // endSegmentIndex
-        var timeRange = Protobuf.int(1, 0)
-        timeRange += Protobuf.int(2, stream.bufferedMs)
-        timeRange += Protobuf.int(3, 1_000)                // timescale
+    private static func bufferedRange(_ delivery: SABRBufferedRange) -> Data {
+        var range = Protobuf.bytes(1, formatId(delivery.format))
+        range += Protobuf.int(2, delivery.startMs)         // startTimeMs
+        range += Protobuf.int(3, delivery.durationMs)      // durationMs
+        range += Protobuf.int(4, delivery.startSequence)   // startSegmentIndex
+        range += Protobuf.int(5, delivery.endSequence)     // endSegmentIndex
+        var timeRange = Protobuf.int(1, delivery.startMs)  // startTicks
+        timeRange += Protobuf.int(2, delivery.durationMs)  // durationTicks
+        timeRange += Protobuf.int(3, delivery.timescale)
         return range + Protobuf.bytes(6, timeRange)
     }
 

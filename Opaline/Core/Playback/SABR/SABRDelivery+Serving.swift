@@ -8,7 +8,7 @@ extension SABRDelivery {
     struct Route {
         let generation: Int
         let tracks: [Track]
-        let session: SABRSession
+        let fetcher: SABRFetcher
         /// Where playback should pick up, for `EXT-X-START`.
         let startAt: Double?
     }
@@ -53,7 +53,7 @@ extension SABRDelivery {
             completion(nil, "")
             return
         }
-        serveSegment(rest[2], of: track, session: route.session, completion: completion)
+        serveSegment(rest[2], of: track, route: route, completion: completion)
     }
 
     /// One track's playlist, or nil when the name is not one of ours.
@@ -91,26 +91,14 @@ extension SABRDelivery {
     private static func serveSegment(
         _ name: String,
         of track: Track,
-        session: SABRSession,
+        route: Route,
         completion: @escaping (Data?, String) -> Void
     ) {
-        let range: (offset: Int64, length: Int)
-        if name == "init" {
-            // Everything before the first media byte: ftyp, moov and sidx.
-            range = (0, track.format.indexRangeEnd + 1)
-        } else if let index = Int(name), index < track.segments.count {
-            range = (segmentOffset(index, in: track), Int(track.segments[index].size))
-        } else {
+        guard let request = segmentRequest(name, of: track, route: route) else {
             completion(nil, "")
             return
         }
-        session.read(SABRReadRequest(
-            itag: track.format.itag,
-            offset: range.offset,
-            length: range.length,
-            timeMs: timeMs(at: range.offset, in: track),
-            sequence: (Int(name) ?? 0) + 1
-        )) { result in
+        route.fetcher.fetch(request) { result in
             switch result {
             case .success(let data):
                 completion(data, "video/mp4")
@@ -119,6 +107,49 @@ extension SABRDelivery {
                 completion(nil, "")
             }
         }
+    }
+
+    /// Maps one playlist entry onto the segment the server knows: SABR counts
+    /// segments from 1, and the time it is asked to stream from is where that
+    /// segment starts.
+    private static func segmentRequest(
+        _ name: String,
+        of track: Track,
+        route: Route
+    ) -> SABRSegmentRequest? {
+        let other = route.tracks
+            .first { $0.format.itag != track.format.itag }
+            .map { SABRDelivery.formatInfo($0.format) }
+        guard let other else {
+            return nil
+        }
+        let format = SABRDelivery.formatInfo(track.format)
+        if name == "init" {
+            // Everything before the first media byte: ftyp, moov and sidx.
+            return SABRSegmentRequest(
+                format: format,
+                other: other,
+                sequence: 1,
+                timeMs: 0,
+                initRange: track.format.indexRangeEnd + 1
+            )
+        }
+        guard let index = Int(name), index < track.segments.count else {
+            return nil
+        }
+        return SABRSegmentRequest(
+            format: format,
+            other: other,
+            sequence: index + 1,
+            timeMs: startMs(of: index, in: track),
+            initRange: nil
+        )
+    }
+
+    /// Where a segment starts on the timeline, from the sidx durations.
+    static func startMs(of index: Int, in track: Track) -> Int {
+        let elapsed = track.segments.prefix(index).reduce(0.0) { $0 + $1.duration }
+        return Int(elapsed * 1_000)
     }
 
     /// Byte offset of a segment: the media data starts after the index, and
@@ -177,7 +208,7 @@ extension SABRDelivery {
     /// switching doing nothing.
     func buildPlayback(
         _ request: DeliveryRequest,
-        session: SABRSession,
+        fetcher: SABRFetcher,
         inits: [Int: Data],
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
@@ -198,21 +229,24 @@ extension SABRDelivery {
                 "sabr build: sidx \(Self.ms(from: started, to: parsed))ms,"
                     + " attach after \(Self.ms(from: parsed, to: Date()))ms"
             )
-            self.attach(tracks: tracks, session: session, info: info, completion: completion)
+            self.attach(tracks: tracks, fetcher: fetcher, info: info, completion: completion)
         }
     }
 
     private func attach(
         tracks: [Track],
-        session: SABRSession,
+        fetcher: SABRFetcher,
         info: DirectPlaybackInfo,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         generation += 1
+        // A quality switch replaces the fetcher behind the same server; the
+        // one being replaced has nobody left to serve.
+        route?.fetcher.stop()
         route = Route(
             generation: generation,
             tracks: tracks,
-            session: session,
+            fetcher: fetcher,
             startAt: pendingStartAt
         )
         pendingStartAt = nil
@@ -227,7 +261,8 @@ extension SABRDelivery {
             completion(.success(PreparedPlayback(
                 item: item,
                 captions: info.captionTracks,
-                duration: info.duration
+                duration: info.duration,
+                startsAt: self.route?.startAt
             )))
         }
     }

@@ -16,15 +16,24 @@ enum UMPPartType: Int {
     case mediaHeader = 20
     case media = 21
     case mediaEnd = 22
-    /// Carries the playback cookie in field 7 and the readahead targets.
+    /// Readahead targets, backoff and the playback cookie — the server pacing
+    /// the client. See `NextRequestPolicy` in googlevideo's protos.
     case nextRequestPolicy = 35
+    /// Where a format ends: last segment number and end time.
     case formatInitializationMetadata = 42
     case sabrRedirect = 43
     case sabrError = 44
     case sabrSeek = 45
     case reloadPlayerResponse = 46
+    /// Bookkeeping the server attaches to ordinary responses. Listed only so
+    /// logs name them instead of printing bare numbers — a response carrying
+    /// nothing but these was once mistaken for the end of the stream.
+    case playbackStartPolicy = 47
+    case requestIdentifier = 52
+    case requestCancellationPolicy = 53
     case sabrContextUpdate = 57
     case streamProtectionStatus = 58
+    case endOfTrack = 62
 }
 
 /// Incremental reader for UMP's length-prefixed framing.

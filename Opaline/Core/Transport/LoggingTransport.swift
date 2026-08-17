@@ -22,20 +22,43 @@ final class LoggingTransport: HTTPTransport {
         return counter
     }
 
+    private static func label(for request: HTTPRequest) -> String {
+        "#\(nextSequenceNumber()) \(request.method.rawValue) "
+            + "\(request.url.host ?? "")\(request.url.path)"
+    }
+
+    private static func log(_ label: String, _ result: Result<HTTPResponse, Error>) {
+        switch result {
+        case .success(let response):
+            AppLog.log("Transport", "\(label) -> \(response.status)")
+        case .failure(let error):
+            AppLog.log("Transport", "\(label) -> \(error)")
+        }
+    }
+
     func send(
         _ request: HTTPRequest,
         cancellationToken: CancellationToken?,
         completion: @escaping (Result<HTTPResponse, Error>) -> Void
     ) {
-        let label = "#\(Self.nextSequenceNumber()) \(request.method.rawValue) "
-            + "\(request.url.host ?? "")\(request.url.path)"
+        let label = Self.label(for: request)
         wrapped.send(request, cancellationToken: cancellationToken) { result in
-            switch result {
-            case .success(let response):
-                AppLog.log("Transport", "\(label) -> \(response.status)")
-            case .failure(let error):
-                AppLog.log("Transport", "\(label) -> \(error)")
-            }
+            Self.log(label, result)
+            completion(result)
+        }
+    }
+
+    func stream(
+        _ request: HTTPRequest,
+        cancellationToken: CancellationToken?,
+        onChunk: @escaping (Data) -> Bool,
+        completion: @escaping (Result<HTTPResponse, Error>) -> Void
+    ) {
+        let label = Self.label(for: request)
+        wrapped.stream(
+            request, cancellationToken: cancellationToken, onChunk: onChunk
+        ) { result in
+            Self.log(label, result)
             completion(result)
         }
     }
