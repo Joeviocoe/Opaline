@@ -28,11 +28,15 @@ enum HLSGenerator {
     // MARK: - HLS playlist generation
 
     /// Generate a media playlist with byte-range segments.
+    /// `startAt` means what it does for [[segmentedPlaylist]]: the player
+    /// begins there instead of buffering the opening and being seeked away
+    /// from it the moment the item turns ready.
     static func mediaPlaylist(
         url: URL,
         initBytes: Int,
         dataStartOffset: Int64,
-        segments: [SidxSegment]
+        segments: [SidxSegment],
+        startAt: Double? = nil
     ) -> String {
         let maxDur = segments.map(\.duration).max() ?? 5
         let urlStr = url.absoluteString
@@ -42,6 +46,7 @@ enum HLSGenerator {
         let target = Int(ceil(maxDur))
         lines.append("#EXT-X-TARGETDURATION:\(target)")
         lines.append("#EXT-X-PLAYLIST-TYPE:VOD")
+        lines.append(contentsOf: startTag(startAt))
         let mapTag = "#EXT-X-MAP:URI=\"\(urlStr)\""
             + ",BYTERANGE=\"\(initBytes)@0\""
         lines.append(mapTag)
@@ -80,9 +85,7 @@ enum HLSGenerator {
         var lines = ["#EXTM3U", "#EXT-X-VERSION:7"]
         lines.append("#EXT-X-TARGETDURATION:\(Int(ceil(maxDur)))")
         lines.append("#EXT-X-PLAYLIST-TYPE:VOD")
-        if let startAt, startAt > 0 {
-            lines.append(String(format: "#EXT-X-START:TIME-OFFSET=%.3f,PRECISE=YES", startAt))
-        }
+        lines.append(contentsOf: startTag(startAt))
         lines.append("#EXT-X-MAP:URI=\"\(base)/init\"")
         for (index, segment) in segments.enumerated() {
             lines.append(String(format: "#EXTINF:%.3f,", segment.duration))
@@ -90,6 +93,18 @@ enum HLSGenerator {
         }
         lines.append("#EXT-X-ENDLIST")
         return lines.joined(separator: "\n") + "\n"
+    }
+
+    /// `EXT-X-START` when there is somewhere to start, nothing when there is
+    /// not — playlists differ only in whether they carry the tag.
+    private static func startTag(_ startAt: Double?) -> [String] {
+        guard let startAt, startAt > 0 else {
+            return []
+        }
+        let tag = String(
+            format: "#EXT-X-START:TIME-OFFSET=%.3f,PRECISE=YES", startAt
+        )
+        return [tag]
     }
 
     /// Generate an audio-only main playlist.

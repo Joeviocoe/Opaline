@@ -52,16 +52,23 @@ final class SABRSession {
     /// and restarts the stream — which made playback slower, causing more
     /// timeouts, causing more restarts.
     static let keepBehind = 4 * 1_024 * 1_024
+    /// How far ahead of the stream a read may land before the session
+    /// repositions rather than streaming its way there. Must stay above the
+    /// player's own read-ahead (20s of buffer plus a segment), or ordinary
+    /// playback would be mistaken for a seek and restart the stream.
+    static let seekAheadMs = 45_000
     /// Consecutive responses that answer nobody before we call it a stall
     /// rather than looping forever.
     static let maxEmptyRounds = 8
 
     private let transport: HTTPTransport
     let url: URL
-    private let ustreamerConfig: Data
+    let ustreamerConfig: Data
     let audio: SabrFormatInfo
     let video: SabrFormatInfo
-    private let queue = DispatchQueue(label: "com.ytvlite.sabr-session")
+    /// Who this session streams as — client and po token.
+    let identity: SABRIdentity
+    let queue = DispatchQueue(label: "com.ytvlite.sabr-session")
 
     /// Contiguous bytes per stream, keyed by itag.
     var buffers: [Int: StreamBuffer] = [:]
@@ -86,74 +93,15 @@ final class SABRSession {
         url: URL,
         ustreamerConfig: Data,
         audio: SabrFormatInfo,
-        video: SabrFormatInfo
+        video: SabrFormatInfo,
+        identity: SABRIdentity
     ) {
         self.transport = transport
         self.url = url
         self.ustreamerConfig = ustreamerConfig
         self.audio = audio
         self.video = video
-    }
-
-    // MARK: - Public API
-
-    /// Opens the session and returns the init segment of each stream — the
-    /// `ftyp/moov/sidx` prefix AVPlayer needs before any media.
-    /// `resumeAt` starts the stream at the playhead instead of at zero —
-    /// switching quality mid-video otherwise streams the opening again while
-    /// the player waits for the part it is actually on.
-    func start(
-        resumeAt: Int = 0,
-        completion: @escaping (Result<[Int: Data], Error>) -> Void
-    ) {
-        queue.async {
-            let body = SABRRequest.startup(
-                ustreamerConfig: self.ustreamerConfig,
-                audio: self.audio,
-                video: self.video
-            )
-            self.send(body) { [weak self] result in
-                guard let self else {
-                    return
-                }
-                if case .failure(let error) = result {
-                    completion(.failure(error))
-                    return
-                }
-                let inits = self.collectedInits()
-                guard inits[self.audio.itag] != nil, inits[self.video.itag] != nil else {
-                    completion(.failure(SABRError.noInitSegment))
-                    return
-                }
-                guard resumeAt > 0 else {
-                    completion(.success(inits))
-                    return
-                }
-                self.jump(to: resumeAt) { completion(.success(inits)) }
-            }
-        }
-    }
-
-    /// Repositions the stream, keeping the init segments already collected.
-    private func jump(to timeMs: Int, completion: @escaping () -> Void) {
-        resetBuffers()
-        progress.removeAll()
-        lastServedMs = timeMs
-        let body = SABRRequest.jump(
-            ustreamerConfig: ustreamerConfig,
-            audio: audio,
-            video: video,
-            playerMs: timeMs,
-            // Segments run about five seconds; the exact figure does not matter,
-            // only that it is consistent with the buffer being claimed.
-            sequence: max(1, timeMs / 5_000)
-        )
-        send(body) { _ in completion() }
-    }
-
-    private func collectedInits() -> [Int: Data] {
-        let inits = initSegments
-        return inits
+        self.identity = identity
     }
 
     /// Bytes `offset..<offset+length` of `itag`, waiting for them if the
@@ -195,8 +143,9 @@ final class SABRSession {
         // Restarting on those threw away all progress, so the server resent the
         // opening segments, which made playback slower, which caused more
         // retries — the loop this guard exists to break.
-        let seeking = needsSeek(itag: request.itag, offset: request.offset)
-            && !isRetry(itag: request.itag, offset: request.offset)
+        let seeking = (needsSeek(itag: request.itag, offset: request.offset)
+            && !isRetry(itag: request.itag, offset: request.offset))
+            || isAheadOfStream(request)
         guard !seeking else {
             resetBuffers()
             progress.removeAll()
@@ -209,6 +158,7 @@ final class SABRSession {
                 ustreamerConfig: ustreamerConfig,
                 audio: audio,
                 video: video,
+                identity: identity,
                 playerMs: request.timeMs,
                 sequence: request.sequence
             )
@@ -228,11 +178,17 @@ final class SABRSession {
                 video: videoProgress,
                 playerMs: timeMs,
                 playbackCookie: playbackCookie
-            )
+            ),
+            identity: identity
         )
     }
 
     // MARK: - Transport
+    private func sabrHeaders() -> [String: String] {
+        var headers = [HTTPHeader.contentType: "application/x-protobuf"]
+        headers[HTTPHeader.userAgent] = identity.client.userAgent
+        return headers
+    }
 
     func send(_ body: Data, completion: @escaping (Result<Void, Error>) -> Void) {
         requestNumber += 1
@@ -240,14 +196,12 @@ final class SABRSession {
             method: .post,
             // The streaming URL always carries a query, so appending is safe.
             url: URL(string: "\(url.absoluteString)&rn=\(requestNumber)") ?? url,
-            headers: [
-                "Content-Type": "application/x-protobuf",
-                "User-Agent": DirectPlaybackClient.androidVR.userAgent
-            ],
+            headers: sabrHeaders(),
             body: body,
             // Anonymous, like the spike this ports: cookies were tried on
             // device and changed nothing.
-            sendsCookies: false
+            sendsCookies: false,
+            isPlayback: true
         )
         let sent = body.count
         transport.send(request, cancellationToken: nil) { [weak self] result in
@@ -266,29 +220,18 @@ final class SABRSession {
         case .failure(let error):
             AppLog.hls("sabr request failed: \(error.localizedDescription)")
             completion(.failure(error))
+        case .success(let response) where response.status != 200:
+            // A refusal with no body never reaches the SABR protocol at all —
+            // googlevideo rejected the URL itself. The request is NOT logged:
+            // it carries the signed URL and the po token.
+            AppLog.hls("sabr HTTP \(response.status) refused, sent \(sent)B")
+            completion(consume(response))
         case .success(let response):
             AppLog.hls(
                 "sabr #\(requestNumber) sent \(sent)B"
                     + " -> HTTP \(response.status), \(response.data.count)B"
             )
             completion(consume(response))
-        }
-    }
-}
-
-enum SABRError: LocalizedError {
-    case noInitSegment
-    case stalled
-    case server(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .noInitSegment:
-            "SABR returned no init segment"
-        case .stalled:
-            "SABR stopped returning media"
-        case .server(let detail):
-            "SABR error: \(detail)"
         }
     }
 }

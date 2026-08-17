@@ -106,30 +106,20 @@ extension WatchViewController {
             return
         }
         didSeekToSavedPosition = true
-        guard let prog = WatchProgressStore.shared
-            .progress(forVideoId: initialVideo.id),
-            prog.shouldShow,
-            prog.fraction < 0.97
-        else {
-            return
-        }
-        seekToProgress(prog)
-    }
-
-    private func seekToProgress(
-        _ prog: WatchProgress
-    ) {
-        guard let player = videoPlayerView?.player
-        else {
+        guard let player = videoPlayerView?.player else {
             return
         }
         let dur = CMTimeGetSeconds(
             player.currentItem?.duration ?? .zero
         )
-        guard dur > 0 else {
+        guard let pos = WatchProgressStore.shared.resumeSeconds(
+            forVideoId: initialVideo.id, duration: dur
+        ) else {
             return
         }
-        let pos = prog.fraction * dur
+        // The source may already have built the stream at this position
+        // (SABR opens at the playhead) — seeking to where playback already
+        // stands is a no-op, so this stays unconditional.
         player.seek(
             to: CMTime(
                 seconds: pos,
@@ -139,8 +129,7 @@ extension WatchViewController {
             toleranceAfter: .zero
         )
         AppLog.player(
-            "resumed at \(Int(pos))s"
-                + " (\(Int(prog.fraction * 100))%)"
+            "resumed at \(Int(pos))s of \(Int(dur))s"
         )
     }
 

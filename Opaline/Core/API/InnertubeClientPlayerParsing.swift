@@ -12,6 +12,7 @@ extension InnertubeClient {
     static func parseDirectPlaybackInfo(
         _ json: [String: Any]
     ) -> DirectPlaybackInfo? {
+        logFormatKeys(json)
         guard let sd = json["streamingData"]
             as? [String: Any]
         else {
@@ -121,9 +122,7 @@ private extension InnertubeClient {
         from adaptive: [[String: Any]]
     ) -> [String: Any]? {
         let pool = adaptive.filter {
-            fmtDirectURL($0) != nil
-                && fmtMimeType($0)
-                    .contains("audio/mp4")
+            fmtMimeType($0).contains("audio/mp4")
         }
         let originals = pool.filter {
             (($0["audioTrack"] as? [String: Any])?["id"]
@@ -161,8 +160,9 @@ private extension InnertubeClient {
     ) -> [String: Any]? {
         adaptive
             .filter { fmt in
-                fmtDirectURL(fmt) != nil
-                    && fmtIsPlayableVideo(fmt)
+                // No URL filter: SABR-only responses (TV) describe every
+                // format without one, and address them by id instead.
+                fmtIsPlayableVideo(fmt)
                     && fmtHeight(fmt) > 0
                     && maxHeight.map {
                         fmtHeight(fmt) <= $0
@@ -205,8 +205,10 @@ private extension InnertubeClient {
             as? [String: Any]
         let indexRange = fmt["indexRange"]
             as? [String: Any]
-        guard let url = fmtDirectURL(fmt),
-              let tag = fmtItag(fmt),
+        // A TV response describes every format but hands out no URL at all —
+        // those are playable over SABR, which addresses formats by id.
+        let url = fmtDirectURL(fmt) ?? DashFormatInfo.noDirectURL
+        guard let tag = fmtItag(fmt),
               let initEnd = intVal(initRange?["end"]),
               let indexStart = intVal(indexRange?["start"]),
               let indexEnd = intVal(indexRange?["end"]),
@@ -256,6 +258,8 @@ private extension InnertubeClient {
             qualityLabel: fmt["qualityLabel"] as? String,
             sigChallenge: fmt[sigChallengeKey] as? String,
             sigParam: fmt[sigParamKey] as? String,
+            lastModified: (fmt["lastModified"] as? String)
+                ?? (fmt["lmt"] as? String),
             audioTrackId: track?["id"] as? String,
             audioTrackName: track?["displayName"]
                 as? String,
@@ -300,10 +304,9 @@ private extension InnertubeClient {
     ) -> [DashFormatInfo] {
         var bestPerTrack: [String: DashFormatInfo] = [:]
         adaptive
-            .filter {
-                fmtDirectURL($0) != nil
-                    && fmtMimeType($0).contains("audio/mp4")
-            }
+            // No URL filter: a SABR-only response (TV) describes every format
+            // without one and addresses them by id — see [[buildDashInfo]].
+            .filter { fmtMimeType($0).contains("audio/mp4") }
             .compactMap(buildDashInfo)
             .forEach { format in
                 guard let trackId = format.audioTrackId else {
@@ -332,10 +335,9 @@ private extension InnertubeClient {
         from adaptive: [[String: Any]]
     ) -> [DashFormatInfo] {
         adaptive
+            // No URL filter, for the same reason as [[buildAllDashAudio]].
             .filter {
-                fmtDirectURL($0) != nil
-                    && fmtIsPlayableVideo($0)
-                    && fmtHeight($0) > 0
+                fmtIsPlayableVideo($0) && fmtHeight($0) > 0
             }
             .compactMap(buildDashInfo)
             .sorted { lhs, rhs in
@@ -507,6 +509,41 @@ private extension InnertubeClient {
             ?? (sel.audio?[key] as? String)
         return ms.flatMap(Double.init)
             .map { $0 / 1_000.0 }
+    }
+
+    static func logFormatKeys(_ json: [String: Any]) {
+        let sd = json["streamingData"] as? [String: Any]
+        let ad = sd?["adaptiveFormats"] as? [[String: Any]] ?? []
+        guard let first = ad.first else {
+            return
+        }
+        AppLog.innertube("fmt keys: \(first.keys.sorted().joined(separator: ","))")
+        logVideoLadder(ad)
+    }
+
+    /// Every video format the response offers, admitted ones first and the
+    /// rejected ones marked. The ladder above 1080p is codec-bound — avc1
+    /// stops there and VP9 is undecodable by AVPlayer — so "where is 4K" is
+    /// only answerable from what the response actually listed.
+    private static func logVideoLadder(_ adaptive: [[String: Any]]) {
+        let video = adaptive.filter { fmtMimeType($0).contains("video/") }
+        guard !video.isEmpty else {
+            return
+        }
+        let ladder = video
+            .sorted { fmtHeight($0) > fmtHeight($1) }
+            .map { fmt -> String in
+                let codec = fmtMimeType(fmt)
+                    .split(separator: "\"").dropFirst().first ?? "?"
+                let itag = fmt["itag"] as? Int ?? -1
+                let mark = fmtIsPlayableVideo(fmt) ? "" : "✗"
+                return "\(mark)\(fmtHeight(fmt))p/\(itag)/\(codec.prefix(4))"
+            }
+            .joined(separator: " ")
+        AppLog.innertube(
+            "video ladder (✗ = we reject it,"
+                + " hw av1=\(AV1Support.isHardwareSupported)): \(ladder)"
+        )
     }
 
     static func logStreamingDataSummary(

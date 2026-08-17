@@ -1,3 +1,4 @@
+import CoreMedia
 import UIKit
 
 // MARK: - Audio-track (dub) picker
@@ -50,15 +51,19 @@ extension WatchViewController {
         guard track != source.currentAudioTrack else {
             return
         }
-        let resumeTime = videoPlayerView?.player?.currentTime()
+        let resumeTime = rebuildPlayhead
         playerStatusLabel.text = "player.status.loading"
             .localized(with: track.displayName)
         playerStatusLabel.isHidden = false
-        source.selectAudioTrack(track) { [weak self] result in
+        source.selectAudioTrack(
+            track, resumeAt: resumeTime.map(CMTimeGetSeconds)
+        ) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let prepared):
-                    self?.attachPrepared(prepared, resumeAt: resumeTime)
+                    // Same as the quality switch: resume where the old item
+                    // got to during the rebuild, not where it started.
+                    self?.attachPrepared(prepared, resumeAt: self?.rebuildPlayhead)
                 case .failure:
                     self?.showPlaybackError(
                         "player.error.audioTrackSwitch".localized

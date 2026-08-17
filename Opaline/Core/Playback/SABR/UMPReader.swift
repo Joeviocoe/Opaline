@@ -8,19 +8,23 @@ struct UMPPart {
 
 /// Part types we act on. The server sends plenty more; everything unlisted is
 /// skipped, which is the documented way to stay forward-compatible with UMP.
+/// Numbers are YouTube's own, cross-checked against two independent
+/// implementations of this protocol (SmartTube's `UMPPartId`, LuanRT's
+/// `googlevideo`) — an earlier guess had 43-45 and 57 shifted by one, which
+/// made a server seek look like an expired player response.
 enum UMPPartType: Int {
     case mediaHeader = 20
     case media = 21
     case mediaEnd = 22
     /// Carries the playback cookie in field 7 and the readahead targets.
-    /// Verified on device 2026-08-14: the server sends 35, not 36.
     case nextRequestPolicy = 35
-    case nextRequestPolicyAlt = 36
     case formatInitializationMetadata = 42
-    case sabrError = 43
-    case sabrSeek = 44
-    case reloadPlayerResponse = 45
-    case streamProtectionStatus = 57
+    case sabrRedirect = 43
+    case sabrError = 44
+    case sabrSeek = 45
+    case reloadPlayerResponse = 46
+    case sabrContextUpdate = 57
+    case streamProtectionStatus = 58
 }
 
 /// Incremental reader for UMP's length-prefixed framing.

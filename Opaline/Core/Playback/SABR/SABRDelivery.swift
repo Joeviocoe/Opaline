@@ -60,8 +60,20 @@ final class SABRDelivery: StreamDelivery {
         }
     }
 
-    init(transport: HTTPTransport) {
+    private let client: DirectPlaybackClient
+    /// Carried per delivery rather than globally: two sources can hold live
+    /// sessions at once, and a shared one would have them rewriting each
+    /// other's requests.
+    private let identity: SABRIdentity
+
+    init(
+        transport: HTTPTransport,
+        client: DirectPlaybackClient = .androidVR,
+        poToken: Data? = nil
+    ) {
+        self.client = client
         self.transport = transport
+        identity = SABRIdentity(client: client, poToken: poToken)
     }
 
     /// `videoPlaybackUstreamerConfig` arrives web-safe base64 and unpadded.
@@ -80,7 +92,10 @@ final class SABRDelivery: StreamDelivery {
         // spike say it was optional.
         SabrFormatInfo(
             itag: format.itag,
-            lastModified: nil,
+            // A television identifies a format by itag *and* the moment it was
+            // encoded; the pair is what the stream server matches against the
+            // ladder it authorised.
+            lastModified: format.lastModified,
             xtags: format.xtags,
             audioTrackId: format.audioTrackId,
             isDrc: false,
@@ -109,15 +124,40 @@ final class SABRDelivery: StreamDelivery {
         let playhead = request.resumeAt.map { Int($0 * 1_000) }
             ?? route?.session.lastServedMs ?? 0
         pendingStartAt = request.resumeAt.map { _ in Double(playhead) / 1_000 }
+        PlaybackProgress.step("player.status.openingSABR")
+        Self.solvingThrottle(url) { [weak self] solved in
+            self?.openSession(request, url: solved, config: config) { result in
+                // The solved `n` is a guess: the TV player's descrambler is not
+                // the one the remote solver was built for, and a wrong `n` is
+                // refused exactly like an unsolved one. If the session will not
+                // open, the URL as minted is the other half of the experiment.
+                guard case .failure = result, solved != url else {
+                    completion(result)
+                    return
+                }
+                AppLog.player("sabr: refused after n solve, retrying as minted")
+                self?.openSession(request, url: url, config: config, completion: completion)
+            }
+        }
+    }
+
+    private func openSession(
+        _ request: DeliveryRequest,
+        url: URL,
+        config: Data,
+        completion: @escaping (Result<PreparedPlayback, Error>) -> Void
+    ) {
+        let playhead = request.resumeAt.map { Int($0 * 1_000) }
+            ?? route?.session.lastServedMs ?? 0
         let session = SABRSession(
             transport: transport,
             url: url,
             ustreamerConfig: config,
             audio: Self.formatInfo(request.audio),
-            video: Self.formatInfo(request.video)
+            video: Self.formatInfo(request.video),
+            identity: identity
         )
         self.session = session
-        PlaybackProgress.step("player.status.openingSABR")
         session.start(resumeAt: request.resumeAt == nil ? 0 : playhead) { [weak self] result in
             switch result {
             case .failure(let error):

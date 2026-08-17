@@ -84,10 +84,7 @@ extension InnertubeClient {
             poToken: poToken,
             signatureTimestamp: signatureTimestamp
         )
-        let headers = client.apiHeaders(
-            token: token,
-            visitorData: visitorData
-        )
+        let headers = client.apiHeaders(token: token, visitorData: visitorData)
         let playerURL = "\(baseURL)/player\(client.playerURLSuffix)"
         var hitBotCheck = false
         execute(
@@ -96,6 +93,7 @@ extension InnertubeClient {
             headers: headers,
             cancellationToken: cancellationToken,
             sendsCookies: client.sendsCookies,
+            isPlayback: true,
             logTag: "directPlayback(\(client))"
         ) { json -> DirectPlaybackInfo? in
             Self.parseDirectPlayback(
@@ -202,7 +200,9 @@ extension InnertubeClient {
         body["videoId"] = videoId
         body["racyCheckOk"] = true
         body["contentCheckOk"] = true
-        if let sts = signatureTimestamp {
+        if let sts = signatureTimestamp.map(
+            DirectPlaybackClient.tv.signatureTimestamp(from:)
+        ) {
             body["playbackContext"] = [
                 "contentPlaybackContext": [
                     "signatureTimestamp": sts
@@ -239,8 +239,8 @@ private extension InnertubeClient {
             var playbackCtx: [String: Any] = [
                 "html5Preference": "HTML5_PREF_WANTS"
             ]
-            if let signatureTimestamp {
-                playbackCtx["signatureTimestamp"] = signatureTimestamp
+            if let sts = signatureTimestamp {
+                playbackCtx["signatureTimestamp"] = client.signatureTimestamp(from: sts)
             }
             body["playbackContext"] = [
                 "contentPlaybackContext": playbackCtx
@@ -251,6 +251,26 @@ private extension InnertubeClient {
                 "poToken": poToken
             ]
         }
+        if case .tv = client {
+            addTVAppInfo(to: &body)
+        }
         return body
+    }
+
+    /// A television names itself in the player context, and the id it gives is
+    /// the one its token is bound to. Without the pair the response still says
+    /// `OK`, but the stream it points at is not the one a TV would get.
+    func addTVAppInfo(to body: inout [String: Any]) {
+        guard var context = body["context"] as? [String: Any],
+              var client = context["client"] as? [String: Any] else {
+            return
+        }
+        client["tvAppInfo"] = [
+            "livingRoomPoTokenId": TVDeviceIdentity.livingRoomPoTokenId,
+            "signedInAccountCount": 1,
+            "appQuality": "TV_APP_QUALITY_FULL_ANIMATION"
+        ]
+        context["client"] = client
+        body["context"] = context
     }
 }

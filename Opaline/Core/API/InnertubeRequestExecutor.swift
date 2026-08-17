@@ -25,6 +25,7 @@ extension InnertubeClient {
         headers: [String: String],
         cancellationToken: CancellationToken? = nil,
         sendsCookies: Bool = true,
+        isPlayback: Bool = false,
         logTag: String = "request",
         parse: @escaping ([String: Any]) -> T?,
         completion: @escaping (Result<T, Error>) -> Void
@@ -50,7 +51,8 @@ extension InnertubeClient {
             body: bodyData,
             headers: headers,
             cancellationToken: cancellationToken,
-            sendsCookies: sendsCookies
+            sendsCookies: sendsCookies,
+            isPlayback: isPlayback
         ) { result in
             self.handlePostResult(
                 result,

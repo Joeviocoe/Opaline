@@ -58,15 +58,20 @@ extension InnertubeClient {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let token):
-                self?.executeDirectPlayback(
-                    videoId: videoId,
-                    client: playbackClient,
-                    token: token,
-                    poToken: poToken,
-                    visitorData: nil,
-                    cancellationToken: cancellation,
-                    completion: completion
-                )
+                // TV refuses a /player without a signature timestamp, in its
+                // own format — the client applies the suffix.
+                SignatureTimestampService.shared.fetch { sts in
+                    self?.executeDirectPlayback(
+                        videoId: videoId,
+                        client: playbackClient,
+                        token: token,
+                        poToken: poToken,
+                        visitorData: nil,
+                        signatureTimestamp: sts,
+                        cancellationToken: cancellation,
+                        completion: completion
+                    )
+                }
             }
         }
     }

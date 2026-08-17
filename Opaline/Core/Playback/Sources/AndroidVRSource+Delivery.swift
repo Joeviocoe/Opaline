@@ -4,40 +4,57 @@ import QuartzCore
 // MARK: - Choosing how the bytes arrive
 
 extension AndroidVRSource {
-    /// Preferred delivery first, fallback second.
-    private static func deliveryOrder(
-        for info: DirectPlaybackInfo,
-        transport: HTTPTransport
-    ) -> (StreamDelivery, StreamDelivery?) {
-        let range = LegacyRangeDelivery(client: .androidVR)
-        // Pinned by the user: no fallback, so a failure stays visible instead
-        // of being quietly papered over by the other delivery.
+    /// The user's pinned delivery, if they pinned one: no fallback, so a
+    /// failure stays visible instead of being quietly papered over by the
+    /// other delivery.
+    private static func pinnedDelivery(
+        transport: HTTPTransport,
+        client: DirectPlaybackClient,
+        poToken: Data?
+    ) -> (StreamDelivery, StreamDelivery?)? {
         switch StreamDeliveryPreference.selected {
         case .byteRange:
             AppLog.player("delivery: range (pinned, no fallback)")
-            return (range, nil)
+            return (LegacyRangeDelivery(client: client), nil)
         case .sabrOnly:
             AppLog.player("delivery: sabr (pinned, no fallback)")
-            return (SABRDelivery(transport: transport), nil)
+            return (
+                SABRDelivery(transport: transport, client: client, poToken: poToken), nil
+            )
         case .automatic:
-            break
+            return nil
         }
+    }
+
+    /// Preferred delivery first, fallback second.
+    private static func deliveryOrder(
+        for info: DirectPlaybackInfo,
+        transport: HTTPTransport,
+        client: DirectPlaybackClient,
+        poToken: Data?
+    ) -> (StreamDelivery, StreamDelivery?) {
+        if let pinned = pinnedDelivery(
+            transport: transport, client: client, poToken: poToken
+        ) {
+            return pinned
+        }
+        let range = LegacyRangeDelivery(client: client)
         guard SABRDelivery.canServe(info) else {
             AppLog.player("delivery: range only — response carries no SABR stream")
             return (range, nil)
         }
-        // A response whose formats carry no URL leaves SABR as the only way to
-        // play it; otherwise byte ranges stay the default, being the cheaper
-        // path and the one with years of mileage.
-        let hasStreamURLs = info.dashVideoFormat
-            .map { !$0.url.absoluteString.isEmpty } ?? false
-        let sabr = SABRDelivery(transport: transport)
-        AppLog.player(
-            "delivery: \(hasStreamURLs ? "range" : "sabr") first"
-                + " (stream URLs \(hasStreamURLs ? "present" : "absent"))"
-                + ", fallback \(hasStreamURLs ? "sabr" : "range")"
-        )
-        return hasStreamURLs ? (range, sabr) : (sabr, range)
+        // A response whose formats carry no URL can only be played over SABR —
+        // falling back to byte ranges would fetch a URL that does not exist.
+        // Otherwise byte ranges stay the default, being the cheaper path and
+        // the one with years of mileage, with SABR held in reserve.
+        let hasStreamURLs = info.dashVideoFormat?.hasDirectURL ?? false
+        let sabr = SABRDelivery(transport: transport, client: client, poToken: poToken)
+        guard hasStreamURLs else {
+            AppLog.player("delivery: sabr only — the response carries no stream URLs")
+            return (sabr, nil)
+        }
+        AppLog.player("delivery: range first, sabr in reserve")
+        return (range, sabr)
     }
 
     /// Lets go of the active delivery — for SABR that takes down its session
@@ -58,7 +75,9 @@ extension AndroidVRSource {
         _ request: DeliveryRequest,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        let (first, second) = Self.deliveryOrder(for: request.info, transport: transport)
+        let (first, second) = Self.deliveryOrder(
+            for: request.info, transport: transport, client: client, poToken: sabrPoToken
+        )
         delivery = first
         let started = CACurrentMediaTime()
         first.prepare(request) { [weak self] result in

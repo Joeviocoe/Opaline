@@ -14,6 +14,8 @@ enum VideoSourceKind {
     /// factory input — a playing source always reports a concrete kind.
     case auto
     case androidVR
+    /// Signed-in living-room client, played over SABR.
+    case tv
     case progressive
     case mwebPot
 }
@@ -106,8 +108,11 @@ protocol VideoSource: AnyObject {
     )
 
     /// Switches the audio track; the source rebuilds playback its own way.
+    /// `resumeAt` means what it does for [[selectQuality]] — a sequential
+    /// source (SABR) has to re-open its session at the playhead.
     func selectAudioTrack(
         _ track: AudioTrack,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     )
 
@@ -145,6 +150,14 @@ extension VideoSource {
 
     func selectAudioTrack(
         _ track: AudioTrack,
+        completion: @escaping (Result<PreparedPlayback, Error>) -> Void
+    ) {
+        selectAudioTrack(track, resumeAt: nil, completion: completion)
+    }
+
+    func selectAudioTrack(
+        _ track: AudioTrack,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         completion(.failure(NSError(

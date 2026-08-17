@@ -9,7 +9,7 @@ extension MWebSource {
     /// build step waits on `potWait` before injecting the pot into the URLs.
     func mintPot(videoId: String) {
         potWait.enter()
-        poTokenService.fetchSessionToken(identifier: videoId) { [weak self] result in
+        poTokenService.fetchSessionToken(identifier: videoId, client: "WEB") { [weak self] result in
             switch result {
             case .success(let token):
                 AppLog.player("mwebSource: minted pot for videoId (\(token.prefix(12))…)")

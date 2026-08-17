@@ -6,7 +6,18 @@ import Foundation
 // Video.swift purely by domain: these are streaming formats, not tiles.
 
 struct DashFormatInfo {
+    /// Stands in for a format the server described but handed no URL for —
+    /// the TV client does this for everything, because it is SABR-only. SABR
+    /// addresses formats by id, so the URL is never read on that path; keeping
+    /// it non-optional avoids threading an optional through the byte-range
+    /// machinery that always has one.
+    static let noDirectURL = URL(fileURLWithPath: "/sabr-only")
+
     let url: URL
+    /// False when the response carried no URL for this format (see
+    /// [[noDirectURL]]) — such a format can only be played over SABR.
+    var hasDirectURL: Bool { url != Self.noDirectURL }
+
     let itag: Int
     let mimeType: String       // e.g. "video/mp4; codecs=\"avc1.4d401f\""
     let codecs: String         // e.g. "avc1.4d401f"
@@ -28,6 +39,9 @@ struct DashFormatInfo {
     let sigChallenge: String?
     /// Query-param name for the solved signature (`sp` from the cipher).
     let sigParam: String?
+    /// When this rendition was encoded. SABR addresses a format by itag *and*
+    /// this value, so it has to survive into the request.
+    let lastModified: String?
     /// `audioTrack` metadata on dubbed audio formats — nil on video formats
     /// and on videos without dubs. `audioTrackId` is YouTube's track id
     /// ("ru.3"), `audioTrackName` its localized display name ("Russian").
