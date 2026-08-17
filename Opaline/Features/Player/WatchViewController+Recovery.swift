@@ -32,17 +32,22 @@ extension WatchViewController {
         }
         isRecoveringPlayback = false
         let target = lastPlaybackPosition
+        // A rebuilt stream that already opens at the playhead is where it
+        // needs to be. Seeking there anyway leaves the player working the head
+        // of the stream as well, which on SABR restarts it on every swap.
+        if let startsAt = itemStartsAt, abs(startsAt - target) <= 1 {
+            AppLog.player("recoverPlayback: ready at \(target)s, stream opened there")
+            pendingRecoverySeek = false
+            videoPlayerView?.player?.play()
+            return true
+        }
         AppLog.player(
             "recoverPlayback: ready"
                 + " duration=\(CMTimeGetSeconds(item.duration))s"
                 + " seekTo=\(target)s"
         )
-        let time = CMTime(
-            seconds: target,
-            preferredTimescale: 1_000
-        )
         videoPlayerView?.player?.seek(
-            to: time,
+            to: CMTime(seconds: target, preferredTimescale: 1_000),
             toleranceBefore: .zero,
             toleranceAfter: .zero
         ) { [weak self] finished in

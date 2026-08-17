@@ -56,17 +56,25 @@ struct PreparedPlayback {
     let resourceLoader: AVAssetResourceLoaderDelegate?
     let captions: [SubtitleTrack]
     let duration: Double?
+    /// Where this item already starts, when the source built it to open at the
+    /// playhead rather than at zero. Seeking there again is not the no-op it
+    /// looks like: the player then loads the head of the stream as well as the
+    /// point it was given, and with SABR each swap between the two restarts
+    /// the stream.
+    let startsAt: Double?
 
     init(
         item: AVPlayerItem,
         resourceLoader: AVAssetResourceLoaderDelegate? = nil,
         captions: [SubtitleTrack] = [],
-        duration: Double? = nil
+        duration: Double? = nil,
+        startsAt: Double? = nil
     ) {
         self.item = item
         self.resourceLoader = resourceLoader
         self.captions = captions
         self.duration = duration
+        self.startsAt = startsAt
     }
 }
 

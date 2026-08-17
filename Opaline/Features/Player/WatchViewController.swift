@@ -89,10 +89,10 @@ final class WatchViewController: UIViewController {
     let playbackFacade = PlaybackFacade()
     var pageLoadToken = CancellationToken()
     var isOuterScrollViewDragging = false, didSeekToSavedPosition = false
-    /// Source-reported duration — known before the item is ready.
-    var preparedDuration: Double?, captionTracks: [SubtitleTrack] = []
-    var activeSubtitleLanguage: String?, backgroundEnteredAt: Date?
-    var savedPlayerForBackground: AVPlayer?
+    /// Source-reported: duration, and where the stream itself starts.
+    var preparedDuration: Double?, itemStartsAt: Double?
+    var captionTracks: [SubtitleTrack] = [], activeSubtitleLanguage: String?
+    var backgroundEnteredAt: Date?, savedPlayerForBackground: AVPlayer?
     var isRecoveringPlayback = false, hasSeenPlaybackError = false
     /// Frozen during a recovery seek: a fresh item's zeroed clock must not
     /// overwrite where the user actually was.

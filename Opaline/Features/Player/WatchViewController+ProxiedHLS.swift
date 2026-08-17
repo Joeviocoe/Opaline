@@ -33,6 +33,13 @@ extension WatchViewController {
     ) {
         activeResourceLoader = prepared.resourceLoader
         preparedDuration = prepared.duration ?? preparedDuration
+        // An item the source already opened at the playhead needs no seek, and
+        // asking for one anyway is actively harmful: the player then works the
+        // head of the stream and the given point at the same time.
+        itemStartsAt = prepared.startsAt
+        if let startsAt = prepared.startsAt, startsAt > 1 {
+            didSeekToSavedPosition = true
+        }
         if !prepared.captions.isEmpty {
             setCaptionTracks(prepared.captions)
         }
