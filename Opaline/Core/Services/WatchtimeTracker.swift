@@ -6,6 +6,11 @@ import Foundation
 /// --mark-watched.
 final class WatchtimeTracker {
     private static let pingInterval: TimeInterval = 15
+    /// How often the position actually goes to YouTube. The local resume
+    /// position still moves on every tick because that costs nothing, but a
+    /// two-hour video woke the radio 488 times to report a position the server
+    /// does not keep at that resolution.
+    private static let reportInterval: TimeInterval = 60
     // Client playback nonce — YouTube dedupes stats by it, so a
     // fresh value is required per playback or history entries for
     // subsequent videos (autoplay/related) are silently dropped.
@@ -16,6 +21,7 @@ final class WatchtimeTracker {
     private var videoId: String?
     private var sessionStart: Date?
     private var lastPingedPosition: TimeInterval?
+    private var lastReported: Date?
 
     /// Provides current playback position (seconds).
     /// Set by the host view controller before or after start().
@@ -69,6 +75,7 @@ final class WatchtimeTracker {
         videoId = nil
         sessionStart = nil
         lastPingedPosition = nil
+        lastReported = nil
     }
 
     // MARK: - Private
@@ -113,6 +120,12 @@ final class WatchtimeTracker {
         }
         lastPingedPosition = pos
         recordLocalProgress(pos)
+        // Whatever is not reported now is carried by the next ping or by the
+        // final one on close: each carries the absolute position, not a delta.
+        if let last = lastReported, Date().timeIntervalSince(last) < Self.reportInterval {
+            return
+        }
+        lastReported = Date()
         let extra = "ver=2&cpn=\(cpn)"
             + "&cmt=\(fmt(pos))&el=detailpage"
             + "&st=0&et=\(fmt(pos))"
