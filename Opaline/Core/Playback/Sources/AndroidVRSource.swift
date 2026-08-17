@@ -38,7 +38,7 @@ final class AndroidVRSource: VideoSource {
     /// format the response defaulted to.
     var currentAudioFormat: DashFormatInfo?
 
-    private let apiClient: WatchService
+    let apiClient: WatchService
     let transport: HTTPTransport
     /// How the bytes are arriving right now — byte ranges or SABR.
     var delivery: StreamDelivery?
@@ -48,8 +48,13 @@ final class AndroidVRSource: VideoSource {
     let client: DirectPlaybackClient
     private(set) var info: DirectPlaybackInfo?
     /// The video `info` belongs to — a rebuild with no playhead of its own
-    /// (the auto-dub start) needs it to find the saved one.
-    private(set) var currentVideoId: String?
+    /// (the auto-dub start) needs it to find the saved one. Also set by the
+    /// metadata probe, which runs before any `/player` fetch.
+    var currentVideoId: String?
+    /// A track the probe picked before this source had a `/player` response.
+    /// The first build then starts on it directly instead of building the
+    /// original and rebuilding a second later.
+    var pendingAudioTrackId: String?
     let poTokenProvider: PoTokenProvider
 
     init(

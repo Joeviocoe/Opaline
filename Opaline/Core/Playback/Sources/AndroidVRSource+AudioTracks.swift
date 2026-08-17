@@ -10,6 +10,14 @@ import Foundation
 // quality switch does for video, so it goes through the same build path.
 
 extension AndroidVRSource {
+    static var noTrackError: Error {
+        NSError(
+            domain: "AndroidVRSource",
+            code: 0,
+            userInfo: [NSLocalizedDescriptionKey: "No such audio track"]
+        )
+    }
+
     /// The audio to build with: the picked dub, else the response's default.
     func audioFormat(in info: DirectPlaybackInfo) -> DashFormatInfo? {
         currentAudioFormat ?? info.dashAudioFormat
@@ -27,10 +35,17 @@ extension AndroidVRSource {
                 )
             }
         }
-        let startId = AutoDubPreference.autoDubTrack(in: tracks)?.id
+        // A probe-picked track wins; otherwise the auto-dub preference picks,
+        // so the very first build is already on the right track.
+        let pendingId = pendingAudioTrackId
+        pendingAudioTrackId = nil
+        let startId = pendingId ?? AutoDubPreference.autoDubTrack(in: tracks)?.id
         let format = startId.flatMap { id in
             info.allDashAudioFormats.first { $0.audioTrackId == id }
         } ?? info.dashAudioFormat
+        if let startId, format?.audioTrackId != startId {
+            AppLog.player("\(kind): start track \(startId) not in formats")
+        }
         let current = tracks.first { $0.id == format?.audioTrackId }
             ?? tracks.first { $0.isOriginal }
         (availableAudioTracks, currentAudioTrack, currentAudioFormat)
@@ -41,27 +56,53 @@ extension AndroidVRSource {
         }
     }
 
-    /// Metadata-only probe: the client's own `/player` response already lists
-    /// every dub, so the probe is the fetch a later switch would have to make
-    /// anyway — it just stops short of building playback.
+    /// Metadata-only probe, and deliberately NOT this source's own `/player`.
+    ///
+    /// The probe exists to beat the primary load to the answer "does this
+    /// video have the dub the user asked for" — and it cannot do that through
+    /// the TV client: that path mints a po token first and then parses a
+    /// hundred-odd formats, ~780 ms warm, while android_vr is playing in 340.
+    /// The IOS listing answers the same question logged-out, with no token and
+    /// no ladder to parse. Track ids match across the clients.
     func probeAudioTracks(
         videoId: String,
         completion: @escaping ([AudioTrack]) -> Void
     ) {
-        fetchInfo(videoId: videoId, cancellation: nil) { [weak self] result in
+        currentVideoId = videoId
+        apiClient.fetchAudioTrackList(videoId: videoId) { [weak self] infos in
             DispatchQueue.main.async {
-                guard let self, case .success(let info) = result else {
+                guard let self else {
                     completion([])
                     return
                 }
-                self.apply(info)
-                // Another source is playing, and it plays the ORIGINAL track —
-                // ticking the auto-dub pick here would show a track that is
-                // not what is coming out of the speakers.
-                self.currentAudioTrack = self.availableAudioTracks
-                    .first { $0.isOriginal }
+                // Only fill in probe state while there is no real response to
+                // contradict: the probe races the load and must never clobber
+                // formats a `/player` answer already published.
+                if self.info == nil {
+                    self.applyProbedTracks(infos)
+                }
                 completion(self.availableAudioTracks)
             }
+        }
+    }
+
+    /// Probe results: menu metadata only, no playable formats behind them.
+    /// The ORIGINAL track shows as current — that is what the source actually
+    /// playing (android_vr) serves; `isDefault` follows the probe's `hl` and
+    /// would tick an AI dub on any video uploaded in another language.
+    private func applyProbedTracks(_ infos: [AudioTrackInfo]) {
+        let tracks = infos.map {
+            AudioTrack(
+                id: $0.id, displayName: $0.displayName, isDefault: $0.isDefault
+            )
+        }
+        availableAudioTracks = tracks
+        currentAudioTrack = tracks.first { $0.isOriginal }
+            ?? tracks.first { $0.isDefault }
+        currentAudioFormat = nil
+        if !tracks.isEmpty {
+            let ids = tracks.map(\.id).joined(separator: ",")
+            AppLog.player("\(kind) probe: \(tracks.count) audio tracks [\(ids)]")
         }
     }
 
@@ -70,16 +111,23 @@ extension AndroidVRSource {
         resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        guard let info,
-              let audio = info.allDashAudioFormats.first(
+        // Probe-only state: no `/player` response yet, so run the full load.
+        // `pendingAudioTrackId` makes that first build start on the picked
+        // track rather than building the original and rebuilding after.
+        guard let info else {
+            guard let videoId = currentVideoId else {
+                completion(.failure(Self.noTrackError))
+                return
+            }
+            pendingAudioTrackId = track.id
+            loadPlayback(videoId: videoId, cancellation: nil, completion: completion)
+            return
+        }
+        guard let audio = info.allDashAudioFormats.first(
                   where: { $0.audioTrackId == track.id }
               ),
               let video = currentVideoFormat(info: info) else {
-            completion(.failure(NSError(
-                domain: "AndroidVRSource",
-                code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "No such audio track"]
-            )))
+            completion(.failure(Self.noTrackError))
             return
         }
         (currentAudioTrack, currentAudioFormat) = (track, audio)

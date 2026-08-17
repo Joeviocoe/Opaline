@@ -13,6 +13,13 @@ extension SABRDelivery {
         let startAt: Double?
     }
 
+    /// The single writer for the routing state the loopback server reads.
+    static let attachQueue = DispatchQueue(label: "com.ytvlite.sabr-attach")
+
+    static func ms(from: Date, to: Date) -> Int {
+        Int(to.timeIntervalSince(from) * 1_000)
+    }
+
     /// Routes one HTTP path to the bytes behind it.
     ///
     /// Paths are `/g<n>/master.m3u8`, `/g<n>/<track>.m3u8` and
@@ -175,14 +182,22 @@ extension SABRDelivery {
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         let info = request.info
+        let started = Date()
         guard let tracks = Self.tracks(inits: inits, info: info, video: request.video) else {
             completion(.failure(SABRError.noInitSegment))
             return
         }
+        let parsed = Date()
         // Everything below touches state the server reads: the generation
-        // counter, the server handle and its base URL. This runs on the
-        // session's queue, so it is pinned to main to keep a single writer.
-        DispatchQueue.main.async {
+        // counter, the server handle and its base URL. One serial queue keeps
+        // a single writer — main used to, but the watch screen is building
+        // comments and thumbnails at exactly this moment and the first frame
+        // ended up queued behind it.
+        Self.attachQueue.async {
+            AppLog.hls(
+                "sabr build: sidx \(Self.ms(from: started, to: parsed))ms,"
+                    + " attach after \(Self.ms(from: parsed, to: Date()))ms"
+            )
             self.attach(tracks: tracks, session: session, info: info, completion: completion)
         }
     }
@@ -232,7 +247,7 @@ extension SABRDelivery {
         }
         self.server = server
         server.start { [weak self] base in
-            DispatchQueue.main.async {
+            Self.attachQueue.async {
                 self?.serverBase = base
                 completion(base)
             }

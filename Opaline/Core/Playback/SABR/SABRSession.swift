@@ -63,12 +63,12 @@ final class SABRSession {
 
     private let transport: HTTPTransport
     let url: URL
-    private let ustreamerConfig: Data
+    let ustreamerConfig: Data
     let audio: SabrFormatInfo
     let video: SabrFormatInfo
     /// Who this session streams as — client and po token.
     let identity: SABRIdentity
-    private let queue = DispatchQueue(label: "com.ytvlite.sabr-session")
+    let queue = DispatchQueue(label: "com.ytvlite.sabr-session")
 
     /// Contiguous bytes per stream, keyed by itag.
     var buffers: [Int: StreamBuffer] = [:]
@@ -102,69 +102,6 @@ final class SABRSession {
         self.audio = audio
         self.video = video
         self.identity = identity
-    }
-
-    // MARK: - Public API
-
-    /// Opens the session and returns the init segment of each stream — the
-    /// `ftyp/moov/sidx` prefix AVPlayer needs before any media.
-    /// `resumeAt` starts the stream at the playhead instead of at zero —
-    /// switching quality mid-video otherwise streams the opening again while
-    /// the player waits for the part it is actually on.
-    func start(
-        resumeAt: Int = 0,
-        completion: @escaping (Result<[Int: Data], Error>) -> Void
-    ) {
-        queue.async {
-            let body = SABRRequest.startup(
-                ustreamerConfig: self.ustreamerConfig,
-                audio: self.audio,
-                video: self.video,
-                identity: self.identity
-            )
-            self.send(body) { [weak self] result in
-                guard let self else {
-                    return
-                }
-                if case .failure(let error) = result {
-                    completion(.failure(error))
-                    return
-                }
-                let inits = self.collectedInits()
-                guard inits[self.audio.itag] != nil, inits[self.video.itag] != nil else {
-                    completion(.failure(SABRError.noInitSegment))
-                    return
-                }
-                guard resumeAt > 0 else {
-                    completion(.success(inits))
-                    return
-                }
-                self.jump(to: resumeAt) { completion(.success(inits)) }
-            }
-        }
-    }
-
-    /// Repositions the stream, keeping the init segments already collected.
-    private func jump(to timeMs: Int, completion: @escaping () -> Void) {
-        resetBuffers()
-        progress.removeAll()
-        lastServedMs = timeMs
-        let body = SABRRequest.jump(
-            ustreamerConfig: ustreamerConfig,
-            audio: audio,
-            video: video,
-            identity: identity,
-            playerMs: timeMs,
-            // Segments run about five seconds; the exact figure does not matter,
-            // only that it is consistent with the buffer being claimed.
-            sequence: max(1, timeMs / 5_000)
-        )
-        send(body) { _ in completion() }
-    }
-
-    private func collectedInits() -> [Int: Data] {
-        let inits = initSegments
-        return inits
     }
 
     /// Bytes `offset..<offset+length` of `itag`, waiting for them if the
