@@ -43,6 +43,11 @@ final class RemotePoTokenService: PoTokenProvider {
     /// Bindings whose next mint must skip the remote provider's server-side
     /// cache too — set by `invalidateToken`.
     private var bypassProviderCache: Set<String> = []
+    /// Callers waiting on a mint that is already on the wire, keyed the same
+    /// way as the cache. One binding is one request no matter how many videos
+    /// ask at once — a cold provider used to be asked three times over while
+    /// its first answer was still coming, and all three timed out.
+    private var inFlight: [String: [(Result<String, Error>) -> Void]] = [:]
     private let lock = NSLock()
 
     init(transport: HTTPTransport = ServiceContainer.transport) {
@@ -63,46 +68,66 @@ final class RemotePoTokenService: PoTokenProvider {
             completion(.success(cached))
             return
         }
-        guard let endpoint = AppURLs.PoTokenProvider.endpoint,
-              let body = try? JSONSerialization.data(
-                  withJSONObject: requestPayload(identifier: identifier, client: client)
-              ) else {
+        guard let endpoint = AppURLs.PoTokenProvider.endpoint else {
             completion(.failure(ProviderError.notConfigured))
             return
         }
-        let request = HTTPRequest(
+        // Joins an existing mint rather than starting a second one. Checked
+        // before the payload is built: `requestPayload` consumes the
+        // bypass-cache flag, and a waiter must not eat it.
+        guard startMint(key: key, waiter: completion) else {
+            AppLog.poToken("mint already in flight for \(key)")
+            return
+        }
+        guard let request = mintRequest(
+            endpoint: endpoint, identifier: identifier, client: client
+        ) else {
+            finishMint(key: key, result: .failure(ProviderError.notConfigured))
+            return
+        }
+        AppLog.poToken("requesting pot for \(identifier) via \(endpoint.host ?? "")")
+        transport.send(request, cancellationToken: nil) { [weak self] result in
+            self?.handle(result: result, identifier: key)
+        }
+    }
+
+    private func mintRequest(
+        endpoint: URL, identifier: String, client: String
+    ) -> HTTPRequest? {
+        guard let body = try? JSONSerialization.data(
+            withJSONObject: requestPayload(identifier: identifier, client: client)
+        ) else {
+            return nil
+        }
+        return HTTPRequest(
             method: .post,
             url: endpoint,
             headers: [HTTPHeader.contentType: HTTPHeaderValue.contentTypeJSON],
             body: body,
-            timeout: 15
+            timeout: 15,
+            isPlayback: true
         )
-        AppLog.poToken("requesting pot for \(identifier) via \(endpoint.host ?? "")")
-        transport.send(request, cancellationToken: nil) { [weak self] result in
-            self?.handle(result: result, identifier: key, completion: completion)
-        }
     }
 
     private func handle(
         result: Result<HTTPResponse, Error>,
-        identifier: String,
-        completion: @escaping (Result<String, Error>) -> Void
+        identifier: String
     ) {
         switch result {
         case .failure(let error):
             AppLog.poToken("pot request failed: \(error.localizedDescription)")
-            completion(.failure(error))
+            finishMint(key: identifier, result: .failure(error))
         case .success(let response):
             guard let token = parseToken(response.data), !token.isEmpty else {
                 AppLog.poToken("pot response missing poToken (status \(response.status))")
-                completion(.failure(ProviderError.badResponse))
+                finishMint(key: identifier, result: .failure(ProviderError.badResponse))
                 return
             }
             AppLog.poToken(
                 "got pot for \(identifier) len=\(token.count) tail=\(token.suffix(4))"
             )
             storeToken(token, for: identifier)
-            completion(.success(token))
+            finishMint(key: identifier, result: .success(token))
         }
     }
 
@@ -145,5 +170,29 @@ final class RemotePoTokenService: PoTokenProvider {
         lock.lock()
         defer { lock.unlock() }
         cache[identifier] = CachedMint(token: token, minted: Date())
+    }
+
+    /// Registers a waiter. `true` means this caller owns the mint and must
+    /// send the request; `false` means one is already on the wire.
+    private func startMint(
+        key: String, waiter: @escaping (Result<String, Error>) -> Void
+    ) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        guard inFlight[key] == nil else {
+            inFlight[key]?.append(waiter)
+            return false
+        }
+        inFlight[key] = [waiter]
+        return true
+    }
+
+    /// Answers everyone who waited on this binding. Called off the lock so a
+    /// waiter is free to ask for another token from its own callback.
+    private func finishMint(key: String, result: Result<String, Error>) {
+        lock.lock()
+        let waiters = inFlight.removeValue(forKey: key) ?? []
+        lock.unlock()
+        waiters.forEach { $0(result) }
     }
 }

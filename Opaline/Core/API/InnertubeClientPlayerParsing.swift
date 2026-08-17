@@ -518,6 +518,32 @@ private extension InnertubeClient {
             return
         }
         AppLog.innertube("fmt keys: \(first.keys.sorted().joined(separator: ","))")
+        logVideoLadder(ad)
+    }
+
+    /// Every video format the response offers, admitted ones first and the
+    /// rejected ones marked. The ladder above 1080p is codec-bound — avc1
+    /// stops there and VP9 is undecodable by AVPlayer — so "where is 4K" is
+    /// only answerable from what the response actually listed.
+    private static func logVideoLadder(_ adaptive: [[String: Any]]) {
+        let video = adaptive.filter { fmtMimeType($0).contains("video/") }
+        guard !video.isEmpty else {
+            return
+        }
+        let ladder = video
+            .sorted { fmtHeight($0) > fmtHeight($1) }
+            .map { fmt -> String in
+                let codec = fmtMimeType(fmt)
+                    .split(separator: "\"").dropFirst().first ?? "?"
+                let itag = fmt["itag"] as? Int ?? -1
+                let mark = fmtIsPlayableVideo(fmt) ? "" : "✗"
+                return "\(mark)\(fmtHeight(fmt))p/\(itag)/\(codec.prefix(4))"
+            }
+            .joined(separator: " ")
+        AppLog.innertube(
+            "video ladder (✗ = we reject it,"
+                + " hw av1=\(AV1Support.isHardwareSupported)): \(ladder)"
+        )
     }
 
     static func logStreamingDataSummary(

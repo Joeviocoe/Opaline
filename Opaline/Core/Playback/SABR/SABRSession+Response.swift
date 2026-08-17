@@ -50,6 +50,7 @@ extension SABRSession {
             }
             sawMedia = apply(part, headers: &headers) || sawMedia
         }
+        sawMediaInLastResponse = sawMedia
         if !sawMedia {
             // No media at all means the server declined rather than the stream
             // ending — some videos are simply not served over SABR, and the

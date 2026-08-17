@@ -51,7 +51,9 @@ extension SignatureTimestampService {
         }
         let headers = [HTTPHeader.userAgent: UserAgent.cobaltFireTV]
         transport.send(
-            HTTPRequest(method: .get, url: url, headers: headers),
+            HTTPRequest(
+                method: .get, url: url, headers: headers, isPlayback: true
+            ),
             cancellationToken: nil
         ) { result in
             guard case .success(let response) = result,

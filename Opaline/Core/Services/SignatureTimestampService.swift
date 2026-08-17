@@ -92,7 +92,7 @@ final class SignatureTimestampService {
             return
         }
         transport.send(
-            HTTPRequest(method: .get, url: url),
+            HTTPRequest(method: .get, url: url, isPlayback: true),
             cancellationToken: nil
         ) { [weak self] result in
             guard let self else {

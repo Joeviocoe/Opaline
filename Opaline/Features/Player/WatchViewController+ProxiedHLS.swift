@@ -4,6 +4,26 @@ import UIKit
 // MARK: - Source-prepared playback
 
 extension WatchViewController {
+    /// Where a rebuilt stream should pick up.
+    ///
+    /// Normally the playhead — but a rebuild can land before the saved
+    /// position has been seeked to (the auto-dub probe routinely does: the
+    /// primary delivers in 400 ms, the item is not even ready yet), and
+    /// `currentTime` is 0 then. Handing that over restarts the video from
+    /// the beginning, which is exactly what the resume was avoiding.
+    var rebuildPlayhead: CMTime? {
+        guard let player = videoPlayerView?.player else {
+            return nil
+        }
+        guard !didSeekToSavedPosition,
+              let saved = WatchProgressStore.shared.resumeSeconds(
+                  forVideoId: initialVideo.id, duration: preparedDuration
+              ) else {
+            return player.currentTime()
+        }
+        return CMTime(seconds: saved, preferredTimescale: 1_000)
+    }
+
     /// Attaches an `AVPlayerItem` built by a `VideoSource`, retaining its
     /// resource loader (e.g. the HLS proxy) for the item's lifetime and
     /// publishing any caption tracks the source resolved.
@@ -12,6 +32,7 @@ extension WatchViewController {
         resumeAt: CMTime? = nil
     ) {
         activeResourceLoader = prepared.resourceLoader
+        preparedDuration = prepared.duration ?? preparedDuration
         if !prepared.captions.isEmpty {
             setCaptionTracks(prepared.captions)
         }
@@ -66,7 +87,7 @@ extension WatchViewController {
         guard quality != source.currentQuality else {
             return
         }
-        let resumeTime = videoPlayerView?.player?.currentTime()
+        let resumeTime = rebuildPlayhead
         playerStatusLabel.text = "player.status.loading"
             .localized(with: quality.label)
         playerStatusLabel.isHidden = false
@@ -76,7 +97,11 @@ extension WatchViewController {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let prepared):
-                    self?.attachPrepared(prepared, resumeAt: resumeTime)
+                    // The old item kept playing for however long the rebuild
+                    // took (1–3 s on SABR). Seeking back to where the playhead
+                    // was when the menu was tapped would undo exactly that, so
+                    // read it again now.
+                    self?.attachPrepared(prepared, resumeAt: self?.rebuildPlayhead)
                 case .failure:
                     self?.showPlaybackError(
                         "player.error.qualitySwitch".localized

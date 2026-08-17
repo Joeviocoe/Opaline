@@ -122,6 +122,22 @@ final class WatchProgressStore {
         return WatchProgress(fraction: frac)
     }
 
+    /// Where playback should pick this video up, or nil when it should start
+    /// from the beginning (barely watched, or watched to the end). One place
+    /// for the rule, because both the player shell and the sources building
+    /// the stream have to agree on where "resume" is.
+    func resumeSeconds(
+        forVideoId videoId: String,
+        duration: Double?
+    ) -> Double? {
+        guard let duration, duration > 0,
+              let prog = progress(forVideoId: videoId),
+              prog.shouldShow, prog.fraction < 0.97 else {
+            return nil
+        }
+        return prog.fraction * duration
+    }
+
     func clearAll() {
         lock.lock()
         fractions.removeAll()

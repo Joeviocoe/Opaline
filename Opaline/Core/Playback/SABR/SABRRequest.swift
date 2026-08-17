@@ -7,6 +7,20 @@ struct SABRStreamProgress {
     let bufferedMs: Int
 }
 
+/// Who a SABR session streams as. Held per session rather than globally: a
+/// composite can run an android_vr session and a TV one at the same time, and
+/// a shared client would have each rewriting the other's requests.
+struct SABRIdentity {
+    /// Which client's session these requests belong to; the bodies carry it in
+    /// `streamerContext`.
+    let client: DirectPlaybackClient
+    /// The proof-of-origin token, already decoded from its web-safe base64. A
+    /// television sends it on every request, bound to the same id its `/player`
+    /// call named; android_vr sends none, which is why it is the one client
+    /// that plays without minting anything.
+    let poToken: Data?
+}
+
 /// Builds `VideoPlaybackAbrRequest` bodies.
 ///
 /// Field numbers are YouTube's, verified against a live server — see
@@ -21,16 +35,6 @@ enum SABRRequest {
         let playbackCookie: Data?
     }
 
-    /// Which client's session these requests belong to. Set by the delivery
-    /// before a session opens; the bodies carry it in `streamerContext`.
-    static var client: DirectPlaybackClient = .androidVR
-
-    /// The proof-of-origin token this session streams under, already decoded
-    /// from its web-safe base64. A television sends it on every request, bound
-    /// to the same id its `/player` call named; android_vr sends none, which is
-    /// why it is the one client that plays without minting anything.
-    static var poToken: Data?
-
     /// The first request of a session.
     ///
     /// Deliberately carries neither `selectedFormatIds` (2) nor `bufferedRanges`
@@ -42,16 +46,22 @@ enum SABRRequest {
         ustreamerConfig: Data,
         audio: SabrFormatInfo,
         video: SabrFormatInfo,
+        identity: SABRIdentity,
         playbackCookie: Data? = nil
     ) -> Data {
-        var body = Protobuf.bytes(1, clientAbrState(video: video, playerMs: 0))
+        var body = Protobuf.bytes(
+            1, clientAbrState(video: video, playerMs: 0, identity: identity)
+        )
         body += Protobuf.bytes(5, ustreamerConfig)
         body += Protobuf.bytes(16, formatId(audio))
         body += Protobuf.bytes(17, formatId(video))
-        body += Protobuf.bytes(19, streamerContext(playbackCookie: playbackCookie))
+        body += Protobuf.bytes(
+            19, streamerContext(playbackCookie: playbackCookie, identity: identity)
+        )
         return body
     }
 
+    // swiftlint:disable function_parameter_count
     /// Jumps the stream to `playerMs`.
     ///
     /// A startup request cannot do this — with a non-zero player time it comes
@@ -62,6 +72,7 @@ enum SABRRequest {
         ustreamerConfig: Data,
         audio: SabrFormatInfo,
         video: SabrFormatInfo,
+        identity: SABRIdentity,
         playerMs: Int,
         sequence: Int = 1
     ) -> Data {
@@ -71,19 +82,26 @@ enum SABRRequest {
         let heldVideo = SABRStreamProgress(
             format: video, lastSequence: sequence, bufferedMs: playerMs
         )
+        // swiftlint:enable function_parameter_count
         return continuation(
             ustreamerConfig: ustreamerConfig,
             state: Continuation(
                 audio: held, video: heldVideo, playerMs: playerMs, playbackCookie: nil
-            )
+            ),
+            identity: identity
         )
     }
 
     /// Every request after the first: same shape plus what we already have.
-    static func continuation(ustreamerConfig: Data, state: Continuation) -> Data {
+    static func continuation(
+        ustreamerConfig: Data, state: Continuation, identity: SABRIdentity
+    ) -> Data {
         let (audio, video) = (state.audio, state.video)
         var body = Protobuf.bytes(
-            1, clientAbrState(video: video.format, playerMs: state.playerMs)
+            1,
+            clientAbrState(
+                video: video.format, playerMs: state.playerMs, identity: identity
+            )
         )
         for stream in [audio, video] {
             body += Protobuf.bytes(2, formatId(stream.format))
@@ -94,14 +112,19 @@ enum SABRRequest {
         body += Protobuf.bytes(5, ustreamerConfig)
         body += Protobuf.bytes(16, formatId(audio.format))
         body += Protobuf.bytes(17, formatId(video.format))
-        body += Protobuf.bytes(19, streamerContext(playbackCookie: state.playbackCookie))
+        body += Protobuf.bytes(
+            19,
+            streamerContext(playbackCookie: state.playbackCookie, identity: identity)
+        )
         return body
     }
 
     // MARK: - Messages
 
-    private static func clientAbrState(video: SabrFormatInfo, playerMs: Int) -> Data {
-        client == .tv
+    private static func clientAbrState(
+        video: SabrFormatInfo, playerMs: Int, identity: SABRIdentity
+    ) -> Data {
+        identity.client == .tv
             ? tvAbrState(video: video, playerMs: playerMs)
             : androidVRAbrState(video: video, playerMs: playerMs)
     }
@@ -121,7 +144,7 @@ enum SABRRequest {
         state += Protobuf.int(34, 0)               // visibility
         state += Protobuf.bool(46, true)           // drcEnabled
         state += Protobuf.bool(58, false)          // preferVp9
-        state += Protobuf.int(59, 1_080)           // av1QualityThreshold
+        state += Protobuf.int(59, decodeCeiling()) // av1QualityThreshold
         state += Protobuf.bytes(72, decodeCeilings())
         state += Protobuf.int(73, 2)
         state += Protobuf.bytes(79, playbackAuthorization())
@@ -130,13 +153,21 @@ enum SABRRequest {
         return state
     }
 
-    /// What the set can decode, capped at 1080p — the shape a television sends.
+    /// The height this session may be served up to: a real television claims
+    /// 1080, and claiming less than it would be asking the server to withhold
+    /// formats we can play — so the setting only ever raises the ceiling.
+    private static func decodeCeiling() -> Int {
+        max(1_080, VideoQualityStore.maxHeight ?? 1_080)
+    }
+
+    /// What the set can decode — the shape a television sends, with our own
+    /// ceiling in place of its fixed 1080.
     private static func decodeCeilings() -> Data {
         var caps = Protobuf.int(1, 0)
-        caps += Protobuf.int(2, 1_080)
+        caps += Protobuf.int(2, decodeCeiling())
         caps += Protobuf.int(3, 0)
         caps += Protobuf.int(4, 0)
-        caps += Protobuf.int(5, 1_080)
+        caps += Protobuf.int(5, decodeCeiling())
         caps += Protobuf.int(6, 0)
         return caps
     }
@@ -188,9 +219,11 @@ enum SABRRequest {
         return range + Protobuf.bytes(6, timeRange)
     }
 
-    private static func streamerContext(playbackCookie: Data?) -> Data {
-        var context = Protobuf.bytes(1, clientInfo())
-        if let poToken, !poToken.isEmpty {
+    private static func streamerContext(
+        playbackCookie: Data?, identity: SABRIdentity
+    ) -> Data {
+        var context = Protobuf.bytes(1, clientInfo(identity: identity))
+        if let poToken = identity.poToken, !poToken.isEmpty {
             context += Protobuf.bytes(2, poToken)
         }
         if let playbackCookie, !playbackCookie.isEmpty {
@@ -201,8 +234,8 @@ enum SABRRequest {
 
     /// Describes the client the SABR URL was minted for — it has to match the
     /// /player call, the server reads this to size and sign what it serves.
-    private static func clientInfo() -> Data {
-        client == .tv ? tvClientInfo() : androidVRClientInfo()
+    private static func clientInfo(identity: SABRIdentity) -> Data {
+        identity.client == .tv ? tvClientInfo() : androidVRClientInfo()
     }
 
     private static func tvClientInfo() -> Data {

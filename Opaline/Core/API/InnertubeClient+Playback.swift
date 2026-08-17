@@ -93,6 +93,7 @@ extension InnertubeClient {
             headers: headers,
             cancellationToken: cancellationToken,
             sendsCookies: client.sendsCookies,
+            isPlayback: true,
             logTag: "directPlayback(\(client))"
         ) { json -> DirectPlaybackInfo? in
             Self.parseDirectPlayback(

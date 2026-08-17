@@ -42,9 +42,14 @@ final class AndroidVRSource: VideoSource {
     let transport: HTTPTransport
     /// How the bytes are arriving right now — byte ranges or SABR.
     var delivery: StreamDelivery?
+    /// The decoded po token this source's SABR sessions stream under (TV only).
+    var sabrPoToken: Data?
     private let liveHLS: LiveHLSPlayback
     let client: DirectPlaybackClient
     private(set) var info: DirectPlaybackInfo?
+    /// The video `info` belongs to — a rebuild with no playhead of its own
+    /// (the auto-dub start) needs it to find the saved one.
+    private(set) var currentVideoId: String?
     let poTokenProvider: PoTokenProvider
 
     init(
@@ -63,64 +68,29 @@ final class AndroidVRSource: VideoSource {
         liveHLS = LiveHLSPlayback(resolver: resolver)
     }
 
-    /// "vCodec (itag) / aCodec (itag)" for the stats overlay; nil when the
-    /// active quality is not a DASH format (live variants). `audio` overrides
-    /// the default audio format (mweb after an audio-track switch).
-    static func codecsLine(
-        info: DirectPlaybackInfo?,
-        quality: VideoQuality?,
-        audio: DashFormatInfo? = nil
-    ) -> String? {
-        guard let info, let quality,
-              let video = info.allDashVideoFormats.first(
-                  where: { "\($0.itag)" == quality.id }
-              ) else {
-            return nil
-        }
-        let videoPart = "\(video.codecs) (\(video.itag))"
-        guard let audio = audio ?? info.dashAudioFormat else {
-            return videoPart
-        }
-        return videoPart + " / \(audio.codecs) (\(audio.itag))"
-    }
-
-    /// One entry per tier label: with av01 admitted alongside avc1 the same
-    /// height appears twice — keep the first (higher-bitrate) format.
-    ///
-    /// Audio-only leads the list. It needs a DASH pair to strip the video from,
-    /// so live and progressive videos never offer it.
-    static func qualities(from info: DirectPlaybackInfo) -> [VideoQuality] {
-        let tiers = videoTiers(from: info)
-        guard !tiers.isEmpty, info.dashAudioFormat != nil else {
-            return tiers
-        }
-        return [AudioOnlyMode.quality] + tiers
-    }
-
-    private static func videoTiers(from info: DirectPlaybackInfo) -> [VideoQuality] {
-        var seenLabels = Set<String>()
-        return info.allDashVideoFormats.map { format in
-            let fps = format.fps ?? 0
-            let height = format.height ?? 0
-            // YouTube's tier name when present — non-16:9 heights are
-            // off-ladder (1920x1012 is the "1080p" tier, not "1012p").
-            let fallback = fps > 30 ? "\(height)p\(fps)" : "\(height)p"
-            return VideoQuality(
-                id: "\(format.itag)",
-                label: format.qualityLabel ?? fallback,
-                height: format.height,
-                fps: format.fps
-            )
-        }
-        .sorted { ($0.height ?? 0) > ($1.height ?? 0) }
-        .filter { seenLabels.insert($0.label).inserted }
-    }
-
     func loadPlayback(
         videoId: String,
         cancellation: CancellationToken?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
+        fetchInfo(videoId: videoId, cancellation: cancellation) { [weak self] result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let info):
+                self?.handleInfo(info, videoId: videoId, completion: completion)
+            }
+        }
+    }
+
+    /// One `/player` fetch for this source's client, minting whatever token it
+    /// needs first. Shared with the metadata-only audio-track probe.
+    func fetchInfo(
+        videoId: String,
+        cancellation: CancellationToken?,
+        completion: @escaping (Result<DirectPlaybackInfo, Error>) -> Void
+    ) {
+        currentVideoId = videoId
         mintingTokenIfNeeded { [weak self] poToken in
             guard let self else {
                 return
@@ -129,15 +99,9 @@ final class AndroidVRSource: VideoSource {
                 videoId: videoId,
                 client: client,
                 poToken: poToken,
-                cancellationToken: cancellation
-            ) { [weak self] result in
-                switch result {
-                case .failure(let error):
-                    completion(.failure(error))
-                case .success(let info):
-                    self?.handleInfo(info, completion: completion)
-                }
-            }
+                cancellationToken: cancellation,
+                completion: completion
+            )
         }
     }
 
@@ -176,8 +140,25 @@ final class AndroidVRSource: VideoSource {
 
     private func handleInfo(
         _ info: DirectPlaybackInfo,
+        videoId: String,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
+        apply(info)
+        // Build straight at the saved playhead: a sequential stream (SABR)
+        // would otherwise deliver the opening minutes and be seeked away from
+        // them the moment the item turns ready.
+        buildBest(
+            info: info,
+            resumeAt: WatchProgressStore.shared.resumeSeconds(
+                forVideoId: videoId, duration: info.duration
+            ),
+            completion: completion
+        )
+    }
+
+    /// Publishes what a `/player` response says about tracks and qualities,
+    /// without building anything from it.
+    func apply(_ info: DirectPlaybackInfo) {
         self.info = info
         liveHLS.reset()
         updateAudioTrackState(from: info)
@@ -188,16 +169,20 @@ final class AndroidVRSource: VideoSource {
         currentQuality = AudioOnlyMode.startQuality(
             in: availableQualities, fallback: defaultQuality
         )
-        buildBest(info: info, completion: completion)
     }
 
     private func buildBest(
         info: DirectPlaybackInfo,
+        resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         if let video = info.dashVideoFormat, let audio = audioFormat(in: info) {
             buildGeneratedHLS(
-                info: info, video: video, audio: audio, completion: completion
+                info: info,
+                video: video,
+                audio: audio,
+                resumeAt: resumeAt,
+                completion: completion
             )
         } else if let hls = info.hlsManifestURL {
             loadLiveHLS(info: info, url: hls, completion: completion)

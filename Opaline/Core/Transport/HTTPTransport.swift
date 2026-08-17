@@ -18,6 +18,12 @@ struct HTTPRequest {
     /// this request — used to keep the anonymous MWEB playback flow from being
     /// contaminated by the app's authenticated (TV device) session cookies.
     var sendsCookies: Bool
+    /// The playback plane: `/player`, the po token, the n solve and the SABR
+    /// pump. These get the network's and the CPU's attention ahead of
+    /// everything else, because a spinner is on screen while they run and a
+    /// thumbnail or a comment page can wait a beat. On a dual-core A7 the
+    /// contention is real: parsing one `/next` costs three seconds.
+    var isPlayback: Bool
 
     init(
         method: HTTPMethod,
@@ -25,7 +31,8 @@ struct HTTPRequest {
         headers: [String: String] = [:],
         body: Data? = nil,
         timeout: TimeInterval? = nil,
-        sendsCookies: Bool = true
+        sendsCookies: Bool = true,
+        isPlayback: Bool = false
     ) {
         self.method = method
         self.url = url
@@ -33,6 +40,7 @@ struct HTTPRequest {
         self.body = body
         self.timeout = timeout
         self.sendsCookies = sendsCookies
+        self.isPlayback = isPlayback
     }
 }
 

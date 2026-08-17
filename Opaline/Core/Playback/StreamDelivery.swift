@@ -57,7 +57,8 @@ final class LegacyRangeDelivery: StreamDelivery {
             audioURL: client.directURL(baseURL: request.audio.url, poToken: nil),
             videoFormat: request.video,
             audioFormat: request.audio,
-            headers: client.streamHeaders(visitorData: info.visitorData)
+            headers: client.streamHeaders(visitorData: info.visitorData),
+            startAt: request.resumeAt
         )
         HLSPlaybackBuilder.build(input: input) { result in
             guard let result else {

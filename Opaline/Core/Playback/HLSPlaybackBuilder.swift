@@ -13,6 +13,9 @@ enum HLSPlaybackBuilder {
         let videoFormat: DashFormatInfo
         let audioFormat: DashFormatInfo
         let headers: [String: String]
+        /// Where the player should begin — the saved playhead on a resume,
+        /// the current one on a rebuild, nil from the start of the video.
+        var startAt: Double?
     }
 
     struct RangeRequest {
@@ -229,13 +232,15 @@ private extension HLSPlaybackBuilder {
             url: input.videoURL,
             initBytes: vidFmt.initRangeEnd + 1,
             dataStartOffset: Int64(vidFmt.indexRangeEnd + 1),
-            segments: videoSegments
+            segments: videoSegments,
+            startAt: input.startAt
         )
         let audioPl = HLSGenerator.mediaPlaylist(
             url: input.audioURL,
             initBytes: audFmt.initRangeEnd + 1,
             dataStartOffset: Int64(audFmt.indexRangeEnd + 1),
-            segments: audioSegments
+            segments: audioSegments,
+            startAt: input.startAt
         )
         loader.register(path: "video.m3u8", content: videoPl)
         loader.register(path: "audio.m3u8", content: audioPl)

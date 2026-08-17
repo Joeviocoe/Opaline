@@ -70,7 +70,9 @@ final class HLSStreamResolver {
             HTTPHeader.acceptLanguage: "en-US,en;q=0.9"
         ]
         transport.send(
-            HTTPRequest(method: .get, url: url, headers: headers),
+            HTTPRequest(
+                method: .get, url: url, headers: headers, isPlayback: true
+            ),
             cancellationToken: nil
         ) { result in
             switch result {

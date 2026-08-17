@@ -107,6 +107,18 @@ extension SABRSession {
         return offset < buffer.start
     }
 
+    /// A read far ahead of where the stream has got to. A continuation would
+    /// have to grind its way there segment by segment while the player waits,
+    /// so the session repositions instead. This is what resuming from history
+    /// looks like: the session opens at zero and the player lands in the
+    /// middle, minutes of stream away.
+    func isAheadOfStream(_ request: SABRReadRequest) -> Bool {
+        guard let buffered = progress.values.map(\.bufferedMs).min() else {
+            return false
+        }
+        return request.timeMs > buffered + Self.seekAheadMs
+    }
+
     /// How far behind the read position a re-request may land before it counts
     /// as a genuine backwards seek.
     func isRetry(itag: Int, offset: Int64) -> Bool {

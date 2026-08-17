@@ -52,6 +52,11 @@ final class SABRSession {
     /// and restarts the stream — which made playback slower, causing more
     /// timeouts, causing more restarts.
     static let keepBehind = 4 * 1_024 * 1_024
+    /// How far ahead of the stream a read may land before the session
+    /// repositions rather than streaming its way there. Must stay above the
+    /// player's own read-ahead (20s of buffer plus a segment), or ordinary
+    /// playback would be mistaken for a seek and restart the stream.
+    static let seekAheadMs = 45_000
     /// Consecutive responses that answer nobody before we call it a stall
     /// rather than looping forever.
     static let maxEmptyRounds = 8
@@ -61,6 +66,8 @@ final class SABRSession {
     private let ustreamerConfig: Data
     let audio: SabrFormatInfo
     let video: SabrFormatInfo
+    /// Who this session streams as — client and po token.
+    let identity: SABRIdentity
     private let queue = DispatchQueue(label: "com.ytvlite.sabr-session")
 
     /// Contiguous bytes per stream, keyed by itag.
@@ -86,13 +93,15 @@ final class SABRSession {
         url: URL,
         ustreamerConfig: Data,
         audio: SabrFormatInfo,
-        video: SabrFormatInfo
+        video: SabrFormatInfo,
+        identity: SABRIdentity
     ) {
         self.transport = transport
         self.url = url
         self.ustreamerConfig = ustreamerConfig
         self.audio = audio
         self.video = video
+        self.identity = identity
     }
 
     // MARK: - Public API
@@ -110,7 +119,8 @@ final class SABRSession {
             let body = SABRRequest.startup(
                 ustreamerConfig: self.ustreamerConfig,
                 audio: self.audio,
-                video: self.video
+                video: self.video,
+                identity: self.identity
             )
             self.send(body) { [weak self] result in
                 guard let self else {
@@ -143,6 +153,7 @@ final class SABRSession {
             ustreamerConfig: ustreamerConfig,
             audio: audio,
             video: video,
+            identity: identity,
             playerMs: timeMs,
             // Segments run about five seconds; the exact figure does not matter,
             // only that it is consistent with the buffer being claimed.
@@ -195,8 +206,9 @@ final class SABRSession {
         // Restarting on those threw away all progress, so the server resent the
         // opening segments, which made playback slower, which caused more
         // retries — the loop this guard exists to break.
-        let seeking = needsSeek(itag: request.itag, offset: request.offset)
-            && !isRetry(itag: request.itag, offset: request.offset)
+        let seeking = (needsSeek(itag: request.itag, offset: request.offset)
+            && !isRetry(itag: request.itag, offset: request.offset))
+            || isAheadOfStream(request)
         guard !seeking else {
             resetBuffers()
             progress.removeAll()
@@ -209,6 +221,7 @@ final class SABRSession {
                 ustreamerConfig: ustreamerConfig,
                 audio: audio,
                 video: video,
+                identity: identity,
                 playerMs: request.timeMs,
                 sequence: request.sequence
             )
@@ -228,14 +241,15 @@ final class SABRSession {
                 video: videoProgress,
                 playerMs: timeMs,
                 playbackCookie: playbackCookie
-            )
+            ),
+            identity: identity
         )
     }
 
     // MARK: - Transport
     private func sabrHeaders() -> [String: String] {
         var headers = [HTTPHeader.contentType: "application/x-protobuf"]
-        headers[HTTPHeader.userAgent] = SABRRequest.client.userAgent
+        headers[HTTPHeader.userAgent] = identity.client.userAgent
         return headers
     }
 
@@ -249,19 +263,19 @@ final class SABRSession {
             body: body,
             // Anonymous, like the spike this ports: cookies were tried on
             // device and changed nothing.
-            sendsCookies: false
+            sendsCookies: false,
+            isPlayback: true
         )
         let sent = body.count
         transport.send(request, cancellationToken: nil) { [weak self] result in
             self?.queue.async {
-                self?.handle(result, request: request, sent: sent, completion: completion)
+                self?.handle(result, sent: sent, completion: completion)
             }
         }
     }
 
     private func handle(
         _ result: Result<HTTPResponse, Error>,
-        request: HTTPRequest,
         sent: Int,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
@@ -271,13 +285,9 @@ final class SABRSession {
             completion(.failure(error))
         case .success(let response) where response.status != 200:
             // A refusal with no body never reaches the SABR protocol at all —
-            // googlevideo rejected the URL itself. Dump the whole exchange so
-            // it can be replayed off-device: rebuilding the app to try one
-            // header at a time is the slow way to answer this.
-            // TODO(OPALINE-82): drop once the TV path plays.
-            AppLog.hls("sabr HTTP \(response.status) refused")
-            AppLog.hls("sabr replay url: \(request.url.absoluteString)")
-            AppLog.hls("sabr replay body: \(request.body?.base64EncodedString() ?? "")")
+            // googlevideo rejected the URL itself. The request is NOT logged:
+            // it carries the signed URL and the po token.
+            AppLog.hls("sabr HTTP \(response.status) refused, sent \(sent)B")
             completion(consume(response))
         case .success(let response):
             AppLog.hls(

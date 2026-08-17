@@ -41,6 +41,30 @@ extension AndroidVRSource {
         }
     }
 
+    /// Metadata-only probe: the client's own `/player` response already lists
+    /// every dub, so the probe is the fetch a later switch would have to make
+    /// anyway — it just stops short of building playback.
+    func probeAudioTracks(
+        videoId: String,
+        completion: @escaping ([AudioTrack]) -> Void
+    ) {
+        fetchInfo(videoId: videoId, cancellation: nil) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self, case .success(let info) = result else {
+                    completion([])
+                    return
+                }
+                self.apply(info)
+                // Another source is playing, and it plays the ORIGINAL track —
+                // ticking the auto-dub pick here would show a track that is
+                // not what is coming out of the speakers.
+                self.currentAudioTrack = self.availableAudioTracks
+                    .first { $0.isOriginal }
+                completion(self.availableAudioTracks)
+            }
+        }
+    }
+
     func selectAudioTrack(
         _ track: AudioTrack,
         resumeAt: Double?,
@@ -59,11 +83,18 @@ extension AndroidVRSource {
             return
         }
         (currentAudioTrack, currentAudioFormat) = (track, audio)
+        // The auto-dub start has no playhead of its own — it is the first
+        // build of the video, so it begins where the last one stopped.
+        let start = resumeAt ?? currentVideoId.flatMap {
+            WatchProgressStore.shared.resumeSeconds(
+                forVideoId: $0, duration: info.duration
+            )
+        }
         buildGeneratedHLS(
             info: info,
             video: video,
             audio: audio,
-            resumeAt: resumeAt,
+            resumeAt: start,
             completion: completion
         )
     }

@@ -22,6 +22,7 @@ extension HLSStreamResolver {
     static func logRemoteOutcome(
         kind: ChallengeKind,
         solved: String?,
+        data: Data?,
         since: Date
     ) {
         let ms = Int(Date().timeIntervalSince(since) * 1_000)
@@ -29,6 +30,14 @@ extension HLSStreamResolver {
             "hlsResolve: remote \(kind.rawValue)"
                 + " \(solved == nil ? "failed" : "solved") in \(ms)ms"
         )
+        // A failure here is the server's answer, not ours: an empty `solved`
+        // means it could not read the transform out of that player build. Say
+        // what it replied, or the next 403 costs another evening.
+        guard solved == nil else {
+            return
+        }
+        let reply = data.flatMap { String(data: $0, encoding: .utf8) } ?? "no body"
+        AppLog.player("hlsResolve: solver said \(reply.prefix(200))")
     }
 
     func solveRemote(
@@ -52,7 +61,8 @@ extension HLSStreamResolver {
             method: .post,
             url: endpoint,
             headers: [HTTPHeader.contentType: HTTPHeaderValue.contentTypeJSON],
-            body: body
+            body: body,
+            isPlayback: true
         )
         AppLog.player(
             "hlsResolve: remote solving \(kind.rawValue) via \(endpoint.host ?? "")"
@@ -65,7 +75,7 @@ extension HLSStreamResolver {
         transport.send(request, cancellationToken: nil) { result in
             let data = try? result.get().data
             let solved = Self.parseRemoteSolved(data: data, unsolved: unsolved)
-            Self.logRemoteOutcome(kind: kind, solved: solved, since: t0)
+            Self.logRemoteOutcome(kind: kind, solved: solved, data: data, since: t0)
             completion(solved)
         }
     }

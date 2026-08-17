@@ -6,6 +6,20 @@ import Foundation
 /// honours `CancellationToken`: a cancelled task silences its callback,
 /// matching the previous `APIClient` behaviour.
 final class URLSessionTransport: HTTPTransport {
+    /// Where response handling lands, off URLSession's serial delegate queue.
+    /// Two lanes rather than one: parsing is the expensive half of a request
+    /// and the playback plane must not wait behind a feed page for a core.
+    private static let completionQueue = DispatchQueue(
+        label: "com.ytvlite.transport.completion",
+        qos: .default,
+        attributes: .concurrent
+    )
+    private static let playbackQueue = DispatchQueue(
+        label: "com.ytvlite.transport.playback",
+        qos: .userInitiated,
+        attributes: .concurrent
+    )
+
     private let session: URLSession
     /// A session with no cookie storage — used for requests that opt out of
     /// cookies (`sendsCookies == false`). Guarantees the shared jar is never
@@ -76,12 +90,22 @@ final class URLSessionTransport: HTTPTransport {
         // Route cookie-opted-out requests through a jar-less session so the
         // shared cookies can't leak in regardless of httpShouldHandleCookies.
         let session = request.sendsCookies ? self.session : cookielessSession
+        let queue = request.isPlayback ? Self.playbackQueue : Self.completionQueue
         let task = session.dataTask(with: urlRequest) { data, response, error in
             if Self.isCancelled(error) {
                 return
             }
-            completion(Self.map(data: data, response: response, error: error))
+            let mapped = Self.map(data: data, response: response, error: error)
+            // URLSession hands every response to one serial delegate queue, so
+            // a slow completion holds up all the others behind it: parsing a
+            // MrBeast /next takes 3 s on an A7, and the dub probe racing the
+            // player load waits them out for nothing. Callers already ran off
+            // the main thread — they now also run off each other.
+            queue.async { completion(mapped) }
         }
+        task.priority = request.isPlayback
+            ? URLSessionTask.highPriority
+            : URLSessionTask.defaultPriority
         cancellationToken?.register(task)
         task.resume()
     }

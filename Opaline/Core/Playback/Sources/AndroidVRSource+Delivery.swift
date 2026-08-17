@@ -4,25 +4,41 @@ import QuartzCore
 // MARK: - Choosing how the bytes arrive
 
 extension AndroidVRSource {
+    /// The user's pinned delivery, if they pinned one: no fallback, so a
+    /// failure stays visible instead of being quietly papered over by the
+    /// other delivery.
+    private static func pinnedDelivery(
+        transport: HTTPTransport,
+        client: DirectPlaybackClient,
+        poToken: Data?
+    ) -> (StreamDelivery, StreamDelivery?)? {
+        switch StreamDeliveryPreference.selected {
+        case .byteRange:
+            AppLog.player("delivery: range (pinned, no fallback)")
+            return (LegacyRangeDelivery(client: client), nil)
+        case .sabrOnly:
+            AppLog.player("delivery: sabr (pinned, no fallback)")
+            return (
+                SABRDelivery(transport: transport, client: client, poToken: poToken), nil
+            )
+        case .automatic:
+            return nil
+        }
+    }
+
     /// Preferred delivery first, fallback second.
     private static func deliveryOrder(
         for info: DirectPlaybackInfo,
         transport: HTTPTransport,
-        client: DirectPlaybackClient
+        client: DirectPlaybackClient,
+        poToken: Data?
     ) -> (StreamDelivery, StreamDelivery?) {
-        let range = LegacyRangeDelivery(client: client)
-        // Pinned by the user: no fallback, so a failure stays visible instead
-        // of being quietly papered over by the other delivery.
-        switch StreamDeliveryPreference.selected {
-        case .byteRange:
-            AppLog.player("delivery: range (pinned, no fallback)")
-            return (range, nil)
-        case .sabrOnly:
-            AppLog.player("delivery: sabr (pinned, no fallback)")
-            return (SABRDelivery(transport: transport, client: client), nil)
-        case .automatic:
-            break
+        if let pinned = pinnedDelivery(
+            transport: transport, client: client, poToken: poToken
+        ) {
+            return pinned
         }
+        let range = LegacyRangeDelivery(client: client)
         guard SABRDelivery.canServe(info) else {
             AppLog.player("delivery: range only — response carries no SABR stream")
             return (range, nil)
@@ -32,7 +48,7 @@ extension AndroidVRSource {
         // Otherwise byte ranges stay the default, being the cheaper path and
         // the one with years of mileage, with SABR held in reserve.
         let hasStreamURLs = info.dashVideoFormat?.hasDirectURL ?? false
-        let sabr = SABRDelivery(transport: transport, client: client)
+        let sabr = SABRDelivery(transport: transport, client: client, poToken: poToken)
         guard hasStreamURLs else {
             AppLog.player("delivery: sabr only — the response carries no stream URLs")
             return (sabr, nil)
@@ -60,7 +76,7 @@ extension AndroidVRSource {
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         let (first, second) = Self.deliveryOrder(
-            for: request.info, transport: transport, client: client
+            for: request.info, transport: transport, client: client, poToken: sabrPoToken
         )
         delivery = first
         let started = CACurrentMediaTime()

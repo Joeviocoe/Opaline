@@ -15,8 +15,18 @@ struct DefaultVideoSourceFactory: VideoSourceFactory {
         case .auto:
             return AutoVideoSource(
                 primary: AndroidVRSource(apiClient: apiClient, transport: transport)
-            ) { [apiClient] in
-                MWebSource(apiClient: apiClient)
+            ) { [apiClient, transport] in
+                // Signed in, the fallback is TV: it is the one that still
+                // lists dubs and serves what android_vr refuses. Anonymously
+                // it is not an option at all — TVHTML5 answers LOGIN_REQUIRED
+                // without a session — so mweb stays the anonymous fallback,
+                // dead as it is, rather than a source that cannot even load.
+                guard OAuthClient.shared.isSignedIn else {
+                    return MWebSource(apiClient: apiClient)
+                }
+                return AndroidVRSource(
+                    apiClient: apiClient, transport: transport, client: .tv, kind: .tv
+                )
             }
         case .androidVR:
             return AndroidVRSource(apiClient: apiClient, transport: transport)

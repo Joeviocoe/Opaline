@@ -8,19 +8,21 @@ extension AndroidVRSource {
     /// living-room id, and the same one goes on to sign every SABR request.
     func mintingTokenIfNeeded(_ completion: @escaping (String?) -> Void) {
         guard case .tv = client else {
-            SABRRequest.poToken = nil
+            sabrPoToken = nil
             completion(nil)
             return
         }
         let binding = TVDeviceIdentity.livingRoomPoTokenId
-        poTokenProvider.fetchSessionToken(identifier: binding, client: "TVHTML5") { result in
+        poTokenProvider.fetchSessionToken(
+            identifier: binding, client: "TVHTML5"
+        ) { [weak self] result in
             guard let token = try? result.get() else {
                 AppLog.player("tv: no pot minted, playback will likely be refused")
-                SABRRequest.poToken = nil
+                self?.sabrPoToken = nil
                 completion(nil)
                 return
             }
-            SABRRequest.poToken = SABRDelivery.decodeConfig(token)
+            self?.sabrPoToken = SABRDelivery.decodeConfig(token)
             completion(token)
         }
     }

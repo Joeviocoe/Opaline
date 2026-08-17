@@ -61,10 +61,19 @@ final class SABRDelivery: StreamDelivery {
     }
 
     private let client: DirectPlaybackClient
+    /// Carried per delivery rather than globally: two sources can hold live
+    /// sessions at once, and a shared one would have them rewriting each
+    /// other's requests.
+    private let identity: SABRIdentity
 
-    init(transport: HTTPTransport, client: DirectPlaybackClient = .androidVR) {
+    init(
+        transport: HTTPTransport,
+        client: DirectPlaybackClient = .androidVR,
+        poToken: Data? = nil
+    ) {
         self.client = client
         self.transport = transport
+        identity = SABRIdentity(client: client, poToken: poToken)
     }
 
     /// `videoPlaybackUstreamerConfig` arrives web-safe base64 and unpadded.
@@ -115,7 +124,6 @@ final class SABRDelivery: StreamDelivery {
         let playhead = request.resumeAt.map { Int($0 * 1_000) }
             ?? route?.session.lastServedMs ?? 0
         pendingStartAt = request.resumeAt.map { _ in Double(playhead) / 1_000 }
-        SABRRequest.client = client
         PlaybackProgress.step("player.status.openingSABR")
         Self.solvingThrottle(url) { [weak self] solved in
             self?.openSession(request, url: solved, config: config) { result in
@@ -146,7 +154,8 @@ final class SABRDelivery: StreamDelivery {
             url: url,
             ustreamerConfig: config,
             audio: Self.formatInfo(request.audio),
-            video: Self.formatInfo(request.video)
+            video: Self.formatInfo(request.video),
+            identity: identity
         )
         self.session = session
         session.start(resumeAt: request.resumeAt == nil ? 0 : playhead) { [weak self] result in
