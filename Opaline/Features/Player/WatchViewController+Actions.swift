@@ -154,13 +154,7 @@ extension WatchViewController {
         guard let channelId = sourceVideo.channelId else {
             return
         }
-        navigationController?.pushViewController(
-            channelViewControllerFactory(
-                channelId,
-                sourceVideo.channelName
-            ),
-            animated: true
-        )
+        videoRouter.openChannel(id: channelId, name: sourceVideo.channelName)
     }
 
     @objc

@@ -13,13 +13,7 @@ extension WatchViewController: UICollectionViewDataSource {
             else {
                 return
             }
-            navigationController?.pushViewController(
-                channelViewControllerFactory(
-                    channelId,
-                    video.channelName
-                ),
-                animated: true
-            )
+            videoRouter.openChannel(id: channelId, name: video.channelName)
         }
         cell.onMenuTap = { [weak self] anchor in
             guard let self else {
