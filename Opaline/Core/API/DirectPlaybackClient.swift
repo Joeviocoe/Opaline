@@ -34,9 +34,12 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         case .mweb:
             "2.20250101.00.00"
         case .tv:
-            // Downgraded on purpose: on the current 7.x version TV serves
-            // SABR only, on 5.x it still hands out stream URLs.
-            "5.20260707"
+            // Whatever `youtube.com/tv` is running, scraped beside the player
+            // path. It was pinned to 5.20260707 while that version still handed
+            // out stream URLs; since 2026-08 it answers SABR-only like 7.x, so
+            // the pin bought nothing and left `cver` naming a client YouTube no
+            // longer serves — which googlevideo answers with 403.
+            SignatureTimestampService.tvClientVersion ?? "7.20260816.19.00"
         }
     }
 
@@ -64,7 +67,7 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         case .mweb:
             UserAgent.mobileSafari
         case .tv:
-            UserAgent.cobaltTV
+            UserAgent.webOSTV
         }
     }
 
@@ -87,11 +90,18 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
     /// MWEB playback is anonymous and its GVS pot binds to the video id; sending
     /// the app's authenticated (TV device) session cookies makes YouTube return a
     /// session-bound URL the anonymous pot can't satisfy (403). Keep it cookieless.
+    ///
+    /// TV is cookieless for the same reason, the other way round: it authenticates
+    /// with the OAuth Bearer, and the cookies in the shared jar belong to whatever
+    /// else has been on the wire. The same body, timestamp, token and user agent
+    /// sent from a shell with no cookies mints a URL googlevideo serves, while the
+    /// app's mint comes back marked `pcm2cms=yes` and is refused (measured
+    /// 2026-08-18, same account, same public IP).
     var sendsCookies: Bool {
         switch self {
-        case .mweb:
+        case .mweb, .tv:
             false
-        case .androidVR, .web, .tv:
+        case .androidVR, .web:
             true
         }
     }
@@ -115,18 +125,6 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             "?prettyPrint=false"
         case .web, .tv:
             ""
-        }
-    }
-
-    /// Web and TV signature timestamps diverged in August 2026: TV wants the
-    /// web value with a "001" suffix (web 20522 → tv 20522001) and answers
-    /// UNPLAYABLE "The page needs to be reloaded" for anything else.
-    func signatureTimestamp(from webValue: Int) -> Int {
-        switch self {
-        case .tv:
-            return Int("\(webValue)001") ?? webValue
-        case .androidVR, .web, .mweb:
-            return webValue
         }
     }
 

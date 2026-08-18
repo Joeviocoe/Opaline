@@ -115,6 +115,18 @@ final class SABRFetcher {
         }
     }
 
+    /// A refusal never reaches the SABR protocol: googlevideo rejected the URL
+    /// itself. Not logged with the URL — that carries the po token — but its
+    /// answer names what it disliked and is worth having.
+    private func refusal(_ response: HTTPResponse, label: String) -> Error {
+        let reason = String(data: response.data.prefix(200), encoding: .utf8) ?? ""
+        AppLog.hls(
+            "sabr \(label): HTTP \(response.status)"
+                + (reason.isEmpty ? "" : " — \(reason)")
+        )
+        return SABRError.server("HTTP \(response.status)")
+    }
+
     private func consume(_ chunk: Data, with collector: SABRSegmentCollector) {
         guard !collector.isDone else {
             return
@@ -139,9 +151,7 @@ final class SABRFetcher {
             return
         }
         if case .success(let response) = result, response.status != 200, !collector.isDone {
-            // A refusal never reaches the SABR protocol: googlevideo rejected
-            // the URL itself. Not logged with the URL — it carries the po token.
-            completion(.failure(SABRError.server("HTTP \(response.status)")))
+            completion(.failure(refusal(response, label: collector.label)))
             return
         }
         if let failure = collector.failure {

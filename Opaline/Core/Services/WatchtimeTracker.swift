@@ -14,7 +14,7 @@ final class WatchtimeTracker {
     // Client playback nonce — YouTube dedupes stats by it, so a
     // fresh value is required per playback or history entries for
     // subsequent videos (autoplay/related) are silently dropped.
-    private var cpn: String = WatchtimeTracker.makeCPN()
+    private var cpn: String = PlaybackNonce.make()
     private let transport: HTTPTransport
     private var pingTimer: Timer?
     private var urls: WatchtimeURLs?
@@ -34,19 +34,9 @@ final class WatchtimeTracker {
         self.transport = transport
     }
 
-    private static func makeCPN() -> String {
-        let chars = "abcdefghijklmnopqrstuvwxyz"
-            + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
-        return String(
-            (0 ..< 16).compactMap { _ in
-                Array(chars).randomElement()
-            }
-        )
-    }
-
     func start(videoId: String, urls: WatchtimeURLs) {
         stop()
-        cpn = Self.makeCPN()
+        cpn = PlaybackNonce.make()
         self.videoId = videoId
         self.urls = urls
         sessionStart = Date()

@@ -4,16 +4,43 @@ import Foundation
 
 extension SignatureTimestampService {
     private static let tvPathKey = "SignatureTimestamp.tvJsPath.v2"
+    /// The STS the cached path was scraped beside. The timestamp we send decides
+    /// which player YouTube signs the URL with, and only that player's transform
+    /// answers its `n` — a path cached for longer than the timestamp it belongs
+    /// to earns a 403 the next time YouTube rotates.
+    private static let tvPathSTSKey = "SignatureTimestamp.tvJsPathSTS"
+    private static let tvVersionKey = "SignatureTimestamp.tvClientVersion"
+
+    /// The TV client version `youtube.com/tv` runs right now, scraped beside the
+    /// player path. It goes on the media URL as `cver`, and googlevideo refuses
+    /// a URL whose `cver` it does not recognise — the version carries a date and
+    /// rotates weekly, so it cannot be a constant.
+    static var tvClientVersion: String? {
+        UserDefaults.standard.string(forKey: tvVersionKey)
+    }
+
+    static func clientVersion(in html: String) -> String? {
+        guard let range = html.range(
+            of: "\"INNERTUBE_CLIENT_VERSION\":\"[^\"]+\"", options: .regularExpression
+        ) else {
+            return nil
+        }
+        return String(html[range]).components(separatedBy: "\"").dropLast().last
+    }
 
     /// Rewrites any advertised TV player path to the `ias-tcl` build, keeping
     /// the player id — that id rotates, the variant does not.
     static func tclVariant(of path: String) -> String {
+        variant("tv-player-ias-tcl.vflset/tv-player-ias-tcl.js", of: path)
+    }
+
+    private static func variant(_ file: String, of path: String) -> String {
         guard let idRange = path.range(
             of: "/s/player/[^/]+/", options: .regularExpression
         ) else {
             return path
         }
-        return String(path[idRange]) + "tv-player-ias-tcl.vflset/tv-player-ias-tcl.js"
+        return String(path[idRange]) + file
     }
 
     static func playerPath(in html: String) -> String? {
@@ -41,12 +68,36 @@ extension SignatureTimestampService {
     /// `tv-player-ias-tcl` build, so keep the scraped player id and swap the
     /// variant.
     func tvPlayerPath(completion: @escaping (String?) -> Void) {
-        if let cached = UserDefaults.standard.string(forKey: Self.tvPathKey) {
+        // The STS is cached and fetched before /player either way, so this waits
+        // on nothing during playback.
+        fetch { [weak self] sts in
+            self?.tvPlayerPath(matching: sts, completion: completion)
+        }
+    }
+
+    private func tvPlayerPath(matching sts: Int?, completion: @escaping (String?) -> Void) {
+        let defaults = UserDefaults.standard
+        let cached = defaults.string(forKey: Self.tvPathKey)
+        // No timestamp to compare against means no network: whatever is cached
+        // beats nothing.
+        // The version is scraped from the same page, so a cached path without
+        // one is a half-filled cache and worth re-reading.
+        if let cached, Self.tvClientVersion != nil,
+           sts == nil || defaults.integer(forKey: Self.tvPathSTSKey) == sts {
             completion(cached)
             return
         }
+        scrapeTVPlayerPath(sts: sts, fallback: cached, completion: completion)
+    }
+
+    private func scrapeTVPlayerPath(
+        sts: Int?,
+        fallback: String?,
+        completion: @escaping (String?) -> Void
+    ) {
+        let defaults = UserDefaults.standard
         guard let url = URL(string: AppURLs.YouTube.base + "/tv") else {
-            completion(nil)
+            completion(fallback)
             return
         }
         let headers = [HTTPHeader.userAgent: UserAgent.cobaltFireTV]
@@ -60,12 +111,15 @@ extension SignatureTimestampService {
                   let html = String(data: response.data, encoding: .utf8),
                   let path = Self.playerPath(in: html) else {
                 AppLog.log("SigTS", "tv player path not found")
-                completion(nil)
+                completion(fallback)
                 return
             }
             let resolved = Self.tclVariant(of: path)
-            AppLog.log("SigTS", "tv player \(resolved)")
-            UserDefaults.standard.set(resolved, forKey: Self.tvPathKey)
+            let version = Self.clientVersion(in: html)
+            AppLog.log("SigTS", "tv player \(resolved) cver=\(version ?? "nil")")
+            defaults.set(version, forKey: Self.tvVersionKey)
+            defaults.set(resolved, forKey: Self.tvPathKey)
+            defaults.set(sts ?? 0, forKey: Self.tvPathSTSKey)
             completion(resolved)
         }
     }

@@ -58,9 +58,15 @@ extension InnertubeClient {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let token):
-                // TV refuses a /player without a signature timestamp, in its
-                // own format — the client applies the suffix.
-                SignatureTimestampService.shared.fetch { sts in
+                // TV refuses a /player without a signature timestamp, and it
+                // must be the one belonging to the player that answers the `n`
+                // — see `tvSignatureTimestamp`. Other OAuth clients keep the
+                // site-wide value.
+                let timestamps = SignatureTimestampService.shared
+                let resolve = playbackClient == .tv
+                    ? timestamps.tvSignatureTimestamp
+                    : timestamps.fetch
+                resolve { sts in
                     self?.executeDirectPlayback(
                         videoId: videoId,
                         client: playbackClient,

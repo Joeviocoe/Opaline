@@ -358,7 +358,9 @@ extension InnertubeClient {
                 completion(nil)
                 return
             }
-            SignatureTimestampService.shared.fetch { ts in
+            // The same pairing rule as playback: the timestamp names the
+            // player, so take the TV one.
+            SignatureTimestampService.shared.tvSignatureTimestamp { ts in
                 self.executeWatchtimeURLs(
                     videoId: videoId,
                     token: token,

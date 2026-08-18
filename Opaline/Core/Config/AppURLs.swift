@@ -77,6 +77,11 @@ enum AppURLs {
     /// Remote n-throttling solver (`/solve`). Only the mweb+pot source uses it.
     enum NSolver {
         static var endpoint: URL? { SolverServer.endpoint(path: "/solve") }
+        /// The signature timestamp read out of a given player build. It has to
+        /// come from the same file that answers the `n` — YouTube signs the
+        /// media URL with whichever player the timestamp names, and a mismatched
+        /// pair is a 403 that looks like a broken solver.
+        static var timestamp: URL? { SolverServer.endpoint(path: "/sts") }
     }
 
     enum GoogleAPIs {

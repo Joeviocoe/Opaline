@@ -200,9 +200,7 @@ extension InnertubeClient {
         body["videoId"] = videoId
         body["racyCheckOk"] = true
         body["contentCheckOk"] = true
-        if let sts = signatureTimestamp.map(
-            DirectPlaybackClient.tv.signatureTimestamp(from:)
-        ) {
+        if let sts = signatureTimestamp {
             body["playbackContext"] = [
                 "contentPlaybackContext": [
                     "signatureTimestamp": sts
@@ -240,7 +238,7 @@ private extension InnertubeClient {
                 "html5Preference": "HTML5_PREF_WANTS"
             ]
             if let sts = signatureTimestamp {
-                playbackCtx["signatureTimestamp"] = client.signatureTimestamp(from: sts)
+                playbackCtx["signatureTimestamp"] = sts
             }
             body["playbackContext"] = [
                 "contentPlaybackContext": playbackCtx
@@ -270,6 +268,9 @@ private extension InnertubeClient {
             "signedInAccountCount": 1,
             "appQuality": "TV_APP_QUALITY_FULL_ANIMATION"
         ]
+        // The context version has to be the one the headers and the media URL's
+        // `cver` name, or the three describe three different televisions.
+        client["clientVersion"] = DirectPlaybackClient.tv.clientVersion
         context["client"] = client
         body["context"] = context
     }

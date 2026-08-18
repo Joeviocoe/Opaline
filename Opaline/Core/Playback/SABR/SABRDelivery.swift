@@ -37,6 +37,8 @@ final class SABRDelivery: StreamDelivery {
     var generation = 0
     /// Where the next attached item should start, set by a quality switch.
     var pendingStartAt: Double?
+    /// One playback nonce per delivery, as a television has one per playback.
+    private let nonce = PlaybackNonce.make()
 
     /// What the server routes to right now.
     ///
@@ -152,19 +154,14 @@ final class SABRDelivery: StreamDelivery {
         }
         pendingStartAt = request.resumeAt
         PlaybackProgress.step("player.status.openingSABR")
-        Self.solvingThrottle(url) { [weak self] solved in
-            self?.openSession(request, url: solved, config: config) { result in
-                // The solved `n` is a guess: the TV player's descrambler is not
-                // the one the remote solver was built for, and a wrong `n` is
-                // refused exactly like an unsolved one. If the session will not
-                // open, the URL as minted is the other half of the experiment.
-                guard case .failure = result, solved != url else {
-                    completion(result)
-                    return
-                }
-                AppLog.player("sabr: refused after n solve, retrying as minted")
-                self?.openSession(request, url: url, config: config, completion: completion)
-            }
+        // `cpn` and `alr` because a television sends them; `cver` comes with
+        // `directURL`. The token stays in the request body, where a television
+        // keeps it.
+        let signed = Self.televisionParams(
+            client.directURL(baseURL: url, poToken: nil), cpn: nonce
+        )
+        Self.solvingThrottle(signed) { [weak self] solved in
+            self?.openSession(request, url: solved, config: config, completion: completion)
         }
     }
 

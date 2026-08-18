@@ -125,6 +125,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             self, name: .homeFeedDidSettle, object: nil
         )
         BackgroundRefreshService.shared.warmSecondaryCaches()
+        // The same idle moment suits the TV n-solver: waiting for it here costs
+        // nobody anything, waiting for it at playback costs the first video.
+        TVSolverWarmup.warmIfNeeded()
     }
 
     private func makeSplashViewController() -> SplashViewController {
