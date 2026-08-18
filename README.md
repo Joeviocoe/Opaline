@@ -16,27 +16,31 @@
 
 </div>
 
-> ### What broke on 14 August, and what is fixed
+> ### What happened between 14 and 17 August
 >
-> On 14 August YouTube changed the way it hands out video, and it broke playback
-> here for everyone. Videos stopped after about a minute or refused to start.
-> Dubbed audio tracks stopped working, and so did anything marked as made for
-> kids. Watch history and Continue watching stopped updating.
+> Over those days YouTube kept changing how it hands out video, and most
+> third-party clients stopped playing, this one among them. Playback cut out
+> about a minute in. A fix would land, and the next change would take something
+> else away: dubbed audio, content made for kids, watch history.
 >
-> **All of it works again. Update to the latest version.**
+> **It plays again. Update to the latest version.**
 >
-> Fixing it meant changing how the app gets video underneath. Opaline now asks
-> for it the way a smart TV does, and when you are signed in it plays as your
-> account instead of anonymously. What that gets you:
+> Getting there meant rebuilding the way the app fetches video. There are
+> several sources now, and Settings → Playback lets you drag them into the order
+> you want or switch off the ones you do not:
 >
-> - videos no longer cut out a minute in
-> - dubbed audio is back, and a video with a dub in your language starts in it
-> - videos made for kids play again
-> - what you watch lands in your history and in Continue watching
+> - **visionOS · byte ranges** and **visionOS · SABR** — the fast ones. No
+>   sign-in needed, dubbed audio works.
+> - **TV · SABR** — up to 1080p, but it needs you to be signed in and takes
+>   longer to start.
+> - **Progressive 360p** — one quality, starts instantly.
 >
-> There is nothing to do beyond updating — your account, settings and history are
-> untouched. One thing is still broken: livestreams on kids channels do not play
-> yet.
+> Sources are tried from the top down until one plays. Content made for kids
+> comes only from **TV · SABR** or **Progressive 360p**. Livestreams on kids
+> channels still do not play.
+>
+> Nothing to do beyond updating. Your account, settings and history are
+> untouched.
 >
 > <sub>Opaline was released as YTLite until August. It was renamed to avoid
 > confusion with an unrelated tweak of the same name and is not related to it.</sub>
