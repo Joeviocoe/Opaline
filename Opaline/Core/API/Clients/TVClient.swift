@@ -101,28 +101,26 @@ struct TVClient: PlaybackClient {
     /// session 2026-08-16. Not the set the anonymous clients use: no
     /// `enabledTrackTypes`, `visibility` is 0 rather than 1, and it states DRC
     /// and codec preferences the others leave out.
-    func sabrAbrState(
-        video: SabrFormatInfo, audioTrackId: String?, playerMs: Int
-    ) -> Data {
-        var state = Protobuf.int(18, 1_920)        // clientViewportWidth
-        state += Protobuf.int(19, 1_080)           // clientViewportHeight
-        state += Protobuf.int(21, 0)               // stickyResolution
-        if let bitrate = video.bitrate, bitrate > 0 {
-            state += Protobuf.int(23, bitrate)     // bandwidthEstimate
+    func sabrAbrState(_ state: SABRPlayerState) -> Data {
+        var body = Protobuf.int(18, 1_920)        // clientViewportWidth
+        body += Protobuf.int(19, 1_080)           // clientViewportHeight
+        body += Protobuf.int(21, 0)               // stickyResolution
+        if let bitrate = state.video.bitrate, bitrate > 0 {
+            body += Protobuf.int(23, bitrate)     // bandwidthEstimate
         }
-        state += Protobuf.int(28, playerMs)
-        state += Protobuf.int(34, 0)               // visibility
-        state += Protobuf.bool(46, true)           // drcEnabled
-        state += Protobuf.bool(58, false)          // preferVp9
-        state += Protobuf.int(59, Self.decodeCeiling()) // av1QualityThreshold
-        if let audioTrackId, !audioTrackId.isEmpty {
-            state += Protobuf.string(69, audioTrackId)
+        body += Protobuf.int(28, state.playerMs)
+        body += Protobuf.int(34, 0)               // visibility
+        body += Protobuf.bool(46, true)           // drcEnabled
+        body += Protobuf.bool(58, false)          // preferVp9
+        body += Protobuf.int(59, Self.decodeCeiling()) // av1QualityThreshold
+        if let id = state.audioTrackId, !id.isEmpty {
+            body += Protobuf.string(69, id)
         }
-        state += Protobuf.bytes(72, Self.decodeCeilings())
-        state += Protobuf.int(73, 2)
-        state += Protobuf.bytes(79, Self.trackAuthorization())
-        state += Protobuf.int(80, 1)
-        state += Protobuf.int(85, 1)
-        return state
+        body += Protobuf.bytes(72, Self.decodeCeilings())
+        body += Protobuf.int(73, 2)
+        body += Protobuf.bytes(79, Self.trackAuthorization())
+        body += Protobuf.int(80, 1)
+        body += Protobuf.int(85, 1)
+        return body
     }
 }

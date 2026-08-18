@@ -1,5 +1,35 @@
 import Foundation
 
+/// What the player looks like to the server for one request.
+struct SABRPlayerState {
+    /// Which track a request is for. googlevideo's own adapter narrows every
+    /// request this way; asking for both lets the server answer with whichever
+    /// audio it likes, which is the default dub.
+    enum Track {
+        case audio
+        case video
+        case both
+
+        /// `enabledTrackTypesBitfield`.
+        var bitfield: Int {
+            switch self {
+            case .both:
+                return 0
+            case .audio:
+                return 1
+            case .video:
+                return 2
+            }
+        }
+    }
+
+    let video: SabrFormatInfo
+    /// The track playback is on, `nil` for single-audio videos.
+    let audioTrackId: String?
+    let wants: Track
+    let playerMs: Int
+}
+
 /// How a client proves who it is.
 enum PlaybackAuthorization {
     /// No credentials at all. What googlevideo throttles — see Opaline#76.
@@ -41,10 +71,11 @@ protocol PlaybackClient {
     /// The client's identity inside `streamerContext` — the server sizes and
     /// signs what it serves from this.
     func sabrClientInfo() -> Data
-    /// `ClientAbrState`: what this client tells the server about the player,
-    /// including which audio track it is on — without that the server is free
-    /// to serve the default one whatever the format ids ask for.
-    func sabrAbrState(video: SabrFormatInfo, audioTrackId: String?, playerMs: Int) -> Data
+    /// `ClientAbrState`: what this client tells the server about the player —
+    /// where it stands, which audio track it is on, and which track this
+    /// request is for. Without the last two the server picks the default dub
+    /// however the format ids are named.
+    func sabrAbrState(_ state: SABRPlayerState) -> Data
 
     // Declared here, not only defaulted below: a client that overrides one of
     // these is called through the protocol, and only a requirement dispatches

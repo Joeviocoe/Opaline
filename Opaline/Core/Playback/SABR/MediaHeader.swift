@@ -2,11 +2,15 @@ import Foundation
 
 /// `MEDIA_HEADER` — what the `MEDIA` parts after it belong to.
 ///
-/// Fields are `MediaHeader` in googlevideo's protos: 3 itag, 6 start_range,
-/// 8 is_init_seg, 9 sequence_number, 11 start_ms, 12 duration_ms, 15 a
-/// `TimeRange` of start, duration and timescale.
+/// Fields are `MediaHeader` in googlevideo's protos: 3 itag, 5 xtags,
+/// 6 start_range, 8 is_init_seg, 9 sequence_number, 11 start_ms,
+/// 12 duration_ms, 13 a `FormatId`, 15 a `TimeRange` of start, duration and
+/// timescale.
 struct MediaHeader {
     let itag: Int
+    /// What the server says it is serving — the only way to tell a dubbed
+    /// track from the original, since both carry the same itag.
+    let xtags: String?
     let startRange: Int64
     let sequence: Int
     let isInit: Bool
@@ -20,6 +24,9 @@ struct MediaHeader {
             return nil
         }
         self.itag = itag
+        let formatId = fields.data(13).map(Protobuf.parse)
+        xtags = fields.string(5)
+            ?? formatId?.string(3)
         startRange = Int64(fields.number(6) ?? 0)
         sequence = fields.number(9) ?? 0
         isInit = (fields.number(8) ?? 0) != 0

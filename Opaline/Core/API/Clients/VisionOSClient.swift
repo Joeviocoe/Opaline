@@ -31,20 +31,18 @@ struct VisionOSClient: PlaybackClient {
         return info + SABRClientInfo.commonTail()
     }
 
-    func sabrAbrState(
-        video: SabrFormatInfo, audioTrackId: String?, playerMs: Int
-    ) -> Data {
-        var state = Protobuf.int(28, playerMs)
-        if let height = video.height, height > 0 {
-            state += Protobuf.int(21, height)      // stickyResolution
+    func sabrAbrState(_ state: SABRPlayerState) -> Data {
+        var body = Protobuf.int(28, state.playerMs)
+        if let height = state.video.height, height > 0 {
+            body += Protobuf.int(21, height)             // stickyResolution
         }
-        state += Protobuf.bool(22, false)          // clientViewportIsFlexible
-        state += Protobuf.int(34, 1)               // visibility
-        state += Protobuf.float(35, 1.0)           // playbackRate
-        state += Protobuf.int(40, 0)               // enabledTrackTypes: audio + video
-        if let audioTrackId, !audioTrackId.isEmpty {
-            state += Protobuf.string(69, audioTrackId)
+        body += Protobuf.bool(22, false)                 // clientViewportIsFlexible
+        body += Protobuf.int(34, 1)                      // visibility
+        body += Protobuf.float(35, 1.0)                  // playbackRate
+        body += Protobuf.int(40, state.wants.bitfield)   // enabledTrackTypes
+        if let id = state.audioTrackId, !id.isEmpty {
+            body += Protobuf.string(69, id)
         }
-        return state
+        return body
     }
 }

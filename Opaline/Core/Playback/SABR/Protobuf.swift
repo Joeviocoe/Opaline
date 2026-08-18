@@ -134,4 +134,9 @@ extension Dictionary where Key == Int, Value == [Protobuf.Value] {
         }
         return value
     }
+
+    /// A length-delimited field read as UTF-8 — `xtags` and friends.
+    func string(_ field: Int) -> String? {
+        data(field).flatMap { String(data: $0, encoding: .utf8) }
+    }
 }

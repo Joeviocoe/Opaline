@@ -67,7 +67,12 @@ enum SABRRequest {
     ) -> Data {
         var body = Protobuf.bytes(
             1, identity.client.sabrAbrState(
-                video: video, audioTrackId: audio.audioTrackId, playerMs: 0
+                SABRPlayerState(
+                    video: video,
+                    audioTrackId: audio.audioTrackId,
+                    wants: .both,
+                    playerMs: 0
+                )
             )
         )
         body += Protobuf.bytes(5, ustreamerConfig)
@@ -94,9 +99,14 @@ enum SABRRequest {
         let audio = isVideo ? state.other : state.format
         var body = Protobuf.bytes(
             1, identity.client.sabrAbrState(
-                video: video,
-                audioTrackId: audio.audioTrackId,
-                playerMs: state.playerMs
+                SABRPlayerState(
+                    video: video,
+                    audioTrackId: audio.audioTrackId,
+                    // One request, one track — the server is told exactly
+                    // which, as googlevideo's own adapter does.
+                    wants: isVideo ? .video : .audio,
+                    playerMs: state.playerMs
+                )
             )
         )
         body += Protobuf.bytes(2, formatId(state.other))

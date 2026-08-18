@@ -177,17 +177,16 @@ extension SABRDelivery {
         return Int(elapsed * 1_000)
     }
 
-    /// Pairs each format with its segment index, taking the video format the
-    /// session actually runs rather than the response's default — a quality
-    /// switch changes the former only, and building playlists from the latter
-    /// meant the picture never changed no matter what was selected.
+    /// Pairs each format with its segment index, taking the formats the
+    /// session actually runs rather than the response's defaults — a quality
+    /// switch changes the video, a dub changes the audio, and building
+    /// playlists from the defaults meant neither ever took effect.
     static func tracks(
         inits: [Int: Data],
-        info: DirectPlaybackInfo,
-        video: DashFormatInfo
+        video: DashFormatInfo,
+        audio: DashFormatInfo
     ) -> [Track]? {
-        guard let audio = info.dashAudioFormat,
-              let videoInit = inits[video.itag],
+        guard let videoInit = inits[video.itag],
               let audioInit = inits[audio.itag],
               let videoSegments = HLSGenerator.parseSidx(data: videoInit),
               let audioSegments = HLSGenerator.parseSidx(data: audioInit) else {
@@ -214,7 +213,9 @@ extension SABRDelivery {
     ) {
         let info = request.info
         let started = Date()
-        guard let tracks = Self.tracks(inits: inits, info: info, video: request.video) else {
+        guard let tracks = Self.tracks(
+            inits: inits, video: request.video, audio: request.audio
+        ) else {
             completion(.failure(SABRError.noInitSegment))
             return
         }

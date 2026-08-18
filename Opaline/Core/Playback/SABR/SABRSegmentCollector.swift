@@ -61,6 +61,19 @@ final class SABRSegmentCollector {
         self.request = request
     }
 
+    /// Whether a served header is the track that was asked for. A request
+    /// without `xtags` takes whatever comes — single-audio videos name no
+    /// track at all.
+    private static func sameTrack(_ served: String?, _ wanted: String?) -> Bool {
+        guard let wanted, !wanted.isEmpty else {
+            return true
+        }
+        guard let served, !served.isEmpty else {
+            return true
+        }
+        return served == wanted
+    }
+
     func append(_ chunk: Data) {
         received += chunk.count
         reader.append(chunk)
@@ -116,11 +129,19 @@ final class SABRSegmentCollector {
         }
         let id = fields.number(1) ?? 0
         headers[id] = header
+        // The itag alone does not name a track: every dub of a video carries
+        // the same one, and only `xtags` tells them apart. A response can hold
+        // several of them, so claiming the first matching itag is how a
+        // request for a dub ends up playing the original.
         guard wantedHeaderId == nil, header.itag == request.format.itag,
-              header.isInit == request.isInit else {
+              header.isInit == request.isInit,
+              Self.sameTrack(header.xtags, request.format.xtags) else {
             return
         }
         wantedHeaderId = id
+        AppLog.hls(
+            "sabr \(label) served itag \(header.itag) xtags \(header.xtags ?? "-")"
+        )
         // An init segment is not a position in the stream, so it must not be
         // acknowledged as one: a buffered range starting at 0 alongside a
         // player time in the middle of the video is a contradiction, and the
