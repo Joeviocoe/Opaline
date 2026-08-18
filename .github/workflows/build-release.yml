@@ -58,11 +58,11 @@ jobs:
             # survive a repo rename or a move off GitHub. Matched on the owner,
             # not the full name, so it keeps holding after a rename.
             #
-            # Builds up to 1.7.x carry repo.verback2308.pp.ua, which the rebrand
-            # retires -- they keep polling a host that stops answering and can
-            # never be told otherwise. That break is deliberate and one-off; it
-            # must not happen twice, so this URL is now frozen, and with it the
-            # name of the repository it points into.
+            # Builds up to 1.7.x carry a custom domain that is now retired --
+            # they keep polling a host that stops answering and can never be
+            # told otherwise. That break is one-off; it must not happen twice,
+            # so this URL is now frozen, and with it the name of the repository
+            # it points into.
             printf 'APP_MANIFEST_URL = https:/$()/verback2308.github.io/repo/apps.json\n' \
               >> Config/Local.xcconfig
           else
