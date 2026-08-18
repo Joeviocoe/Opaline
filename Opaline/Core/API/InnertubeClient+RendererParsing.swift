@@ -97,7 +97,7 @@ extension InnertubeClient {
         }
         let rawURL = vr.thumbnailURL() ?? ""
         let thumb = preferredThumbnailURL(videoId: videoId, fallbackURL: rawURL)
-        let isLive = checkOverlayLive(vr["thumbnailOverlays"])
+        let isLive = checkLive(in: vr)
         let channelName = gridChannelName(from: vr)
         let duration = isLive ? nil : gridDuration(from: vr)
         logThumbnailChoice(videoId: videoId, chosenURL: thumb, fallbackURL: rawURL)
@@ -191,7 +191,7 @@ private extension InnertubeClient {
         let thumb = preferredThumbnailURL(videoId: videoId, fallbackURL: rawURL)
         let chName = vr.digString("ownerText", JSONKey.runs, 0, JSONKey.text) ?? ""
         let chId = webChannelId(from: vr)
-        let isLive = checkOverlayLive(vr["thumbnailOverlays"])
+        let isLive = checkLive(in: vr)
         let dur: String? = isLive ? nil : webDuration(from: vr)
         let views = simpleText(from: vr["viewCountText"])
         let published = simpleText(from: vr["publishedTimeText"])

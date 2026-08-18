@@ -37,9 +37,13 @@ enum VideoCardHelper {
 
     /// Configures duration label and live badge for a video.
     static func configureBadges(video: Video, durationLabel: UILabel, liveBadgeView: UILabel?) {
+        durationLabel.backgroundColor = ThemeManager.shared.durationBackground
         if video.isLive {
-            durationLabel.isHidden = true
             liveBadgeView?.isHidden = false
+            // Cells without a badge view of their own reuse the duration slot.
+            durationLabel.isHidden = liveBadgeView != nil
+            durationLabel.text = " ● LIVE "
+            durationLabel.backgroundColor = ThemeManager.shared.liveBadgeBackground
         } else if let duration = video.duration, !duration.isEmpty {
             durationLabel.text = " \(duration) "
             durationLabel.isHidden = false

@@ -61,10 +61,21 @@ struct RichItemVideoRendererParser: VideoRendererParser {
 // MARK: - LockupViewModelVideoParser
 
 /// Handles {"lockupViewModel": {...}} — new YouTube channel grid format.
+///
+/// A lockup also carries playlists and channels, and there `contentId` is a
+/// playlistId/channelId rather than a videoId — search returns 16 of those
+/// per page. Only video lockups may become a `Video`; playlist lockups go
+/// through `parseLockupPlaylist`. Older responses omit `contentType` and
+/// only ever carried videos.
 struct LockupViewModelVideoParser: VideoRendererParser {
     func video(from item: [String: Any]) -> Video? {
         guard let lockup = item["lockupViewModel"] as? [String: Any]
         else { return nil }
+        let type = lockup["contentType"] as? String
+            ?? "LOCKUP_CONTENT_TYPE_VIDEO"
+        guard type == "LOCKUP_CONTENT_TYPE_VIDEO" else {
+            return nil
+        }
         return InnertubeClient.parseLockupVideo(lockup)
     }
 }

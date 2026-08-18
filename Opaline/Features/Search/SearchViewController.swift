@@ -54,12 +54,22 @@ class SearchViewController: UIViewController {
         setupSearchBar()
         setupTableView()
         applyTheme()
+        showHistoryIfIdle()
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(applyTheme),
             name: ThemeManager.didChangeNotification,
             object: nil
         )
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Only on a fresh screen: coming back from a video should leave
+        // the results where they were, without the keyboard covering them.
+        if results.isEmpty {
+            searchBar.becomeFirstResponder()
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -177,7 +187,7 @@ extension SearchViewController: UISearchBarDelegate {
 
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         searchBar.setShowsCancelButton(false, animated: true)
-        setPanel(.hidden)
+        showHistoryIfIdle()
     }
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
