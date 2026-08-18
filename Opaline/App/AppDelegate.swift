@@ -10,6 +10,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     private let dependencies = AppDependencies.live()
     /// Built during the splash, handed over by `showMain`.
     private var preloadedMain: UIViewController?
+    /// A `ytlite://` or youtube.com link that arrived while the splash or
+    /// auth screen was still up — replayed once `showMain` puts the tab
+    /// bar on screen. See `AppDelegate+DeepLink.swift`.
+    var pendingDeepLink: URL?
 
     func application(
         _ application: UIApplication,
@@ -147,32 +151,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return splash
     }
 
-    private func runMigrations() {
-        OAuthClient.shared.migrateKeychainAccessibilityIfNeeded()
-        migratePlaybackSourceToChain()
-    }
-
-    /// The old picker stored one source: `auto`, `android_vr`, `mweb_pot`,
-    /// `tv` or `progressive`. Only a deliberate `tv` says anything the chain
-    /// cannot express better — everyone else lands on the default chain, and
-    /// the clients behind the other values are dead (Opaline#76).
-    private func migratePlaybackSourceToChain() {
-        let defaults = UserDefaults.standard
-        let key = UserDefaultsKeys.Migration.playbackSourceAuto
-        guard !defaults.bool(forKey: key) else {
-            return
-        }
-        defaults.set(true, forKey: key)
-        let legacyKey = "debug_playbackSource"
-        if defaults.string(forKey: legacyKey) == "tv" {
-            PlaybackChainSettings.order = ["tv.sabr"]
-                + PlaybackChainSettings.defaultOrder.filter { $0 != "tv.sabr" }
-            PlaybackChainSettings.enabled = ["tv.sabr"]
-        }
-        defaults.removeObject(forKey: legacyKey)
-        defaults.removeObject(forKey: "debug_streamDelivery")
-    }
-
     private func configureSharedDependencies() {
         UserProfileStore.shared.configure(
             accountService: dependencies.accountService
@@ -205,6 +183,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = preloadedMain
             ?? makeMain(dependencies: dependencies)
         preloadedMain = nil
+        replayPendingDeepLinkIfNeeded()
     }
 
     /// Constructs the tab bar and forces the first screen through a full

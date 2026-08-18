@@ -63,6 +63,17 @@ if [ -n "${BUILD_NUMBER:-}" ]; then
   plutil -replace CFBundleVersion -string "$BUILD_NUMBER" "$APP_PATH/Info.plist"
 fi
 
+# The share-sheet extension's id must stay a suffix of the app's, or installd
+# rejects the bundle. Its version keys have to match the app's too.
+APPEX_PATH="$APP_PATH/PlugIns/OpalineOpenIn.appex"
+if [ -d "$APPEX_PATH" ]; then
+  plutil -replace CFBundleIdentifier -string "$RELEASE_BUNDLE_ID.OpenIn" "$APPEX_PATH/Info.plist"
+  plutil -replace CFBundleShortVersionString -string "$VERSION" "$APPEX_PATH/Info.plist"
+  if [ -n "${BUILD_NUMBER:-}" ]; then
+    plutil -replace CFBundleVersion -string "$BUILD_NUMBER" "$APPEX_PATH/Info.plist"
+  fi
+fi
+
 # When the build runs unsigned (CI: CODE_SIGNING_ALLOWED=NO), Xcode embeds the
 # toolchain's Swift back-deploy dylibs verbatim, keeping their huge bitcode
 # segment; a signed build strips it. No-op when already stripped.
@@ -100,7 +111,25 @@ cat > "$ENTITLEMENTS" <<'EOF'
 </plist>
 EOF
 echo "▶ Replacing dev cert with ad-hoc signature..."
-codesign -f -s - --deep --entitlements "$ENTITLEMENTS" "$APP_PATH" 2>/dev/null \
+# Signed inner-most first: signing the app seals whatever is nested inside it,
+# so the extension and the dylibs have to be final before the app is signed.
+# --deep is not usable here — it would overwrite the extension's own
+# application-identifier with the app's.
+for dylib in "$APP_PATH/Frameworks/"*.dylib; do
+  [ -e "$dylib" ] || continue
+  codesign -f -s - "$dylib" 2>/dev/null || true
+done
+if [ -d "$APPEX_PATH" ]; then
+  rm -f "$APPEX_PATH/embedded.mobileprovision"
+  APPEX_ENTITLEMENTS=$(mktemp).plist
+  sed 's|com.verback.YTLite<|com.verback.YTLite.OpenIn<|' "$ENTITLEMENTS" \
+    > "$APPEX_ENTITLEMENTS"
+  codesign -f -s - --entitlements "$APPEX_ENTITLEMENTS" "$APPEX_PATH" 2>/dev/null \
+    && echo "  codesign (extension): ok" \
+    || echo "  codesign (extension): skipped"
+  rm -f "$APPEX_ENTITLEMENTS"
+fi
+codesign -f -s - --entitlements "$ENTITLEMENTS" "$APP_PATH" 2>/dev/null \
   && echo "  codesign: ok" \
   || echo "  codesign: skipped (app will still install via AppSync)"
 
@@ -123,6 +152,9 @@ for dylib in "$APP_PATH/Frameworks/"*.dylib; do
   [ -e "$dylib" ] || continue
   ldid -s "$dylib"
 done
+if [ -d "$APPEX_PATH" ]; then
+  ldid -s "$APPEX_PATH/OpalineOpenIn"
+fi
 ldid -s "$APP_PATH/$APP_NAME"
 echo "  ldid: ok"
 rm -f "$ENTITLEMENTS"

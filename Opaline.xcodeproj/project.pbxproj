@@ -6,8 +6,39 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		49E0100B00000000000000EB /* OpalineOpenIn.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 49E0100100000000000000E1 /* OpalineOpenIn.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		49E0100F00000000000000EF /* YouTubeLinkParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E0100E00000000000000EE /* YouTubeLinkParser.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		49E0100D00000000000000ED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4940A7172F6AD27900E6C599 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 49E0100200000000000000E2;
+			remoteInfo = OpalineOpenIn;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		49E0100A00000000000000EA /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				49E0100B00000000000000EB /* OpalineOpenIn.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		4940A71F2F6AD27900E6C599 /* Opaline.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Opaline.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		49E0100100000000000000E1 /* OpalineOpenIn.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OpalineOpenIn.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		49E0100E00000000000000EE /* YouTubeLinkParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = YouTubeLinkParser.swift; path = Opaline/Core/Common/YouTubeLinkParser.swift; sourceTree = SOURCE_ROOT; };
 		A1B2C3D4E5F6000123456789 /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Local.xcconfig; path = Config/Local.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -18,6 +49,13 @@
 				Info.plist,
 			);
 			target = 4940A71E2F6AD27900E6C599 /* Opaline */;
+		};
+		49E0101000000000000000F0 /* Exceptions for "OpalineOpenIn" folder in "OpalineOpenIn" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 49E0100200000000000000E2 /* OpalineOpenIn */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -30,10 +68,25 @@
 			path = Opaline;
 			sourceTree = "<group>";
 		};
+		49E0100600000000000000E6 /* OpalineOpenIn */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				49E0101000000000000000F0 /* Exceptions for "OpalineOpenIn" folder in "OpalineOpenIn" target */,
+			);
+			path = OpalineOpenIn;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		4940A71C2F6AD27900E6C599 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		49E0100400000000000000E4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -47,6 +100,8 @@
 			isa = PBXGroup;
 			children = (
 				4940A7212F6AD27900E6C599 /* Opaline */,
+				49E0100600000000000000E6 /* OpalineOpenIn */,
+				49E0100E00000000000000EE /* YouTubeLinkParser.swift */,
 				4940A7202F6AD27900E6C599 /* Products */,
 				A1B2C3D4E5F6000123456789 /* Local.xcconfig */,
 			);
@@ -56,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				4940A71F2F6AD27900E6C599 /* Opaline.app */,
+				49E0100100000000000000E1 /* OpalineOpenIn.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -72,10 +128,12 @@
 				4940A71C2F6AD27900E6C599 /* Frameworks */,
 				4940A71D2F6AD27900E6C599 /* Resources */,
 				49B1D1002FA4B10000A1B299 /* Set Build Number */,
+				49E0100A00000000000000EA /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				49E0100C00000000000000EC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4940A7212F6AD27900E6C599 /* Opaline */,
@@ -86,6 +144,28 @@
 			productName = Opaline;
 			productReference = 4940A71F2F6AD27900E6C599 /* Opaline.app */;
 			productType = "com.apple.product-type.application";
+		};
+		49E0100200000000000000E2 /* OpalineOpenIn */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 49E0100700000000000000E7 /* Build configuration list for PBXNativeTarget "OpalineOpenIn" */;
+			buildPhases = (
+				49E0100300000000000000E3 /* Sources */,
+				49E0100400000000000000E4 /* Frameworks */,
+				49E0100500000000000000E5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				49E0100600000000000000E6 /* OpalineOpenIn */,
+			);
+			name = OpalineOpenIn;
+			packageProductDependencies = (
+			);
+			productName = OpalineOpenIn;
+			productReference = 49E0100100000000000000E1 /* OpalineOpenIn.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -98,6 +178,9 @@
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					4940A71E2F6AD27900E6C599 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					49E0100200000000000000E2 = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -131,12 +214,20 @@
 			projectRoot = "";
 			targets = (
 				4940A71E2F6AD27900E6C599 /* Opaline */,
+				49E0100200000000000000E2 /* OpalineOpenIn */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		4940A71D2F6AD27900E6C599 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		49E0100500000000000000E5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -164,7 +255,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\ncd \"$SRCROOT\" || exit 1\n\nif command -v swiftlint >/dev/null 2>&1; then\n  swiftlint lint --config \"$SRCROOT/.swiftlint.yml\" --strict Opaline\nelse\n  echo \"error: SwiftLint is not installed or not available to Xcode.\"\n  echo \"error: Expected it in /opt/homebrew/bin or /usr/local/bin.\"\n  echo \"error: Install with: brew install swiftlint\"\n  exit 1\nfi\n";
+			shellScript = "export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\ncd \"$SRCROOT\" || exit 1\n\nif command -v swiftlint >/dev/null 2>&1; then\n  swiftlint lint --config \"$SRCROOT/.swiftlint.yml\" --strict Opaline OpalineOpenIn\nelse\n  echo \"error: SwiftLint is not installed or not available to Xcode.\"\n  echo \"error: Expected it in /opt/homebrew/bin or /usr/local/bin.\"\n  echo \"error: Install with: brew install swiftlint\"\n  exit 1\nfi\n";
 		};
 		49B1D1002FA4B10000A1B299 /* Set Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -195,7 +286,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		49E0100300000000000000E3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49E0100F00000000000000EF /* YouTubeLinkParser.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		49E0100C00000000000000EC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 49E0100200000000000000E2 /* OpalineOpenIn */;
+			targetProxy = 49E0100D00000000000000ED /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4940A7332F6AD27A00E6C599 /* Debug */ = {
@@ -385,6 +492,58 @@
 			};
 			name = Release;
 		};
+		49E0100800000000000000E8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1B2C3D4E5F6000123456789 /* Local.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OpalineOpenIn/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.9.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited).OpenIn";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		49E0100900000000000000E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1B2C3D4E5F6000123456789 /* Local.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OpalineOpenIn/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.9.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited).OpenIn";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -402,6 +561,15 @@
 			buildConfigurations = (
 				4940A7332F6AD27A00E6C599 /* Debug */,
 				4940A7342F6AD27A00E6C599 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		49E0100700000000000000E7 /* Build configuration list for PBXNativeTarget "OpalineOpenIn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49E0100800000000000000E8 /* Debug */,
+				49E0100900000000000000E9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

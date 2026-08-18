@@ -44,6 +44,12 @@ final class WatchProgressStore {
     )
     /// Only touched from `persistQueue`.
     private var pendingWork: DispatchWorkItem?
+    /// A timecode carried by a link (`youtu.be/ID?t=87`). It outranks stored
+    /// progress for that one video, so every reader of `resumeSeconds` — the
+    /// player shell and the sources that open a stream at the playhead —
+    /// agrees on where the link asked to start. Dropped once this device
+    /// records a position of its own for that video.
+    private var linkStart: (videoId: String, seconds: Double)?
 
     init() {
         loadFractions()
@@ -81,6 +87,9 @@ final class WatchProgressStore {
         fraction: Double
     ) {
         lock.lock()
+        if linkStart?.videoId == videoId {
+            linkStart = nil
+        }
         fractions[videoId] = fraction
         localTimes[videoId] = Date().timeIntervalSince1970
         trimLocked()
@@ -126,10 +135,22 @@ final class WatchProgressStore {
     /// from the beginning (barely watched, or watched to the end). One place
     /// for the rule, because both the player shell and the sources building
     /// the stream have to agree on where "resume" is.
+    func setLinkStart(seconds: Double, forVideoId videoId: String) {
+        lock.lock()
+        linkStart = (videoId, seconds)
+        lock.unlock()
+    }
+
     func resumeSeconds(
         forVideoId videoId: String,
         duration: Double?
     ) -> Double? {
+        lock.lock()
+        let link = linkStart
+        lock.unlock()
+        if let link, link.videoId == videoId {
+            return link.seconds
+        }
         guard let duration, duration > 0,
               let prog = progress(forVideoId: videoId),
               prog.shouldShow, prog.fraction < 0.97 else {

@@ -53,6 +53,25 @@ struct Video: Codable {
         self.isShort = isShort
     }
 
+    /// Minimal stub for a video known only by id — e.g. a deep link.
+    /// `WatchViewController` refetches everything from the network by
+    /// videoId, so the placeholder fields are only ever shown for the
+    /// instant before that fetch replaces them.
+    init(id: String) {
+        self.id = id
+        title = ""
+        channelId = nil
+        channelName = ""
+        channelAvatarURL = nil
+        thumbnailURL = ""
+        viewCount = nil
+        publishedAt = nil
+        duration = nil
+        isLive = false
+        playlistId = nil
+        isShort = false
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)

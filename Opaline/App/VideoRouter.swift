@@ -20,6 +20,15 @@ final class VideoRouter {
         return watchVC.watchPage?.video ?? watchVC.initialVideo
     }
 
+    private var keyWindowMainTabBar: MainTabBarController? {
+        var root = (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController
+        while let presented = root?.presentedViewController {
+            root = presented
+        }
+        return (root as? RootContainerViewController)?.mainTabBar
+            ?? root as? MainTabBarController
+    }
+
     private init() {}
 
     /// - Parameter shorts: how the shorts feed continues past `video` —
@@ -61,6 +70,25 @@ final class VideoRouter {
             return
         }
         tabBar.installPlayerPanel(newPanel)
+    }
+
+    /// Opens a video known only by id — e.g. a `ytlite://` deep link or a
+    /// tapped youtube.com link. `seconds` is the link's own timecode
+    /// (`?t=87`), which outranks stored watch progress. Presents on the
+    /// currently selected tab of `MainTabBarController`; a no-op if the main
+    /// UI isn't up yet.
+    func openVideoId(_ videoId: String, startAt seconds: Double? = nil) {
+        if let seconds {
+            WatchProgressStore.shared.setLinkStart(
+                seconds: seconds, forVideoId: videoId
+            )
+        }
+        guard let tabBar = keyWindowMainTabBar,
+              let presenter = tabBar.selectedViewController
+        else {
+            return
+        }
+        open(video: Video(id: videoId), from: presenter)
     }
 
     func minimize() {
