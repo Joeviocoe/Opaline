@@ -67,16 +67,28 @@ extension InnertubeClient {
         )
     }
 
-    static func checkOverlayLive(
-        _ overlaysAny: Any?
+    /// A live entry is marked one of two ways, depending on the surface:
+    /// an older time-status overlay, or a `BADGE_STYLE_TYPE_LIVE_NOW`
+    /// badge, which is all a search result carries.
+    static func checkLive(
+        in renderer: [String: Any]
     ) -> Bool {
-        let overlays = overlaysAny
+        let overlays = renderer["thumbnailOverlays"]
             as? [[String: Any]] ?? []
         let key = RendererKey
             .thumbnailOverlayTimeStatus
-        return overlays.contains {
+        let overlayLive = overlays.contains {
             ($0[key] as? [String: Any])?["style"]
                 as? String == "LIVE"
+        }
+        guard !overlayLive else {
+            return true
+        }
+        let badges = renderer["badges"]
+            as? [[String: Any]] ?? []
+        return badges.contains {
+            ($0["metadataBadgeRenderer"] as? [String: Any])?["style"]
+                as? String == "BADGE_STYLE_TYPE_LIVE_NOW"
         }
     }
 }
@@ -169,7 +181,7 @@ private extension InnertubeClient {
         )
         let overlays = hdr?["thumbnailOverlays"]
             as? [[String: Any]] ?? []
-        let isLive = checkOverlayLive(overlays)
+        let isLive = checkLive(in: hdr ?? [:])
         let duration: String? = isLive
             ? nil : overlayDuration(overlays)
         return (isLive, duration)

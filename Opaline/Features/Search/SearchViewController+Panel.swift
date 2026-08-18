@@ -40,21 +40,29 @@ extension SearchViewController {
     /// Derives the panel from the current input: history for an
     /// empty query, debounced suggestions otherwise.
     func updatePanel(for text: String) {
-        guard searchBar.isFirstResponder else {
-            return
-        }
         let trimmed = text.trimmingCharacters(
             in: .whitespacesAndNewlines
         )
         if trimmed.isEmpty {
+            // Clearing the field is how the user asks for history back,
+            // whether or not the keyboard is still up.
             suggestions = []
-            setPanel(
-                searchHistory.queries.isEmpty ? .hidden : .history
-            )
-        } else {
+            showHistoryIfIdle()
+        } else if searchBar.isFirstResponder {
             setPanel(.suggestions)
             scheduleSuggestions(for: trimmed)
         }
+    }
+
+    /// History is the resting state of an empty search screen: it shows
+    /// without waiting for the field to take focus, and comes back when the
+    /// user dismisses the keyboard without searching.
+    func showHistoryIfIdle() {
+        guard results.isEmpty else {
+            setPanel(.hidden)
+            return
+        }
+        setPanel(searchHistory.queries.isEmpty ? .hidden : .history)
     }
 
     /// Row tap in the panel: fill the bar and run the search.

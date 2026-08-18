@@ -116,9 +116,15 @@ extension InnertubeClient {
         guard let bottom = overlay["thumbnailBottomOverlayViewModel"] as? [String: Any],
               let badges = bottom["badges"] as? [[String: Any]],
               let badge = badges.first,
-              let badgeVM = badge["thumbnailBadgeViewModel"] as? [String: Any],
-              let text = badgeVM[JSONKey.text] as? String,
-              !text.isEmpty
+              let badgeVM = badge["thumbnailBadgeViewModel"] as? [String: Any]
+        else { return nil }
+        // The badge carries live the same way everywhere else does, just
+        // under its own style key; its text is localised and unusable.
+        if badgeVM["badgeStyle"] as? String
+            == "THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE" {
+            return (nil, true)
+        }
+        guard let text = badgeVM[JSONKey.text] as? String, !text.isEmpty
         else { return nil }
         return (text, false)
     }
