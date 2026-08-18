@@ -2,6 +2,9 @@ import Foundation
 
 enum DirectPlaybackClient: Equatable, CustomStringConvertible {
     case androidVR
+    /// Vision Pro's client: anonymous like android_vr, but the only one whose
+    /// SABR session is still served past the first minute of a video.
+    case visionOS
     case web
     case mweb
     /// The living-room client. The only one our device-code OAuth token is
@@ -16,6 +19,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .androidVR:
             "ANDROID_VR"
+        case .visionOS:
+            "VISIONOS"
         case .web:
             "WEB"
         case .mweb:
@@ -29,6 +34,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .androidVR:
             "1.65.10"
+        case .visionOS:
+            "1.02"
         case .web:
             "2.20231121.08.00"
         case .mweb:
@@ -47,6 +54,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .androidVR:
             "28"
+        case .visionOS:
+            "101"
         case .web:
             "1"
         case .mweb:
@@ -64,6 +73,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
                 + " eureka-user Build/SQ3A.220605.009.A1) gzip"
         case .web:
             UserAgent.chromeMac
+        case .visionOS:
+            UserAgent.visionOS
         case .mweb:
             UserAgent.mobileSafari
         case .tv:
@@ -74,7 +85,7 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
     /// Whether this client uses cookie-based auth instead of OAuth Bearer token
     var usesCookieAuth: Bool {
         switch self {
-        case .androidVR, .mweb:
+        case .androidVR, .visionOS, .mweb:
             true
         // The TV client authenticates with the OAuth Bearer, like WEB.
         case .web, .tv:
@@ -99,7 +110,9 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
     /// 2026-08-18, same account, same public IP).
     var sendsCookies: Bool {
         switch self {
-        case .mweb, .tv:
+        // visionOS plays anonymously; the jar holds whatever else has been on
+        // the wire, and a session-bound URL is not what this client asks for.
+        case .mweb, .tv, .visionOS:
             false
         case .androidVR, .web:
             true
@@ -110,6 +123,8 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
         switch self {
         case .androidVR:
             InnertubeContexts.androidVR
+        case .visionOS:
+            InnertubeContexts.visionOS
         case .web:
             InnertubeContexts.web
         case .mweb:
@@ -121,7 +136,7 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
 
     var playerURLSuffix: String {
         switch self {
-        case .androidVR, .mweb:
+        case .androidVR, .visionOS, .mweb:
             "?prettyPrint=false"
         case .web, .tv:
             ""
@@ -161,7 +176,7 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             headers[HTTPHeader.referer] = AppURLs.YouTube.base + "/"
             headers[HTTPHeader.origin] = AppURLs.YouTube.base
             headers[HTTPHeader.xOrigin] = AppURLs.YouTube.base
-        case .androidVR, .mweb, .tv:
+        case .androidVR, .visionOS, .mweb, .tv:
             break
         }
         if let visitorData, !visitorData.isEmpty {
@@ -184,7 +199,7 @@ enum DirectPlaybackClient: Equatable, CustomStringConvertible {
             break
         case .tv:
             headers[HTTPHeader.referer] = AppURLs.YouTube.base + "/tv"
-        case .androidVR, .mweb:
+        case .androidVR, .visionOS, .mweb:
             if let visitorData, !visitorData.isEmpty {
                 headers[HTTPHeader.xGoogVisitorId] = visitorData
             }

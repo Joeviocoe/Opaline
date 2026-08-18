@@ -161,10 +161,14 @@ extension PlaybackFacade {
         from kind: VideoSourceKind
     ) -> VideoSourceKind {
         switch kind {
-        case .auto, .androidVR, .progressive:
-            return .mwebPot
+        // Signed in, TV is the only client that plays what an anonymous
+        // session is refused. Anonymously there is nowhere to escalate to:
+        // every other client is cut off after a minute (Opaline#76), so
+        // retrying visionOS is the least useless thing left.
+        case .auto, .visionOS, .androidVR, .progressive:
+            return OAuthClient.shared.isSignedIn ? .tv : .visionOS
         case .mwebPot, .tv:
-            return .androidVR
+            return .visionOS
         }
     }
 

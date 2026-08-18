@@ -142,6 +142,7 @@ enum UserDefaultsKeys {
 /// broken one last.
 enum PlaybackSource: String, CaseIterable {
     case auto = "auto"
+    case visionOS = "visionos"
     case androidVR = "android_vr"
     case tv = "tv"
     case progressive = "progressive"
@@ -158,9 +159,11 @@ enum PlaybackSource: String, CaseIterable {
     var displayName: String {
         switch self {
         case .auto:
-            return "Auto (Android VR, TV fallback)"
+            return "Auto (visionOS, TV fallback)"
+        case .visionOS:
+            return "visionOS (anonymous, SABR)"
         case .androidVR:
-            return "Android VR (fast)"
+            return "Android VR (capped at 1 min)"
         case .progressive:
             return "Progressive (360p)"
         case .mwebPot:
@@ -172,12 +175,13 @@ enum PlaybackSource: String, CaseIterable {
 
     /// Whether this source has a choice of delivery at all.
     ///
-    /// Only the android_vr path has two ways to fetch its bytes. Progressive
-    /// plays a single muxed URL, and mweb is built around its own pot-bound
-    /// URLs — neither has anything to switch between.
+    /// The anonymous clients hand out formats that carry a `url`, so their
+    /// bytes can arrive either way. Progressive plays a single muxed URL, and
+    /// mweb is built around its own pot-bound URLs — neither has anything to
+    /// switch between.
     var supportsDeliveryChoice: Bool {
         switch self {
-        case .auto, .androidVR:
+        case .auto, .visionOS, .androidVR:
             return true
         // TV serves no stream URLs at all — SABR is its only delivery.
         case .progressive, .mwebPot, .tv:
@@ -189,6 +193,8 @@ enum PlaybackSource: String, CaseIterable {
         switch self {
         case .auto:
             return .auto
+        case .visionOS:
+            return .visionOS
         case .androidVR:
             return .androidVR
         case .progressive:

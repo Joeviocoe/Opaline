@@ -26,7 +26,7 @@ enum TVSolverWarmup {
         switch PlaybackSource.selected {
         case .auto, .tv:
             return true
-        case .androidVR, .progressive, .mwebPot:
+        case .visionOS, .androidVR, .progressive, .mwebPot:
             return false
         }
     }

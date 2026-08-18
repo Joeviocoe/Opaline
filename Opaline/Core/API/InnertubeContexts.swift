@@ -14,6 +14,7 @@ enum InnertubeContexts {
     static var mweb: [String: Any] { localized(mwebTemplate) }
     static var android: [String: Any] { localized(androidTemplate) }
     static var androidVR: [String: Any] { localized(androidVRTemplate) }
+    static var visionOS: [String: Any] { localized(visionOSTemplate) }
     static var ios: [String: Any] { localized(iosTemplate) }
 
     private static let webTemplate: [String: Any] = [
@@ -100,6 +101,26 @@ enum InnertubeContexts {
             "request": [
                 "useSsl": true,
                 "internalExperimentFlags": []
+            ]
+        ]
+    ]
+
+    /// Apple Vision Pro's client. The one client still served media past the
+    /// first minute of a video anonymously — every other one is cut off there
+    /// (measured 2026-08-18, see Opaline#76).
+    private static let visionOSTemplate: [String: Any] = [
+        "context": [
+            "client": [
+                "clientName": "VISIONOS",
+                "clientVersion": "1.02",
+                "hl": "en",
+                "timeZone": "UTC",
+                "utcOffsetMinutes": 0,
+                "deviceMake": "Apple",
+                "deviceModel": "RealityDevice14,1",
+                "osName": "visionOS",
+                "osVersion": "1.0.2.21O209",
+                "userAgent": UserAgent.visionOS
             ]
         ]
     ]

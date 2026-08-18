@@ -53,6 +53,13 @@ enum UserAgent {
         "Chrome/122.0.0.0 Safari/537.36"
     ].joined(separator: " ")
 
+    /// Safari on visionOS — the VISIONOS client's own agent.
+    static let visionOS = [
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3)",
+        "AppleWebKit/605.1.15 (KHTML, like Gecko)",
+        "Version/26.0 Safari/605.1.15"
+    ].joined(separator: " ")
+
     /// Cobalt (TV embedded browser) — used for the OAuth device flow.
     static let cobaltTV =
         "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version"

@@ -13,31 +13,46 @@ struct DefaultVideoSourceFactory: VideoSourceFactory {
     func make(kind: VideoSourceKind) -> VideoSource {
         switch kind {
         case .auto:
-            return AutoVideoSource(
-                primary: AndroidVRSource(apiClient: apiClient, transport: transport)
-            ) { [apiClient, transport] in
-                // Signed in, the fallback is TV: it is the one that still
-                // lists dubs and serves what android_vr refuses. Anonymously
-                // it is not an option at all — TVHTML5 answers LOGIN_REQUIRED
-                // without a session — so mweb stays the anonymous fallback,
-                // dead as it is, rather than a source that cannot even load.
+            return AutoVideoSource(primary: visionOS()) { [self] in
+                // Signed in, the fallback is TV: it lists dubs and serves kids
+                // content, which the anonymous client does not. Anonymously it
+                // is not an option — TVHTML5 answers LOGIN_REQUIRED without a
+                // session — so there is nothing below visionOS to fall to, and
+                // android_vr stands in only to fail visibly rather than
+                // pretending a dead source is a fallback.
                 guard OAuthClient.shared.isSignedIn else {
-                    return MWebSource(apiClient: apiClient)
+                    return AndroidVRSource(apiClient: apiClient, transport: transport)
                 }
-                return AndroidVRSource(
-                    apiClient: apiClient, transport: transport, client: .tv, kind: .tv
-                )
+                return tv()
             }
+        case .visionOS:
+            return visionOS()
         case .androidVR:
             return AndroidVRSource(apiClient: apiClient, transport: transport)
         case .tv:
-            return AndroidVRSource(
-                apiClient: apiClient, transport: transport, client: .tv, kind: .tv
-            )
+            return tv()
         case .progressive:
             return ProgressiveSource(apiClient: apiClient)
         case .mwebPot:
             return MWebSource(apiClient: apiClient)
         }
+    }
+
+    private func visionOS() -> VideoSource {
+        AndroidVRSource(
+            apiClient: apiClient,
+            transport: transport,
+            client: .visionOS,
+            kind: .visionOS
+        )
+    }
+
+    private func tv() -> VideoSource {
+        AndroidVRSource(
+            apiClient: apiClient,
+            transport: transport,
+            client: .tv,
+            kind: .tv
+        )
     }
 }

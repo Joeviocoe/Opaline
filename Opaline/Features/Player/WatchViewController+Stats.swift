@@ -78,6 +78,8 @@ extension WatchViewController {
         switch kind {
         case .androidVR:
             return "android_vr"
+        case .visionOS:
+            return "visionos"
         case .mwebPot:
             return "mweb+pot"
         case .progressive:

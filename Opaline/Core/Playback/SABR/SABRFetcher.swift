@@ -159,7 +159,7 @@ final class SABRFetcher {
             return
         }
         guard let data = collector.segment else {
-            AppLog.hls("sabr \(collector.label): no media in \(collector.received)B")
+            AppLog.hls("sabr \(collector.noMediaLine)")
             completion(.failure(SABRError.stalled))
             return
         }

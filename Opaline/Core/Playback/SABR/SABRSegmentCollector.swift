@@ -27,6 +27,9 @@ final class SABRSegmentCollector {
     private(set) var policy: SABRPolicy?
     /// What was collected, for the next request to acknowledge.
     private(set) var deliveredRange: SABRBufferedRange?
+    /// Every part type the response carried, in order — the only way to see
+    /// what the server answered with when it answers without media.
+    private(set) var seenTypes: [Int] = []
 
     var label: String {
         let kind = request.isInit ? "init" : "\(request.sequence)"
@@ -49,6 +52,11 @@ final class SABRSegmentCollector {
         return data
     }
 
+    /// What a response without media carried instead, for the log.
+    var noMediaLine: String {
+        "\(label): no media in \(received)B, parts \(seenTypes)"
+    }
+
     init(request: SABRSegmentRequest) {
         self.request = request
     }
@@ -62,6 +70,7 @@ final class SABRSegmentCollector {
     }
 
     private func handle(_ part: UMPPart) {
+        seenTypes.append(part.type)
         switch UMPPartType(rawValue: part.type) {
         case .mediaHeader:
             noteHeader(part.payload)
@@ -112,6 +121,14 @@ final class SABRSegmentCollector {
             return
         }
         wantedHeaderId = id
+        // An init segment is not a position in the stream, so it must not be
+        // acknowledged as one: a buffered range starting at 0 alongside a
+        // player time in the middle of the video is a contradiction, and the
+        // server answers it with start policies and no media. googlevideo's
+        // own adapter builds ranges from media headers only, never init ones.
+        guard !request.isInit else {
+            return
+        }
         deliveredRange = SABRBufferedRange(
             format: request.format,
             startMs: header.startMs,

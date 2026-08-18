@@ -10,9 +10,11 @@ import Foundation
 
 /// Identifies a source; maps 1:1 from the user-facing `PlaybackSource` setting.
 enum VideoSourceKind {
-    /// Composite strategy: android_vr first, mweb+pot on failure. Only ever a
+    /// Composite strategy: visionOS first, TV on failure. Only ever a
     /// factory input — a playing source always reports a concrete kind.
     case auto
+    /// Anonymous Vision Pro client, played over SABR.
+    case visionOS
     case androidVR
     /// Signed-in living-room client, played over SABR.
     case tv
