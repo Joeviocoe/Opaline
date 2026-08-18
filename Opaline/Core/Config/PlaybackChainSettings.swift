@@ -6,8 +6,11 @@ import Foundation
 /// moved, the ladder was wrong in a way only a release could fix. This is the
 /// same decision expressed as data, so it can be reordered on the device.
 enum PlaybackChainSettings {
+    /// VisionOS first, both of its steps: it is the client googlevideo lets
+    /// play past the anonymous one-minute cut-off, and TV needs an account
+    /// to run at all.
     static let defaultOrder = [
-        "visionos.range", "tv.sabr", "visionos.sabr", "progressive"
+        "visionos.range", "visionos.sabr", "tv.sabr", "progressive"
     ]
     /// Everything is on by default: a step that cannot run (TV without an
     /// account) already skips itself.
