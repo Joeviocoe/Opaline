@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.9.1",
+          "date": "2026-08-18T10:22:31Z",
+          "localizedDescription": "On 17 August YouTube rotated its player and video stopped loading for everyone on 1.9.0. This release fixes that, and it also fixes rewinding, which never worked properly in 1.9.0.\n\nFixes\n\n- Video plays again after the 17 August player rotation. The app was telling YouTube one player was in use while answering the challenge with another, and every segment came back refused. Both now come from the same file, so they cannot drift apart when YouTube rotates again.\n- Rewinding works. Jumping back in a video, or dragging the scrubber backwards, used to stall until the video was reopened.\n- Starting a video no longer waits for the playback service to warm up. It is now warmed in the background once the home feed has loaded.\n- Resuming a video from history lands in one step instead of loading the beginning first.\n- Long videos use less battery. A two-hour video was reporting your position to YouTube 488 times, and it now reports once a minute.",
+          "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.9.1/Opaline_1.9.1.ipa",
+          "size": 6439948,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.9.0",
           "date": "2026-08-17T16:24:04Z",
           "localizedDescription": "1.8.3 stopped the one-minute cutoff, but it did it by retrying until YouTube handed out a session that was not being throttled — a workaround with a shelf life. This release changes how the app gets video instead. Opaline now asks for it the way a smart TV does, and when you are signed in it plays as your account rather than anonymously. Everything that was still broken since 14 August works again.\n\nFixes\n\n- Dubbed audio works again, and a video that has a dub in your language now starts in it instead of playing the original for a few seconds and switching over.\n- Videos made for kids play again.\n- Watch history and Continue watching update again. What you watch is now recorded by the session that actually plays it, which is what YouTube expects.\n- Playback no longer depends on drawing a healthy anonymous session, so the one-minute cutoff cannot come back this way.\n- Seeking far into a long video no longer breaks playback. Resuming a long video from history lands where you left it and starts straight away.\n- Switching quality or audio track no longer throws the video a second or two backwards.\n- Opening a video no longer waits for the comments and recommendations to finish loading. On older devices that was costing seconds before the picture appeared.\n\nKnown issues\n\n- Livestreams on kids channels do not play yet.\n\nPlayback was rebuilt underneath for this release. If something misbehaves for you, a bug report with a log attached (Settings → Debug → Share Debug Log) is the fastest way to get it fixed.",
@@ -164,14 +172,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.9.0",
-      "versionDate": "2026-08-17T16:24:04Z",
-      "versionDescription": "1.8.3 stopped the one-minute cutoff, but it did it by retrying until YouTube handed out a session that was not being throttled — a workaround with a shelf life. This release changes how the app gets video instead. Opaline now asks for it the way a smart TV does, and when you are signed in it plays as your account rather than anonymously. Everything that was still broken since 14 August works again.\n\nFixes\n\n- Dubbed audio works again, and a video that has a dub in your language now starts in it instead of playing the original for a few seconds and switching over.\n- Videos made for kids play again.\n- Watch history and Continue watching update again. What you watch is now recorded by the session that actually plays it, which is what YouTube expects.\n- Playback no longer depends on drawing a healthy anonymous session, so the one-minute cutoff cannot come back this way.\n- Seeking far into a long video no longer breaks playback. Resuming a long video from history lands where you left it and starts straight away.\n- Switching quality or audio track no longer throws the video a second or two backwards.\n- Opening a video no longer waits for the comments and recommendations to finish loading. On older devices that was costing seconds before the picture appeared.\n\nKnown issues\n\n- Livestreams on kids channels do not play yet.\n\nPlayback was rebuilt underneath for this release. If something misbehaves for you, a bug report with a log attached (Settings → Debug → Share Debug Log) is the fastest way to get it fixed.",
-      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.9.0/Opaline_1.9.0.ipa",
+      "version": "1.9.1",
+      "versionDate": "2026-08-18T10:22:31Z",
+      "versionDescription": "On 17 August YouTube rotated its player and video stopped loading for everyone on 1.9.0. This release fixes that, and it also fixes rewinding, which never worked properly in 1.9.0.\n\nFixes\n\n- Video plays again after the 17 August player rotation. The app was telling YouTube one player was in use while answering the challenge with another, and every segment came back refused. Both now come from the same file, so they cannot drift apart when YouTube rotates again.\n- Rewinding works. Jumping back in a video, or dragging the scrubber backwards, used to stall until the video was reopened.\n- Starting a video no longer waits for the playback service to warm up. It is now warmed in the background once the home feed has loaded.\n- Resuming a video from history lands in one step instead of loading the beginning first.\n- Long videos use less battery. A two-hour video was reporting your position to YouTube 488 times, and it now reports once a minute.",
+      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.9.1/Opaline_1.9.1.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 6425116,
+      "size": 6439948,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -194,6 +202,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "Opaline 1.9.1 - Playback after the player rotation, and rewinding",
+      "identifier": "release-1.9.1",
+      "caption": "Video plays again after the 17 August player rotation. The app was telling YouTube one player was in use while answer…",
+      "date": "2026-08-18T10:22:31Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/Opaline/releases/tag/1.9.1"
+    },
     {
       "title": "Opaline 1.9.0 - Dubs, kids content and history are back",
       "identifier": "release-1.9.0",
