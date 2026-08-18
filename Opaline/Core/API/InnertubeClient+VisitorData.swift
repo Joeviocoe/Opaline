@@ -45,7 +45,7 @@ extension InnertubeClient {
 
     func oauthPlayback(
         videoId: String,
-        playbackClient: DirectPlaybackClient,
+        playbackClient: PlaybackClient,
         poToken: String? = nil,
         cancellation: CancellationToken? = nil,
         completion: @escaping (Result<DirectPlaybackInfo, Error>) -> Void
@@ -63,7 +63,7 @@ extension InnertubeClient {
                 // — see `tvSignatureTimestamp`. Other OAuth clients keep the
                 // site-wide value.
                 let timestamps = SignatureTimestampService.shared
-                let resolve = playbackClient == .tv
+                let resolve = playbackClient.needsSignatureSolver
                     ? timestamps.tvSignatureTimestamp
                     : timestamps.fetch
                 resolve { sts in
@@ -82,9 +82,9 @@ extension InnertubeClient {
         }
     }
 
-    func cookieAuthPlayback(
+    func anonymousPlayback(
         videoId: String,
-        playbackClient: DirectPlaybackClient,
+        playbackClient: PlaybackClient,
         poToken: String? = nil,
         cancellation: CancellationToken? = nil,
         completion: @escaping (Result<DirectPlaybackInfo, Error>) -> Void

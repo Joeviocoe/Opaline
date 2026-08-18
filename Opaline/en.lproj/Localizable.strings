@@ -238,7 +238,7 @@
 "settings.footer.autoDub" = "When a video's original language differs from the dub language, the matching audio track is selected automatically.";
 "settings.footer.home" = "How recommendation shelves are shown: one continuous grid or TV-style horizontal rails.";
 "settings.footer.ryd" = "Dislike counts are powered by Return YouTube Dislike (returnyoutubedislike.com) — an open community project.";
-"settings.footer.debug" = "Force a specific playback source. Normally Android VR is used with automatic fallback. The solver server powers the Mobile Web + pot source (pot minting, and n-solving on iOS 12–13).";
+"settings.footer.debug" = "Choose which ways of playing a video are used, and the order they are tried in. The solver server answers the throttling challenge the TV client's streams carry (and mints its token).";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "Theme";
@@ -299,8 +299,9 @@
 "settings.row.sponsorblockSettings" = "SponsorBlock Settings";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "Playback Source";
-"settings.row.streamDelivery" = "Stream delivery";
+"settings.row.playbackChain" = "Playback sources";
+"settings.playbackChain.signInNeeded" = "Sign in to use this source";
+"settings.playbackChain.footer" = "Tried from top to bottom until one plays. Drag to reorder, switch off what you do not want.";
 "settings.row.resetIdentity" = "Reset visitor identity";
 "settings.row.solverServer" = "Solver Server";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
@@ -513,3 +514,4 @@
 "settings.thumbnailQuality.high" = "High (640×360)";
 "settings.thumbnailQuality.maximum" = "Maximum (1280×720)";
 "settings.footer.thumbnailQuality" = "Auto picks a level from the amount of memory your device has. Higher quality means larger downloads and more memory per thumbnail, which can slow scrolling on devices with little RAM.";
+"player.error.noSources" = "No playback sources are enabled. Turn one on in Settings → Debug → Playback sources.";

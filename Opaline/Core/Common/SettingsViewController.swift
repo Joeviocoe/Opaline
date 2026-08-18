@@ -20,8 +20,7 @@ final class SettingsViewController: UIViewController {
         case clearCache, rydEnabled
         case sponsorBlockEnabled, sponsorBlockSettings
         case notificationSettings
-        case playbackSource
-        case streamDelivery
+        case playbackChain
         case resetIdentity
         case solverEndpoint
         case mainThreadWatchdog
@@ -357,15 +356,10 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return makeDisclosureCell("settings.row.support".localized)
         case .aboutVersion, .aboutSystem, .aboutModel:
             return makeAboutCell(row)
-        case .playbackSource:
+        case .playbackChain:
             return makeDisclosureCell(
-                "settings.row.playbackSource".localized,
-                value: PlaybackSource.selected.displayName
-            )
-        case .streamDelivery:
-            return makeDisclosureCell(
-                "settings.row.streamDelivery".localized,
-                value: StreamDeliveryPreference.selected.displayName
+                "settings.row.playbackChain".localized,
+                value: "\(PlaybackChainSettings.activeSteps().count)"
             )
         case .resetIdentity:
             return makeDisclosureCell("settings.row.resetIdentity".localized)
@@ -441,7 +435,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             if let url = URL(string: AppURLs.Support.donate) {
                 UIApplication.shared.open(url)
             }
-        case .playbackSource, .streamDelivery, .solverEndpoint:
+        case .playbackChain, .solverEndpoint:
             showDebugPicker(for: row)
         case .resetIdentity:
             // A spent identity is behind most "it plays on one device but not
@@ -757,72 +751,14 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         present(sheet, animated: true)
     }
 
-    private func showPlaybackSourcePicker() {
-        let sheet = UIAlertController(
-            title: "settings.row.playbackSource".localized,
-            message: nil,
-            preferredStyle: .actionSheet
-        )
-        let current = PlaybackSource.selected
-        for source in PlaybackSource.allCases {
-            let action = UIAlertAction(
-                title: source.displayName,
-                style: .default
-            ) { _ in
-                UserDefaults.standard.set(
-                    source.rawValue,
-                    forKey: UserDefaultsKeys.Debug.playbackSource
-                )
-                self.tableView.reloadData()
-            }
-            if source == current {
-                action.setValue(true, forKey: "checked")
-            }
-            sheet.addAction(action)
-        }
-        sheet.addAction(
-            UIAlertAction(title: "common.cancel".localized, style: .cancel)
-        )
-        configureCenteredPopover(sheet)
-        present(sheet, animated: true)
-    }
-
     private func showDebugPicker(for row: Row) {
-        switch row {
-        case .playbackSource:
-            showPlaybackSourcePicker()
-        case .streamDelivery:
-            showStreamDeliveryPicker()
-        default:
+        guard row == .playbackChain else {
             showSolverEndpointPicker()
+            return
         }
-    }
-
-    private func showStreamDeliveryPicker() {
-        let sheet = UIAlertController(
-            title: "settings.row.streamDelivery".localized,
-            message: nil,
-            preferredStyle: .actionSheet
+        navigationController?.pushViewController(
+            PlaybackChainViewController(), animated: true
         )
-        let current = StreamDeliveryPreference.selected
-        for option in StreamDeliveryPreference.allCases {
-            let action = UIAlertAction(title: option.displayName, style: .default) { _ in
-                UserDefaults.standard.set(
-                    option.rawValue,
-                    forKey: UserDefaultsKeys.Debug.streamDelivery
-                )
-                self.tableView.reloadData()
-            }
-            if option == current {
-                action.setValue(true, forKey: "checked")
-            }
-            sheet.addAction(action)
-        }
-        sheet.addAction(
-            UIAlertAction(title: "common.cancel".localized, style: .cancel)
-        )
-        configureCenteredPopover(sheet)
-        present(sheet, animated: true)
     }
 
     private func showSolverEndpointPicker() {

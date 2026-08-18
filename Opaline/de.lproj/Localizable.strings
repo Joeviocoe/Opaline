@@ -199,7 +199,6 @@
 "settings.footer.autoDub" = "Wenn die Originalsprache eines Videos von der Synchronsprache abweicht, wird automatisch die passende Audiospur ausgewählt.";
 "settings.footer.home" = "Wie Empfehlungsbereiche angezeigt werden: ein durchgehendes Raster oder horizontale Schienen im TV-Stil.";
 "settings.footer.ryd" = "Dislike-Zähler werden von Return YouTube Dislike (returnyoutubedislike.com) bereitgestellt — ein offenes Gemeinschaftsprojekt.";
-"settings.footer.debug" = "Erzwingt eine bestimmte Wiedergabequelle. Normalerweise wird Android VR mit automatischem Fallback verwendet. Der Solver-Server versorgt die Mobile Web + pot Quelle (pot-Erstellung und n-solving auf iOS 12–13).";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "Design";
@@ -256,7 +255,6 @@
 "settings.row.solverServer" = "Solver server";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "Wiedergabequelle";
 "settings.row.shareLog" = "Debug-Log teilen";
 "settings.row.support" = "Entwicklung unterstützen";
 "settings.row.feedback" = "Feedback geben";

@@ -2,17 +2,17 @@ import Foundation
 
 // MARK: - Audio-track (dub) selection
 //
-// Only the TV client ever lists dubs here: android_vr returns the original
+// Only the TV client ever lists dubs here: the anonymous clients returns the original
 // track alone, so `allDashAudioFormats` stays empty and the picker stays off.
 //
 // On SABR a track change is a format change — the session re-opens with the
 // chosen audio format in `preferred_audio_format_ids`, which is exactly what a
 // quality switch does for video, so it goes through the same build path.
 
-extension AndroidVRSource {
+extension InnertubeVideoSource {
     static var noTrackError: Error {
         NSError(
-            domain: "AndroidVRSource",
+            domain: "InnertubeVideoSource",
             code: 0,
             userInfo: [NSLocalizedDescriptionKey: "No such audio track"]
         )
@@ -44,7 +44,7 @@ extension AndroidVRSource {
             info.allDashAudioFormats.first { $0.audioTrackId == id }
         } ?? info.dashAudioFormat
         if let startId, format?.audioTrackId != startId {
-            AppLog.player("\(kind): start track \(startId) not in formats")
+            AppLog.player("\(name): start track \(startId) not in formats")
         }
         let current = tracks.first { $0.id == format?.audioTrackId }
             ?? tracks.first { $0.isOriginal }
@@ -52,7 +52,7 @@ extension AndroidVRSource {
             = (tracks, current, format)
         if !tracks.isEmpty {
             let ids = tracks.map(\.id).joined(separator: ",")
-            AppLog.player("\(kind): \(tracks.count) audio tracks [\(ids)]")
+            AppLog.player("\(name): \(tracks.count) audio tracks [\(ids)]")
         }
     }
 
@@ -61,7 +61,7 @@ extension AndroidVRSource {
     /// The probe exists to beat the primary load to the answer "does this
     /// video have the dub the user asked for" — and it cannot do that through
     /// the TV client: that path mints a po token first and then parses a
-    /// hundred-odd formats, ~780 ms warm, while android_vr is playing in 340.
+    /// hundred-odd formats, ~780 ms warm, while the anonymous client is playing in 340.
     /// The IOS listing answers the same question logged-out, with no token and
     /// no ladder to parse. Track ids match across the clients.
     func probeAudioTracks(
@@ -88,7 +88,7 @@ extension AndroidVRSource {
 
     /// Probe results: menu metadata only, no playable formats behind them.
     /// The ORIGINAL track shows as current — that is what the source actually
-    /// playing (android_vr) serves; `isDefault` follows the probe's `hl` and
+    /// playing (the anonymous client) serves; `isDefault` follows the probe's `hl` and
     /// would tick an AI dub on any video uploaded in another language.
     private func applyProbedTracks(_ infos: [AudioTrackInfo]) {
         let tracks = infos.map {
@@ -102,7 +102,7 @@ extension AndroidVRSource {
         currentAudioFormat = nil
         if !tracks.isEmpty {
             let ids = tracks.map(\.id).joined(separator: ",")
-            AppLog.player("\(kind) probe: \(tracks.count) audio tracks [\(ids)]")
+            AppLog.player("\(name) probe: \(tracks.count) audio tracks [\(ids)]")
         }
     }
 

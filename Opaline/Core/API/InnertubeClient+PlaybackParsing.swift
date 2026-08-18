@@ -6,14 +6,9 @@ extension InnertubeClient {
     static func parseDirectPlayback(
         json: [String: Any],
         videoId: String,
-        client: DirectPlaybackClient,
+        client: PlaybackClient,
         onBotCheck: () -> Void
     ) -> DirectPlaybackInfo? {
-        // Only the mweb source can finish ciphered URLs (it owns the
-        // watch-page player context the sig solve needs).
-        let json = client == .mweb
-            ? unwrappingSignatureCiphers(json)
-            : json
         guard let info = parseDirectPlaybackInfo(json) else {
             logDirectPlaybackError(
                 json: json,
@@ -48,7 +43,7 @@ extension InnertubeClient {
     static func logDirectPlaybackError(
         json: [String: Any],
         videoId: String,
-        client: DirectPlaybackClient
+        client: PlaybackClient
     ) {
         if let errorObj = json["error"],
            let data = try? JSONSerialization.data(
@@ -57,12 +52,12 @@ extension InnertubeClient {
            ),
            let str = String(data: data, encoding: .utf8) {
             AppLog.innertube(
-                "directPlayback error (\(client)): \(str)"
+                "directPlayback error (\(client.name)): \(str)"
             )
         }
         logPlayerDebug(
             videoId: videoId,
-            contextName: client.description,
+            contextName: client.name,
             json: json
         )
     }

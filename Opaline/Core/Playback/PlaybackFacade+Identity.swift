@@ -6,7 +6,6 @@ struct ResolveAttempt {
     let videoId: String
     let apiClient: WatchService
     let cancellationToken: CancellationToken
-    let kind: VideoSourceKind
     let startedAt: Date
     let identityGeneration: Int
 }
@@ -48,8 +47,7 @@ extension PlaybackFacade {
             self?.start(
                 videoId: attempt.videoId,
                 apiClient: attempt.apiClient,
-                cancellationToken: attempt.cancellationToken,
-                kind: attempt.kind
+                cancellationToken: attempt.cancellationToken
             )
         }
         return true

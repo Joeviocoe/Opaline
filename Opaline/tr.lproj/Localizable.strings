@@ -205,7 +205,6 @@
 "settings.footer.autoDub" = "Videonun orijinal dili dublaj dilinden farklıysa uygun ses parçası otomatik olarak seçilir.";
 "settings.footer.home" = "Öneri rafları nasıl gösterilir: sürekli bir ızgara veya TV tarzı yatay raylar.";
 "settings.footer.ryd" = "Beğenmeme sayıları Return YouTube Dislike (returnyoutubedislike.com) tarafından desteklenmektedir — açık bir topluluk projesi.";
-"settings.footer.debug" = "Belirli bir oynatma kaynağını zorla. Normalde Android VR otomatik geri dönüş ile kullanılır. Çözücü sunucusu Mobile Web + pot kaynağını besler (pot madenciliği ve iOS 12–13'te n-çözümleme).";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "Tema";
@@ -261,7 +260,6 @@
 "settings.row.sponsorblockSettings" = "SponsorBlock Ayarları";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "Oynatma Kaynağı";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Hata Ayıklama Kaydını Paylaş";
 "settings.row.support" = "Geliştirmeyi destekle";

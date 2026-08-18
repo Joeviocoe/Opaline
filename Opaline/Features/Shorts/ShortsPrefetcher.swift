@@ -31,8 +31,9 @@ final class ShortsPrefetcher {
               inFlight.insert(videoId).inserted else {
             return
         }
-        let source = DefaultVideoSourceFactory(apiClient: watchService)
-            .make(kind: PlaybackSource.selected.sourceKind)
+        let source = FallbackChainSource(
+            steps: PlaybackChainSettings.activeSteps(), apiClient: watchService
+        )
         source.loadPlayback(
             videoId: videoId, cancellation: nil
         ) { [weak self] result in

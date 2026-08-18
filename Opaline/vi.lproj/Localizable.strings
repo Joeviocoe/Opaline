@@ -162,7 +162,6 @@
 "settings.footer.autoDub" = "Khi ngôn ngữ gốc của video khác với ngôn ngữ lồng tiếng, bản âm thanh tương ứng sẽ được chọn tự động.";
 "settings.footer.home" = "Cách hiển thị các kệ nội dung đề xuất: một lưới liền mạch hoặc các hàng ngang theo kiểu TV.";
 "settings.footer.ryd" = "Số lượt không thích được cung cấp bởi Return YouTube Dislike (returnyoutubedislike.com) — một dự án cộng đồng mở.";
-"settings.footer.debug" = "Buộc dùng một nguồn phát cụ thể. Thông thường, Android VR được dùng kèm cơ chế dự phòng tự động. Máy chủ giải mã cung cấp nguồn Mobile Web + pot (tạo pot và giải n trên iOS 12–13).";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "Giao diện";
@@ -219,7 +218,6 @@
 "settings.row.sponsorblockSettings" = "Cài đặt SponsorBlock";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "Nguồn phát";
 "settings.row.solverServer" = "Solver Server";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
 "settings.row.shareLog" = "Chia sẻ nhật ký gỡ lỗi";

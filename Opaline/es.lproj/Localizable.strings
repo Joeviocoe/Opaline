@@ -201,7 +201,6 @@
 "settings.footer.autoDub" = "Si el idioma original de un video difiere del idioma de doblaje, la pista de audio correspondiente se selecciona automáticamente.";
 "settings.footer.home" = "Cómo se muestran los estantes de recomendaciones: una cuadrícula continua o carriles horizontales estilo TV.";
 "settings.footer.ryd" = "Los recuentos de dislikes están impulsados por Return YouTube Dislike (returnyoutubedislike.com) — un proyecto comunitario abierto.";
-"settings.footer.debug" = "Forzar una fuente de reproducción específica. Normalmente se usa Android VR con respaldo automático. El servidor resolutor alimenta la fuente Mobile Web + pot (creación de pot y n-solving en iOS 12–13).";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "Apariencia";
@@ -257,7 +256,6 @@
 "settings.row.sponsorblockSettings" = "Configuración de SponsorBlock";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "Fuente de reproducción";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Compartir registro de depuración";
 "settings.row.support" = "Apoyar el desarrollo";

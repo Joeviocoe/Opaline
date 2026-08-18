@@ -53,6 +53,10 @@ enum UserAgent {
         "Chrome/122.0.0.0 Safari/537.36"
     ].joined(separator: " ")
 
+    /// The phone client, used only for the muxed 360p stream.
+    static let androidPhone =
+        "com.google.android.youtube/21.26.364 (Linux; U; Android 11) gzip"
+
     /// Safari on visionOS — the VISIONOS client's own agent.
     static let visionOS = [
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3)",

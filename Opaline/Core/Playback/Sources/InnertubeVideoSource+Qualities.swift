@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - The quality ladder a /player response describes
 
-extension AndroidVRSource {
+extension InnertubeVideoSource {
     /// "vCodec (itag) / aCodec (itag)" for the stats overlay; nil when the
     /// active quality is not a DASH format (live variants). `audio` overrides
     /// the default audio format (mweb after an audio-track switch).

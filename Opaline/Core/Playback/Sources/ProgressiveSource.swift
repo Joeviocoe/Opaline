@@ -8,13 +8,13 @@ final class ProgressiveSource: VideoSource {
         id: "progressive", label: "360p", height: 360, fps: nil
     )
 
-    let kind: VideoSourceKind = .progressive
+    let name = "progressive"
     let supportsQualitySelection = true
     let availableQualities: [VideoQuality] = [ProgressiveSource.quality360]
     let currentQuality: VideoQuality? = ProgressiveSource.quality360
 
     private let apiClient: WatchService
-    private let client: DirectPlaybackClient = .androidVR
+    private let client: PlaybackClient = AndroidClient()
 
     init(apiClient: WatchService) {
         self.apiClient = apiClient

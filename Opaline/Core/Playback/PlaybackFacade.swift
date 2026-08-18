@@ -42,6 +42,9 @@ final class PlaybackFacade {
     weak var context: PlaybackContext?
     /// The active source — owns stream resolution and quality selection.
     var activeVideoSource: VideoSource?
+    /// The chain underneath it, so a mid-playback failure can move on to the
+    /// next step instead of starting the whole ladder again.
+    var activeChain: FallbackChainSource?
     let watchtimeTracker = WatchtimeTracker()
     var currentVideoId: String?
     weak var currentApiClient: WatchService?
@@ -64,7 +67,6 @@ extension PlaybackFacade {
         videoId: String,
         apiClient: WatchService,
         cancellationToken: CancellationToken,
-        kind: VideoSourceKind = PlaybackSource.selected.sourceKind,
         statusKey: String = "player.status.resolving"
     ) {
         if videoId != currentVideoId {
@@ -72,9 +74,7 @@ extension PlaybackFacade {
         }
         currentVideoId = videoId
         currentApiClient = apiClient
-        let source = DefaultVideoSourceFactory(apiClient: apiClient)
-            .make(kind: kind)
-        activeVideoSource = source
+        let source = buildChain(apiClient: apiClient)
         context?.updateStatusLabel(statusKey.localized)
         PlaybackProgress.report = { [weak self] text in
             self?.context?.updateStatusLabel(text)
@@ -83,7 +83,6 @@ extension PlaybackFacade {
             videoId: videoId,
             apiClient: apiClient,
             cancellationToken: cancellationToken,
-            kind: kind,
             startedAt: Date(),
             identityGeneration: InnertubeSession.identityGeneration
         )
@@ -97,6 +96,22 @@ extension PlaybackFacade {
         }
     }
 
+    /// The user's chain, wrapped so a preferred dub can start on the step
+    /// that lists dubs.
+    private func buildChain(apiClient: WatchService) -> VideoSource {
+        let steps = PlaybackChainSettings.activeSteps()
+        if steps.isEmpty {
+            AppLog.player("chain: no sources enabled for this session")
+        }
+        let chain = FallbackChainSource(steps: steps, apiClient: apiClient)
+        activeChain = chain
+        let source = AutoDubSource(wrapping: chain) { [weak chain] in
+            chain?.dubCapableSource()
+        }
+        activeVideoSource = source
+        return source
+    }
+
     private func finishResolve(
         _ result: Swift.Result<PreparedPlayback, Error>,
         attempt: ResolveAttempt
@@ -104,7 +119,7 @@ extension PlaybackFacade {
         let ms = Int(Date().timeIntervalSince(attempt.startedAt) * 1_000)
         let verdict = (try? result.get()) == nil ? "failed" : "ok"
         AppLog.player(
-            "resolve \(verdict) on \(attempt.kind) in \(ms)ms"
+            "resolve \(verdict) on \(activeVideoSource?.name ?? "chain") in \(ms)ms"
         )
         guard !attempt.cancellationToken.isCancelled else {
             return
@@ -117,11 +132,11 @@ extension PlaybackFacade {
     }
 
     /// Restarts playback after a mid-playback failure (segment 403, fatal
-    /// stall). The source can't see these itself — its manifest loaded fine,
-    /// so its own load-time fallback never fires. Escalate instead: refresh
-    /// the same source once (that fixes genuine URL expiry), then rebuild on
-    /// a different client, then stop. Returns false when the budget is spent
-    /// — the shell shows the error rather than hammering the API forever.
+    /// stall). A source cannot see these itself — its manifest loaded fine —
+    /// so the chain is walked from here: rebuild the same step once (that
+    /// fixes genuine URL expiry), then move to the next step, then stop.
+    /// Returns false when the budget is spent, and the shell shows the error
+    /// rather than hammering the API forever.
     func recover(cancellationToken: CancellationToken) -> Bool {
         guard let videoId = currentVideoId,
               let apiClient = currentApiClient else {
@@ -133,42 +148,36 @@ extension PlaybackFacade {
         }
         lastRecoveryAt = Date()
         recoveryAttempts += 1
-        let selected = PlaybackSource.selected.sourceKind
-        let kind: VideoSourceKind
-        switch recoveryAttempts {
-        case 1:
-            kind = selected
-        case 2:
-            kind = escalated(from: selected)
-        default:
+        guard recoveryAttempts <= 2 else {
             AppLog.player("recovery: retries spent, giving up")
             return false
         }
-        AppLog.player("recovery attempt \(recoveryAttempts) on \(kind)")
-        start(
-            videoId: videoId,
-            apiClient: apiClient,
-            cancellationToken: cancellationToken,
-            kind: kind,
-            statusKey: "player.status.refreshing"
-        )
+        AppLog.player("recovery attempt \(recoveryAttempts)")
+        // Once for a URL that simply expired; the second time the step itself
+        // is failing, so the video goes to the next step in the user's chain.
+        guard recoveryAttempts > 1, let chain = activeChain else {
+            start(
+                videoId: videoId,
+                apiClient: apiClient,
+                cancellationToken: cancellationToken,
+                statusKey: "player.status.refreshing"
+            )
+            return true
+        }
+        context?.updateStatusLabel("player.status.refreshing".localized)
+        advanceChain(chain, videoId: videoId, cancellationToken: cancellationToken)
         return true
     }
 
-    /// Whatever the failing stream came from, hand the next attempt to a
-    /// different client — the same one would serve the same dead URLs.
-    private func escalated(
-        from kind: VideoSourceKind
-    ) -> VideoSourceKind {
-        switch kind {
-        // Signed in, TV is the only client that plays what an anonymous
-        // session is refused. Anonymously there is nowhere to escalate to:
-        // every other client is cut off after a minute (Opaline#76), so
-        // retrying visionOS is the least useless thing left.
-        case .auto, .visionOS, .androidVR, .progressive:
-            return OAuthClient.shared.isSignedIn ? .tv : .visionOS
-        case .mwebPot, .tv:
-            return .visionOS
+    private func advanceChain(
+        _ chain: FallbackChainSource,
+        videoId: String,
+        cancellationToken: CancellationToken
+    ) {
+        chain.advance(videoId: videoId, cancellation: cancellationToken) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.handlePrepared(result, cancellation: cancellationToken)
+            }
         }
     }
 
@@ -179,15 +188,19 @@ extension PlaybackFacade {
         PlaybackProgress.report = nil
         switch result {
         case .success(let prepared):
-            let kind = activeVideoSource?.kind
+            let name = activeVideoSource?.name ?? "?"
             let count = activeVideoSource?.availableQualities.count ?? 0
-            AppLog.player(
-                "source \(String(describing: kind)) playing, \(count) qualities"
-            )
+            AppLog.player("source \(name) playing, \(count) qualities")
             context?.attachPrepared(prepared, resumeAt: nil)
             fetchWatchtimeAndTrack()
         case .failure(let error):
             AppLog.player("source playback failed: \(error)")
+            guard !PlaybackChainSettings.activeSteps().isEmpty else {
+                // Every step is either switched off or needs an account that
+                // is not there — say that rather than blame the stream.
+                context?.showPlaybackError("player.error.noSources".localized)
+                return
+            }
             guard isBotCheck(error) else {
                 context?.showPlaybackError("player.error.playback".localized)
                 return

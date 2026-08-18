@@ -322,21 +322,22 @@ extension InnertubeClient {
 
     func fetchDirectPlayback(
         videoId: String,
-        client: DirectPlaybackClient = .androidVR,
+        client: PlaybackClient,
         poToken: String? = nil,
         cancellationToken: CancellationToken? = nil,
         completion: @escaping (Result<DirectPlaybackInfo, Error>) -> Void
     ) {
-        AppLog.innertube("fetchDirectPlayback: \(videoId), client: \(client)")
-        if client.usesCookieAuth {
-            cookieAuthPlayback(
+        AppLog.innertube("fetchDirectPlayback: \(videoId), client: \(client.name)")
+        switch client.authorization {
+        case .anonymous:
+            anonymousPlayback(
                 videoId: videoId,
                 playbackClient: client,
                 poToken: poToken,
                 cancellation: cancellationToken,
                 completion: completion
             )
-        } else {
+        case .bearer:
             oauthPlayback(
                 videoId: videoId,
                 playbackClient: client,

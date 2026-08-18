@@ -8,20 +8,6 @@ import Foundation
 // source-specific branching leaks into the player shell or the UI — the view
 // controller talks only to `VideoSource`.
 
-/// Identifies a source; maps 1:1 from the user-facing `PlaybackSource` setting.
-enum VideoSourceKind {
-    /// Composite strategy: visionOS first, TV on failure. Only ever a
-    /// factory input — a playing source always reports a concrete kind.
-    case auto
-    /// Anonymous Vision Pro client, played over SABR.
-    case visionOS
-    case androidVR
-    /// Signed-in living-room client, played over SABR.
-    case tv
-    case progressive
-    case mwebPot
-}
-
 /// A selectable quality level, expressed source-agnostically.
 struct VideoQuality: Equatable {
     let id: String
@@ -82,7 +68,8 @@ struct PreparedPlayback {
 
 /// A single video source: resolves a stream and owns its quality selection.
 protocol VideoSource: AnyObject {
-    var kind: VideoSourceKind { get }
+    /// The step this source came from, for logs and the stats overlay.
+    var name: String { get }
     /// Whether this source exposes a quality menu at all.
     var supportsQualitySelection: Bool { get }
     /// Qualities available for the currently loaded video (empty until loaded).
@@ -91,6 +78,9 @@ protocol VideoSource: AnyObject {
     var currentQuality: VideoQuality? { get }
     /// Active codec/itag pair for the stats overlay, when the source knows it.
     var currentCodecs: String? { get }
+    /// Whether this source can list dubs at all — asked before a video is
+    /// loaded, unlike `supportsAudioTrackSelection`.
+    var listsAudioTracks: Bool { get }
     /// Whether this source exposes an audio-track (dub) menu.
     var supportsAudioTrackSelection: Bool { get }
     /// Audio tracks for the currently loaded video (empty = single-audio).
@@ -143,9 +133,10 @@ protocol VideoSource: AnyObject {
 
 extension VideoSource {
     var currentCodecs: String? { nil }
+    var listsAudioTracks: Bool { false }
 
     // Audio-track selection is opt-in: sources whose client never returns
-    // dub tracks (android_vr, progressive) inherit the disabled default.
+    // dub tracks (the anonymous ones) inherit the disabled default.
     var supportsAudioTrackSelection: Bool { availableAudioTracks.count > 1 }
     var availableAudioTracks: [AudioTrack] { [] }
     var currentAudioTrack: AudioTrack? { nil }
@@ -190,9 +181,4 @@ extension VideoSource {
     /// Nothing to release by default — only delivery-backed sources hold
     /// anything between plays.
     func releaseResources() {}
-}
-
-/// Creates the right `VideoSource` for a kind (abstract factory).
-protocol VideoSourceFactory {
-    func make(kind: VideoSourceKind) -> VideoSource
 }

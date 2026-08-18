@@ -9,11 +9,15 @@ enum InnertubeContexts {
     // The ONE deliberate exception is visitorData minting
     // (InnertubeClient+VisitorData) — its context/headers stay English for
     // BotGuard/fingerprint stability and do not come from here.
+    /// The web client is only ever named in headers beside `webTemplate` —
+    /// it has no playback path of its own.
+    static let webClientHeaderName = "1"
+    static let webClientVersion = "2.20231121.08.00"
+
     static var web: [String: Any] { localized(webTemplate) }
     static var tv: [String: Any] { localized(tvTemplate) }
     static var mweb: [String: Any] { localized(mwebTemplate) }
     static var android: [String: Any] { localized(androidTemplate) }
-    static var androidVR: [String: Any] { localized(androidVRTemplate) }
     static var visionOS: [String: Any] { localized(visionOSTemplate) }
     static var ios: [String: Any] { localized(iosTemplate) }
 
@@ -85,14 +89,13 @@ enum InnertubeContexts {
         "context": [
             "client": [
                 "clientName": "ANDROID",
-                "clientVersion": "21.02.35",
+                "clientVersion": "21.26.364",
                 "hl": "en",
                 "gl": "US",
                 "androidSdkVersion": 30,
                 "osName": "Android",
                 "osVersion": "11",
-                "userAgent": "com.google.android.youtube/21.02.35"
-                    + " (Linux; U; Android 11) gzip"
+                "userAgent": UserAgent.androidPhone
             ],
             "user": [
                 "enableSafetyMode": false,
@@ -125,30 +128,6 @@ enum InnertubeContexts {
         ]
     ]
 
-    private static let androidVRTemplate: [String: Any] = [
-        "context": [
-            "client": [
-                "clientName": "ANDROID_VR",
-                "clientVersion": "1.65.10",
-                "hl": "en",
-                "timeZone": "UTC",
-                "utcOffsetMinutes": 0,
-                "deviceMake": "Oculus",
-                "deviceModel": "Quest 3",
-                "androidSdkVersion": 32,
-                "osName": "Android",
-                "osVersion": "12L",
-                "userAgent": [
-                    "com.google.android.apps.youtube.vr.oculus/1.65.10",
-                    "(Linux; U; Android 12L;",
-                    "eureka-user Build/SQ3A.220605.009.A1) gzip"
-                ].joined(separator: " ")
-            ]
-        ]
-    ]
-
-    /// Official iOS app client. Its timedtext caption URLs are served without
-    /// a proof-of-origin token, unlike the WEB client's.
     private static let iosTemplate: [String: Any] = [
         "context": [
             "client": [

@@ -196,7 +196,7 @@ protocol WatchService: AnyObject {
     // swiftlint:disable:next function_parameter_count
     func fetchDirectPlayback(
         videoId: String,
-        client: DirectPlaybackClient,
+        client: PlaybackClient,
         poToken: String?,
         cancellationToken: CancellationToken?,
         completion: @escaping (Result<DirectPlaybackInfo, Error>) -> Void
@@ -210,17 +210,6 @@ protocol WatchService: AnyObject {
     func fetchWatchtimeURLs(
         videoId: String,
         completion: @escaping (WatchtimeURLs?) -> Void
-    )
-    // Anonymous MWEB playback (video-bound pot). signatureTimestamp must come
-    // from the same player as the one used to solve `n`.
-    // swiftlint:disable:next function_parameter_count
-    func fetchMWebPlayback(
-        videoId: String,
-        poToken: String?,
-        visitorData: String?,
-        signatureTimestamp: Int?,
-        cancellationToken: CancellationToken?,
-        completion: @escaping (Result<DirectPlaybackInfo, Error>) -> Void
     )
     /// Caption tracks via the IOS player client (works where the WEB
     /// client's timedtext URLs are POT-gated and return empty bodies).

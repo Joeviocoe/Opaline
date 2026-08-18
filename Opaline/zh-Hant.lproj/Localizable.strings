@@ -205,7 +205,6 @@
 "settings.footer.autoDub" = "當影片的原始語言與配音語言不同時，會自動選擇對應的音軌。";
 "settings.footer.home" = "推薦欄顯示方式：連續格線或電視風格水平軌道。";
 "settings.footer.ryd" = "不喜歡次數由 Return YouTube Dislike (returnyoutubedislike.com) 提供 — 開放社群專案。";
-"settings.footer.debug" = "強制使用特定播放來源。通常使用 Android VR 並自動回退。解算器伺服器為 Mobile Web + pot 來源提供支援（pot 鑄造和 iOS 12–13 上的 n-solving）。";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "主題";
@@ -261,7 +260,6 @@
 "settings.row.sponsorblockSettings" = "SponsorBlock 設定";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "播放來源";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "分享除錯記錄";
 "settings.row.support" = "支持開發";

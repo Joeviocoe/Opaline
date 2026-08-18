@@ -41,9 +41,9 @@ protocol StreamDelivery: AnyObject {
 final class LegacyRangeDelivery: StreamDelivery {
     let label = "range"
 
-    private let client: DirectPlaybackClient
+    private let client: PlaybackClient
 
-    init(client: DirectPlaybackClient) {
+    init(client: PlaybackClient) {
         self.client = client
     }
 

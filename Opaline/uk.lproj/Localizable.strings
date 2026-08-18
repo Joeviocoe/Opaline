@@ -165,7 +165,7 @@
 "settings.footer.autoDub" = "Якщо мова оригіналу відео відрізняється від мови дубляжу, відповідна аудіодоріжка вмикається автоматично.";
 "settings.footer.home" = "Як показувати полиці рекомендацій: суцільна сітка або горизонтальні стрічки у стилі ТБ.";
 "settings.footer.ryd" = "Лічильники дизлайків працюють через Return YouTube Dislike (returnyoutubedislike.com) — відкритий проєкт спільноти.";
-"settings.footer.debug" = "Примусовий вибір джерела відтворення. Зазвичай використовується Android VR з автоматичним резервним джерелом. Solver server обслуговує джерело Mobile Web + pot (випуск pot і розв'язання n на iOS 12–13).";
+"settings.footer.debug" = "Виберіть, якими способами відтворювати відео та в якому порядку їх пробувати. Сервер-розв’язувач відповідає на перевірку тротлінгу в потоках ТВ-клієнта (і випускає його токен).";
 
 "settings.row.theme" = "Тема";
 "settings.row.appIcon" = "Значок застосунку";
@@ -216,8 +216,6 @@
 "settings.row.sponsorblock" = "SponsorBlock";
 "settings.row.sponsorblockSettings" = "Налаштування SponsorBlock";
 
-"settings.row.playbackSource" = "Джерело";
-"settings.row.streamDelivery" = "Доставка потоку";
 "settings.row.resetIdentity" = "Скинути visitor identity";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Поділитися журналом налагодження";
@@ -395,3 +393,7 @@
 "settings.thumbnailQuality.high" = "Висока (640×360)";
 "settings.thumbnailQuality.maximum" = "Максимальна (1280×720)";
 "settings.footer.thumbnailQuality" = "У режимі «Авто» рівень обирається за обсягом памʼяті пристрою. Що вища якість, то більше завантаження та витрати памʼяті на кожну обкладинку — на пристроях з малим обсягом ОЗП це може сповільнювати прокручування.";
+"settings.row.playbackChain" = "Джерела відтворення";
+"settings.playbackChain.signInNeeded" = "Увійдіть, щоб використовувати це джерело";
+"settings.playbackChain.footer" = "Перебираються згори вниз, доки одне не заграє. Перетягніть, щоб змінити порядок, непотрібні вимкніть.";
+"player.error.noSources" = "Усі джерела відтворення вимкнено. Увімкніть хоча б одне в «Налаштування → Зневадження → Джерела відтворення».";

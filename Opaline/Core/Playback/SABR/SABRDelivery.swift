@@ -62,7 +62,7 @@ final class SABRDelivery: StreamDelivery {
         }
     }
 
-    private let client: DirectPlaybackClient
+    private let client: PlaybackClient
     /// Carried per delivery rather than globally: two sources can hold live
     /// sessions at once, and a shared one would have them rewriting each
     /// other's requests.
@@ -70,7 +70,7 @@ final class SABRDelivery: StreamDelivery {
 
     init(
         transport: HTTPTransport,
-        client: DirectPlaybackClient = .androidVR,
+        client: PlaybackClient,
         poToken: Data? = nil
     ) {
         self.client = client

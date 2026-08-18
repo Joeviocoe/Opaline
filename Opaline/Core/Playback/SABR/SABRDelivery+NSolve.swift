@@ -19,19 +19,19 @@ extension SABRDelivery {
     }
 
     /// The TV client's streaming URL carries an `n` throttling challenge that
-    /// android_vr's does not: unsolved, googlevideo answers 403 before the SABR
+    /// the anonymous clients' do not: unsolved, googlevideo answers 403 before the SABR
     /// protocol says anything. Solve it with the player the timestamp named —
     /// `tvPlayerPath` and `tvSignatureTimestamp` read the pair out of the same
     /// file, and a mismatched pair is refused exactly like an unsolved `n`.
     ///
     /// Anything without an `n` passes straight through, so this costs the
-    /// android_vr path nothing.
+    /// anonymous path nothing.
     static func solvingThrottle(
         _ url: URL,
         resolver: HLSStreamResolver = .shared,
         completion: @escaping (URL) -> Void
     ) {
-        guard let unsolved = MWebSource.nValue(of: url) else {
+        guard let unsolved = StreamURLParams.nValue(of: url) else {
             completion(url)
             return
         }
@@ -43,7 +43,7 @@ extension SABRDelivery {
                     return
                 }
                 AppLog.player("sabr: n solved")
-                completion(MWebSource.replacingN(in: url, solved: solved))
+                completion(StreamURLParams.replacingN(in: url, solved: solved))
             }
         }
     }

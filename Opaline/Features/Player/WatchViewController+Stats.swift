@@ -56,7 +56,7 @@ extension WatchViewController {
             row(
                 "Video ID / Source",
                 "\(playbackFacade.currentVideoId ?? "?")"
-                    + " / \(kindName(source?.kind))"
+                    + " / \(source?.name ?? "?")"
             ),
             row("Viewport / Frames", viewportValue(dropped: item)),
             row("Current / Selected", resolutionValue(item, source: source))
@@ -72,25 +72,6 @@ extension WatchViewController {
 
     private func row(_ title: String, _ value: String) -> String {
         title.padding(toLength: 19, withPad: " ", startingAt: 0) + value
-    }
-
-    private func kindName(_ kind: VideoSourceKind?) -> String {
-        switch kind {
-        case .androidVR:
-            return "android_vr"
-        case .visionOS:
-            return "visionos"
-        case .mwebPot:
-            return "mweb+pot"
-        case .progressive:
-            return "progressive"
-        case .tv:
-            return "tv"
-        case .auto:
-            return "auto"
-        case nil:
-            return "?"
-        }
     }
 
     private func viewportValue(dropped item: AVPlayerItem?) -> String {

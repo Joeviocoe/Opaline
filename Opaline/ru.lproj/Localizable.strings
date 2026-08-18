@@ -166,7 +166,7 @@
 "settings.footer.autoDub" = "Если язык оригинала видео отличается от языка дубляжа, подходящая аудиодорожка включается автоматически.";
 "settings.footer.home" = "Как показывать полки рекомендаций: единая сетка или горизонтальные ленты в стиле ТВ.";
 "settings.footer.ryd" = "Счётчики дизлайков работают через Return YouTube Dislike (returnyoutubedislike.com) — открытый проект сообщества.";
-"settings.footer.debug" = "Принудительный выбор источника воспроизведения. Обычно используется Android VR с автоматическим фолбэком. Solver server обслуживает источник Mobile Web + pot (выпуск pot и решение n на iOS 12–13).";
+"settings.footer.debug" = "Выберите, какими способами воспроизводить видео и в каком порядке их пробовать. Сервер-решатель отвечает на проверку троттлинга в потоках ТВ-клиента (и выпускает его токен).";
 
 "settings.row.theme" = "Тема";
 "settings.row.appIcon" = "Значок приложения";
@@ -217,8 +217,6 @@
 "settings.row.sponsorblock" = "SponsorBlock";
 "settings.row.sponsorblockSettings" = "Настройки SponsorBlock";
 
-"settings.row.playbackSource" = "Источник";
-"settings.row.streamDelivery" = "Доставка потока";
 "settings.row.resetIdentity" = "Сбросить visitor identity";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "Поделиться логом отладки";
@@ -395,3 +393,7 @@
 "settings.thumbnailQuality.high" = "Высокое (640×360)";
 "settings.thumbnailQuality.maximum" = "Максимальное (1280×720)";
 "settings.footer.thumbnailQuality" = "В режиме «Авто» уровень выбирается по объёму памяти устройства. Чем выше качество, тем больше загрузка и расход памяти на каждую обложку — на устройствах с малым объёмом ОЗУ это может замедлять прокрутку.";
+"settings.row.playbackChain" = "Источники воспроизведения";
+"settings.playbackChain.signInNeeded" = "Войдите, чтобы использовать этот источник";
+"settings.playbackChain.footer" = "Перебираются сверху вниз, пока один не заиграет. Перетащите, чтобы изменить порядок, ненужные выключите.";
+"player.error.noSources" = "Все источники воспроизведения выключены. Включите хотя бы один в «Настройки → Отладка → Источники воспроизведения».";

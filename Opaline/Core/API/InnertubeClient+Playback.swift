@@ -52,9 +52,9 @@ extension InnertubeClient {
         let headers: [String: String] = [
             HTTPHeader.contentType: HTTPHeaderValue.contentTypeJSON,
             HTTPHeader.xYoutubeClientName:
-                DirectPlaybackClient.web.clientHeaderName,
+                InnertubeContexts.webClientHeaderName,
             HTTPHeader.xYoutubeClientVersion:
-                DirectPlaybackClient.web.clientVersion
+                InnertubeContexts.webClientVersion
         ]
         let nextURL = "\(baseURL)\(InnertubeEndpoint.next)"
         execute(
@@ -70,7 +70,7 @@ extension InnertubeClient {
 
     func executeDirectPlayback(
         videoId: String,
-        client: DirectPlaybackClient,
+        client: PlaybackClient,
         token: String,
         poToken: String? = nil,
         visitorData: String? = nil,
@@ -85,7 +85,7 @@ extension InnertubeClient {
             signatureTimestamp: signatureTimestamp
         )
         let headers = client.apiHeaders(token: token, visitorData: visitorData)
-        let playerURL = "\(baseURL)/player\(client.playerURLSuffix)"
+        let playerURL = "\(baseURL)\(client.playerURL)"
         var hitBotCheck = false
         execute(
             urlString: playerURL,
@@ -94,7 +94,7 @@ extension InnertubeClient {
             cancellationToken: cancellationToken,
             sendsCookies: client.sendsCookies,
             isPlayback: true,
-            logTag: "directPlayback(\(client))"
+            logTag: "directPlayback(\(client.name))"
         ) { json -> DirectPlaybackInfo? in
             Self.parseDirectPlayback(
                 json: json, videoId: videoId, client: client
@@ -107,42 +107,6 @@ extension InnertubeClient {
             } else {
                 completion(result)
             }
-        }
-    }
-
-    /// Anonymous MWEB playback: POSTs /player with the mobile-web context +
-    /// STS + `pot` + `visitorData`. The signatureTimestamp is mandatory (else
-    /// UNPLAYABLE "page needs reloaded") and MUST match the player used to
-    /// solve `n` — the caller scrapes both from the same watch page; a stale
-    /// STS gets every media range 403'd. Falls back to the site-wide STS
-    /// only when the caller has none.
-    func fetchMWebPlayback(
-        videoId: String,
-        poToken: String?,
-        visitorData: String?,
-        signatureTimestamp: Int? = nil,
-        cancellationToken: CancellationToken? = nil,
-        completion: @escaping (Result<DirectPlaybackInfo, Error>) -> Void
-    ) {
-        let run: (Int?) -> Void = { [weak self] sts in
-            guard let self, cancellationToken?.isCancelled != true else {
-                return
-            }
-            self.executeDirectPlayback(
-                videoId: videoId,
-                client: .mweb,
-                token: "",
-                poToken: poToken,
-                visitorData: visitorData,
-                signatureTimestamp: sts,
-                cancellationToken: cancellationToken,
-                completion: completion
-            )
-        }
-        if let signatureTimestamp {
-            run(signatureTimestamp)
-        } else {
-            SignatureTimestampService.shared.fetch { run($0) }
         }
     }
 
@@ -225,53 +189,25 @@ extension InnertubeClient {
 private extension InnertubeClient {
     func buildDirectPlaybackBody(
         videoId: String,
-        client: DirectPlaybackClient,
+        client: PlaybackClient,
         poToken: String?,
         signatureTimestamp: Int? = nil
     ) -> [String: Any] {
-        var body = client.context
+        var body = client.innertubeContext
         body["videoId"] = videoId
-        if client.requiresContentCheckFlags {
-            body["contentCheckOk"] = true
-            body["racyCheckOk"] = true
-            var playbackCtx: [String: Any] = [
-                "html5Preference": "HTML5_PREF_WANTS"
-            ]
-            if let sts = signatureTimestamp {
-                playbackCtx["signatureTimestamp"] = sts
-            }
-            body["playbackContext"] = [
-                "contentPlaybackContext": playbackCtx
-            ]
+        body["contentCheckOk"] = true
+        body["racyCheckOk"] = true
+        var playbackCtx: [String: Any] = ["html5Preference": "HTML5_PREF_WANTS"]
+        if let sts = signatureTimestamp {
+            playbackCtx["signatureTimestamp"] = sts
         }
+        body["playbackContext"] = ["contentPlaybackContext": playbackCtx]
         if let poToken, !poToken.isEmpty {
             body["serviceIntegrityDimensions"] = [
                 "poToken": poToken
             ]
         }
-        if case .tv = client {
-            addTVAppInfo(to: &body)
-        }
+        client.decoratePlayerBody(&body)
         return body
-    }
-
-    /// A television names itself in the player context, and the id it gives is
-    /// the one its token is bound to. Without the pair the response still says
-    /// `OK`, but the stream it points at is not the one a TV would get.
-    func addTVAppInfo(to body: inout [String: Any]) {
-        guard var context = body["context"] as? [String: Any],
-              var client = context["client"] as? [String: Any] else {
-            return
-        }
-        client["tvAppInfo"] = [
-            "livingRoomPoTokenId": TVDeviceIdentity.livingRoomPoTokenId,
-            "signedInAccountCount": 1,
-            "appQuality": "TV_APP_QUALITY_FULL_ANIMATION"
-        ]
-        // The context version has to be the one the headers and the media URL's
-        // `cver` name, or the three describe three different televisions.
-        client["clientVersion"] = DirectPlaybackClient.tv.clientVersion
-        context["client"] = client
-        body["context"] = context
     }
 }

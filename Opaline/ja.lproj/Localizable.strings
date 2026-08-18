@@ -205,7 +205,6 @@
 "settings.footer.autoDub" = "動画の元の言語が吹き替え言語と異なる場合、対応する音声トラックが自動的に選択されます。";
 "settings.footer.home" = "おすすめシェルフの表示方法: 連続したグリッドまたはTVスタイルの水平レール。";
 "settings.footer.ryd" = "低評価数は Return YouTube Dislike (returnyoutubedislike.com) によって提供されています — オープンコミュニティプロジェクト。";
-"settings.footer.debug" = "特定の再生ソースを強制。通常は Android VR が自動フォールバックで使用されます。ソルバーサーバーは Mobile Web + pot ソース（ポット発行、iOS 12–13でのn-solving）を提供します。";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "テーマ";
@@ -261,7 +260,6 @@
 "settings.row.sponsorblockSettings" = "SponsorBlock設定";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "再生ソース";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "デバッグログを共有";
 "settings.row.support" = "開発を支援";

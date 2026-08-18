@@ -205,7 +205,6 @@
 "settings.footer.autoDub" = "当视频的原始语言与配音语言不同时，会自动选择对应的音轨。";
 "settings.footer.home" = "推荐栏显示方式：连续网格或电视风格水平轨道。";
 "settings.footer.ryd" = "不喜欢次数由 Return YouTube Dislike (returnyoutubedislike.com) 提供 — 开放社区项目。";
-"settings.footer.debug" = "强制使用特定播放源。通常使用 Android VR 并自动回退。求解器服务器为 Mobile Web + pot 源提供支持（pot 铸造和 iOS 12–13 上的 n-solving）。";
 
 /* Theme rows; segment labels for dark/light/auto modes */
 "settings.row.theme" = "主题";
@@ -261,7 +260,6 @@
 "settings.row.sponsorblockSettings" = "SponsorBlock 设置";
 
 /* Debug rows (values stay technical/English) */
-"settings.row.playbackSource" = "播放源";
 "settings.row.solverServer" = "Solver server";
 "settings.row.shareLog" = "分享调试日志";
 "settings.row.support" = "支持开发";

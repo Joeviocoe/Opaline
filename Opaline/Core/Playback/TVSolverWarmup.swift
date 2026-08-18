@@ -17,18 +17,10 @@ enum TVSolverWarmup {
     private static let probe = "opalinewarmup12345678"
     private static var didWarm = false
 
-    /// Only the signed-in TV path solves `n`: android_vr URLs carry none, and
-    /// anonymously TV is not reachable at all.
+    /// Worth warming only when a step in the user's chain actually solves
+    /// `n` — the anonymous clients' URLs carry none.
     private static var isUseful: Bool {
-        guard OAuthClient.shared.isSignedIn else {
-            return false
-        }
-        switch PlaybackSource.selected {
-        case .auto, .tv:
-            return true
-        case .visionOS, .androidVR, .progressive, .mwebPot:
-            return false
-        }
+        PlaybackChainSettings.activeSteps().contains { $0.requiresSignIn }
     }
 
     /// Call once the app is idle — the home feed settling is the signal for it.

@@ -9,14 +9,19 @@ import Foundation
 /// them is the request, not the playback: `androidVR` (anonymous, formats carry
 /// URLs) and `tv` (OAuth, SABR-only). Which delivery runs follows from what the
 /// response carries, so the TV client lands on SABR without a branch here.
-final class AndroidVRSource: VideoSource {
+final class InnertubeVideoSource: VideoSource {
+    static let deliveryUnavailableError = NSError(
+        domain: "InnertubeVideoSource",
+        code: 1,
+        userInfo: [NSLocalizedDescriptionKey: "Delivery cannot serve this response"]
+    )
     private static let noStreamError = NSError(
-        domain: "AndroidVRSource",
+        domain: "InnertubeVideoSource",
         code: 0,
         userInfo: [NSLocalizedDescriptionKey: "No playable stream"]
     )
 
-    let kind: VideoSourceKind
+    let name: String
     var supportsQualitySelection: Bool { !availableQualities.isEmpty }
     var currentCodecs: String? {
         guard let line = Self.codecsLine(
@@ -31,7 +36,7 @@ final class AndroidVRSource: VideoSource {
     }
     private(set) var availableQualities: [VideoQuality] = []
     private(set) var currentQuality: VideoQuality?
-    // Written by the audio-track extension; see AndroidVRSource+AudioTracks.
+    // Written by the audio-track extension; see InnertubeVideoSource+AudioTracks.
     var availableAudioTracks: [AudioTrack] = []
     var currentAudioTrack: AudioTrack?
     /// The audio format playback is built with — the picked dub, or the
@@ -45,7 +50,11 @@ final class AndroidVRSource: VideoSource {
     /// The decoded po token this source's SABR sessions stream under (TV only).
     var sabrPoToken: Data?
     private let liveHLS: LiveHLSPlayback
-    let client: DirectPlaybackClient
+    let client: PlaybackClient
+    /// How this source's bytes arrive — one delivery, chosen when the source
+    /// was created rather than guessed from the response.
+    let deliveryFactory: StreamDeliveryFactory
+    var listsAudioTracks: Bool { client.listsAudioTracks }
     private(set) var info: DirectPlaybackInfo?
     /// The video `info` belongs to — a rebuild with no playhead of its own
     /// (the auto-dub start) needs it to find the saved one. Also set by the
@@ -59,16 +68,18 @@ final class AndroidVRSource: VideoSource {
 
     init(
         apiClient: WatchService,
+        client: PlaybackClient,
+        name: String,
+        deliveryFactory: StreamDeliveryFactory,
         transport: HTTPTransport = ServiceContainer.mediaTransport,
         resolver: HLSStreamResolver = .shared,
-        client: DirectPlaybackClient = .androidVR,
-        kind: VideoSourceKind = .androidVR,
         poTokenProvider: PoTokenProvider = RemotePoTokenService.shared
     ) {
         self.apiClient = apiClient
         self.transport = transport
         self.client = client
-        self.kind = kind
+        self.name = name
+        self.deliveryFactory = deliveryFactory
         self.poTokenProvider = poTokenProvider
         liveHLS = LiveHLSPlayback(resolver: resolver)
     }
@@ -206,6 +217,10 @@ final class AndroidVRSource: VideoSource {
         resumeAt: Double? = nil,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
+        AppLog.player(
+            "\(name): building with audio \(audio.audioTrackId ?? "default")"
+                + " itag \(audio.itag) xtags \(audio.xtags ?? "-")"
+        )
         deliver(
             DeliveryRequest(info: info, video: video, audio: audio, resumeAt: resumeAt),
             completion: completion
@@ -233,7 +248,7 @@ final class AndroidVRSource: VideoSource {
 
 // MARK: - Live HLS
 
-private extension AndroidVRSource {
+private extension InnertubeVideoSource {
     /// Live streams (no DASH SIDX ladder): [[LiveHLSPlayback]] exposes the
     /// multivariant playlist's variants as qualities and starts on Auto. A
     /// failed playlist fetch degrades to direct playback with no picker.

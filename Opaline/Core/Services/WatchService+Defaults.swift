@@ -31,7 +31,7 @@ extension WatchService {
 
     func fetchDirectPlayback(
         videoId: String,
-        client: DirectPlaybackClient = .androidVR,
+        client: PlaybackClient,
         poToken: String? = nil,
         completion: @escaping (
             Result<DirectPlaybackInfo, Error>
