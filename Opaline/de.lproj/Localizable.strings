@@ -10,6 +10,7 @@
 "player.menu.quality" = "Qualität";
 /* Quality tier that drops the video track to save data */
 "player.quality.audioOnly" = "Nur Audio";
+"player.loop" = "Video wiederholen";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Audiotrack";
 /* Menu item: toggles the playback statistics overlay */

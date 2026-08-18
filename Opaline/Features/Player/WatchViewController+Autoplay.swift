@@ -1,5 +1,72 @@
 import UIKit
 
+// MARK: - End of item
+
+extension WatchViewController {
+    /// The one place playback-ended is decided, for every player state:
+    /// it hangs off `AVPlayerItemDidPlayToEndTime`, so backgrounded and
+    /// PiP playback take the same branch as an on-screen player.
+    @objc
+    func playerItemDidPlayToEnd(
+        _ notification: Notification
+    ) {
+        // Loop beats every autoplay path: no queue jump, no countdown. The
+        // watchtime tracker keeps running with the same cpn, so the repeats
+        // fold into the session it already opened instead of stacking up as
+        // new history entries.
+        if videoPlayerView?.isLooping == true {
+            AppLog.player("playToEnd: loop restart")
+            DispatchQueue.main.async { [weak self] in
+                self?.videoPlayerView?.replay()
+            }
+            return
+        }
+        if let next = queue.nextVideo {
+            playQueueEntry(next)
+            return
+        }
+        guard AutoplayPreference.isEnabled,
+              let nextVideo = watchPage?.nextVideo else {
+            showEndScreen(reason: "no next video or autoplay off")
+            return
+        }
+        playSuggestion(nextVideo)
+    }
+
+    /// Queue playback (mix/playlist) jumps straight to the next entry — the
+    /// countdown overlay is suggestion-autoplay only. The queue is peeked,
+    /// not advanced: navigation syncs it via seekTo.
+    private func playQueueEntry(_ next: Video) {
+        guard AutoplayPreference.isMixEnabled else {
+            showEndScreen(reason: "queue next=\(next.id), mix autoplay off")
+            return
+        }
+        AppLog.player("playToEnd: queue next=\(next.id)")
+        DispatchQueue.main.async { [weak self] in
+            self?.navigateTo(next)
+        }
+    }
+
+    private func playSuggestion(_ nextVideo: Video) {
+        // applicationState is main-thread-only and this notification can
+        // arrive off-main — read it inside the hop.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else {
+                return
+            }
+            let active = UIApplication.shared.applicationState == .active
+            AppLog.player(
+                "playToEnd: suggestion=\(nextVideo.id) active=\(active)"
+            )
+            if active {
+                self.showAutoplayOverlay(for: nextVideo)
+            } else {
+                self.navigateTo(nextVideo)
+            }
+        }
+    }
+}
+
 // MARK: - Autoplay
 
 extension WatchViewController {

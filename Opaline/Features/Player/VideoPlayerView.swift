@@ -89,6 +89,16 @@ final class VideoPlayerView: UIView {
     let ccButton = UIButton(type: .system)
     let speedButton = UIButton(type: .system)
     let audioOnlyButton = UIButton(type: .system)
+    let loopButton = UIButton(type: .system)
+
+    /// Repeat the current video instead of ending it. Per video, not per
+    /// app: `resetVideoState()` clears it whenever another video loads.
+    var isLooping = false {
+        didSet {
+            updateLoopButton()
+        }
+    }
+
     var pipController: AVPictureInPictureController?
     let rewindButton = UIButton(type: .system)
     let playPauseButton = UIButton(type: .system)

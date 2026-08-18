@@ -11,6 +11,7 @@
 "player.menu.settings" = "Cài đặt trình phát";
 "player.menu.quality" = "Chất lượng";
 "player.quality.audioOnly" = "Chỉ âm thanh";
+"player.loop" = "Phát video theo vòng lặp";
 "player.menu.audioTrack" = "Bản âm thanh";
 "player.menu.queue" = "Hàng đợi";
 "player.menu.stats" = "Thống kê chi tiết";

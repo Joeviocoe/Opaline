@@ -10,6 +10,7 @@
 "player.menu.quality" = "Качество";
 /* Quality tier that drops the video track to save data */
 "player.quality.audioOnly" = "Только звук";
+"player.loop" = "Повтор видео";
 "player.menu.audioTrack" = "Аудиодорожка";
 "player.menu.queue" = "Очередь";
 "player.menu.stats" = "Подробная статистика";

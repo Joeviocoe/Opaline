@@ -14,6 +14,7 @@
 "player.menu.quality" = "Kalite";
 /* Quality tier that drops the video track to save data */
 "player.quality.audioOnly" = "Yalnızca ses";
+"player.loop" = "Videoyu Döngüye Al";
 /* Menu item + picker title: audio track (dub) selection */
 "player.menu.audioTrack" = "Ses parçası";
 /* Menu item: toggles the playback statistics overlay */
