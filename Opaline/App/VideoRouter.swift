@@ -8,6 +8,8 @@ final class VideoRouter {
     var shortsViewControllerFactory: ((Video, ShortsEntry) -> UIViewController)?
     /// Lets Core screens push a channel without importing Features.
     var channelViewControllerFactory: ((String, String) -> UIViewController)?
+    /// Same idea for a playlist opened from a link.
+    var playlistViewControllerFactory: ((Playlist) -> UIViewController)?
     private var panel: PlayerPanelViewController?
 
     /// The video currently loaded in the mini/full player, if any — lets
@@ -74,10 +76,16 @@ final class VideoRouter {
 
     /// Opens a video known only by id — e.g. a `ytlite://` deep link or a
     /// tapped youtube.com link. `seconds` is the link's own timecode
-    /// (`?t=87`), which outranks stored watch progress. Presents on the
+    /// (`?t=87`), which outranks stored watch progress, and `isShort` sends
+    /// it to the vertical feed instead of the watch screen. Presents on the
     /// currently selected tab of `MainTabBarController`; a no-op if the main
     /// UI isn't up yet.
-    func openVideoId(_ videoId: String, startAt seconds: Double? = nil) {
+    func openVideoId(
+        _ videoId: String,
+        startAt seconds: Double? = nil,
+        isShort: Bool = false,
+        playlistId: String? = nil
+    ) {
         if let seconds {
             WatchProgressStore.shared.setLinkStart(
                 seconds: seconds, forVideoId: videoId
@@ -88,7 +96,32 @@ final class VideoRouter {
         else {
             return
         }
-        open(video: Video(id: videoId), from: presenter)
+        open(
+            video: Video(id: videoId, isShort: isShort, playlistId: playlistId),
+            from: presenter
+        )
+    }
+
+    /// Opens a playlist known only by id — a shared `youtube.com/playlist`
+    /// link. The screen fetches its own contents, so a title placeholder is
+    /// all it needs to start.
+    func openPlaylistId(_ playlistId: String) {
+        guard let makePlaylist = playlistViewControllerFactory,
+              let tabBar = keyWindowMainTabBar,
+              let presenter = tabBar.selectedViewController
+        else {
+            return
+        }
+        let playlist = Playlist(
+            id: playlistId,
+            title: "common.playlist".localized,
+            description: "",
+            thumbnailURL: nil,
+            itemCount: nil
+        )
+        presenter.visibleNavigationController?.pushViewController(
+            makePlaylist(playlist), animated: true
+        )
     }
 
     func minimize() {

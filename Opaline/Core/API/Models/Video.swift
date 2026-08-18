@@ -57,8 +57,10 @@ struct Video: Codable {
     /// `WatchViewController` refetches everything from the network by
     /// videoId, so the placeholder fields are only ever shown for the
     /// instant before that fetch replaces them.
-    init(id: String) {
+    init(id: String, isShort: Bool = false, playlistId: String? = nil) {
         self.id = id
+        self.isShort = isShort
+        self.playlistId = playlistId
         title = ""
         channelId = nil
         channelName = ""
@@ -68,8 +70,6 @@ struct Video: Codable {
         publishedAt = nil
         duration = nil
         isLive = false
-        playlistId = nil
-        isShort = false
     }
 
     init(from decoder: Decoder) throws {

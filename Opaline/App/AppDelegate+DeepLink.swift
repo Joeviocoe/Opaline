@@ -10,7 +10,7 @@ extension AppDelegate {
         open url: URL,
         options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
-        guard YouTubeLinkParser.videoId(from: url) != nil else {
+        guard YouTubeLinkParser.handles(url) else {
             return false
         }
         guard window?.rootViewController is RootContainerViewController else {
@@ -31,11 +31,19 @@ extension AppDelegate {
     }
 
     private func openVideo(from url: URL) {
-        guard let videoId = YouTubeLinkParser.videoId(from: url) else {
+        let playlistId = YouTubeLinkParser.playlistId(from: url)
+        let videoOrMixSeed = YouTubeLinkParser.videoId(from: url)
+            ?? YouTubeLinkParser.mixSeedVideoId(from: url)
+        guard let videoId = videoOrMixSeed else {
+            // A real playlist, with a page of its own to show.
+            playlistId.map(VideoRouter.shared.openPlaylistId)
             return
         }
         VideoRouter.shared.openVideoId(
-            videoId, startAt: YouTubeLinkParser.startSeconds(from: url)
+            videoId,
+            startAt: YouTubeLinkParser.startSeconds(from: url),
+            isShort: YouTubeLinkParser.isShort(url),
+            playlistId: playlistId
         )
     }
 }

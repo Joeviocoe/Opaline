@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 struct AppDependencies {
     let feedService: FeedService
@@ -30,6 +30,14 @@ struct AppDependencies {
             shortsService: ServiceContainer.shorts,
             channelRSSService: ServiceContainer.channelRSS,
             localePreferences: ServiceContainer.localePreferences
+        )
+    }
+
+    func makePlaylistViewController(playlist: Playlist) -> UIViewController {
+        PlaylistVideosViewController(
+            playlist: playlist,
+            service: playlistService,
+            channelViewControllerFactory: makeChannelViewController
         )
     }
 

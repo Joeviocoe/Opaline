@@ -32,6 +32,46 @@ enum YouTubeLinkParser {
         return nil
     }
 
+    /// A mix is a queue YouTube builds around one video, and its id is `RD`
+    /// followed by that video's id. It has no playlist page — asking browse
+    /// for `VL` + a mix id answers 400 — so a mix link opens the player with
+    /// the mix as its queue, which is what the official app does.
+    static func mixSeedVideoId(from url: URL) -> String? {
+        guard let list = playlistId(from: url), list.hasPrefix("RD") else {
+            return nil
+        }
+        let seed = String(list.dropFirst(2))
+        return seed.count == 11 ? seed : nil
+    }
+
+    /// Whether this link is one the app can open at all. One rule, because
+    /// the share extension and the deep-link handler have to agree on it.
+    static func handles(_ url: URL) -> Bool {
+        videoId(from: url) != nil || playlistId(from: url) != nil
+    }
+
+    /// The playlist a link points at — the `list` of a `/playlist` page, or
+    /// the one a watch link carries alongside the video.
+    static func playlistId(from url: URL) -> String? {
+        guard url.scheme?.lowercased() == "ytlite"
+            || (url.host.map { isYouTubeHost($0.lowercased()) } ?? false)
+        else {
+            return nil
+        }
+        return queryValue(url, name: "list")
+    }
+
+    /// Whether the link points at a short — `/shorts/ID`, or the `shorts=1`
+    /// a `ytlite://` link carries it over with. The watch screen and the
+    /// vertical feed are different destinations, so the shape of the original
+    /// link has to survive the trip through the deep link.
+    static func isShort(_ url: URL) -> Bool {
+        if pathComponents(url).first == "shorts" {
+            return true
+        }
+        return queryValue(url, name: "shorts") == "1"
+    }
+
     /// Seconds a link asks playback to start at — `?t=87`, `?t=1m30s`, or the
     /// `start=` an embed carries. Nil when the link has no timecode.
     static func startSeconds(from url: URL) -> Double? {

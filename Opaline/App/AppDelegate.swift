@@ -161,6 +161,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         VideoRouter.shared.channelViewControllerFactory = { [dependencies] id, name in
             dependencies.makeChannelViewController(channelId: id, channelName: name)
         }
+        VideoRouter.shared.playlistViewControllerFactory = { [dependencies] playlist in
+            dependencies.makePlaylistViewController(playlist: playlist)
+        }
         VideoRouter.shared.watchViewControllerFactory = { [dependencies] video in
             dependencies.makeWatchViewController(video: video)
         }
