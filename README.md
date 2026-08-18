@@ -26,18 +26,17 @@
 > **It plays again. Update to the latest version.**
 >
 > Getting there meant rebuilding the way the app fetches video. There are
-> several sources now, and Settings → Playback lets you drag them into the order
-> you want or switch off the ones you do not:
+> several sources now, listed in Settings → Playback, where you can drag them
+> into the order you want or switch off the ones you do not:
 >
-> - **visionOS · byte ranges** and **visionOS · SABR** — the fast ones. No
->   sign-in needed, dubbed audio works.
-> - **TV · SABR** — up to 1080p, but it needs you to be signed in and takes
->   longer to start.
-> - **Progressive 360p** — one quality, starts instantly.
+> - two fast ones, no sign-in needed, dubbed audio works
+> - one that reaches 1080p but needs you to be signed in and takes longer to
+>   start
+> - one that serves a single 360p quality and starts instantly
 >
 > Sources are tried from the top down until one plays. Content made for kids
-> comes only from **TV · SABR** or **Progressive 360p**. Livestreams on kids
-> channels still do not play.
+> comes only from the 1080p source or the 360p one. Livestreams on kids channels
+> still do not play.
 >
 > Nothing to do beyond updating. Your account, settings and history are
 > untouched.
