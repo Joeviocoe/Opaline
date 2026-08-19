@@ -68,11 +68,13 @@ extension WatchViewController {
             current: current.title,
             next: queue.nextVideo?.title
         )
-        // The strip floats over the scroll view, so the list needs room to
-        // scroll clear of it.
-        scrollView.contentInset.bottom = queueBar.isHidden
-            ? 0
-            : QueueBarView.height + 16
+        // The strip floats over a list, so that list needs room to scroll
+        // clear of it — the related sidebar in landscape, the page itself in
+        // portrait.
+        let clearance = queueBar.isHidden ? 0 : QueueBarView.height + 16
+        scrollView.contentInset.bottom = queueBarSlot.isLandscape ? 0 : clearance
+        relatedCollectionView.contentInset.bottom =
+            queueBarSlot.isLandscape ? clearance : 0
     }
 
     /// Keeps an open panel in step with the queue, which on a mix moves on
