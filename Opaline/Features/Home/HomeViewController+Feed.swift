@@ -109,22 +109,38 @@ extension HomeViewController {
                 }
                 let ms = Int(Date().timeIntervalSince(t0) * 1_000)
                 self.spinner.stopAnimating()
+                self.handleFeedResult(result, ms: ms)
+            }
+        }
+    }
+
+    /// The refresh control and the "feed settled" signal wait for the
+    /// expanded page — the first shelf costs a few more requests.
+    private func handleFeedResult(
+        _ result: Result<FeedPage, Error>,
+        ms: Int
+    ) {
+        switch result {
+        case .success(let page):
+            AppLog.home("network fetch done \(ms)ms videos=\(page.videos.count)")
+            expandRecommended(page) { [weak self] expanded in
+                guard let self else {
+                    return
+                }
                 self.endRefreshing()
                 self.postFeedDidSettle()
-                switch result {
-                case .success(let page):
-                    AppLog.home("network fetch done \(ms)ms videos=\(page.videos.count)")
-                    self.applyFreshFeed(page)
-                case .failure(let err):
-                    AppLog.home("network fetch failed \(ms)ms: \(err)")
-                    self.endChipDiscovery()
-                    // Keep cached/stale content when revalidation
-                    // fails offline — only blank screens get the error.
-                    if self.videoCount == 0 {
-                        self.setPage(FeedPage(videos: [], continuation: nil))
-                        self.showFeedError()
-                    }
-                }
+                self.applyFreshFeed(expanded)
+            }
+        case .failure(let err):
+            AppLog.home("network fetch failed \(ms)ms: \(err)")
+            endRefreshing()
+            postFeedDidSettle()
+            endChipDiscovery()
+            // Keep cached/stale content when revalidation
+            // fails offline — only blank screens get the error.
+            if videoCount == 0 {
+                setPage(FeedPage(videos: [], continuation: nil))
+                showFeedError()
             }
         }
     }
@@ -156,4 +172,108 @@ extension Notification.Name {
     static let homeFeedDidSettle = Notification.Name(
         "homeFeedDidSettle"
     )
+}
+
+// MARK: - Recommended shelf expansion
+
+extension HomeViewController {
+    /// Pages fetched from the first shelf before the feed is shown.
+    /// Ten videos each.
+    private static let recommendedExtraPages = 3
+
+    /// Swaps the first shelf's videos and advances its token, so the
+    /// later shelf drain carries on past what was just consumed
+    /// instead of replaying it.
+    private static func replacingFirstShelf(
+        in page: FeedPage,
+        with videos: [Video],
+        oldToken: String,
+        newToken: String?
+    ) -> FeedPage {
+        var page = page
+        page.videos = videos + page.videos.dropFirst(
+            page.shelves?.first?.count ?? 0
+        )
+        var shelves = page.shelves ?? []
+        shelves[0] = FeedShelf(
+            title: shelves[0].title,
+            count: videos.count,
+            continuation: newToken
+        )
+        page.shelves = shelves
+        page.shelfContinuations = page.shelfContinuations?.compactMap {
+            guard $0.token == oldToken else {
+                return $0
+            }
+            return newToken.map {
+                ShelfContinuation(title: shelves[0].title, token: $0)
+            }
+        }
+        return page
+    }
+
+    /// The TV home page pins the top of its first shelf — the same
+    /// video sat first for a week, and a refresh only ever swapped
+    /// the second tile. The shelf's own continuation is not pinned,
+    /// so the first shelf is deepened by a few pages and shuffled;
+    /// everything below it is left exactly as the server sent it.
+    func expandRecommended(
+        _ page: FeedPage,
+        completion: @escaping (FeedPage) -> Void
+    ) {
+        guard let shelves = page.shelves, let first = shelves.first,
+              let token = first.continuation
+        else {
+            completion(page)
+            return
+        }
+        drainRecommended(
+            token: token,
+            pagesLeft: Self.recommendedExtraPages,
+            videos: []
+        ) { extra, next in
+            var merged = Array(page.videos.prefix(first.count)) + extra
+            var seen = Set<String>()
+            merged = merged.filter { seen.insert($0.id).inserted }.shuffled()
+            AppLog.home(
+                "recommended expanded \(first.count) → \(merged.count) videos"
+            )
+            completion(Self.replacingFirstShelf(
+                in: page, with: merged, oldToken: token, newToken: next
+            ))
+        }
+    }
+
+    /// Walks the first shelf's continuation chain, collecting videos.
+    /// A failed page ends the walk with what it has — the feed still
+    /// shows, just less deep.
+    private func drainRecommended(
+        token: String,
+        pagesLeft: Int,
+        videos: [Video],
+        completion: @escaping ([Video], String?) -> Void
+    ) {
+        guard pagesLeft > 0 else {
+            completion(videos, token)
+            return
+        }
+        service.fetchNextPage(continuation: token) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self, let page = try? result.get() else {
+                    completion(videos, token)
+                    return
+                }
+                guard let next = page.continuation else {
+                    completion(videos + page.videos, nil)
+                    return
+                }
+                self.drainRecommended(
+                    token: next,
+                    pagesLeft: pagesLeft - 1,
+                    videos: videos + page.videos,
+                    completion: completion
+                )
+            }
+        }
+    }
 }
