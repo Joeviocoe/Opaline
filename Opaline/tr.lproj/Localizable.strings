@@ -95,6 +95,8 @@
 "video.menu.watchLater" = "Daha sonra izle";
 "video.menu.watchLaterName" = "Daha sonra izle";
 "video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.removeFromQueue" = "Sıradan kaldır";
+"video.menu.goToChannel" = "Kanal";
 "video.menu.queued" = "Kuyruğa eklendi";
 
 /* ===== Player: comments ===== */
@@ -457,6 +459,10 @@
 "common.copied" = "Kopyalandı";
 "common.edit" = "Düzenle";
 "player.menu.queue" = "Sıra";
+"player.queue.shuffle" = "Karıştır";
+"player.queue.repeat" = "Tekrarla";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "Sıradaki: %1$@";
 "player.comments.viewReplies" = "Yanıtları göster";
 "player.comments.hideReplies" = "Yanıtları gizle";
 "player.comments.moreReplies" = "Daha fazla yanıt göster";

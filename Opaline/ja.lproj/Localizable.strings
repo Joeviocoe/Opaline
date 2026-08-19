@@ -95,6 +95,8 @@
 "video.menu.watchLater" = "後で見る";
 "video.menu.watchLaterName" = "後で見る";
 "video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.removeFromQueue" = "キューから削除";
+"video.menu.goToChannel" = "チャンネル";
 "video.menu.queued" = "キューに追加しました";
 
 /* ===== Player: comments ===== */
@@ -457,6 +459,10 @@
 "common.copied" = "コピーしました";
 "common.edit" = "編集";
 "player.menu.queue" = "キュー";
+"player.queue.shuffle" = "シャッフル";
+"player.queue.repeat" = "リピート";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "次へ: %1$@";
 "player.comments.viewReplies" = "返信を表示";
 "player.comments.hideReplies" = "返信を非表示";
 "player.comments.moreReplies" = "返信をさらに表示";

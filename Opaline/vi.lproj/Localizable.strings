@@ -14,6 +14,10 @@
 "player.loop" = "Phát video theo vòng lặp";
 "player.menu.audioTrack" = "Bản âm thanh";
 "player.menu.queue" = "Hàng đợi";
+"player.queue.shuffle" = "Phát ngẫu nhiên";
+"player.queue.repeat" = "Lặp lại";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "Video tiếp theo: %1$@";
 "player.menu.stats" = "Thống kê chi tiết";
 "player.menu.subtitles" = "Phụ đề";
 
@@ -71,6 +75,8 @@
 "video.menu.watchLater" = "Xem sau";
 "video.menu.watchLaterName" = "Xem sau";
 "video.menu.removeFrom" = "Xóa khỏi %1$@";
+"video.menu.removeFromQueue" = "Xoá khỏi hàng đợi";
+"video.menu.goToChannel" = "Kênh";
 "video.menu.queued" = "Đã thêm vào hàng đợi";
 
 /* ===== Player: comments ===== */
