@@ -40,7 +40,10 @@ extension WatchViewController {
         // The portrait panel can overlap the player at its expanded detent —
         // a no-op if it's currently attached to `sidebarContainer` instead
         // (landscape) or not attached at all (collapsed).
-        view.bringSubviewToFront(commentsPanel)
+        if let sheet = sheetView {
+            view.bringSubviewToFront(sheet)
+        }
+        view.bringSubviewToFront(queueBar)
     }
 
     /// The size-dependent half of `updateLayoutForSize`, split out only to
@@ -58,7 +61,7 @@ extension WatchViewController {
         if relatedCollectionView.bounds.width > 0 {
             updateRelatedLayout(isLandscape: isLandscape, containerSize: resolved)
         }
-        layoutCommentsPanel(isLandscape: isLandscape)
+        layoutSheet(isLandscape: isLandscape)
         // Swap last: applying a layout that still carries the item size from
         // the previous width makes the flow layout complain.
         let expected = isLandscape ? landscapeRelatedLayout : portraitRelatedLayout
@@ -163,9 +166,6 @@ extension WatchViewController {
     ) {
         let cols = relatedColumns(isLandscape: isLandscape)
         let si = layout.sectionInset
-        let playlistCount = CGFloat(
-            isPlaylistMode ? queue.videos.count : 0
-        )
         let relatedCount = CGFloat(
             visibleRelatedVideos.count
         )
@@ -176,19 +176,13 @@ extension WatchViewController {
                 + max(0, rows - 1)
                 * layout.minimumLineSpacing
         }
-        let playlistHeight = sectionHeight(playlistCount)
-        let relatedHeight = sectionHeight(relatedCount)
-        // Every section carries a header now (Mix and Related both).
-        let totalSections = isPlaylistMode ? 2 : 1
-        let totalHeaders = CGFloat(totalSections)
-            * WatchViewController.relatedHeaderHeight
-        let total = playlistHeight
-            + relatedHeight + totalHeaders
+        let total = sectionHeight(relatedCount)
+            + WatchViewController.relatedHeaderHeight
         // Portrait: related is always full height — the comments panel is a
         // floating overlay above it now, not a slot swap (see
         // `WatchViewController+CommentsPanel`). Landscape still swaps: the
         // panel and related share the sidebar slot there.
-        let desired = (isLandscape && isCommentsExpanded) ? 0 : total
+        let desired = (isLandscape && isSheetExpanded) ? 0 : total
         if relatedSlot.height?.constant != desired {
             relatedSlot.height?.constant = desired
         }

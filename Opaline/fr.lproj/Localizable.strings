@@ -91,6 +91,8 @@
 "video.menu.watchLater" = "À regarder plus tard";
 "video.menu.watchLaterName" = "À regarder plus tard";
 "video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.removeFromQueue" = "Retirer de la file d'attente";
+"video.menu.goToChannel" = "Chaîne";
 "video.menu.queued" = "Ajouté à la file d'attente";
 
 /* ===== Player: comments ===== */
@@ -453,6 +455,10 @@
 "common.copied" = "Copié";
 "common.edit" = "Modifier";
 "player.menu.queue" = "File d'attente";
+"player.queue.shuffle" = "Lecture aléatoire";
+"player.queue.repeat" = "Répéter";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "Suivant : %1$@";
 "player.comments.viewReplies" = "Afficher les réponses";
 "player.comments.hideReplies" = "Masquer les réponses";
 "player.comments.moreReplies" = "Afficher plus de réponses";

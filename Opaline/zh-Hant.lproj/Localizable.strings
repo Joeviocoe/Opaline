@@ -95,6 +95,8 @@
 "video.menu.watchLater" = "稍後觀看";
 "video.menu.watchLaterName" = "稍後觀看";
 "video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.removeFromQueue" = "從待播清單中移除";
+"video.menu.goToChannel" = "頻道";
 "video.menu.queued" = "已加入佇列";
 
 /* ===== Player: comments ===== */
@@ -457,6 +459,10 @@
 "common.copied" = "已複製";
 "common.edit" = "編輯";
 "player.menu.queue" = "待播清單";
+"player.queue.shuffle" = "隨機播放";
+"player.queue.repeat" = "循環播放";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "接下來：%1$@";
 "player.comments.viewReplies" = "查看回覆";
 "player.comments.hideReplies" = "隱藏回覆";
 "player.comments.moreReplies" = "顯示更多回覆";

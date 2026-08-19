@@ -20,6 +20,10 @@
 "player.menu.audioTrack" = "Audio track";
 /* Menu item + list title: the videos queued after this one */
 "player.menu.queue" = "Queue";
+"player.queue.shuffle" = "Shuffle";
+"player.queue.repeat" = "Repeat";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "Up next: %1$@";
 /* Menu item: toggles the playback statistics overlay */
 "player.menu.stats" = "Stats for nerds";
 /* Picker title: subtitles */
@@ -174,6 +178,8 @@
 "video.menu.watchLaterName" = "Watch later";
 /* Removes the video from a playlist; %1$@ = playlist name */
 "video.menu.removeFrom" = "Remove from %1$@";
+"video.menu.removeFromQueue" = "Remove from queue";
+"video.menu.goToChannel" = "Channel";
 /* Toast after "Play next in queue" */
 "video.menu.queued" = "Added to queue";
 

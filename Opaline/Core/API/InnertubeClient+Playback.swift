@@ -2,10 +2,13 @@ import Foundation
 
 // MARK: - Playback & Subscriptions
 extension InnertubeClient {
+    /// `playlistParams` replaces the plain queue params — the shelf's
+    /// Shuffle button hands us a set that asks for the same queue re-ordered.
     func executeWatchNext(
         video: Video,
         token: String,
         anonymous: Bool = false,
+        playlistParams: String? = nil,
         cancellationToken: CancellationToken? = nil,
         completion: @escaping (Result<WatchPage, Error>) -> Void
     ) {
@@ -13,12 +16,11 @@ extension InnertubeClient {
         body["videoId"] = video.id
         if let pid = video.playlistId {
             body["playlistId"] = pid
-            body["params"] = "OALAAQE%3D"
+            body["params"] = playlistParams ?? "OALAAQE%3D"
         }
-        var headers = anonHeaders()
-        if !anonymous && !token.isEmpty {
-            headers[HTTPHeader.authorization] = "Bearer \(token)"
-        }
+        let headers = anonymous
+            ? anonHeaders()
+            : watchHeaders(token: token)
         let nextURL = "\(baseURL)\(InnertubeEndpoint.next)"
         execute(
             urlString: nextURL,
@@ -32,6 +34,72 @@ extension InnertubeClient {
                 fallbackVideo: video
             )
         } completion: { completion($0) }
+    }
+
+    // MARK: Queue
+
+    /// The queue past the 20-item window the watch page shipped with, one
+    /// "Show more" page at a time.
+    func fetchQueuePage(
+        continuation: String,
+        completion: @escaping (Result<FeedPage, Error>) -> Void
+    ) {
+        withWatchToken { [weak self] token in
+            guard let self else {
+                return
+            }
+            var body = self.tvContext
+            body[JSONKey.continuation] = continuation
+            self.execute(
+                urlString: "\(self.baseURL)\(InnertubeEndpoint.next)",
+                body: body,
+                headers: self.watchHeaders(token: token),
+                logTag: "queuePage"
+            ) { json -> FeedPage? in
+                InnertubeClient.parseQueueContinuation(json)
+            } completion: { completion($0) }
+        }
+    }
+
+    /// The same watch page, with the queue shuffled by the server rather
+    /// than by us: our own shuffle could only reach the window we hold.
+    func fetchShuffledQueue(
+        video: Video,
+        params: String,
+        completion: @escaping (Result<WatchPage, Error>) -> Void
+    ) {
+        withWatchToken { [weak self] token in
+            self?.executeWatchNext(
+                video: video,
+                token: token,
+                playlistParams: params,
+                completion: completion
+            )
+        }
+    }
+
+    /// Auth the way the watch endpoint wants it: the session's bearer when
+    /// there is one, anonymous otherwise. A queue has to reach a private
+    /// playlist while signed in and still answer when signed out, so a token
+    /// that cannot be refreshed falls back rather than failing the call.
+    func withWatchToken(
+        _ perform: @escaping (String) -> Void
+    ) {
+        guard OAuthClient.shared.isSignedIn else {
+            perform("")
+            return
+        }
+        OAuthClient.shared.validToken { result in
+            perform((try? result.get()) ?? "")
+        }
+    }
+
+    func watchHeaders(token: String) -> [String: String] {
+        var headers = anonHeaders()
+        if !token.isEmpty {
+            headers[HTTPHeader.authorization] = "Bearer \(token)"
+        }
+        return headers
     }
 
     // MARK: Comments

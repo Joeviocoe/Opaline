@@ -36,7 +36,9 @@ extension InnertubeClient {
             commentCount: parseCommentCount(json),
             nextVideo: autoplayNextVideo(json),
             playlistTitle: pivot?.title,
-            playlistVideos: pivot?.videos
+            playlistVideos: pivot?.videos,
+            queueContinuation: pivot?.continuation,
+            shuffleParams: pivot?.shuffleParams
         )
     }
 

@@ -36,8 +36,25 @@ enum VideoCardHelper {
     }
 
     /// Configures duration label and live badge for a video.
-    static func configureBadges(video: Video, durationLabel: UILabel, liveBadgeView: UILabel?) {
+    /// `mixBadge` marks a card that opens a queue rather than a single
+    /// video: the server hands a mix playlist to plenty of ordinary music
+    /// videos, and the official app labels those the same way.
+    static func configureBadges(
+        video: Video,
+        durationLabel: UILabel,
+        liveBadgeView: UILabel?,
+        mixBadge: UILabel? = nil
+    ) {
         durationLabel.backgroundColor = ThemeManager.shared.durationBackground
+        if let mixBadge, video.playlistId != nil {
+            // One chip in the corner, not two: the mix label takes the
+            // duration's place, the way the official app does it.
+            mixBadge.isHidden = false
+            durationLabel.isHidden = true
+            liveBadgeView?.isHidden = true
+            return
+        }
+        mixBadge?.isHidden = true
         if video.isLive {
             liveBadgeView?.isHidden = false
             // Cells without a badge view of their own reuse the duration slot.

@@ -13,6 +13,10 @@
 "player.loop" = "Повтор видео";
 "player.menu.audioTrack" = "Аудиодорожка";
 "player.menu.queue" = "Очередь";
+"player.queue.shuffle" = "Перемешать";
+"player.queue.repeat" = "Повторять";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "Далее: %1$@";
 "player.menu.stats" = "Подробная статистика";
 "player.menu.subtitles" = "Субтитры";
 
@@ -110,6 +114,8 @@
 "video.menu.watchLater" = "Смотреть позже";
 "video.menu.watchLaterName" = "Смотреть позже";
 "video.menu.removeFrom" = "Удалить из «%1$@»";
+"video.menu.removeFromQueue" = "Удалить из очереди";
+"video.menu.goToChannel" = "Канал";
 "video.menu.queued" = "Добавлено в очередь";
 
 /* ===== Player: comments ===== */

@@ -23,6 +23,12 @@ final class WatchProgressStore {
 
     private let fractionKey = "WatchProgressStore.fractions"
     private let localTimesKey = "WatchProgressStore.localTimes"
+    /// Set by the player for a video that plays as part of a queue: those
+    /// open at their start, whoever asks. Video sources read this store
+    /// directly and build the stream at the saved playhead, so the rule has
+    /// to live here rather than in the watch screen — checked there, the
+    /// source resumed anyway.
+    var suppressResume = false
     private let maxEntries = 200
     private let persistDebounceInterval: TimeInterval = 5
     /// How long a locally recorded position outranks the server.
@@ -145,6 +151,9 @@ final class WatchProgressStore {
         forVideoId videoId: String,
         duration: Double?
     ) -> Double? {
+        guard !suppressResume else {
+            return nil
+        }
         lock.lock()
         let link = linkStart
         lock.unlock()

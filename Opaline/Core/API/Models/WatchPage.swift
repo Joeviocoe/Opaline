@@ -28,6 +28,12 @@ struct WatchPage: Codable {
     let nextVideo: Video?
     let playlistTitle: String?
     let playlistVideos: [Video]?
+    /// Handles on the rest of the queue: a token for the items past the
+    /// window `playlistVideos` holds, and the params that ask for the same
+    /// queue shuffled. Both belong to one live response, so they stay out of
+    /// the coding keys — a page read back from disk has no queue anyway.
+    var queueContinuation: String?
+    var shuffleParams: String?
     /// Set when this page came off the disk instead of the network, so the
     /// rail below the video can say what it is actually listing. Left out of
     /// the coding keys deliberately: it describes how a page was delivered,

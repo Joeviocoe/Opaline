@@ -23,26 +23,14 @@ extension WatchViewController: UICollectionViewDataSource {
         }
     }
 
-    func numberOfSections(
-        in collectionView: UICollectionView
-    )
-        -> Int {
-        isPlaylistMode ? 2 : 1
-    }
-
     func collectionView(
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     )
         -> Int {
-        if isPlaylistMode {
-            return section == 0
-                ? max(0, queue.videos.count - 1)
-                : visibleRelatedVideos.count
-        }
         // Placeholders while the page loads: an empty list would let the
         // sidebar lay out at no height and come back scrolled.
-        return isLoadingRelated
+        isLoadingRelated
             ? WatchPaging.relatedBatch
             : visibleRelatedVideos.count
     }
@@ -89,9 +77,7 @@ extension WatchViewController: UICollectionViewDataSource {
                 for: indexPath
             ) as? PlaylistSectionHeaderView
             ?? PlaylistSectionHeaderView()
-        let title: String = if isPlaylistMode, indexPath.section == 0 {
-            queue.playlistTitle ?? "player.related.mix".localized
-        } else if watchPage?.servedOffline ?? false {
+        let title: String = if watchPage?.servedOffline ?? false {
             "player.related.downloaded".localized
         } else {
             "player.related.title".localized
@@ -128,14 +114,10 @@ extension WatchViewController: UICollectionViewDelegate {
 }
 
 extension WatchViewController {
-    /// The collection carries the queue in section 0 when in playlist mode
-    /// (offset by one — the current video is not listed) and the related
-    /// videos otherwise. Shared with prefetching.
+    /// Related only — the queue lives in its own panel now
+    /// (`WatchViewController+Queue`). Shared with prefetching.
     func relatedVideo(at indexPath: IndexPath) -> Video? {
-        if isPlaylistMode, indexPath.section == 0 {
-            return queue.videos[safe: indexPath.item + 1]
-        }
-        return visibleRelatedVideos[safe: indexPath.item]
+        visibleRelatedVideos[safe: indexPath.item]
     }
 }
 

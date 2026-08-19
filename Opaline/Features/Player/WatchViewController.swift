@@ -55,8 +55,10 @@ final class WatchViewController: UIViewController {
     /// `commentsPreview` is pinned, so re-sorting doesn't swap the row.
     var commentsContinuation: String?, commentsPreview: Comment?
     var playlistOptions: [PlaylistAddOption]?
-    /// Whether the comments panel is on screen (open or opening).
-    var isCommentsExpanded = false
+    /// What the sliding panel is showing, or nil when it is closed. Set as
+    /// the panel is presented and cleared as it starts to leave, so the
+    /// dismiss animation still runs against the view `sheetView` holds.
+    var presentedSheet: PlayerSheetKind?
     var videoPlayerView: VideoPlayerView?
     /// Retains the active resource loader (AVURLAsset holds its delegate weakly),
     /// e.g. a source's HLS proxy.
@@ -84,6 +86,7 @@ final class WatchViewController: UIViewController {
     let playbackFacade = PlaybackFacade()
     var pageLoadToken = CancellationToken()
     var isOuterScrollViewDragging = false, didSeekToSavedPosition = false
+    var isLoadingQueuePage = false
     /// Source-reported: duration, and where the stream itself starts.
     var preparedDuration: Double?, itemStartsAt: Double?
     var captionTracks: [SubtitleTrack] = [], activeSubtitleLanguage: String?
@@ -131,8 +134,14 @@ final class WatchViewController: UIViewController {
     )
     /// The one instance that ever backs the collapsed preview row.
     let commentPreviewContentView = CommentContentView()
-    /// Expanded-panel chrome — see `WatchViewController+CommentsPanel`.
-    lazy var commentsPanel = CommentsPanelView(tableView: commentsTableView)
+    /// Expanded-panel chrome — see `WatchViewController+Sheet`.
+    lazy var commentsPanel = PlayerSheetView(list: commentsTableView)
+    var loadedQueuePanel: QueuePanelController?
+    /// Bottom strip naming the queue while one is playing — see
+    /// `WatchViewController+Queue`.
+    let queueBar = QueueBarView()
+    /// The panel on screen right now, of the two.
+    var sheetView: PlayerSheetView?
     let actionBar = UIStackView()
     let likeButton = UIButton(type: .system)
     let dislikeButton = UIButton(type: .system)
@@ -153,12 +162,12 @@ final class WatchViewController: UIViewController {
     var relatedSlot = SlotLayout()
     /// Portrait panel's draggable top edge, in `view` coordinates. `.landscape`/
     /// `.isLandscape` on the slot double as the sidebar bookkeeping when it isn't.
-    var commentsPanelTopConstraint: NSLayoutConstraint?, commentsPanelSlot = SlotLayout()
+    var sheetTopConstraint: NSLayoutConstraint?, sheetSlot = SlotLayout()
     /// True mid-pan (layout passes must not fight the user's finger); true
     /// when resting at the full-screen detent rather than below the player.
     /// Set while a drag or a presentation owns the panel's offset, so the
     /// layout pass leaves it alone instead of snapping it to a detent.
-    var isCommentsPanelOffsetPinned = false, isCommentsPanelDetentExpanded = false
+    var isSheetOffsetPinned = false, isSheetDetentExpanded = false
     var playerTopConstraint: NSLayoutConstraint?
     var playerLeadingConstraint: NSLayoutConstraint?
     var playerTrailingConstraint: NSLayoutConstraint?
@@ -196,10 +205,6 @@ final class WatchViewController: UIViewController {
             return .all
         }
         return orientationLock ?? .allButUpsideDown
-    }
-
-    var isPlaylistMode: Bool {
-        queue.playlistTitle != nil
     }
 
     // MARK: - Initializers
@@ -242,6 +247,8 @@ final class WatchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // The first video never passes through `loadVideoInternal`.
+        applyResumePolicy(for: initialVideo)
         setupLayout()
         applyTheme()
         setupNavigationBar()
