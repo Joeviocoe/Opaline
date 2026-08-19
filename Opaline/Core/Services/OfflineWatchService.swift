@@ -89,8 +89,9 @@ final class OfflineWatchService: WatchService {
     }
 
     /// Same rule as the page: the network answer wins, and what was saved
-    /// with the video stands in when there is none. A sort the user picks
-    /// offline has no stored answer and simply reports as unavailable.
+    /// with the video stands in when there is none. The saved copy holds one
+    /// order, so its sort menu is dropped: a chip nobody can answer offline
+    /// only empties the list the video came with.
     func fetchComments(
         videoId: String,
         continuation: String?,
@@ -110,7 +111,12 @@ final class OfflineWatchService: WatchService {
                 return
             }
             AppLog.player("comments served from the downloaded copy")
-            completion(.success(stored))
+            completion(.success(CommentsPage(
+                title: stored.title,
+                comments: stored.comments,
+                continuation: stored.continuation,
+                sortOptions: []
+            )))
         }
     }
 
@@ -121,11 +127,21 @@ final class OfflineWatchService: WatchService {
         inner.fetchWatchtimeURLs(videoId: videoId, completion: completion)
     }
 
+    /// This one reports failure as an empty list, so "nothing came back" is
+    /// what the fallback keys on.
     func fetchCaptionTracks(
         videoId: String,
         completion: @escaping ([SubtitleTrack]) -> Void
     ) {
-        inner.fetchCaptionTracks(videoId: videoId, completion: completion)
+        inner.fetchCaptionTracks(videoId: videoId) { tracks in
+            guard tracks.isEmpty,
+                  let stored = DownloadStore.captionTracks(for: videoId) else {
+                completion(tracks)
+                return
+            }
+            AppLog.player("caption tracks served from the downloaded copy")
+            completion(stored)
+        }
     }
 
     func fetchAudioTrackList(

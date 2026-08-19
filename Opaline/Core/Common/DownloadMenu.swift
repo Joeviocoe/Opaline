@@ -92,7 +92,13 @@ enum DownloadMenu {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let options) where !options.isEmpty:
-                    present(options, for: video, from: presenter, anchor: anchor)
+                    guard let pinned = pick(from: options) else {
+                        present(
+                            options, for: video, from: presenter, anchor: anchor
+                        )
+                        return
+                    }
+                    start(video, option: pinned, from: presenter)
                 case .success:
                     toast("downloads.error.noOptions", in: presenter, isError: true)
                 case .failure(let error):
@@ -101,6 +107,16 @@ enum DownloadMenu {
                 }
             }
         }
+    }
+
+    /// The rendition the settings ask for: the best one at or below the
+    /// chosen height, or the smallest available when even that is too big.
+    /// nil means the setting is "ask", and the menu opens instead.
+    private static func pick(from options: [DownloadOption]) -> DownloadOption? {
+        guard let wanted = DownloadPreferences.preferredHeight else {
+            return nil
+        }
+        return options.first { $0.height <= wanted } ?? options.last
     }
 
     private static func present(

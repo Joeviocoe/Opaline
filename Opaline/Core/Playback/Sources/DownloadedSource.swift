@@ -8,6 +8,13 @@ import Foundation
 /// while the app is backgrounded. Everything above the player shell talks to
 /// `VideoSource`, so an offline video is not a special case anywhere else.
 ///
+/// Subtitles come from what was saved beside the file: the local item carries
+/// no caption tracks of its own, and nothing else on this path asks the
+/// network for them. Only the languages chosen at download time are listed,
+/// online as well as offline.
+/// ponytail: saved languages only; ask the network for the rest if someone
+/// misses a language while online.
+///
 /// The saved file always plays first, with no network in the way. What the
 /// network could serve is probed behind it: online, the quality menu offers
 /// the full ladder next to the saved copy; offline the probe simply fails and
@@ -97,6 +104,7 @@ final class DownloadedSource: VideoSource {
         AppLog.player("downloaded file \(videoId): \(Int(seconds))s")
         completion(.success(PreparedPlayback(
             item: AVPlayerItem(asset: asset),
+            captions: DownloadStore.captionTracks(for: videoId) ?? [],
             duration: seconds.isFinite ? seconds : nil
         )))
     }

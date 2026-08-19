@@ -13,6 +13,12 @@ enum UserDefaultsKeys {
         static let selected = "defaultVideoQuality"
     }
 
+    enum Downloads {
+        static let quality = "downloadQuality"
+        static let comments = "downloadComments"
+        static let captions = "downloadCaptions"
+    }
+
     enum Cache {
         static let feedPersistenceEnabled = "feedCachePersistenceEnabled"
         static let feedCacheDays = "feedCacheDays"

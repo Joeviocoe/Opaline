@@ -14,10 +14,34 @@ final class SubtitleService {
         self.transport = transport
     }
 
+    /// Cues for a saved video, if this track was stored with it. Keyed by
+    /// language, because the signed timedtext URL the track carries today is
+    /// not the one it was saved under.
+    private static func storedCues(for track: SubtitleTrack) -> [SubtitleCue]? {
+        guard let videoId = videoId(in: track.url) else {
+            return nil
+        }
+        return DownloadStore.cues(
+            language: track.languageCode, for: videoId
+        )
+    }
+
+    private static func videoId(in url: URL) -> String? {
+        URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?
+            .first { $0.name == "v" }?
+            .value
+    }
+
     func load(
         track: SubtitleTrack,
         completion: @escaping ([SubtitleCue]) -> Void
     ) {
+        if let stored = Self.storedCues(for: track), !stored.isEmpty {
+            AppLog.player("subtitles served from the downloaded copy")
+            completion(stored)
+            return
+        }
         // Append format=vtt to get WebVTT
         guard var comps = URLComponents(
             url: track.url,

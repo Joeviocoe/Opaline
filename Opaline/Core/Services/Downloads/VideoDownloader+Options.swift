@@ -37,16 +37,39 @@ extension VideoDownloader {
             }
     }
 
+    /// The dub the video would start on, judged the same way a live playback
+    /// judges it. A saved copy holds one audio track, so it has to be the one
+    /// this person would have heard: downloading the original of an English
+    /// video that plays back in Russian gives them a file they cannot watch.
     private static func audioFormat(
         in info: DirectPlaybackInfo
     ) -> DashFormatInfo? {
         let mp4 = info.allDashAudioFormats.filter {
             $0.hasDirectURL && $0.codecs.hasPrefix("mp4a")
         }
+        let dubbed = AutoDubPreference
+            .autoDubTrack(in: mp4.compactMap(track))
+            .flatMap { wanted in
+                mp4.first { $0.audioTrackId == wanted.id }
+            }
         let original = mp4.first { $0.audioIsOriginal }
         let fallback = info.dashAudioFormat.flatMap {
             $0.hasDirectURL && $0.codecs.hasPrefix("mp4a") ? $0 : nil
         }
-        return original ?? mp4.first ?? fallback
+        if let dubbed {
+            AppLog.downloads("saving the \(dubbed.audioTrackId ?? "?") dub")
+        }
+        return dubbed ?? original ?? mp4.first ?? fallback
+    }
+
+    private static func track(_ format: DashFormatInfo) -> AudioTrack? {
+        guard let id = format.audioTrackId else {
+            return nil
+        }
+        return AudioTrack(
+            id: id,
+            displayName: format.audioTrackName ?? id,
+            isDefault: format.audioIsDefault
+        )
     }
 }

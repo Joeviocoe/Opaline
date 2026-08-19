@@ -6,10 +6,11 @@ import UIKit
 final class SettingsViewController: UIViewController {
     enum Row {
         case pageAppearance, pageLanguage, pagePlayback, pageShorts
-        case pageSponsorBlock, pageCache, pageDebug
+        case pageSponsorBlock, pageCache, pageDebug, pageDownloads
         case theme, autoDarkStart, autoDarkEnd, appIcon
         case appLanguage, region
         case quality, backgroundPlayback, pipEnabled, hideStatusBar
+        case downloadQuality, downloadComments, downloadCaptions
         case showShorts, shortsPlayer, shortsGrouping
         case autoZoomToFill
         case autoplayEnabled, autoplayMixEnabled
@@ -30,7 +31,7 @@ final class SettingsViewController: UIViewController {
     }
     enum Page {
         case root, appearance, language, playback, shorts
-        case sponsorBlock, cache, debug
+        case sponsorBlock, cache, debug, downloads
     }
     struct Section {
         let header: String?
@@ -187,7 +188,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         }
         switch row {
         case .pageAppearance, .pageLanguage, .pagePlayback, .pageShorts,
-             .pageSponsorBlock, .pageCache, .pageDebug:
+             .pageSponsorBlock, .pageCache, .pageDebug, .pageDownloads:
             return UITableViewCell()  // unreachable: makePageCell handles these
         case .theme:
             return makeThemeCell()
@@ -214,6 +215,21 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return makeDisclosureCell(
                 "settings.row.defaultQuality".localized,
                 value: VideoQualityStore.displayName
+            )
+        case .downloadQuality:
+            return makeDisclosureCell(
+                "settings.row.downloadQuality".localized,
+                value: DownloadPreferences.qualityDisplayName
+            )
+        case .downloadComments:
+            return makeDisclosureCell(
+                "settings.row.downloadComments".localized,
+                value: DownloadPreferences.comments.displayName
+            )
+        case .downloadCaptions:
+            return makeDisclosureCell(
+                "settings.row.downloadCaptions".localized,
+                value: DownloadPreferences.captionsDisplayName
             )
         case .backgroundPlayback:
             let bgOn = BackgroundPlaybackService.isEnabled
@@ -396,9 +412,24 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             handleDebugSelection, handleThemeSelection,
             handleLanguageSelection, handleAutoDubSelection,
             handleNotificationsSelection, handleAboutSelection,
+            handleDownloadSelection,
             handleGeneralSelection
         ]
         _ = handlers.first { $0(row) }
+    }
+
+    private func handleDownloadSelection(_ row: Row) -> Bool {
+        switch row {
+        case .downloadQuality:
+            showDownloadQualityPicker()
+        case .downloadComments:
+            showDownloadCommentsPicker()
+        case .downloadCaptions:
+            showDownloadCaptionsPicker()
+        default:
+            return false
+        }
+        return true
     }
 
     private func handleGeneralSelection(_ row: Row) -> Bool {
@@ -891,6 +922,11 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             UIAlertAction(title: "common.ok".localized, style: .default)
         )
         present(alert, animated: true)
+    }
+
+    /// Repaints the rows after a picker changed something they display.
+    func reloadTable() {
+        tableView.reloadData()
     }
 
     func configureCenteredPopover(_ controller: UIViewController) {

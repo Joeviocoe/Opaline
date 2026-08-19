@@ -1,6 +1,6 @@
 import Foundation
 
-struct SubtitleCue {
+struct SubtitleCue: Codable {
     let start: TimeInterval
     let end: TimeInterval
     let text: String

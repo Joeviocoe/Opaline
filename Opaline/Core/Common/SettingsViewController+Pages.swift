@@ -7,6 +7,32 @@ import UIKit
 // shared — only the section layout differs per page.
 
 extension SettingsViewController {
+    /// A table rather than a switch: it is a straight mapping, and one
+    /// entry per page keeps the lint-visible complexity flat as pages are
+    /// added.
+    private static let pageTitleKeys: [Page: String] = [
+        .root: "settings.title",
+        .appearance: "settings.section.appearance",
+        .language: "settings.section.language",
+        .playback: "settings.section.playback",
+        .shorts: "shorts.shelf.title",
+        .sponsorBlock: "settings.section.sponsorblock",
+        .cache: "settings.section.cache",
+        .debug: "settings.section.debug",
+        .downloads: "settings.section.downloads"
+    ]
+
+    private static let rowPages: [Row: Page] = [
+        .pageAppearance: .appearance,
+        .pageLanguage: .language,
+        .pagePlayback: .playback,
+        .pageShorts: .shorts,
+        .pageSponsorBlock: .sponsorBlock,
+        .pageCache: .cache,
+        .pageDownloads: .downloads,
+        .pageDebug: .debug
+    ]
+
     var pageTitle: String { Self.title(for: page) }
 
     var sections: [Section] {
@@ -27,6 +53,8 @@ extension SettingsViewController {
             return cacheSections
         case .debug:
             return debugSections
+        case .downloads:
+            return downloadsSections
         }
     }
 
@@ -39,7 +67,7 @@ extension SettingsViewController {
                 footer: nil,
                 rows: [
                     .pageAppearance, .pageLanguage,
-                    .pagePlayback, .pageShorts,
+                    .pagePlayback, .pageShorts, .pageDownloads,
                     .notificationSettings, .pageSponsorBlock,
                     .pageCache, .pageDebug
                 ]
@@ -73,6 +101,16 @@ extension SettingsViewController {
                 header: nil,
                 footer: "settings.footer.thumbnailQuality".localized,
                 rows: [.thumbnailQuality]
+            )
+        ]
+    }
+
+    private var downloadsSections: [Section] {
+        [
+            Section(
+                header: nil,
+                footer: "settings.footer.downloads".localized,
+                rows: [.downloadQuality, .downloadComments, .downloadCaptions]
             )
         ]
     }
@@ -175,24 +213,7 @@ extension SettingsViewController {
     // MARK: Category rows
 
     static func title(for page: Page) -> String {
-        switch page {
-        case .root:
-            return "settings.title".localized
-        case .appearance:
-            return "settings.section.appearance".localized
-        case .language:
-            return "settings.section.language".localized
-        case .playback:
-            return "settings.section.playback".localized
-        case .shorts:
-            return "shorts.shelf.title".localized
-        case .sponsorBlock:
-            return "settings.section.sponsorblock".localized
-        case .cache:
-            return "settings.section.cache".localized
-        case .debug:
-            return "settings.section.debug".localized
-        }
+        (pageTitleKeys[page] ?? "settings.title").localized
     }
 
     func makePageCell(_ row: Row) -> UITableViewCell? {
@@ -214,23 +235,6 @@ extension SettingsViewController {
     }
 
     private func childPage(_ row: Row) -> Page? {
-        switch row {
-        case .pageAppearance:
-            return .appearance
-        case .pageLanguage:
-            return .language
-        case .pagePlayback:
-            return .playback
-        case .pageShorts:
-            return .shorts
-        case .pageSponsorBlock:
-            return .sponsorBlock
-        case .pageCache:
-            return .cache
-        case .pageDebug:
-            return .debug
-        default:
-            return nil
-        }
+        Self.rowPages[row]
     }
 }

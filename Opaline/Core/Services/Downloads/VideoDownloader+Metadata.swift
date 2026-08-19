@@ -13,6 +13,7 @@ extension VideoDownloader {
         fetchSegments(for: video.id)
         fetchVotes(for: video.id)
         fetchComments(for: video.id)
+        fetchCaptions(for: video.id)
     }
 
     private func fetchVotes(for videoId: String) {

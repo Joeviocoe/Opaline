@@ -1,6 +1,6 @@
 import Foundation
 
-struct SubtitleTrack {
+struct SubtitleTrack: Codable {
     let name: String
     let languageCode: String
     let url: URL

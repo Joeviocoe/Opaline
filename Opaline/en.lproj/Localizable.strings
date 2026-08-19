@@ -111,6 +111,24 @@
 /* Action bar: download */
 "player.action.download" = "Download";
 
+/* ===== Downloads settings ===== */
+
+/* Settings category */
+"settings.section.downloads" = "Downloads";
+"settings.footer.downloads" = "What is saved along with a video. Comments and subtitles are stored as they were at the moment of the download.";
+"settings.row.downloadQuality" = "Quality";
+"settings.row.downloadComments" = "Comments";
+"settings.row.downloadCaptions" = "Subtitles";
+/* Quality setting: show the picker every time instead of deciding up front */
+"downloads.quality.ask" = "Ask every time";
+"downloads.comments.none" = "Don't download";
+"downloads.comments.top" = "Top comments";
+"downloads.comments.newest" = "Newest first";
+"downloads.captions.none" = "Don't download";
+/* Subtitle setting value when several languages are picked; %@ is a count */
+"downloads.captions.count" = "%@ languages";
+"settings.footer.downloadCaptions" = "Subtitles in these languages are saved with a video when it has them.";
+
 /* ===== Downloads ===== */
 
 /* Title of the quality prompt shown before a download starts */

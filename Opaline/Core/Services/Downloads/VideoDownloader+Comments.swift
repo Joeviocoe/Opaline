@@ -9,7 +9,38 @@ extension VideoDownloader {
     static let commentPagesToSave = 5
 
     func fetchComments(for videoId: String) {
-        collectComments(videoId: videoId, continuation: nil, collected: [])
+        switch DownloadPreferences.comments {
+        case .none:
+            return
+        case .top:
+            collectComments(videoId: videoId, continuation: nil, collected: [])
+        case .newest:
+            collectNewest(videoId: videoId)
+        }
+    }
+
+    /// The sort menu comes from the server already localized, so the wanted
+    /// order cannot be matched by name — it is the second entry, the way the
+    /// screen itself lists them. Its first page is stored under a nil token
+    /// so that offline it answers as page one.
+    private func collectNewest(videoId: String) {
+        apiClient.fetchComments(
+            videoId: videoId, continuation: nil, cancellationToken: nil
+        ) { [weak self] result in
+            guard case .success(let page) = result,
+                  let newest = page.sortOptions[safe: 1] else {
+                self?.collectComments(
+                    videoId: videoId, continuation: nil, collected: []
+                )
+                return
+            }
+            self?.collectComments(
+                videoId: videoId,
+                continuation: newest.token,
+                collected: [],
+                storeFirstAsPageOne: true
+            )
+        }
     }
 
     /// One page after another, following the server's own tokens — the same
@@ -17,7 +48,8 @@ extension VideoDownloader {
     private func collectComments(
         videoId: String,
         continuation: String?,
-        collected: [DownloadStore.StoredComments]
+        collected: [DownloadStore.StoredComments],
+        storeFirstAsPageOne: Bool = false
     ) {
         apiClient.fetchComments(
             videoId: videoId,
@@ -28,10 +60,11 @@ extension VideoDownloader {
                 self?.finishComments(collected, videoId: videoId)
                 return
             }
+            let key = storeFirstAsPageOne && collected.isEmpty
+                ? nil
+                : continuation
             let pages = collected + [
-                DownloadStore.StoredComments(
-                    requestedWith: continuation, page: page
-                )
+                DownloadStore.StoredComments(requestedWith: key, page: page)
             ]
             guard let next = page.continuation,
                   pages.count < Self.commentPagesToSave else {
@@ -39,7 +72,10 @@ extension VideoDownloader {
                 return
             }
             self?.collectComments(
-                videoId: videoId, continuation: next, collected: pages
+                videoId: videoId,
+                continuation: next,
+                collected: pages,
+                storeFirstAsPageOne: storeFirstAsPageOne
             )
         }
     }

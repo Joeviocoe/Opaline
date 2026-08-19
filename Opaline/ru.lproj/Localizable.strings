@@ -70,6 +70,21 @@
 "player.action.removedFrom" = "Удалено из «%1$@»";
 "player.action.download" = "Скачать";
 
+/* ===== Downloads settings ===== */
+
+"settings.section.downloads" = "Скачивание";
+"settings.footer.downloads" = "Что сохраняется вместе с видео. Комментарии и субтитры остаются такими, какими были в момент скачивания.";
+"settings.row.downloadQuality" = "Качество";
+"settings.row.downloadComments" = "Комментарии";
+"settings.row.downloadCaptions" = "Субтитры";
+"downloads.quality.ask" = "Спрашивать каждый раз";
+"downloads.comments.none" = "Не скачивать";
+"downloads.comments.top" = "Топ комментариев";
+"downloads.comments.newest" = "Сначала новые";
+"downloads.captions.none" = "Не скачивать";
+"downloads.captions.count" = "Языков: %@";
+"settings.footer.downloadCaptions" = "Субтитры на этих языках сохраняются вместе с видео, если они у него есть.";
+
 /* ===== Downloads ===== */
 
 "downloads.quality.title" = "Качество скачивания";
