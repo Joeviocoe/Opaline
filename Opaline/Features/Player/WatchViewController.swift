@@ -159,7 +159,7 @@ final class WatchViewController: UIViewController {
     // MARK: - Constraints
 
     var playerAspectConstraint: NSLayoutConstraint?
-    var relatedSlot = SlotLayout()
+    var relatedSlot = SlotLayout(), queueBarSlot = SlotLayout()
     /// Portrait panel's draggable top edge, in `view` coordinates. `.landscape`/
     /// `.isLandscape` on the slot double as the sidebar bookkeeping when it isn't.
     var sheetTopConstraint: NSLayoutConstraint?, sheetSlot = SlotLayout()

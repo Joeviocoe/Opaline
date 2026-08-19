@@ -1,5 +1,35 @@
 import UIKit
 
+/// Rows the full width of the panel. The panel is the width of the sidebar
+/// in landscape and the width of the screen in portrait, and it moves
+/// between the two as the device turns.
+private final class QueueRowLayout: UICollectionViewFlowLayout {
+    /// The width the current row size was measured against. Comparing the
+    /// incoming bounds with the collection view's own is no use: by the time
+    /// the callback runs the view already carries the new bounds, so the two
+    /// always match and the stale size is kept.
+    private var laidOutWidth: CGFloat = 0
+
+    /// Row size is set here rather than answered from
+    /// `sizeForItemAt`, because a bounds-change invalidation does not
+    /// re-ask the delegate for its metrics — the rows kept the width of the
+    /// orientation they were built in, so sidebar rows ran off the edge of a
+    /// portrait screen and portrait rows tiled two per line in the sidebar.
+    override func prepare() {
+        super.prepare()
+        let width = collectionView?.bounds.width ?? 0
+        laidOutWidth = width
+        let size = CGSize(width: width, height: QueuePanelController.rowHeight)
+        if width > 0, itemSize != size {
+            itemSize = size
+        }
+    }
+
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        newBounds.width != laidOutWidth
+    }
+}
+
 /// The playing queue as a panel: the list the watch screen used to bury in
 /// the related feed, with the queue's own controls in its header.
 ///
@@ -32,7 +62,7 @@ final class QueuePanelController: NSObject {
 
     private let queue: PlaybackQueue
     private let listView: UICollectionView
-    private let layout = UICollectionViewFlowLayout()
+    private let layout = QueueRowLayout()
     private let shuffleButton = UIButton(type: .system)
     private let repeatButton = UIButton(type: .system)
 
@@ -154,7 +184,7 @@ final class QueuePanelController: NSObject {
 // MARK: - List
 
 extension QueuePanelController: UICollectionViewDataSource,
-    UICollectionViewDelegateFlowLayout {
+    UICollectionViewDelegate {
     func collectionView(
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
@@ -189,18 +219,6 @@ extension QueuePanelController: UICollectionViewDataSource,
             self?.onMenu?(video, anchor)
         }
         return videoCell
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    )
-        -> CGSize {
-        CGSize(
-            width: collectionView.bounds.width,
-            height: Self.rowHeight
-        )
     }
 
     func collectionView(

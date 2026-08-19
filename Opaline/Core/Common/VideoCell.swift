@@ -25,6 +25,10 @@ class VideoCell: UICollectionViewCell {
     private let menuButton = UIButton(type: .system)
     private var representedChannelId: String?
     private var cachedTitleHeight: CGFloat = 0
+    /// The width the cached height was measured at. Rotation changes the
+    /// width without re-configuring the cell, and a height measured against
+    /// the other width leaves the lines under the title pushed out of place.
+    private var cachedTitleWidth: CGFloat = 0
     var onChannelTap: (() -> Void)?
     var onMenuTap: ((UIView) -> Void)?
 
@@ -57,10 +61,10 @@ class VideoCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         let cellWidth = contentView.bounds.width
-        if !forceGridLayout && cellWidth > 350 {
-            layoutHorizontal(cellWidth: cellWidth)
-        } else {
+        if isGridLayout {
             layoutGrid(cellWidth: cellWidth)
+        } else {
+            layoutHorizontal(cellWidth: cellWidth)
         }
         thumbnail.maxPixelSize = ThumbnailSizing.pixelSize(
             forDisplayWidth: thumbnail.bounds.width,
@@ -79,10 +83,9 @@ class VideoCell: UICollectionViewCell {
             return
         }
         let width = max(34, mixBadge.intrinsicContentSize.width + 8)
-        let isGrid = forceGridLayout || contentView.bounds.width <= 350
         mixBadge.frame = CGRect(
-            x: thumbnail.bounds.width - width - (isGrid ? 6 : 4),
-            y: thumbnail.bounds.height - (isGrid ? 24 : 22),
+            x: thumbnail.bounds.width - width - (isGridLayout ? 6 : 4),
+            y: thumbnail.bounds.height - (isGridLayout ? 24 : 22),
             width: width,
             height: 18
         )
@@ -207,10 +210,26 @@ extension VideoCell {
 // MARK: - Layout
 
 extension VideoCell {
+    /// Artwork the full width of the row with the text under it, versus
+    /// artwork on the left and the text beside it. Width alone used to
+    /// decide, which broke wherever the row is wide but short: the queue
+    /// panel in the iPad sidebar is 340pt across with 110pt rows, wide
+    /// enough to be called narrow and far too short to draw a grid card, so
+    /// the artwork spilled over the rows below it. A grid card needs room
+    /// for 16:9 artwork before anything else, so the height decides too.
+    private var isGridLayout: Bool {
+        let cellWidth = contentView.bounds.width
+        guard forceGridLayout || cellWidth <= 350 else {
+            return false
+        }
+        return contentView.bounds.height >= cellWidth * 9.0 / 16.0
+    }
+
     private func computeTitleHeight(for width: CGFloat) -> CGFloat {
-        if cachedTitleHeight > 0 {
+        if cachedTitleHeight > 0, cachedTitleWidth == width {
             return cachedTitleHeight
         }
+        cachedTitleWidth = width
         let height = titleLabel.sizeThatFits(
             CGSize(width: width, height: 60)
         ).height

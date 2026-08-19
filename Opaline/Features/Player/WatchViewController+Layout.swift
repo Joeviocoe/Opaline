@@ -365,21 +365,35 @@ extension WatchViewController {
         tv.separatorStyle = .none
     }
 
-    /// Pinned to the bottom of the screen, above the safe area, over
-    /// whatever the scroll view has there. Hidden until a queue exists.
+    /// Pinned to the bottom, above the safe area, over whatever is under it.
+    /// Portrait that is the page, so the strip spans the screen. Landscape
+    /// puts the comments under the player and the queue's own list in the
+    /// sidebar, so a full-width strip lay over the comments — on an iPad wide
+    /// enough for both, it was lost there. It spans the sidebar instead, over
+    /// the list it belongs to. Hidden until a queue exists.
     private func setupQueueBar() {
         queueBar.isHidden = true
         queueBar.onTap = { [weak self] in
             self?.showQueue()
         }
         let safe = view.safeAreaLayoutGuide
-        NSLayoutConstraint.activate([
+        queueBarSlot.portrait = [
             queueBar.leadingAnchor.constraint(
                 equalTo: safe.leadingAnchor, constant: 8
             ),
             queueBar.trailingAnchor.constraint(
                 equalTo: safe.trailingAnchor, constant: -8
+            )
+        ]
+        queueBarSlot.landscape = [
+            queueBar.leadingAnchor.constraint(
+                equalTo: sidebarContainer.leadingAnchor, constant: 8
             ),
+            queueBar.trailingAnchor.constraint(
+                equalTo: sidebarContainer.trailingAnchor, constant: -8
+            )
+        ]
+        NSLayoutConstraint.activate(queueBarSlot.portrait + [
             queueBar.bottomAnchor.constraint(
                 equalTo: safe.bottomAnchor, constant: -8
             ),

@@ -70,7 +70,23 @@ extension WatchViewController {
         }
     }
 
+    /// Moves the queue strip between spanning the page and spanning the
+    /// sidebar.
+    private func activateQueueBarSlot(isLandscape: Bool) {
+        guard queueBarSlot.isLandscape != isLandscape else {
+            return
+        }
+        queueBarSlot.isLandscape = isLandscape
+        let (on, off) = isLandscape
+            ? (queueBarSlot.landscape, queueBarSlot.portrait)
+            : (queueBarSlot.portrait, queueBarSlot.landscape)
+        NSLayoutConstraint.deactivate(off)
+        NSLayoutConstraint.activate(on)
+        updateQueueBar()
+    }
+
     func activateLandscapeLayout() {
+        activateQueueBarSlot(isLandscape: true)
         scrollTrailingConstraint?.isActive = false
         scrollToSidebarConstraint?.isActive = true
         sidebarTopConstraint?.isActive = true
@@ -85,6 +101,7 @@ extension WatchViewController {
     }
 
     func activatePortraitLayout() {
+        activateQueueBarSlot(isLandscape: false)
         bottomCommentsConstraint?.isActive = false
         scrollToSidebarConstraint?.isActive = false
         scrollTrailingConstraint?.isActive = true
