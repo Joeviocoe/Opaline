@@ -75,6 +75,8 @@
 "video.menu.watchLater" = "Дивитися пізніше";
 "video.menu.watchLaterName" = "Дивитися пізніше";
 "video.menu.removeFrom" = "Видалити з «%1$@»";
+"video.menu.removeFromQueue" = "Видалити з черги";
+"video.menu.goToChannel" = "Канал";
 "video.menu.queued" = "Додано до черги";
 
 /* ===== Player: comments ===== */
@@ -384,6 +386,10 @@
 "shorts.shelf.title" = "Відео Shorts";
 "common.close" = "Закрити";
 "player.menu.queue" = "Черга";
+"player.queue.shuffle" = "Перемішати";
+"player.queue.repeat" = "Повторювати";
+/* %1$@ = title of the video coming next in the queue */
+"player.queue.upNext" = "Далі: %1$@";
 "settings.row.mainThreadWatchdog" = "Main Thread Watchdog";
 
 "settings.row.thumbnailQuality" = "Якість обкладинок";

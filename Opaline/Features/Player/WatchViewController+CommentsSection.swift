@@ -20,21 +20,14 @@ extension WatchViewController {
     }
 
     /// Portrait: the panel is a floating overlay above the untouched related
-    /// list (see `WatchViewController+CommentsPanel`). Landscape: it still
-    /// swaps into the related list's sidebar slot, one visible at a time.
+    /// list (see `WatchViewController+Sheet`). Landscape: it still swaps into
+    /// the related list's sidebar slot, one visible at a time.
     private func setCommentsExpanded(_ expanded: Bool) {
-        isCommentsExpanded = expanded
         commentsTableView.reloadData()
-        view.setNeedsLayout()
-        // Layout first, animate second. The other order let
-        // `layoutCommentsPanel` assign the panel's final offset outside the
-        // animation block, so opening snapped into place while closing —
-        // which returns early once `isCommentsExpanded` is false — animated.
-        updateLayoutForSize()
         if expanded {
-            presentCommentsPanel()
+            presentSheet(.comments, content: commentsPanel)
         } else {
-            dismissCommentsPanel()
+            collapseSheet()
         }
     }
 }

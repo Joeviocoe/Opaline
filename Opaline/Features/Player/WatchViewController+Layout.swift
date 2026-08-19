@@ -57,6 +57,12 @@ extension WatchViewController {
         nc.addObserver(self, selector: #selector(appWillEnterForeground), name: fg, object: nil)
         nc.addObserver(
             self,
+            selector: #selector(queueDidChange),
+            name: PlaybackQueue.didChangeNotification,
+            object: nil
+        )
+        nc.addObserver(
+            self,
             selector: #selector(audioTracksDidChange(_:)),
             name: .sourceAudioTracksDidChange,
             object: nil
@@ -120,7 +126,8 @@ extension WatchViewController {
         // the tap survives the whole drag and opens a video on lift-off.
         scrollView.canCancelContentTouches = true
         scrollView.delegate = self
-        [scrollView, playerContainer, sidebarContainer].forEach { view.addSubview($0) }
+        [scrollView, playerContainer, sidebarContainer, queueBar]
+            .forEach { view.addSubview($0) }
         scrollView.addSubview(contentView)
         let pc = playerContainer, sv = scrollView
         let sc = sidebarContainer, safe = view.safeAreaLayoutGuide
@@ -331,6 +338,7 @@ extension WatchViewController {
         cv.addSubview(commentsStackView)
         setupCommentsTableView()
         setupCommentsPanel()
+        setupQueueBar()
     }
 
     /// The always-visible "Comments" title above the collapsed preview card
@@ -357,13 +365,46 @@ extension WatchViewController {
         tv.separatorStyle = .none
     }
 
+    /// Pinned to the bottom of the screen, above the safe area, over
+    /// whatever the scroll view has there. Hidden until a queue exists.
+    private func setupQueueBar() {
+        queueBar.isHidden = true
+        queueBar.onTap = { [weak self] in
+            self?.showQueue()
+        }
+        let safe = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            queueBar.leadingAnchor.constraint(
+                equalTo: safe.leadingAnchor, constant: 8
+            ),
+            queueBar.trailingAnchor.constraint(
+                equalTo: safe.trailingAnchor, constant: -8
+            ),
+            queueBar.bottomAnchor.constraint(
+                equalTo: safe.bottomAnchor, constant: -8
+            ),
+            queueBar.heightAnchor.constraint(
+                equalToConstant: QueueBarView.height
+            )
+        ])
+    }
+
     private func setupCommentsPanel() {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCommentsPanelPan))
-        commentsPanel.dragRegion.addGestureRecognizer(pan)
+        makeSheetDraggable(commentsPanel)
         commentsPanel.onSelectSort = { [weak self] index in
             self?.selectCommentSort(at: index)
         }
         commentsPanel.isHidden = true
+    }
+
+    /// Both panels drag by their handle-and-header region; the table view
+    /// underneath keeps its own scroll gesture.
+    func makeSheetDraggable(_ sheet: PlayerSheetView) {
+        let pan = UIPanGestureRecognizer(
+            target: self,
+            action: #selector(handleSheetPan)
+        )
+        sheet.dragRegion.addGestureRecognizer(pan)
     }
 
     /// A UIStackView does not draw its own `backgroundColor` before iOS 14 —

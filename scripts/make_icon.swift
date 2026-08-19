@@ -42,7 +42,9 @@ let fullSet: [(String, String)] = [
     ("arrow.counterclockwise", "icon_replay"),
     ("backward.end.fill", "icon_previous"),
     ("forward.end.fill", "icon_next"),
-    ("repeat", "icon_loop")
+    ("repeat", "icon_loop"),
+    ("shuffle", "icon_shuffle"),
+    ("chevron.up", "icon_chevron_up")
 ]
 
 /// Renders the symbol huge, then reports the image plus its ink bounds so

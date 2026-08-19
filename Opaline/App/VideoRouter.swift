@@ -131,14 +131,24 @@ final class VideoRouter {
     /// Pushes a channel screen onto the tab underneath the player and
     /// collapses the player to the mini bar — matching the official app,
     /// which never lets a pushed screen cover the expanded player.
-    func openChannel(id: String, name: String) {
-        guard let factory = channelViewControllerFactory,
-              let tabNav = panel?.owner?.selectedViewController as? UINavigationController
-        else {
+    /// `presenter` is the fallback for callers with no player open — the
+    /// action menu opens from feeds as well as from the watch screen.
+    func openChannel(
+        id: String,
+        name: String,
+        from presenter: UIViewController? = nil
+    ) {
+        guard let factory = channelViewControllerFactory else {
             return
         }
-        tabNav.pushViewController(factory(id, name), animated: true)
-        minimize()
+        let channel = factory(id, name)
+        if let tabNav = panel?.owner?.selectedViewController as? UINavigationController {
+            tabNav.pushViewController(channel, animated: true)
+            minimize()
+            return
+        }
+        presenter?.visibleNavigationController?
+            .pushViewController(channel, animated: true)
     }
 
     /// Brings the full player back — used when PiP asks the app to restore

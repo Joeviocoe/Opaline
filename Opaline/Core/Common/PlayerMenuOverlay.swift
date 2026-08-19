@@ -31,8 +31,9 @@ final class PlayerMenuOverlay: UIView {
         static let rowHeight: CGFloat = isPad ? 56 : 44
         static let rowFontSize: CGFloat = isPad ? 17 : 15
         static let titleFontSize: CGFloat = isPad ? 15 : 13
-        /// Six compact rows / seven tall rows before scrolling kicks in.
-        static let maxRowsHeight: CGFloat = isPad ? 392 : 264
+        /// Eight rows before scrolling kicks in. The panel is separately
+        /// capped to the host's height, so a short screen still fits.
+        static let maxRowsHeight: CGFloat = isPad ? 448 : 352
         static let iconSize: CGFloat = 22
         static let iconLeading: CGFloat = 16
         static let iconTitleGap: CGFloat = 10

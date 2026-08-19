@@ -71,6 +71,7 @@ extension WatchViewController {
         commentsPreviewCard.layer.borderColor = theme.separator.cgColor
         commentPreviewContentView.applyTheme()
         commentsPanel.applyTheme(theme)
+        loadedQueuePanel?.applyTheme(theme)
         commentsTableView.reloadData()
     }
 

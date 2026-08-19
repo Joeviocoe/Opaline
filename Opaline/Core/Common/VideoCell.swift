@@ -10,7 +10,8 @@ class VideoCell: UICollectionViewCell {
     private static let vPadAfterThumb: CGFloat = 8
 
     private let thumbnail = ThumbnailImageView(frame: .zero)
-    private let durationLabel = UILabel()
+    private let durationLabel = makeBadgeLabel()
+    private let mixBadge = makeBadgeLabel()
     private let downloadBadge = DownloadBadgeView()
     private let downloadBar = DownloadProgressBar()
     private let liveBadgeView = UILabel()
@@ -28,6 +29,9 @@ class VideoCell: UICollectionViewCell {
     var onMenuTap: ((UIView) -> Void)?
 
     /// Force grid layout regardless of cell width.
+    /// Off inside the queue panel: there every row is part of a queue, so
+    /// the marker says nothing and only costs the duration its place.
+    var showsMixBadge = true
     var forceGridLayout: Bool = false {
         didSet {
             if oldValue != forceGridLayout { setNeedsLayout() }
@@ -63,6 +67,25 @@ class VideoCell: UICollectionViewCell {
             scale: window?.screen.scale ?? UIScreen.main.scale
         )
         layoutProgress()
+        layoutMixBadge()
+    }
+
+    /// Sits where the duration would, which is why the duration is hidden
+    /// while it shows: this card carries a mix, so opening it starts a queue
+    /// rather than a single video, and the card otherwise looks like any
+    /// other.
+    private func layoutMixBadge() {
+        guard !mixBadge.isHidden else {
+            return
+        }
+        let width = max(34, mixBadge.intrinsicContentSize.width + 8)
+        let isGrid = forceGridLayout || contentView.bounds.width <= 350
+        mixBadge.frame = CGRect(
+            x: thumbnail.bounds.width - width - (isGrid ? 6 : 4),
+            y: thumbnail.bounds.height - (isGrid ? 24 : 22),
+            width: width,
+            height: 18
+        )
     }
 
     private func layoutProgress() {
@@ -88,6 +111,7 @@ class VideoCell: UICollectionViewCell {
         metaLabel.text = nil
         durationLabel.text = nil
         durationLabel.isHidden = true
+        mixBadge.isHidden = true
         liveBadgeView.isHidden = true
         channelAvatarView.isHidden = false
         watchFraction = 0
@@ -101,6 +125,18 @@ class VideoCell: UICollectionViewCell {
 // MARK: - Setup
 
 extension VideoCell {
+    /// Both corner plates on the artwork are the same chip.
+    private static func makeBadgeLabel() -> UILabel {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 11, weight: .semibold)
+        label.textColor = .white
+        label.backgroundColor = ThemeManager.shared.durationBackground
+        label.layer.cornerRadius = 3
+        label.layer.masksToBounds = true
+        label.textAlignment = .center
+        return label
+    }
+
     private func showDownloadState(of videoId: String?) {
         downloadBadge.configure(videoId: videoId)
         downloadBar.configure(videoId: videoId)
@@ -119,13 +155,10 @@ extension VideoCell {
         )
         thumbnail.addSubview(progressFill)
 
-        durationLabel.font = UIFont.systemFont(ofSize: 11, weight: .semibold)
-        durationLabel.textColor = .white
-        durationLabel.backgroundColor = ThemeManager.shared.durationBackground
-        durationLabel.layer.cornerRadius = 3
-        durationLabel.layer.masksToBounds = true
-        durationLabel.textAlignment = .center
         thumbnail.addSubview(durationLabel)
+        mixBadge.text = " \("player.related.mix".localized) "
+        mixBadge.isHidden = true
+        thumbnail.addSubview(mixBadge)
 
         liveBadgeView.text = "● LIVE"
         liveBadgeView.textColor = .white
@@ -222,18 +255,23 @@ extension VideoCell {
         metaLabel.frame = CGRect(x: textX, y: metaY, width: textW, height: 14)
     }
 
+    /// Both badges are subviews of the thumbnail, so they are placed in its
+    /// bounds — measured against the cell instead they slid out past the
+    /// artwork's right edge and were clipped mid-digit.
     private func layoutBadgesForHorizontal() {
+        let thumbW = thumbnail.bounds.width
+        let thumbH = thumbnail.bounds.height
         if !durationLabel.isHidden {
             let badgeW = max(36, durationLabel.intrinsicContentSize.width + 8)
-            let badgeX = thumbnail.frame.maxX - badgeW - 4
-            let badgeY = thumbnail.frame.maxY - 22
-            durationLabel.frame = CGRect(x: badgeX, y: badgeY, width: badgeW, height: 18)
+            durationLabel.frame = CGRect(
+                x: thumbW - badgeW - 4, y: thumbH - 22, width: badgeW, height: 18
+            )
         }
         if !liveBadgeView.isHidden {
             let badgeW = max(40, liveBadgeView.intrinsicContentSize.width + 8)
-            let badgeX = thumbnail.frame.maxX - badgeW - 4
-            let badgeY = thumbnail.frame.maxY - 22
-            liveBadgeView.frame = CGRect(x: badgeX, y: badgeY, width: badgeW, height: 14)
+            liveBadgeView.frame = CGRect(
+                x: thumbW - badgeW - 4, y: thumbH - 22, width: badgeW, height: 14
+            )
         }
     }
 
@@ -334,6 +372,16 @@ extension VideoCell {
         contentView.showSkeleton()
     }
 
+    private func loadThumbnail(for video: Video) {
+        guard let url = URL(string: video.thumbnailURL) else {
+            return
+        }
+        thumbnail.setImage(
+            url: url,
+            videoId: video.isShort ? nil : video.id
+        )
+    }
+
     func configure(with video: Video) {
         showDownloadState(of: video.id)
         hideSkeleton()
@@ -354,23 +402,23 @@ extension VideoCell {
         VideoCardHelper.configureBadges(
             video: video,
             durationLabel: durationLabel,
-            liveBadgeView: liveBadgeView
+            liveBadgeView: liveBadgeView,
+            mixBadge: showsMixBadge ? mixBadge : nil
         )
-        if let url = URL(string: video.thumbnailURL) {
-            thumbnail.setImage(
-                url: url,
-                videoId: video.isShort ? nil : video.id
-            )
-        }
-        applyWatchProgress(videoId: video.id)
+        loadThumbnail(for: video)
+        applyWatchProgress(for: video)
         cachedTitleHeight = 0
         setNeedsLayout()
     }
 
-    private func applyWatchProgress(videoId: String) {
-        if let prog = WatchProgressStore.shared.progress(
-            forVideoId: videoId
-        ), prog.shouldShow {
+    /// Nothing for a card that opens a queue: those play from the start, so
+    /// a bar from some earlier viewing promises a resume that will not
+    /// happen.
+    private func applyWatchProgress(for video: Video) {
+        if video.playlistId == nil,
+           let prog = WatchProgressStore.shared.progress(
+               forVideoId: video.id
+           ), prog.shouldShow {
             watchFraction = CGFloat(prog.fraction)
             progressTrack.isHidden = false
             progressFill.isHidden = false

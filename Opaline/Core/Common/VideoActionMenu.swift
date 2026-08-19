@@ -7,19 +7,35 @@ import UIKit
 /// `PlayerMenuOverlay` the watch screen uses rather than a system alert,
 /// so it looks and behaves the same everywhere.
 enum VideoActionMenu {
+    /// The menu for a row of the playing queue. It leads with the way out of
+    /// the queue, drops "Add to queue" — everything on that list is queued
+    /// already — and drops "Play now" for what is playing right now.
+    struct QueueContext {
+        let isPlaying: Bool
+        let remove: () -> Void
+    }
+
+    /// Everything the caller can vary, bundled: the two contexts a menu can
+    /// be opened from are a playlist screen and the queue panel.
+    private struct Options {
+        let remove: (playlist: (id: String, title: String), onRemoved: (() -> Void)?)?
+        let queue: QueueContext?
+    }
+
     static func present(
         video: Video,
         from presenter: UIViewController,
         anchor: UIView,
         removeFrom playlist: (id: String, title: String)? = nil,
-        onRemoved: (() -> Void)? = nil
+        onRemoved: (() -> Void)? = nil,
+        queue: QueueContext? = nil
     ) {
         let remove = playlist.map { (playlist: $0, onRemoved: onRemoved) }
         let items = menuItems(
             video: video,
             from: presenter,
             anchor: anchor,
-            remove: remove
+            options: Options(remove: remove, queue: queue)
         )
         let host = menuHost(presenter)
         PlayerMenuOverlay.show(
@@ -43,10 +59,15 @@ enum VideoActionMenu {
         video: Video,
         from presenter: UIViewController,
         anchor: UIView,
-        remove: (playlist: (id: String, title: String), onRemoved: (() -> Void)?)?
+        options: Options
     ) -> [PlayerMenuItem] {
-        var items = baseItems(video: video, from: presenter, anchor: anchor)
-        if let remove {
+        var items = baseItems(
+            video: video,
+            from: presenter,
+            anchor: anchor,
+            queue: options.queue
+        )
+        if let remove = options.remove {
             items.append(removeItem(
                 video,
                 playlist: remove.playlist,
@@ -60,30 +81,71 @@ enum VideoActionMenu {
     private static func baseItems(
         video: Video,
         from presenter: UIViewController,
-        anchor: UIView
+        anchor: UIView,
+        queue: QueueContext?
     ) -> [PlayerMenuItem] {
-        [
-            PlayerMenuItem(
+        var items = leadingItems(
+            video: video,
+            from: presenter,
+            queue: queue
+        )
+        // Only where the card carried one: plenty of TV tiles arrive without
+        // a channel id, and a row that goes nowhere is worse than no row.
+        if let channelId = video.channelId, !channelId.isEmpty {
+            items.append(PlayerMenuItem(
+                title: "video.menu.goToChannel".localized,
+                iconName: "icon_person_fill"
+            ) {
+                VideoRouter.shared.openChannel(
+                    id: channelId,
+                    name: video.channelName,
+                    from: presenter
+                )
+            })
+        }
+        items.append(PlayerMenuItem(
+            title: "video.menu.watchLater".localized,
+            iconName: "icon_clock"
+        ) {
+            addToWatchLater(video, from: presenter)
+        })
+        return items
+            + saveAndShareItems(video: video, from: presenter, anchor: anchor)
+            + DownloadMenu.items(for: video, from: presenter, anchor: anchor)
+    }
+
+    /// The head of the menu, which is what a queue row changes.
+    private static func leadingItems(
+        video: Video,
+        from presenter: UIViewController,
+        queue: QueueContext?
+    ) -> [PlayerMenuItem] {
+        var items: [PlayerMenuItem] = []
+        if queue?.isPlaying != true {
+            items.append(PlayerMenuItem(
                 title: "player.autoplay.playNow".localized,
                 iconName: "icon_play_fill"
             ) {
                 VideoRouter.shared.open(video: video, from: presenter)
-            },
-            PlayerMenuItem(
-                title: "video.menu.playNext".localized,
-                iconName: "icon_text_append"
-            ) {
-                playNext(video, from: presenter)
-            },
-            PlayerMenuItem(
-                title: "video.menu.watchLater".localized,
-                iconName: "icon_clock"
-            ) {
-                addToWatchLater(video, from: presenter)
-            }
-        ]
-            + saveAndShareItems(video: video, from: presenter, anchor: anchor)
-            + DownloadMenu.items(for: video, from: presenter, anchor: anchor)
+            })
+        }
+        if let queue, !queue.isPlaying {
+            items.append(PlayerMenuItem(
+                title: "video.menu.removeFromQueue".localized,
+                iconName: "icon_minus_circle",
+                handler: queue.remove
+            ))
+        }
+        guard queue == nil else {
+            return items
+        }
+        items.append(PlayerMenuItem(
+            title: "video.menu.playNext".localized,
+            iconName: "icon_text_append"
+        ) {
+            playNext(video, from: presenter)
+        })
+        return items
     }
 
     private static func saveAndShareItems(

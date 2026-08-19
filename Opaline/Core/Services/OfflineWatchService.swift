@@ -32,6 +32,30 @@ final class OfflineWatchService: WatchService {
         }
     }
 
+    // A queue only exists over the network, so both go straight through.
+
+    func fetchQueuePage(
+        continuation: String,
+        completion: @escaping (Result<FeedPage, Error>) -> Void
+    ) {
+        inner.fetchQueuePage(
+            continuation: continuation,
+            completion: completion
+        )
+    }
+
+    func fetchShuffledQueue(
+        video: Video,
+        params: String,
+        completion: @escaping (Result<WatchPage, Error>) -> Void
+    ) {
+        inner.fetchShuffledQueue(
+            video: video,
+            params: params,
+            completion: completion
+        )
+    }
+
     private func storedPage(for video: Video) -> Result<WatchPage, Error>? {
         if let cached = cache.cachedWatchPage(videoId: video.id) {
             return .success(cached)

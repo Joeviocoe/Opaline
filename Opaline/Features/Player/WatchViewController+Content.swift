@@ -304,6 +304,7 @@ extension WatchViewController {
             related.prefix(WatchPaging.relatedBatch)
         )
         populateQueueIfNeeded(from: page)
+        refreshQueuePanel()
         relatedCollectionView.reloadData()
         // Zeroed here and not only on the way out of the previous video: the
         // list is often handed its content while the sidebar has no size yet,
@@ -313,23 +314,42 @@ extension WatchViewController {
         relatedCollectionView.setContentOffset(.zero, animated: false)
     }
 
+    /// Which queue this page belongs to is decided by its playlist, not by
+    /// "is this video somewhere in the list": overlapping mixes used to
+    /// graft onto each other, and a plain video opened after a mix inherited
+    /// everything already played.
     private func populateQueueIfNeeded(
         from page: WatchPage
     ) {
-        if queue.videos.contains(
-            where: { $0.id == page.video.id }
-        ) {
-            queue.seekTo(videoId: page.video.id)
-        } else if let vids = page.playlistVideos,
-                  !vids.isEmpty {
-            queue.setQueue(
-                vids,
-                title: page.playlistTitle
-            )
-            queue.seekTo(videoId: page.video.id)
-        } else {
+        let playlistId = page.video.playlistId
+        if let vids = page.playlistVideos, !vids.isEmpty {
+            if playlistId != nil, playlistId == queue.playlistId {
+                // The window this page brought reaches further than the one
+                // the queue was built from — fold in what is new, or the
+                // queue only drains and autoplay stops after 20 (#73).
+                queue.append(vids)
+            } else {
+                queue.setQueue(
+                    vids,
+                    playlistId: playlistId,
+                    title: page.playlistTitle,
+                    continuation: page.queueContinuation,
+                    shuffleParams: page.shuffleParams
+                )
+                AppLog.player(
+                    "queue opened: \(vids.count) videos,"
+                        + " shuffle=\(page.shuffleParams != nil),"
+                        + " more=\(page.queueContinuation != nil)"
+                )
+            }
+        } else if queue.playlistId != nil
+            || !queue.videos.contains(where: { $0.id == page.video.id }) {
+            // Out of the playlist, or a video nobody queued: whatever the
+            // queue held is over. A hand-built queue (no playlist) survives,
+            // since walking it is exactly how it is meant to be played.
             queue.clear()
         }
+        queue.seekTo(videoId: page.video.id)
     }
 
     private func enrichWithChannelId(
@@ -393,6 +413,7 @@ extension WatchViewController {
         keepFullscreen: Bool = false
     ) {
         dismissAutoplayOverlay()
+        applyResumePolicy(for: video)
         pageLoadToken.cancel()
         pageLoadToken = CancellationToken()
         let isBg = UIApplication.shared.applicationState != .active

@@ -116,6 +116,9 @@ extension WatchViewController {
         playerContainer.addSubview(playerView)
         applyEdgeConstraints(playerView, to: playerContainer)
         videoPlayerView = playerView
+        // A fresh player brings a fresh repeat button, which the queue may
+        // want hidden.
+        updateQueueBar()
         playerView.setCaptionTracks(
             captionTracks,
             activeLanguage: activeSubtitleLanguage

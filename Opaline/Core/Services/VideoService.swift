@@ -207,6 +207,17 @@ protocol WatchService: AnyObject {
         cancellationToken: CancellationToken?,
         completion: @escaping (Result<CommentsPage, Error>) -> Void
     )
+    /// The queue past the window the watch page carried, and the queue
+    /// re-ordered by the server. Only the queue panel asks for either.
+    func fetchQueuePage(
+        continuation: String,
+        completion: @escaping (Result<FeedPage, Error>) -> Void
+    )
+    func fetchShuffledQueue(
+        video: Video,
+        params: String,
+        completion: @escaping (Result<WatchPage, Error>) -> Void
+    )
     func fetchWatchtimeURLs(
         videoId: String,
         completion: @escaping (WatchtimeURLs?) -> Void

@@ -14,6 +14,7 @@ extension WatchViewController {
             return
         }
         detachPlayerToWindow(playerView, window: window)
+        updateQueueBar()
         setNeedsStatusBarAppearanceUpdate()
         setNeedsUpdateOfHomeIndicatorAutoHidden()
         guard animated else {
@@ -107,5 +108,6 @@ extension WatchViewController {
         setNeedsStatusBarAppearanceUpdate()
         setNeedsUpdateOfHomeIndicatorAutoHidden()
         updateLayoutForSize()
+        updateQueueBar()
     }
 }

@@ -114,6 +114,9 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
     func close() {
         watchVC.exitFullscreenIfNeeded()
         watchVC.videoPlayerView?.player?.pause()
+        // Closing the player ends the queue with it — otherwise reopening the
+        // same mix later picked it up mid-list, shuffle state and all.
+        PlaybackQueue.shared.clear()
         miniBar?.layer.removeAllAnimations()
         miniBar?.transform = .identity
         guard let tabBarController = owner else {
