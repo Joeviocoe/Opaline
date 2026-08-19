@@ -3,8 +3,22 @@ import UIKit
 // MARK: - Download
 
 extension WatchViewController {
-    private var downloadVideoId: String {
-        watchPage?.video.id ?? initialVideo.id
+    private var downloadVideo: Video {
+        watchPage?.video ?? initialVideo
+    }
+
+    /// Accent once the video is here, plain while it is on its way, yellow
+    /// when it stopped and wants a decision — the same three colours the
+    /// badge on a video card uses.
+    private static func tint(for status: DownloadStatus) -> UIColor {
+        switch status {
+        case .ready:
+            return ThemeManager.shared.accent
+        case .failed:
+            return .systemYellow
+        default:
+            return ThemeManager.shared.primaryText
+        }
     }
 
     private static func runningCaption(_ downloader: VideoDownloader) -> String {
@@ -12,23 +26,30 @@ extension WatchViewController {
             ? "downloads.muxing".localized
             : "\(Int(downloader.progress * 100))%"
     }
-
-    private static func sizeText(_ bytes: Int64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        formatter.allowedUnits = [.useMB, .useGB]
-        return formatter.string(fromByteCount: bytes)
-    }
-
     @objc
     func downloadTapped() {
-        let videoId = downloadVideoId
-        if VideoDownloader.shared.activeVideoId == videoId {
+        let video = downloadVideo
+        let downloader = VideoDownloader.shared
+        if downloader.activeVideoId == video.id {
             presentDownloadProgressMenu()
-        } else if DownloadStore.isDownloaded(videoId) {
-            presentDownloadedMenu(videoId: videoId)
+        } else if DownloadStore.isDownloaded(video.id) {
+            presentPlayerMenu(
+                title: "player.action.download".localized,
+                items: DownloadMenu.items(
+                    for: video, from: self, anchor: downloadButton
+                )
+            )
+        } else if downloader.isQueued(video.id) {
+            presentPlayerMenu(
+                title: "downloads.queued".localized,
+                items: DownloadMenu.items(
+                    for: video, from: self, anchor: downloadButton
+                )
+            )
         } else {
-            presentQualityPrompt(videoId: videoId)
+            DownloadMenu.promptQuality(
+                for: video, from: self, anchor: downloadButton
+            )
         }
     }
 
@@ -36,51 +57,35 @@ extension WatchViewController {
     /// the save button marks a video that sits in a playlist.
     @objc
     func updateDownloadButton() {
-        let videoId = downloadVideoId
+        let video = downloadVideo
         let downloader = VideoDownloader.shared
-        let running = downloader.activeVideoId == videoId
-        let marked = running || DownloadStore.isDownloaded(videoId)
-        downloadButton.tintColor = marked
-            ? ThemeManager.shared.accent
-            : ThemeManager.shared.primaryText
+        let running = downloader.activeVideoId == video.id
+        let status = DownloadStatus.of(video.id)
+        downloadButton.tintColor = Self.tint(for: status)
         downloadStatusLabel.text = running
             ? Self.runningCaption(downloader)
             : "player.action.download".localized
+        setDownloadPulse(active: status.isActive)
     }
 
-    // MARK: - Menus
-
-    private func presentQualityPrompt(videoId: String) {
-        downloadButton.isEnabled = false
-        VideoDownloader.shared.options(for: videoId) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.downloadButton.isEnabled = true
-                switch result {
-                case .success(let options) where !options.isEmpty:
-                    self?.presentQualityMenu(options, videoId: videoId)
-                case .success:
-                    self?.showDownloadToast("downloads.error.noOptions", isError: true)
-                case .failure(let error):
-                    AppLog.downloads("options failed: \(error)")
-                    self?.showDownloadToast("downloads.error.failed", isError: true)
-                }
-            }
+    /// Same signal as the badge on a video card, so a download reads the same
+    /// wherever it is looked at.
+    private func setDownloadPulse(active: Bool) {
+        guard active else {
+            downloadButton.layer.removeAnimation(forKey: "pulse")
+            downloadButton.alpha = 1
+            return
         }
-    }
-
-    private func presentQualityMenu(
-        _ options: [DownloadOption],
-        videoId: String
-    ) {
-        let items = options.map { option in
-            PlayerMenuItem(
-                title: "\(option.label) · \(Self.sizeText(option.bytes))",
-                iconName: "icon_download"
-            ) { [weak self] in
-                self?.startDownload(videoId: videoId, option: option)
-            }
+        guard downloadButton.layer.animation(forKey: "pulse") == nil else {
+            return
         }
-        presentPlayerMenu(title: "downloads.quality.title".localized, items: items)
+        let pulse = CABasicAnimation(keyPath: "opacity")
+        pulse.fromValue = 1
+        pulse.toValue = 0.25
+        pulse.duration = 0.7
+        pulse.autoreverses = true
+        pulse.repeatCount = .infinity
+        downloadButton.layer.add(pulse, forKey: "pulse")
     }
 
     private func presentDownloadProgressMenu() {
@@ -101,46 +106,5 @@ extension WatchViewController {
             }
         ]
         presentPlayerMenu(title: title, items: items)
-    }
-
-    private func presentDownloadedMenu(videoId: String) {
-        let items = [
-            PlayerMenuItem(
-                title: "downloads.delete".localized,
-                isDestructive: true,
-                iconName: "icon_minus_circle"
-            ) { [weak self] in
-                DownloadStore.remove(videoId)
-                self?.updateDownloadButton()
-                self?.showDownloadToast("downloads.deleted")
-            }
-        ]
-        presentPlayerMenu(
-            title: "player.action.download".localized, items: items
-        )
-    }
-
-    // MARK: - Job
-
-    private func startDownload(videoId: String, option: DownloadOption) {
-        VideoDownloader.shared.start(
-            videoId: videoId,
-            option: option
-        ) { [weak self] result in
-            self?.updateDownloadButton()
-            switch result {
-            case .success:
-                self?.showDownloadToast("downloads.finished")
-            case .failure(let error):
-                self?.showDownloadToast("downloads.error.failed", isError: true)
-                AppLog.downloads("job failed: \(error)")
-            }
-        }
-        updateDownloadButton()
-        showDownloadToast("downloads.started")
-    }
-
-    private func showDownloadToast(_ key: String, isError: Bool = false) {
-        ToastView.show(key.localized, in: view, isError: isError)
     }
 }

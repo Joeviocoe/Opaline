@@ -121,6 +121,10 @@
 "downloads.quality.savedPlain" = "Saved copy";
 /* Toast shown when a download starts */
 "downloads.started" = "Downloading";
+/* Toast when a video is added behind another download */
+"downloads.queued" = "Queued for download";
+/* Downloads screen: how many wait behind the running job; %@ is a count */
+"downloads.banner.queued" = "(+%@)";
 /* Toast shown when a download finishes */
 "downloads.finished" = "Download complete";
 /* Menu title while a download runs; %@ is a percentage */
@@ -131,6 +135,8 @@
 "downloads.cancel" = "Cancel download";
 /* Menu action that deletes an already downloaded video */
 "downloads.delete" = "Delete download";
+/* Menu action offered after a download failed */
+"downloads.retry" = "Download again";
 /* Toast shown after a download is deleted */
 "downloads.deleted" = "Download deleted";
 /* Error toast: another download is already running */
@@ -446,7 +452,8 @@
 "library.playlists" = "Playlists";
 /* Legacy pre-2013 "Favorites" playlist */
 "library.playlists.favorites" = "Favorites";
-"library.downloads.comingSoon" = "Downloads coming soon";
+/* Empty state on the Downloads tab */
+"library.downloads.empty" = "Videos you download appear here";
 "library.history.signIn" = "Sign in to view your watch history";
 "library.history.empty" = "No watch history found";
 "library.history.loadFailed" = "Could not load history";

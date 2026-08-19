@@ -10,14 +10,23 @@ struct DownloadOption {
     var bytes: Int64 { video.contentLength + audio.contentLength }
 }
 
-/// Downloads a video for offline watching: the video track and the audio
-/// track as separate files, then one passthrough remux into a single MP4.
+/// Downloads videos for offline watching: the video track and the audio track
+/// as separate files, then one passthrough remux into a single MP4.
 ///
-/// One job at a time. Two parallel downloads on an A7 over one link finish no
-/// sooner together than one after the other, and a queue is only worth
-/// building once the Downloads screen exists to show it.
-/// ponytail: single job; add a queue when the Downloads screen lands.
+/// One job runs at a time and the rest wait. Two transfers over one link
+/// finish no sooner together than one after the other, and a queue is what a
+/// list screen needs anyway once "Download" sits in the menu of every row.
 final class VideoDownloader {
+    /// One video waiting to be saved.
+    struct Job {
+        let video: Video
+        let option: DownloadOption
+        let completion: (Result<URL, Error>) -> Void
+        /// How many times this job has already been retried after a network
+        /// failure.
+        var attempt = 0
+    }
+
     /// Posted while a download runs, at most once a second — enough for a
     /// percentage to look alive, few enough not to churn the main queue on an
     /// A7 while megabytes land.
@@ -28,19 +37,25 @@ final class VideoDownloader {
 
     static let shared = VideoDownloader()
 
-    private(set) var activeVideoId: String?
-    /// 0...1 across both tracks. Reads as 1 while the remux runs.
+    /// 0...1 across both tracks of the running job. Reads as 1 while the
+    /// remux runs.
     private(set) var progress: Double = 0
     private(set) var isMuxing = false
 
     let transport: HTTPTransport
-    private let apiClient: WatchService
     let client: PlaybackClient = VisionOSClient()
     var cancellation: CancellationToken?
+
+    private let apiClient: WatchService
+    private(set) var jobs: [Job] = []
     private var receivedBytes: Int64 = 0
     private var totalBytes: Int64 = 1
     private var lastProgressPost = Date.distantPast
 
+    var activeVideo: Video? { jobs.first?.video }
+    var activeVideoId: String? { jobs.first?.video.id }
+    /// How many are waiting behind the one running.
+    var queuedCount: Int { max(jobs.count - 1, 0) }
     var isDownloading: Bool { activeVideoId != nil }
 
     init(
@@ -72,108 +87,118 @@ final class VideoDownloader {
         }
     }
 
-    // MARK: - Job control
+    // MARK: - Queue
+
+    func isQueued(_ videoId: String) -> Bool {
+        jobs.contains { $0.video.id == videoId }
+    }
 
     func start(
-        videoId: String,
+        video: Video,
         option: DownloadOption,
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
-        guard !isDownloading else {
+        guard !isQueued(video.id) else {
             completion(.failure(DownloadError.busy))
             return
         }
-        guard DownloadStore.prepareFolder(for: videoId) else {
+        guard DownloadStore.prepareFolder(for: video.id) else {
             completion(.failure(DownloadError.storage))
             return
         }
-        activeVideoId = videoId
-        progress = 0
-        isMuxing = false
-        receivedBytes = 0
-        totalBytes = max(option.bytes, 1)
-        cancellation = CancellationToken()
-        DownloadStore.announceChange()
-        AppLog.downloads(
-            "start \(videoId) \(option.label) \(option.bytes / 1_048_576) MB,"
-                + " itags \(option.video.itag)+\(option.audio.itag)"
+        DownloadStore.clearFailure(video.id)
+        DownloadStore.save(video)
+        fetchThumbnail(for: video)
+        jobs.append(
+            Job(video: video, option: option, completion: completion)
         )
-        fetchTracks(videoId: videoId, option: option, completion: completion)
+        DownloadStore.announceChange()
+        if jobs.count == 1 {
+            startNextJob()
+        }
     }
 
+    /// Drops the running job and moves on to whatever is behind it.
     func cancel() {
-        guard let videoId = activeVideoId else {
+        guard let job = jobs.first else {
             return
         }
         cancellation?.cancel()
-        finish(videoId: videoId)
-        DownloadStore.removeParts(for: videoId)
-        AppLog.downloads("cancelled \(videoId)")
-        DownloadStore.announceChange()
+        AppLog.downloads("cancelled \(job.video.id)")
+        // The whole folder, not just the parts: the metadata was written when
+        // the download was asked for, and leaving it behind would keep an
+        // empty card on the Downloads screen forever.
+        DownloadStore.remove(job.video.id)
+        finishJob(reporting: nil)
     }
 
-    private func fetchTracks(
-        videoId: String,
-        option: DownloadOption,
-        completion: @escaping (Result<URL, Error>) -> Void
-    ) {
-        let videoPart = DownloadStore.partFile(for: videoId, named: "video.part.mp4")
-        let audioPart = DownloadStore.partFile(for: videoId, named: "audio.part.mp4")
-        download(
-            from: option.video.url,
-            to: videoPart,
-            size: option.video.contentLength
-        ) { [weak self] error in
-            if let error {
-                self?.fail(videoId: videoId, error: error, completion: completion)
-                return
-            }
-            self?.download(
-                from: option.audio.url,
-                to: audioPart,
-                size: option.audio.contentLength
-            ) { audioError in
-                if let audioError {
-                    self?.fail(
-                        videoId: videoId, error: audioError, completion: completion
-                    )
-                    return
-                }
-                self?.mux(
-                    videoId: videoId,
-                    option: option,
-                    parts: (videoPart, audioPart),
-                    completion: completion
-                )
-            }
-        }
-    }
-
-    func fail(
-        videoId: String,
-        error: Error,
-        completion: @escaping (Result<URL, Error>) -> Void
-    ) {
-        AppLog.downloads("failed \(videoId): \(error)")
-        let cancelled = cancellation?.isCancelled == true
-        finish(videoId: videoId)
-        DownloadStore.removeParts(for: videoId)
-        DownloadStore.announceChange()
-        guard !cancelled else {
+    /// Cancels one video wherever it sits: running, or still waiting its turn.
+    func cancel(_ videoId: String) {
+        guard activeVideoId != videoId else {
+            cancel()
             return
         }
-        DispatchQueue.main.async { completion(.failure(error)) }
-    }
-
-    func finish(videoId: String) {
-        guard activeVideoId == videoId else {
+        guard let index = jobs.firstIndex(where: { $0.video.id == videoId })
+        else {
             return
         }
-        activeVideoId = nil
+        jobs.remove(at: index)
+        AppLog.downloads("dequeued \(videoId)")
+        DownloadStore.remove(videoId)
+    }
+
+    private func startNextJob() {
+        guard let job = jobs.first else {
+            return
+        }
+        let option = job.option
+        progress = 0
+        isMuxing = false
+        totalBytes = max(option.bytes, 1)
+        receivedBytes = 0
+        cancellation = CancellationToken()
+        DownloadStore.announceChange()
+        AppLog.downloads(
+            "start \(job.video.id) \(option.label)"
+                + " \(option.bytes / 1_048_576) MB,"
+                + " itags \(option.video.itag)+\(option.audio.itag)"
+        )
+        fetchTracks(videoId: job.video.id, option: option)
+    }
+
+    func bumpAttempt() {
+        guard !jobs.isEmpty else {
+            return
+        }
+        jobs[0].attempt += 1
+    }
+
+    /// After a resume, progress must count what is already on disk, or a job
+    /// that is half done would report starting from zero.
+    func resetProgressToDisk(videoId: String) {
+        receivedBytes = bytesAlreadySaved(videoId: videoId)
+        progress = min(Double(receivedBytes) / Double(totalBytes), 1)
+        postProgress()
+    }
+
+    /// Ends the running job, tells its caller how it went, and starts the
+    /// next. A cancelled job reports nothing: its caller asked for this.
+    func finishJob(reporting result: Result<URL, Error>?) {
+        guard !jobs.isEmpty else {
+            return
+        }
+        let job = jobs.removeFirst()
         isMuxing = false
         progress = 0
         cancellation = nil
+        DownloadStore.announceChange()
+        if let result {
+            DispatchQueue.main.async { job.completion(result) }
+        }
+        startNextJob()
     }
+
+    // MARK: - Progress
 
     func advance(by count: Int64) {
         receivedBytes += count

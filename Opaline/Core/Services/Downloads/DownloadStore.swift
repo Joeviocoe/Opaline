@@ -15,6 +15,9 @@ enum DownloadStore {
 
     private static let folderName = "Downloads"
     private static let videoFileName = "video.mp4"
+    /// What a half-finished transfer leaves behind. Named by suffix so that
+    /// cleaning up after a job cannot reach the metadata stored beside it.
+    static let partSuffix = ".part.mp4"
 
     static let root: URL = {
         let base = FileManager.default.urls(
@@ -42,6 +45,26 @@ enum DownloadStore {
 
     static func partFile(for videoId: String, named name: String) -> URL {
         folder(for: videoId).appendingPathComponent(name)
+    }
+
+    /// A job that ended badly leaves this behind, so the row it belongs to
+    /// can say so instead of sitting there looking unfinished forever.
+    static func markFailed(_ videoId: String) {
+        FileManager.default.createFile(
+            atPath: failureFile(for: videoId).path, contents: nil
+        )
+    }
+
+    static func clearFailure(_ videoId: String) {
+        try? FileManager.default.removeItem(at: failureFile(for: videoId))
+    }
+
+    static func hasFailed(_ videoId: String) -> Bool {
+        FileManager.default.fileExists(atPath: failureFile(for: videoId).path)
+    }
+
+    private static func failureFile(for videoId: String) -> URL {
+        folder(for: videoId).appendingPathComponent("failed")
     }
 
     static func isDownloaded(_ videoId: String) -> Bool {
@@ -73,14 +96,15 @@ enum DownloadStore {
         announceChange()
     }
 
-    /// Leaves the finished file alone and drops the half-downloaded tracks —
-    /// a cancelled or failed job must not strand hundreds of megabytes.
+    /// Drops the half-downloaded tracks — a cancelled or failed job must not
+    /// strand hundreds of megabytes. Only the parts: everything else in the
+    /// folder is the video and the metadata that describes it.
     static func removeParts(for videoId: String) {
         let folder = folder(for: videoId)
         let names = (try? FileManager.default.contentsOfDirectory(
             atPath: folder.path
         )) ?? []
-        for name in names where name != videoFileName {
+        for name in names where name.hasSuffix(partSuffix) {
             try? FileManager.default.removeItem(
                 at: folder.appendingPathComponent(name)
             )

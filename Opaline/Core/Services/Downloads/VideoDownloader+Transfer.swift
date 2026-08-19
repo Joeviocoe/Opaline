@@ -17,6 +17,12 @@ extension VideoDownloader {
     /// also how playback already reads its segments.
     static let chunkBytes: Int64 = 8 * 1_048_576
 
+    /// How much of this part is already on disk from an earlier attempt.
+    static func bytesOnDisk(at file: URL) -> Int64 {
+        let values = try? file.resourceValues(forKeys: [.fileSizeKey])
+        return Int64(values?.fileSize ?? 0)
+    }
+
     /// Streams straight to disk, one range at a time. The transport hands
     /// chunks over as they arrive, so a two-gigabyte file never sits in
     /// memory.
@@ -26,14 +32,23 @@ extension VideoDownloader {
         size: Int64,
         completion: @escaping (Error?) -> Void
     ) {
+        // Whatever a dropped connection already wrote stays: the next attempt
+        // asks for the range after it instead of starting the file again.
+        let done = Self.bytesOnDisk(at: file)
         let manager = FileManager.default
-        try? manager.removeItem(at: file)
-        guard manager.createFile(atPath: file.path, contents: nil),
-              let handle = try? FileHandle(forWritingTo: file) else {
+        if done == 0 {
+            try? manager.removeItem(at: file)
+            _ = manager.createFile(atPath: file.path, contents: nil)
+        }
+        guard let handle = try? FileHandle(forWritingTo: file) else {
             completion(DownloadError.storage)
             return
         }
-        let job = RangeJob(url: url, handle: handle, size: size, offset: 0)
+        if done > 0 {
+            AppLog.downloads("resuming \(file.lastPathComponent) at \(done) B")
+            handle.seekToEndOfFile()
+        }
+        let job = RangeJob(url: url, handle: handle, size: size, offset: done)
         fetchRange(job) { error in
             handle.closeFile()
             // Expected against written: the one number that tells a truncated

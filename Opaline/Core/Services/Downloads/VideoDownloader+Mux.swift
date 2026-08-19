@@ -33,8 +33,7 @@ extension VideoDownloader {
     func mux(
         videoId: String,
         option: DownloadOption,
-        parts: (video: URL, audio: URL),
-        completion: @escaping (Result<URL, Error>) -> Void
+        parts: (video: URL, audio: URL)
     ) {
         let (video, audio) = parts
         markMuxing()
@@ -57,10 +56,10 @@ extension VideoDownloader {
                 to: composition
             )
         } catch {
-            fail(videoId: videoId, error: error, completion: completion)
+            fail(videoId: videoId, error: error)
             return
         }
-        export(composition, videoId: videoId, completion: completion)
+        export(composition, videoId: videoId)
     }
 
     /// The length the server states, not the one AVFoundation computes.
@@ -94,8 +93,7 @@ extension VideoDownloader {
 
     private func export(
         _ composition: AVMutableComposition,
-        videoId: String,
-        completion: @escaping (Result<URL, Error>) -> Void
+        videoId: String
     ) {
         let output = DownloadStore.videoFile(for: videoId)
         try? FileManager.default.removeItem(at: output)
@@ -103,7 +101,7 @@ extension VideoDownloader {
             asset: composition,
             presetName: AVAssetExportPresetPassthrough
         ) else {
-            fail(videoId: videoId, error: DownloadError.export, completion: completion)
+            fail(videoId: videoId, error: DownloadError.export)
             return
         }
         session.outputURL = output
@@ -111,14 +109,12 @@ extension VideoDownloader {
         session.exportAsynchronously { [weak self] in
             guard session.status == .completed else {
                 let error = session.error ?? DownloadError.export
-                self?.fail(videoId: videoId, error: error, completion: completion)
+                self?.fail(videoId: videoId, error: error)
                 return
             }
-            self?.finish(videoId: videoId)
             DownloadStore.removeParts(for: videoId)
-            DownloadStore.announceChange()
             AppLog.downloads("finished \(videoId)")
-            DispatchQueue.main.async { completion(.success(output)) }
+            self?.finishJob(reporting: .success(output))
         }
     }
 }

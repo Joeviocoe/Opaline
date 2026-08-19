@@ -369,7 +369,6 @@
 "library.downloads" = "已下載的內容";
 "library.playlists" = "播放清單";
 "library.playlists.favorites" = "收藏";
-"library.downloads.comingSoon" = "下載功能即將推出";
 "library.history.signIn" = "登入以查看觀看記錄";
 "library.history.empty" = "沒有觀看記錄";
 "library.history.loadFailed" = "無法載入觀看記錄";

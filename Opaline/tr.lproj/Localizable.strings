@@ -369,7 +369,6 @@
 "library.downloads" = "İndirilenler";
 "library.playlists" = "Oynatma listeleri";
 "library.playlists.favorites" = "Favoriler";
-"library.downloads.comingSoon" = "İndirmeler yakında";
 "library.history.signIn" = "İzleme geçmişinizi görmek için giriş yapın";
 "library.history.empty" = "İzleme geçmişi bulunamadı";
 "library.history.loadFailed" = "Geçmiş yüklenemedi";

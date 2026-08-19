@@ -369,7 +369,6 @@
 "library.downloads" = "ダウンロード";
 "library.playlists" = "再生リスト";
 "library.playlists.favorites" = "お気に入り";
-"library.downloads.comingSoon" = "ダウンロードは近日公開";
 "library.history.signIn" = "サインインして視聴履歴を表示";
 "library.history.empty" = "視聴履歴が見つかりません";
 "library.history.loadFailed" = "履歴を読み込めませんでした";

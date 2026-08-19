@@ -365,7 +365,6 @@
 "library.downloads" = "Downloads";
 "library.playlists" = "Playlists";
 "library.playlists.favorites" = "Favoritas";
-"library.downloads.comingSoon" = "Downloads em breve";
 "library.history.signIn" = "Entre para ver seu histórico";
 "library.history.empty" = "Nenhum histórico encontrado";
 "library.history.loadFailed" = "Não foi possível carregar o histórico";

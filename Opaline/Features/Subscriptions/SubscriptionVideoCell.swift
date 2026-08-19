@@ -5,6 +5,8 @@ class SubscriptionVideoCell: UITableViewCell {
 
     let thumbnail = ThumbnailImageView(frame: .zero)
     let durationLabel = UILabel()
+    let downloadBadge = DownloadBadgeView()
+    let downloadBar = DownloadProgressBar()
     let progressTrack = UIView()
     let progressFill = UIView()
     var watchFraction: CGFloat = 0
@@ -67,6 +69,8 @@ class SubscriptionVideoCell: UITableViewCell {
         durationLabel.layer.masksToBounds = true
         durationLabel.textAlignment = .center
         thumbnail.addSubview(durationLabel)
+        downloadBadge.pin(toThumbnail: thumbnail)
+        downloadBar.pin(toThumbnail: thumbnail)
     }
 
     private func setupChannelAvatar() {
@@ -116,6 +120,8 @@ class SubscriptionVideoCell: UITableViewCell {
     }
 
     func configureSkeleton() {
+        downloadBadge.configure(videoId: nil)
+        downloadBar.configure(videoId: nil)
         hideSkeleton()
         titleLabel.text = nil
         channelLabel.text = nil
@@ -128,6 +134,8 @@ class SubscriptionVideoCell: UITableViewCell {
     }
 
     func configure(with video: Video) {
+        downloadBadge.configure(videoId: video.id)
+        downloadBar.configure(videoId: video.id)
         applyTheme()
         menuButton.isHidden = false
         representedChannelId = video.channelId

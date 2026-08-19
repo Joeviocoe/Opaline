@@ -81,7 +81,9 @@ enum VideoActionMenu {
             ) {
                 addToWatchLater(video, from: presenter)
             }
-        ] + saveAndShareItems(video: video, from: presenter, anchor: anchor)
+        ]
+            + saveAndShareItems(video: video, from: presenter, anchor: anchor)
+            + DownloadMenu.items(for: video, from: presenter, anchor: anchor)
     }
 
     private static func saveAndShareItems(
