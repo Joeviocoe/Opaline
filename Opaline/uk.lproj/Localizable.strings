@@ -397,3 +397,36 @@
 "settings.playbackChain.signInNeeded" = "Увійдіть, щоб використовувати це джерело";
 "settings.playbackChain.footer" = "Перебираються згори вниз, доки одне не заграє. Перетягніть, щоб змінити порядок, непотрібні вимкніть.";
 "player.error.noSources" = "Усі джерела відтворення вимкнено. Увімкніть хоча б одне в «Налаштування → Зневадження → Джерела відтворення».";
+
+
+/* Downloads, playback sources */
+"settings.section.downloads" = "Завантаження";
+"settings.footer.downloads" = "Що зберігається разом із відео. Коментарі та субтитри залишаються такими, якими були на момент завантаження.";
+"settings.row.downloadQuality" = "Якість";
+"settings.row.downloadComments" = "Коментарі";
+"settings.row.downloadCaptions" = "Субтитри";
+"downloads.quality.ask" = "Запитувати щоразу";
+"downloads.comments.none" = "Не завантажувати";
+"downloads.comments.top" = "Топ коментарів";
+"downloads.comments.newest" = "Спочатку нові";
+"downloads.captions.none" = "Не завантажувати";
+"downloads.captions.count" = "Мов: %@";
+"settings.footer.downloadCaptions" = "Субтитри цими мовами зберігаються разом із відео, якщо вони в нього є.";
+"downloads.quality.title" = "Якість завантаження";
+"downloads.quality.saved" = "%@ (завантажено)";
+"downloads.quality.savedPlain" = "Завантажена копія";
+"downloads.started" = "Завантаження";
+"downloads.queued" = "Очікує на завантаження…";
+"downloads.banner.queued" = "(+%@)";
+"downloads.finished" = "Завантаження завершено";
+"downloads.progress" = "Завантажено %@%%";
+"downloads.muxing" = "Обробка";
+"downloads.cancel" = "Скасувати завантаження";
+"downloads.delete" = "Видалити із завантажень";
+"downloads.retry" = "Завантажити знову";
+"downloads.deleted" = "Завантаження видалено";
+"downloads.error.busy" = "Уже триває інше завантаження";
+"downloads.error.failed" = "Не вдалося завантажити відео";
+"downloads.error.noOptions" = "Це відео не можна завантажити";
+"player.related.downloaded" = "Також завантажені";
+"library.downloads.empty" = "Тут з’являтимуться відео, які ви завантажили";
