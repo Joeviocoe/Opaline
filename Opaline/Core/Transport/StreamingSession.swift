@@ -71,8 +71,10 @@ final class StreamingSession: NSObject, URLSessionDataDelegate {
         let sink = sinks[dataTask.taskIdentifier]
         lock.unlock()
         // A refusal has a body too, and it is not the protocol the caller is
-        // parsing. Only the status reaches it.
-        guard let sink, sink.status == 200 else {
+        // parsing. Only the status reaches it. Any 2xx counts: a ranged
+        // request answers 206, and dropping those left downloads writing
+        // empty files while the transfer reported success.
+        guard let sink, (200...299).contains(sink.status) else {
             return
         }
         guard sink.onChunk(data) else {

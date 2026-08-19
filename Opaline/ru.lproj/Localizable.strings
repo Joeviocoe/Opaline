@@ -70,6 +70,20 @@
 "player.action.removedFrom" = "Удалено из «%1$@»";
 "player.action.download" = "Скачать";
 
+/* ===== Downloads ===== */
+
+"downloads.quality.title" = "Качество скачивания";
+"downloads.started" = "Скачивание";
+"downloads.finished" = "Видео скачано";
+"downloads.progress" = "Скачивание: %@%%";
+"downloads.muxing" = "Обработка";
+"downloads.cancel" = "Отменить скачивание";
+"downloads.delete" = "Удалить скачанное";
+"downloads.deleted" = "Скачанное видео удалено";
+"downloads.error.busy" = "Уже идёт другое скачивание";
+"downloads.error.failed" = "Не удалось скачать это видео";
+"downloads.error.noOptions" = "Это видео нельзя скачать";
+
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
 "video.menu.playNext" = "Добавить в очередь";

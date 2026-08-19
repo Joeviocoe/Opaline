@@ -111,6 +111,31 @@
 /* Action bar: download */
 "player.action.download" = "Download";
 
+/* ===== Downloads ===== */
+
+/* Title of the quality prompt shown before a download starts */
+"downloads.quality.title" = "Download quality";
+/* Toast shown when a download starts */
+"downloads.started" = "Downloading";
+/* Toast shown when a download finishes */
+"downloads.finished" = "Download complete";
+/* Menu title while a download runs; %@ is a percentage */
+"downloads.progress" = "Downloading %@%%";
+/* Menu title while the downloaded tracks are being joined */
+"downloads.muxing" = "Preparing";
+/* Menu action that stops a running download */
+"downloads.cancel" = "Cancel download";
+/* Menu action that deletes an already downloaded video */
+"downloads.delete" = "Delete download";
+/* Toast shown after a download is deleted */
+"downloads.deleted" = "Download deleted";
+/* Error toast: another download is already running */
+"downloads.error.busy" = "Another download is already running";
+/* Error toast: the download could not be completed */
+"downloads.error.failed" = "Couldn't download this video";
+/* Error toast: nothing downloadable came back for this video */
+"downloads.error.noOptions" = "This video can't be downloaded";
+
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
 /* Queues the video to play right after the current one */
