@@ -68,8 +68,8 @@ final class OfflineWatchService: WatchService {
 
     // MARK: - Straight through
     //
-    // Playback, captions, dubs and comments have their own offline stories
-    // (the file on disk, the saved tracks, step 5) and nothing to add here.
+    // Playback, captions and dubs have their own offline stories — the file
+    // on disk and the tracks inside it — and nothing to add here.
 
     // swiftlint:disable:next function_parameter_count
     func fetchDirectPlayback(
@@ -88,6 +88,9 @@ final class OfflineWatchService: WatchService {
         )
     }
 
+    /// Same rule as the page: the network answer wins, and what was saved
+    /// with the video stands in when there is none. A sort the user picks
+    /// offline has no stored answer and simply reports as unavailable.
     func fetchComments(
         videoId: String,
         continuation: String?,
@@ -97,9 +100,18 @@ final class OfflineWatchService: WatchService {
         inner.fetchComments(
             videoId: videoId,
             continuation: continuation,
-            cancellationToken: cancellationToken,
-            completion: completion
-        )
+            cancellationToken: cancellationToken
+        ) { result in
+            guard case .failure = result,
+                  let stored = DownloadStore.comments(
+                      for: videoId, continuation: continuation
+                  ) else {
+                completion(result)
+                return
+            }
+            AppLog.player("comments served from the downloaded copy")
+            completion(.success(stored))
+        }
     }
 
     func fetchWatchtimeURLs(

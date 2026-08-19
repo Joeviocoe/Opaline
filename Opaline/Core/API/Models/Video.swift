@@ -112,7 +112,7 @@ struct ChannelPage {
     let isSubscribed: Bool
 }
 
-struct Comment {
+struct Comment: Codable {
     let id: String
     let authorName: String
     let authorChannelId: String?
@@ -127,7 +127,7 @@ struct Comment {
     let replyContinuation: String?
 }
 
-struct CommentsPage {
+struct CommentsPage: Codable {
     let title: String?
     let comments: [Comment]
     let continuation: String?
@@ -138,7 +138,7 @@ struct CommentsPage {
     let sortOptions: [CommentSortOption]
 }
 
-struct CommentSortOption {
+struct CommentSortOption: Codable {
     let title: String
     let token: String
     let isSelected: Bool
