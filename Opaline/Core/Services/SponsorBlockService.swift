@@ -2,7 +2,7 @@ import UIKit
 
 // MARK: - Segment model
 
-struct SponsorBlockSegment {
+struct SponsorBlockSegment: Codable {
     let uuid: String
     let category: SBCategory
     let startTime: Double
@@ -76,7 +76,16 @@ final class SponsorBlockService {
             HTTPRequest(method: .get, url: url),
             cancellationToken: nil
         ) { result in
-            completion(self.processResult(result, videoId: videoId))
+            let processed = self.processResult(result, videoId: videoId)
+            // A saved video carries its segments; without this the skips it
+            // was downloaded with disappear the moment the network does.
+            guard case .failure = processed,
+                  let stored = DownloadStore.segments(for: videoId) else {
+                completion(processed)
+                return
+            }
+            AppLog.sponsorBlock("serving \(stored.count) stored segments")
+            completion(.success(stored))
         }
     }
 

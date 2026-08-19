@@ -74,3 +74,103 @@ extension DownloadStore {
         ThumbnailLoader.shared.diskCache.store(data: data, for: url)
     }
 }
+
+// MARK: - The page around the video
+
+extension DownloadStore {
+    private static let pageFileName = "page.json"
+    private static let segmentsFileName = "sponsorblock.json"
+    private static let avatarFileName = "avatar.jpg"
+    private static let votesFileName = "votes.json"
+
+    static func savePage(_ page: WatchPage, for videoId: String) {
+        write(
+            page,
+            to: folder(for: videoId).appendingPathComponent(pageFileName),
+            what: "page"
+        )
+    }
+
+    static func page(for videoId: String) -> WatchPage? {
+        read(
+            WatchPage.self,
+            from: folder(for: videoId).appendingPathComponent(pageFileName)
+        )
+    }
+
+    static func saveSegments(
+        _ segments: [SponsorBlockSegment],
+        for videoId: String
+    ) {
+        write(
+            segments,
+            to: folder(for: videoId).appendingPathComponent(segmentsFileName),
+            what: "segments"
+        )
+    }
+
+    static func segments(for videoId: String) -> [SponsorBlockSegment]? {
+        read(
+            [SponsorBlockSegment].self,
+            from: folder(for: videoId).appendingPathComponent(segmentsFileName)
+        )
+    }
+
+    static func saveVotes(_ votes: RYDVotes, for videoId: String) {
+        write(
+            votes,
+            to: folder(for: videoId).appendingPathComponent(votesFileName),
+            what: "votes"
+        )
+    }
+
+    static func votes(for videoId: String) -> RYDVotes? {
+        read(
+            RYDVotes.self,
+            from: folder(for: videoId).appendingPathComponent(votesFileName)
+        )
+    }
+
+    /// The channel picture, kept and re-primed exactly like the thumbnail.
+    static func saveAvatar(_ data: Data, for videoId: String, url: URL) {
+        try? data.write(
+            to: folder(for: videoId).appendingPathComponent(avatarFileName),
+            options: .atomic
+        )
+        ThumbnailLoader.shared.diskCache.store(data: data, for: url)
+    }
+
+    /// Hands the stored channel picture back to the image cache, if the page
+    /// names one — the offline screen asks for it by URL like any other.
+    static func primeAvatarIfPossible(from page: WatchPage, videoId: String) {
+        guard let raw = page.channelInfo?.avatarURL
+            ?? page.video.channelAvatarURL,
+            let url = URL(string: raw) else {
+            return
+        }
+        primeAvatar(for: videoId, url: url)
+    }
+
+    static func primeAvatar(for videoId: String, url: URL) {
+        guard let data = try? Data(contentsOf: folder(for: videoId)
+            .appendingPathComponent(avatarFileName)) else {
+            return
+        }
+        ThumbnailLoader.shared.diskCache.store(data: data, for: url)
+    }
+
+    private static func write<T: Encodable>(_ value: T, to url: URL, what: String) {
+        guard let data = try? JSONEncoder().encode(value) else {
+            AppLog.downloads("could not encode \(what) for \(url.lastPathComponent)")
+            return
+        }
+        try? data.write(to: url, options: .atomic)
+    }
+
+    private static func read<T: Decodable>(_ type: T.Type, from url: URL) -> T? {
+        guard let data = try? Data(contentsOf: url) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(type, from: data)
+    }
+}

@@ -200,6 +200,8 @@
 "player.related.mix" = "Mix";
 /* Header of the related-videos section */
 "player.related.title" = "Related";
+/* Header of the rail below an offline video: it lists other downloads */
+"player.related.downloaded" = "Also downloaded";
 /* Status label on fatal playback failure; %1$@ = error description */
 "player.error.withMessage" = "Playback error: %1$@";
 

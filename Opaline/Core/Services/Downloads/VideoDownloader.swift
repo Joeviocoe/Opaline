@@ -46,7 +46,7 @@ final class VideoDownloader {
     let client: PlaybackClient = VisionOSClient()
     var cancellation: CancellationToken?
 
-    private let apiClient: WatchService
+    let apiClient: WatchService
     private(set) var jobs: [Job] = []
     private var receivedBytes: Int64 = 0
     private var totalBytes: Int64 = 1
@@ -107,8 +107,7 @@ final class VideoDownloader {
             return
         }
         DownloadStore.clearFailure(video.id)
-        DownloadStore.save(video)
-        fetchThumbnail(for: video)
+        saveMetadata(for: video)
         jobs.append(
             Job(video: video, option: option, completion: completion)
         )

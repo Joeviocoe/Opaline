@@ -121,6 +121,7 @@
 
 "player.related.mix" = "Джем";
 "player.related.title" = "Похожие";
+"player.related.downloaded" = "Тоже скачано";
 "player.error.withMessage" = "Ошибка воспроизведения: %1$@";
 
 /* ===== Player: speed ===== */

@@ -91,6 +91,8 @@ extension WatchViewController: UICollectionViewDataSource {
             ?? PlaylistSectionHeaderView()
         let title: String = if isPlaylistMode, indexPath.section == 0 {
             queue.playlistTitle ?? "player.related.mix".localized
+        } else if watchPage?.servedOffline ?? false {
+            "player.related.downloaded".localized
         } else {
             "player.related.title".localized
         }

@@ -112,23 +112,6 @@ struct ChannelPage {
     let isSubscribed: Bool
 }
 
-struct WatchPage {
-    let video: Video
-    let description: String?
-    let channelInfo: ChannelInfo?
-    let subscribeButtonText: String?
-    let isSubscribed: Bool
-    let relatedVideos: [Video]
-    let likeCount: String?
-    let likeStatus: LikeStatus?
-    /// Total comments as the server formats it ("13K") — the Shorts rail
-    /// shows it without paying for a comments fetch.
-    let commentCount: String?
-    let nextVideo: Video?
-    let playlistTitle: String?
-    let playlistVideos: [Video]?
-}
-
 struct Comment {
     let id: String
     let authorName: String
