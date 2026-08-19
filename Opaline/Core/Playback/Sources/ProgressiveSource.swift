@@ -54,6 +54,10 @@ final class ProgressiveSource: VideoSource {
         _ info: DirectPlaybackInfo,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
+        if info.progressiveURL == nil, let hls = info.hlsManifestURL {
+            completion(.success(item(for: hls, info: info)))
+            return
+        }
         guard let url = info.progressiveURL else {
             completion(.failure(
                 NSError(
@@ -66,16 +70,18 @@ final class ProgressiveSource: VideoSource {
             ))
             return
         }
+        completion(.success(item(for: url, info: info)))
+    }
+
+    private func item(for url: URL, info: DirectPlaybackInfo) -> PreparedPlayback {
         let headers = client.streamHeaders(visitorData: info.visitorData)
         let asset = AVURLAsset(
             url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers]
         )
-        completion(.success(
-            PreparedPlayback(
-                item: AVPlayerItem(asset: asset),
-                captions: info.captionTracks,
-                duration: info.duration
-            )
-        ))
+        return PreparedPlayback(
+            item: AVPlayerItem(asset: asset),
+            captions: info.captionTracks,
+            duration: info.duration
+        )
     }
 }
