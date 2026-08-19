@@ -315,7 +315,6 @@
 "library.downloads" = "Nội dung tải xuống";
 "library.playlists" = "Danh sách phát";
 "library.playlists.favorites" = "Yêu thích";
-"library.downloads.comingSoon" = "Tính năng tải xuống sẽ có sau";
 "library.history.signIn" = "Đăng nhập để xem nhật ký xem của bạn";
 "library.history.empty" = "Không tìm thấy nhật ký xem";
 "library.history.loadFailed" = "Không tải được nhật ký xem";

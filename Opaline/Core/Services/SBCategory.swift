@@ -28,7 +28,7 @@ private struct SBCategoryDefinition {
 
 // MARK: - Category
 
-enum SBCategory: String, CaseIterable {
+enum SBCategory: String, CaseIterable, Codable {
     case sponsor = "sponsor"
     case selfpromo = "selfpromo"
     case exclusiveAccess = "exclusive_access"

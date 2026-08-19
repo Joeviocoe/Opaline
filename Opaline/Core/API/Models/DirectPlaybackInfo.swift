@@ -39,6 +39,10 @@ struct DashFormatInfo {
     let sigChallenge: String?
     /// Query-param name for the solved signature (`sp` from the cipher).
     let sigParam: String?
+    /// The rendition's true length, as the server states it. AVFoundation
+    /// reads twice that off these fragmented MP4s once they are on disk, so
+    /// the download trusts this number over the file's own timeline.
+    let approxDurationMs: Int?
     /// When this rendition was encoded. SABR addresses a format by itag *and*
     /// this value, so it has to survive into the request.
     let lastModified: String?

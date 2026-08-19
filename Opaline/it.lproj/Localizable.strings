@@ -365,7 +365,6 @@
 "library.downloads" = "Download";
 "library.playlists" = "Playlist";
 "library.playlists.favorites" = "Preferiti";
-"library.downloads.comingSoon" = "Download in arrivo";
 "library.history.signIn" = "Accedi per vedere la tua cronologia";
 "library.history.empty" = "Nessuna cronologia trovata";
 "library.history.loadFailed" = "Impossibile caricare la cronologia";

@@ -310,7 +310,6 @@
 "library.downloads" = "Завантаження";
 "library.playlists" = "Списки відтворення";
 "library.playlists.favorites" = "Вибране";
-"library.downloads.comingSoon" = "Завантаження скоро з'являться";
 "library.history.signIn" = "Увійдіть, щоб бачити історію переглядів";
 "library.history.empty" = "Історія переглядів порожня";
 "library.history.loadFailed" = "Не вдалося завантажити історію";

@@ -35,7 +35,12 @@ final class LibraryViewController: UIViewController {
                         dependencies.makeChannelViewController
                 )
             ),
-            RotatingNavigationController(rootViewController: DownloadsViewController()),
+            RotatingNavigationController(
+                rootViewController: DownloadsViewController(
+                    channelViewControllerFactory:
+                        dependencies.makeChannelViewController
+                )
+            ),
             RotatingNavigationController(
                 rootViewController: PlaylistsViewController(
                     service: dependencies.playlistService,

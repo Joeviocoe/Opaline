@@ -29,7 +29,8 @@ extension WatchViewController {
             ActionBarItem(
                 button: downloadButton,
                 icon: "icon_download",
-                label: "player.action.download".localized
+                label: "player.action.download".localized,
+                countLabel: downloadStatusLabel
             )
         ]
     }
@@ -60,6 +61,7 @@ extension WatchViewController {
             name: .sourceAudioTracksDidChange,
             object: nil
         )
+        addDownloadObservers()
         // Only to release the orientation lock a fullscreen toggle took — the
         // rotation itself is UIKit's job. Generation runs app-wide from
         // `AppDelegate`, so there is nothing to start here.
@@ -68,6 +70,23 @@ extension WatchViewController {
                 self,
                 selector: #selector(handleDeviceOrientationChange),
                 name: UIDevice.orientationDidChangeNotification,
+                object: nil
+            )
+        }
+    }
+
+    /// Both feed the same button: one fires when a job starts, finishes or is
+    /// deleted, the other once a second while it runs.
+    private func addDownloadObservers() {
+        let nc = NotificationCenter.default
+        for name in [
+            DownloadStore.didChangeNotification,
+            VideoDownloader.didProgressNotification
+        ] {
+            nc.addObserver(
+                self,
+                selector: #selector(updateDownloadButton),
+                name: name,
                 object: nil
             )
         }
@@ -235,6 +254,9 @@ extension WatchViewController {
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
         likeButton.addTarget(self, action: #selector(likeTapped), for: .touchUpInside)
         dislikeButton.addTarget(self, action: #selector(dislikeTapped), for: .touchUpInside)
+        downloadButton.addTarget(
+            self, action: #selector(downloadTapped), for: .touchUpInside
+        )
         for item in actionBarItems {
             item.button.addTapFeedback()
         }

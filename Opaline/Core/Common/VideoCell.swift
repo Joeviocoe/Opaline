@@ -11,6 +11,8 @@ class VideoCell: UICollectionViewCell {
 
     private let thumbnail = ThumbnailImageView(frame: .zero)
     private let durationLabel = UILabel()
+    private let downloadBadge = DownloadBadgeView()
+    private let downloadBar = DownloadProgressBar()
     private let liveBadgeView = UILabel()
     private let progressTrack = UIView()
     private let progressFill = UIView()
@@ -99,6 +101,11 @@ class VideoCell: UICollectionViewCell {
 // MARK: - Setup
 
 extension VideoCell {
+    private func showDownloadState(of videoId: String?) {
+        downloadBadge.configure(videoId: videoId)
+        downloadBar.configure(videoId: videoId)
+    }
+
     private func setupUI() {
         thumbnail.layer.cornerRadius = 4
         thumbnail.layer.masksToBounds = true
@@ -129,6 +136,9 @@ extension VideoCell {
         liveBadgeView.textAlignment = .center
         liveBadgeView.isHidden = true
         thumbnail.addSubview(liveBadgeView)
+
+        downloadBadge.pin(toThumbnail: thumbnail)
+        downloadBar.pin(toThumbnail: thumbnail)
 
         setupInfoArea()
         applyTheme()
@@ -312,6 +322,7 @@ extension VideoCell {
 
 extension VideoCell {
     func configureSkeleton() {
+        showDownloadState(of: nil)
         hideSkeleton()
         titleLabel.text = nil
         channelLabel.text = nil
@@ -324,6 +335,7 @@ extension VideoCell {
     }
 
     func configure(with video: Video) {
+        showDownloadState(of: video.id)
         hideSkeleton()
         menuButton.isHidden = false
         representedChannelId = video.channelId

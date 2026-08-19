@@ -70,6 +70,25 @@
 "player.action.removedFrom" = "Удалено из «%1$@»";
 "player.action.download" = "Скачать";
 
+/* ===== Downloads ===== */
+
+"downloads.quality.title" = "Качество скачивания";
+"downloads.quality.saved" = "%@ (скачано)";
+"downloads.quality.savedPlain" = "Скачанная копия";
+"downloads.started" = "Скачивание";
+"downloads.queued" = "Добавлено в очередь скачивания";
+"downloads.banner.queued" = "(+%@)";
+"downloads.finished" = "Видео скачано";
+"downloads.progress" = "Скачивание: %@%%";
+"downloads.muxing" = "Обработка";
+"downloads.cancel" = "Отменить скачивание";
+"downloads.delete" = "Удалить скачанное";
+"downloads.retry" = "Скачать заново";
+"downloads.deleted" = "Скачанное видео удалено";
+"downloads.error.busy" = "Уже идёт другое скачивание";
+"downloads.error.failed" = "Не удалось скачать это видео";
+"downloads.error.noOptions" = "Это видео нельзя скачать";
+
 /* ===== Video action menu (shared "..." menu on video cells) ===== */
 
 "video.menu.playNext" = "Добавить в очередь";
@@ -102,6 +121,7 @@
 
 "player.related.mix" = "Джем";
 "player.related.title" = "Похожие";
+"player.related.downloaded" = "Тоже скачано";
 "player.error.withMessage" = "Ошибка воспроизведения: %1$@";
 
 /* ===== Player: speed ===== */
@@ -311,7 +331,7 @@
 "library.downloads" = "Скачанные";
 "library.playlists" = "Плейлисты";
 "library.playlists.favorites" = "Избранное";
-"library.downloads.comingSoon" = "Загрузки скоро появятся";
+"library.downloads.empty" = "Скачанные видео появятся здесь";
 "library.history.signIn" = "Войдите, чтобы видеть историю просмотров";
 "library.history.empty" = "История просмотров пуста";
 "library.history.loadFailed" = "Не удалось загрузить историю";

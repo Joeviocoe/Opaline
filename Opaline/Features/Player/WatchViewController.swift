@@ -139,6 +139,9 @@ final class WatchViewController: UIViewController {
     let shareButton = UIButton(type: .system)
     let saveButton = UIButton(type: .system)
     let downloadButton = UIButton(type: .system)
+    /// Doubles as the download button's caption: "Download" at rest, the
+    /// running percentage while a job is on.
+    let downloadStatusLabel = UILabel()
     let likeCountLabel = UILabel()
     let dislikeCountLabel = UILabel()
     var likeCount: String?, dislikeCount: String?

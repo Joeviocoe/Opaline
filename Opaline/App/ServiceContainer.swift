@@ -40,7 +40,11 @@ enum ServiceContainer {
     static var channel: ChannelService { client }
     static var channelTabs: ChannelTabService { client }
     static var subscribedChannels: SubscribedChannelsService { client }
-    static var watch: WatchService { client }
+    /// Wrapped so a downloaded video keeps its page when the network is
+    /// gone; online it is the plain client.
+    static var watch: WatchService { offlineWatch }
+
+    private static let offlineWatch = OfflineWatchService(wrapping: client)
     static var engagement: EngagementService { client }
     static var account: AccountService { client }
     static var shorts: ShortsService { client }

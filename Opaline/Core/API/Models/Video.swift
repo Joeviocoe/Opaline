@@ -112,24 +112,7 @@ struct ChannelPage {
     let isSubscribed: Bool
 }
 
-struct WatchPage {
-    let video: Video
-    let description: String?
-    let channelInfo: ChannelInfo?
-    let subscribeButtonText: String?
-    let isSubscribed: Bool
-    let relatedVideos: [Video]
-    let likeCount: String?
-    let likeStatus: LikeStatus?
-    /// Total comments as the server formats it ("13K") — the Shorts rail
-    /// shows it without paying for a comments fetch.
-    let commentCount: String?
-    let nextVideo: Video?
-    let playlistTitle: String?
-    let playlistVideos: [Video]?
-}
-
-struct Comment {
+struct Comment: Codable {
     let id: String
     let authorName: String
     let authorChannelId: String?
@@ -144,7 +127,7 @@ struct Comment {
     let replyContinuation: String?
 }
 
-struct CommentsPage {
+struct CommentsPage: Codable {
     let title: String?
     let comments: [Comment]
     let continuation: String?
@@ -155,7 +138,7 @@ struct CommentsPage {
     let sortOptions: [CommentSortOption]
 }
 
-struct CommentSortOption {
+struct CommentSortOption: Codable {
     let title: String
     let token: String
     let isSelected: Bool

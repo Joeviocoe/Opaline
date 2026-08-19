@@ -363,7 +363,6 @@
 "library.downloads" = "Downloads";
 "library.playlists" = "Playlists";
 "library.playlists.favorites" = "Favoriten";
-"library.downloads.comingSoon" = "Downloads kommen bald";
 "library.history.signIn" = "Anmelden, um deinen Verlauf anzuzeigen";
 "library.history.empty" = "Kein Verlauf gefunden";
 "library.history.loadFailed" = "Verlauf konnte nicht geladen werden";

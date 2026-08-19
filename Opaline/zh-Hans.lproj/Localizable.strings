@@ -369,7 +369,6 @@
 "library.downloads" = "下载内容";
 "library.playlists" = "播放列表";
 "library.playlists.favorites" = "收藏";
-"library.downloads.comingSoon" = "下载功能即将推出";
 "library.history.signIn" = "登录以查看观看历史";
 "library.history.empty" = "没有观看历史记录";
 "library.history.loadFailed" = "无法加载历史记录";

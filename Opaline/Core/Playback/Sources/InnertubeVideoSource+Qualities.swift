@@ -55,4 +55,21 @@ extension InnertubeVideoSource {
         .sorted { ($0.height ?? 0) > ($1.height ?? 0) }
         .filter { seenLabels.insert($0.label).inserted }
     }
+
+    /// One `/player` fetch, formats only — no delivery is opened and no state
+    /// is published, so a probe racing a real load cannot disturb it.
+    func probeQualities(
+        videoId: String,
+        completion: @escaping ([VideoQuality]) -> Void
+    ) {
+        fetchInfo(videoId: videoId, cancellation: nil) { result in
+            DispatchQueue.main.async {
+                guard case .success(let info) = result else {
+                    completion([])
+                    return
+                }
+                completion(Self.qualities(from: info))
+            }
+        }
+    }
 }

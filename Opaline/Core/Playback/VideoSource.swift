@@ -116,6 +116,14 @@ protocol VideoSource: AnyObject {
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     )
 
+    /// Fetches the quality ladder WITHOUT preparing playback — lets a source
+    /// that plays from somewhere else (a downloaded file) still offer what the
+    /// network could serve. Sources with nothing to probe return `[]`.
+    func probeQualities(
+        videoId: String,
+        completion: @escaping ([VideoQuality]) -> Void
+    )
+
     /// Fetches audio-track metadata WITHOUT preparing playback — lets a
     /// composite discover dubs on a fallback source in the background while
     /// another source plays. Sources that never list dubs return `[]`.
@@ -174,6 +182,13 @@ extension VideoSource {
     func probeAudioTracks(
         videoId: String,
         completion: @escaping ([AudioTrack]) -> Void
+    ) {
+        completion([])
+    }
+
+    func probeQualities(
+        videoId: String,
+        completion: @escaping ([VideoQuality]) -> Void
     ) {
         completion([])
     }

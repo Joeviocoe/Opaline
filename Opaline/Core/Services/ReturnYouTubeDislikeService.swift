@@ -1,7 +1,7 @@
 import Foundation
 import CommonCrypto
 
-struct RYDVotes { let likes: Int; let dislikes: Int; let rating: Double }
+struct RYDVotes: Codable { let likes: Int; let dislikes: Int; let rating: Double }
 private struct PuzzleSolution { let base64: String; let difficulty: Int; let solution: Data }
 
 final class ReturnYouTubeDislikeService {
@@ -71,6 +71,11 @@ extension ReturnYouTubeDislikeService {
                   let dislikes = json["dislikes"] as? Int,
                   let rating = json["rating"] as? Double
             else {
+                // A saved video carries its counts, so the dislikes it was
+                // downloaded with survive the network going away.
+                if let stored = DownloadStore.votes(for: videoId) {
+                    completion(.success(stored)); return
+                }
                 let info = [NSLocalizedDescriptionKey: "Parse error"]
                 completion(.failure(NSError(domain: "RYD", code: 1, userInfo: info))); return
             }
