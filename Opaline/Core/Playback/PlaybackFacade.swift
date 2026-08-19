@@ -74,7 +74,7 @@ extension PlaybackFacade {
         }
         currentVideoId = videoId
         currentApiClient = apiClient
-        let source = buildChain(apiClient: apiClient)
+        let source = buildChain(apiClient: apiClient, videoId: videoId)
         context?.updateStatusLabel(statusKey.localized)
         PlaybackProgress.report = { [weak self] text in
             self?.context?.updateStatusLabel(text)
@@ -98,8 +98,23 @@ extension PlaybackFacade {
 
     /// The user's chain, wrapped so a preferred dub can start on the step
     /// that lists dubs.
-    private func buildChain(apiClient: WatchService) -> VideoSource {
+    private func buildChain(
+        apiClient: WatchService,
+        videoId: String
+    ) -> VideoSource {
         let steps = PlaybackChainSettings.activeSteps()
+        if DownloadStore.isDownloaded(videoId) {
+            AppLog.player("chain: this video is downloaded, playing the file")
+            // The chain rides along unloaded, purely so the quality menu can
+            // offer what the network would serve. Nothing touches it until
+            // the user picks one of those rows.
+            let source = DownloadedSource(
+                network: FallbackChainSource(steps: steps, apiClient: apiClient)
+            )
+            activeChain = nil
+            activeVideoSource = source
+            return source
+        }
         if steps.isEmpty {
             AppLog.player("chain: no sources enabled for this session")
         }

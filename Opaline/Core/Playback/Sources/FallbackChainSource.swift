@@ -96,6 +96,20 @@ final class FallbackChainSource: VideoSource {
         source.probeAudioTracks(videoId: videoId, completion: completion)
     }
 
+    /// Asked of the step that would play, without playing it: the answer is
+    /// the ladder the network offers, which is all a downloaded video needs
+    /// to show alongside its saved copy.
+    func probeQualities(
+        videoId: String,
+        completion: @escaping ([VideoQuality]) -> Void
+    ) {
+        guard let step = steps.first else {
+            completion([])
+            return
+        }
+        source(for: step).probeQualities(videoId: videoId, completion: completion)
+    }
+
     func releaseResources() {
         built.values.forEach { $0.releaseResources() }
         built.removeAll()

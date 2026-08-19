@@ -240,13 +240,12 @@ private extension InnertubeClient {
     ) -> DashFormatInfo {
         let track = fmt["audioTrack"]
             as? [String: Any]
+        let approxMs = Int((fmt["approxDurationMs"] as? String) ?? "")
         return DashFormatInfo(
             url: url,
             itag: itag,
             mimeType: fmtMimeType(fmt),
-            codecs: extractCodecs(
-                from: fmtMimeType(fmt)
-            ),
+            codecs: extractCodecs(from: fmtMimeType(fmt)),
             bitrate: fmtBitrate(fmt),
             contentLength: clen,
             initRangeEnd: iEnd,
@@ -258,14 +257,12 @@ private extension InnertubeClient {
             qualityLabel: fmt["qualityLabel"] as? String,
             sigChallenge: fmt[sigChallengeKey] as? String,
             sigParam: fmt[sigParamKey] as? String,
+            approxDurationMs: approxMs,
             lastModified: (fmt["lastModified"] as? String)
                 ?? (fmt["lmt"] as? String),
             audioTrackId: track?["id"] as? String,
-            audioTrackName: track?["displayName"]
-                as? String,
-            audioIsDefault:
-                (track?["audioIsDefault"] as? Bool)
-                    ?? false,
+            audioTrackName: track?["displayName"] as? String,
+            audioIsDefault: (track?["audioIsDefault"] as? Bool) ?? false,
             xtags: fmt["xtags"] as? String
         )
     }

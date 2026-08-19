@@ -73,6 +73,8 @@
 /* ===== Downloads ===== */
 
 "downloads.quality.title" = "Качество скачивания";
+"downloads.quality.saved" = "%@ (скачано)";
+"downloads.quality.savedPlain" = "Скачанная копия";
 "downloads.started" = "Скачивание";
 "downloads.finished" = "Видео скачано";
 "downloads.progress" = "Скачивание: %@%%";

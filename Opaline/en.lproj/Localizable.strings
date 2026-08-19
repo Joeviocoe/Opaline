@@ -115,6 +115,10 @@
 
 /* Title of the quality prompt shown before a download starts */
 "downloads.quality.title" = "Download quality";
+/* Quality row for the downloaded file; %@ is its height, e.g. "1080p" */
+"downloads.quality.saved" = "%@ (saved)";
+/* Same row when the height could not be read off the file */
+"downloads.quality.savedPlain" = "Saved copy";
 /* Toast shown when a download starts */
 "downloads.started" = "Downloading";
 /* Toast shown when a download finishes */

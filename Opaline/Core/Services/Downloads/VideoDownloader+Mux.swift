@@ -4,6 +4,20 @@ import Foundation
 // MARK: - Remux
 
 extension VideoDownloader {
+    /// Clamped to what the track actually offers: a stated length longer than
+    /// the media would make the insert fail outright.
+    private static func range(
+        of track: AVAssetTrack,
+        trueMs: Int?
+    ) -> CMTimeRange {
+        guard let trueMs, trueMs > 0 else {
+            return track.timeRange
+        }
+        let stated = CMTime(value: CMTimeValue(trueMs), timescale: 1_000)
+        let capped = CMTimeMinimum(stated, track.timeRange.duration)
+        return CMTimeRange(start: track.timeRange.start, duration: capped)
+    }
+
     /// Tells a truncated download apart from a container AVFoundation would
     /// not open — the two fail at the same place otherwise.
     private static func fileSize(_ url: URL) -> Int64 {
@@ -18,10 +32,11 @@ extension VideoDownloader {
     /// the bytes are already in the codecs the player wants.
     func mux(
         videoId: String,
-        video: URL,
-        audio: URL,
+        option: DownloadOption,
+        parts: (video: URL, audio: URL),
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
+        let (video, audio) = parts
         markMuxing()
         AppLog.downloads(
             "mux \(videoId): video \(Self.fileSize(video)) B,"
@@ -29,8 +44,18 @@ extension VideoDownloader {
         )
         let composition = AVMutableComposition()
         do {
-            try append(url: video, type: .video, to: composition)
-            try append(url: audio, type: .audio, to: composition)
+            try append(
+                url: video,
+                type: .video,
+                trueMs: option.video.approxDurationMs,
+                to: composition
+            )
+            try append(
+                url: audio,
+                type: .audio,
+                trueMs: option.audio.approxDurationMs,
+                to: composition
+            )
         } catch {
             fail(videoId: videoId, error: error, completion: completion)
             return
@@ -38,13 +63,17 @@ extension VideoDownloader {
         export(composition, videoId: videoId, completion: completion)
     }
 
-    /// The track's own `timeRange`, never the asset's `duration`: YouTube's
-    /// adaptive MP4s routinely claim a duration in the file header that does
-    /// not match what the track actually holds, and inserting the claimed
-    /// range yields a file that ends early or plays silence at the tail.
+    /// The length the server states, not the one AVFoundation computes.
+    ///
+    /// Measured 2026-08-19: a byte-exact copy of YouTube's adaptive MP4 reads
+    /// back as exactly twice its real length (507.83 s for a 253.92 s track,
+    /// on both the video and the audio part). The bytes are right — expected
+    /// and written sizes matched to the byte — so the file's own timeline is
+    /// what cannot be trusted, and `approxDurationMs` is taken instead.
     private func append(
         url: URL,
         type: AVMediaType,
+        trueMs: Int?,
         to composition: AVMutableComposition
     ) throws {
         let asset = AVURLAsset(url: url)
@@ -55,13 +84,12 @@ extension VideoDownloader {
               ) else {
             throw DownloadError.noTracks
         }
+        let range = Self.range(of: source, trueMs: trueMs)
         AppLog.downloads(
-            "\(type.rawValue) track \(CMTimeGetSeconds(source.timeRange.duration))s"
-                + " (file claims \(CMTimeGetSeconds(asset.duration))s)"
+            "\(type.rawValue) track \(CMTimeGetSeconds(range.duration))s"
+                + " (file claims \(CMTimeGetSeconds(source.timeRange.duration))s)"
         )
-        try target.insertTimeRange(
-            source.timeRange, of: source, at: .zero
-        )
+        try target.insertTimeRange(range, of: source, at: .zero)
     }
 
     private func export(

@@ -36,6 +36,13 @@ extension VideoDownloader {
         let job = RangeJob(url: url, handle: handle, size: size, offset: 0)
         fetchRange(job) { error in
             handle.closeFile()
+            // Expected against written: the one number that tells a truncated
+            // range loop apart from a container the player misreads.
+            let wrote = (try? file.resourceValues(forKeys: [.fileSizeKey]))?
+                .fileSize ?? 0
+            AppLog.downloads(
+                "\(file.lastPathComponent): expected \(size) B, wrote \(wrote) B"
+            )
             completion(error)
         }
     }

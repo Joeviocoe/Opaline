@@ -95,7 +95,8 @@ final class VideoDownloader {
         cancellation = CancellationToken()
         DownloadStore.announceChange()
         AppLog.downloads(
-            "start \(videoId) \(option.label) \(option.bytes / 1_048_576) MB"
+            "start \(videoId) \(option.label) \(option.bytes / 1_048_576) MB,"
+                + " itags \(option.video.itag)+\(option.audio.itag)"
         )
         fetchTracks(videoId: videoId, option: option, completion: completion)
     }
@@ -140,8 +141,8 @@ final class VideoDownloader {
                 }
                 self?.mux(
                     videoId: videoId,
-                    video: videoPart,
-                    audio: audioPart,
+                    option: option,
+                    parts: (videoPart, audioPart),
                     completion: completion
                 )
             }
@@ -209,6 +210,7 @@ enum DownloadError: LocalizedError {
     case http(Int)
     case noTracks
     case export
+    case missingFile
 
     var errorDescription: String? {
         switch self {
