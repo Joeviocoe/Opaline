@@ -35,8 +35,7 @@
 > - one that serves a single 360p quality and starts instantly
 >
 > Sources are tried from the top down until one plays. Content made for kids
-> comes only from the 1080p source or the 360p one. Livestreams on kids channels
-> still do not play.
+> comes only from the 1080p source or the 360p one.
 >
 > Nothing to do beyond updating. Your account, settings and history are
 > untouched.
@@ -183,7 +182,6 @@ Install the `.ipa` package directly:
 ## Known Issues and Limitations
 
 - Playback speeds above 2x may cause issues
-- Livestreams on kids channels don't play — no source hands out a stream we can read ([#83](https://github.com/verback2308/Opaline/issues/83))
 - Comments are read-only — you can browse and sort them and open replies, but not post, reply or like
 - Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
 - **Picture in Picture is limited by the system before iOS 15**, and no app can work around it: the window survives exactly one video, and switching to another one closes it and leaves audio playing — [the full findings are in issue #31](https://github.com/verback2308/Opaline/issues/31#issuecomment-5148224679)
