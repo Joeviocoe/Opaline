@@ -117,6 +117,7 @@ When Google dropped support for the official YouTube app on older devices, there
   <source media="(prefers-color-scheme: dark)" srcset="screenshots/app/iphone/dark/settings.jpeg">
   <img src="screenshots/app/iphone/light/settings.jpeg" width="32%" alt="Settings">
 </picture>
+<img src="screenshots/app/iphone/light/shorts.jpeg" width="32%" alt="Shorts viewer">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="screenshots/app/ipad/dark/recommendations.jpeg">
   <img src="screenshots/app/ipad/light/recommendations.jpeg" width="63%" alt="iPad home feed">
