@@ -11,6 +11,7 @@ final class QueueBarView: UIView {
 
     private let nextLabel = UILabel()
     private let queueLabel = UILabel()
+    private let queueIcon = UIImageView()
     private let chevron = UIImageView()
 
     override init(frame: CGRect) {
@@ -50,6 +51,7 @@ final class QueueBarView: UIView {
         nextLabel.textColor = theme.primaryText
         queueLabel.textColor = theme.secondaryText
         chevron.tintColor = theme.primaryText
+        queueIcon.tintColor = theme.primaryText
     }
 
     private func setup() {
@@ -61,12 +63,15 @@ final class QueueBarView: UIView {
         for label in [nextLabel, queueLabel] {
             label.lineBreakMode = .byTruncatingTail
         }
-        chevron.image = PlayerIcons.playerIcon(
-            "icon_chevron_up",
-            size: 18
-        )
-        chevron.contentMode = .scaleAspectFit
-        chevron.setContentHuggingPriority(.required, for: .horizontal)
+        // Template images, not the player's pre-filled white ones: this strip
+        // sits on the theme's surface, so its icons take the theme's tint —
+        // white on white was invisible in the light theme.
+        chevron.image = resizedNavBarIcon("icon_chevron_up", size: 18)
+        queueIcon.image = resizedNavBarIcon("icon_queue", size: 20)
+        for icon in [queueIcon, chevron] {
+            icon.contentMode = .scaleAspectFit
+            icon.setContentHuggingPriority(.required, for: .horizontal)
+        }
         layoutRow()
         addGestureRecognizer(
             UITapGestureRecognizer(
@@ -83,7 +88,7 @@ final class QueueBarView: UIView {
         )
         text.axis = .vertical
         text.spacing = 2
-        let row = UIStackView(arrangedSubviews: [text, chevron])
+        let row = UIStackView(arrangedSubviews: [queueIcon, text, chevron])
         row.axis = .horizontal
         row.alignment = .center
         row.spacing = 12
@@ -93,7 +98,8 @@ final class QueueBarView: UIView {
             row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             row.centerYAnchor.constraint(equalTo: centerYAnchor),
-            chevron.widthAnchor.constraint(equalToConstant: 18)
+            chevron.widthAnchor.constraint(equalToConstant: 18),
+            queueIcon.widthAnchor.constraint(equalToConstant: 20)
         ])
     }
 
