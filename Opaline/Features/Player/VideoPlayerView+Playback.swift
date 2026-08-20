@@ -226,10 +226,11 @@ extension VideoPlayerView {
         )
     }
 
+    /// `.initial`: a local file already knows its duration, so a
+    /// change-only observer never fires and the bar stays at 0:00.
     private func observeDuration(on player: AVPlayer) {
         statusObservation = player.currentItem?.observe(
-            \.duration,
-            options: [.new]
+            \.duration, options: [.initial, .new]
         ) { [weak self] item, _ in
             DispatchQueue.main.async {
                 let secs = CMTimeGetSeconds(item.duration)
