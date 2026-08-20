@@ -379,18 +379,18 @@ extension WatchViewController {
         let safe = view.safeAreaLayoutGuide
         queueBarSlot.portrait = [
             queueBar.leadingAnchor.constraint(
-                equalTo: safe.leadingAnchor, constant: 8
+                equalTo: safe.leadingAnchor, constant: 16
             ),
             queueBar.trailingAnchor.constraint(
-                equalTo: safe.trailingAnchor, constant: -8
+                equalTo: safe.trailingAnchor, constant: -16
             )
         ]
         queueBarSlot.landscape = [
             queueBar.leadingAnchor.constraint(
-                equalTo: sidebarContainer.leadingAnchor, constant: 8
+                equalTo: sidebarContainer.leadingAnchor, constant: 16
             ),
             queueBar.trailingAnchor.constraint(
-                equalTo: sidebarContainer.trailingAnchor, constant: -8
+                equalTo: sidebarContainer.trailingAnchor, constant: -16
             )
         ]
         NSLayoutConstraint.activate(queueBarSlot.portrait + [
