@@ -219,6 +219,9 @@
 "settings.row.darkUntil" = "Тёмная тема до";
 
 "settings.row.defaultQuality" = "Качество по умолчанию";
+"settings.section.videoQuality" = "Качество видео";
+"settings.row.qualityWiFi" = "По Wi-Fi";
+"settings.row.qualityCellular" = "По мобильной сети";
 "settings.quality.auto" = "Авто";
 "settings.row.backgroundPlayback" = "Фоновое воспроизведение";
 "settings.row.pip" = "Картинка в картинке";

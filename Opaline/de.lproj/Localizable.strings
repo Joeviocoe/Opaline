@@ -215,6 +215,9 @@
 
 /* Playback rows */
 "settings.row.defaultQuality" = "Standardqualität";
+"settings.section.videoQuality" = "Einstellungen für Videoqualität";
+"settings.row.qualityWiFi" = "Über WLAN";
+"settings.row.qualityCellular" = "Über Mobilfunknetz";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
 "settings.quality.auto" = "Auto";
 "settings.row.backgroundPlayback" = "Hintergrundwiedergabe";

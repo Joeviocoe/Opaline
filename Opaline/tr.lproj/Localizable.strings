@@ -221,6 +221,9 @@
 
 /* Playback rows */
 "settings.row.defaultQuality" = "Varsayılan Kalite";
+"settings.section.videoQuality" = "Video kalitesi tercihleri";
+"settings.row.qualityWiFi" = "Kablosuz ağlarda";
+"settings.row.qualityCellular" = "Mobil ağlarda";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
 "settings.quality.auto" = "Otomatik";
 "settings.row.backgroundPlayback" = "Arka Planda Oynatma";

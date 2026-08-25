@@ -181,6 +181,9 @@
 
 /* Playback rows */
 "settings.row.defaultQuality" = "Chất lượng mặc định";
+"settings.section.videoQuality" = "Lựa chọn ưu tiên về chất lượng video";
+"settings.row.qualityWiFi" = "Qua mạng Wi-Fi";
+"settings.row.qualityCellular" = "Qua mạng di động";
 "settings.quality.auto" = "Tự động";
 "settings.row.backgroundPlayback" = "Phát trong nền";
 "settings.row.pip" = "Hình trong hình";

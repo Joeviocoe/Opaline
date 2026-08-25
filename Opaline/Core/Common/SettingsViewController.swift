@@ -9,7 +9,8 @@ final class SettingsViewController: UIViewController {
         case pageSponsorBlock, pageCache, pageDebug, pageDownloads
         case theme, autoDarkStart, autoDarkEnd, appIcon
         case appLanguage, region
-        case quality, backgroundPlayback, pipEnabled, hideStatusBar
+        case quality, qualityCellular
+        case backgroundPlayback, pipEnabled, hideStatusBar
         case downloadQuality, downloadComments, downloadCaptions
         case showShorts, shortsPlayer, shortsGrouping
         case autoZoomToFill
@@ -213,8 +214,13 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             )
         case .quality:
             return makeDisclosureCell(
-                "settings.row.defaultQuality".localized,
-                value: VideoQualityStore.displayName
+                "settings.row.qualityWiFi".localized,
+                value: VideoQualityStore.displayName(VideoQualityStore.wifi)
+            )
+        case .qualityCellular:
+            return makeDisclosureCell(
+                "settings.row.qualityCellular".localized,
+                value: VideoQualityStore.displayName(VideoQualityStore.cellular)
             )
         case .downloadQuality:
             return makeDisclosureCell(
@@ -434,8 +440,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
 
     private func handleGeneralSelection(_ row: Row) -> Bool {
         switch row {
-        case .quality:
-            showQualityPicker()
+        case .quality, .qualityCellular:
+            showQualityPicker(forCellular: row == .qualityCellular)
         case .shortsPlayer:
             showShortsPlayerPicker()
         case .feedCacheDays:
@@ -681,20 +687,27 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    private func showQualityPicker() {
+    private func showQualityPicker(forCellular: Bool) {
+        let rowTitle = forCellular
+            ? "settings.row.qualityCellular" : "settings.row.qualityWiFi"
+        let current = forCellular
+            ? VideoQualityStore.cellular : VideoQualityStore.wifi
         let sheet = UIAlertController(
-            title: "settings.row.defaultQuality".localized,
+            title: rowTitle.localized,
             message: nil,
             preferredStyle: .actionSheet
         )
         VideoQualityStore.options.forEach { opt in
-            let title = opt == "Auto"
-                ? "settings.quality.auto".localized : opt
+            let title = VideoQualityStore.displayName(opt)
             let action = UIAlertAction(title: title, style: .default) { _ in
-                VideoQualityStore.selected = opt
+                if forCellular {
+                    VideoQualityStore.cellular = opt
+                } else {
+                    VideoQualityStore.wifi = opt
+                }
                 self.tableView.reloadData()
             }
-            if opt == VideoQualityStore.selected {
+            if opt == current {
                 action.setValue(true, forKey: "checked")
             }
             sheet.addAction(action)
@@ -984,20 +997,20 @@ enum VideoQualityStore {
         }
         return opts
     }
+    /// What playback should use right now. Wi-Fi and cellular each keep
+    /// their own choice, as in the official app: one setting either wasted
+    /// mobile data or made every video on Wi-Fi start at a low tier (#108).
     static var selected: String {
-        get {
-            let key = UserDefaultsKeys.VideoQuality.selected
-            return UserDefaults.standard.string(forKey: key) ?? "Auto"
-        }
-        set { UserDefaults.standard.set(newValue, forKey: UserDefaultsKeys.VideoQuality.selected) }
+        NetworkType.isCellular ? cellular : wifi
     }
-    /// Display text for the stored value — "Auto" is a stored constant
-    /// (never localized in UserDefaults), only its display is translated.
-    static var displayName: String {
-        selected == "Auto"
-            ? "settings.quality.auto".localized : selected
+    static var wifi: String {
+        get { stored(UserDefaultsKeys.VideoQuality.selected) }
+        set { store(newValue, forKey: UserDefaultsKeys.VideoQuality.selected) }
     }
-
+    static var cellular: String {
+        get { stored(UserDefaultsKeys.VideoQuality.selectedCellular) }
+        set { store(newValue, forKey: UserDefaultsKeys.VideoQuality.selectedCellular) }
+    }
     /// Returns the maximum height for the selected quality. "Auto" caps at
     /// 1080p — the pre-AV1 behavior; higher tiers are explicit opt-in.
     static var maxHeight: Int? {
@@ -1005,5 +1018,20 @@ enum VideoQualityStore {
             "2160p": 2_160, "1440p": 1_440, "1080p": 1_080,
             "720p": 720, "480p": 480, "360p": 360
         ][selected] ?? 1_080
+    }
+
+    /// Display text for a stored value — "Auto" is a stored constant
+    /// (never localized in UserDefaults), only its display is translated.
+    static func displayName(_ quality: String) -> String {
+        quality == "Auto"
+            ? "settings.quality.auto".localized : quality
+    }
+
+    private static func stored(_ key: String) -> String {
+        UserDefaults.standard.string(forKey: key) ?? "Auto"
+    }
+
+    private static func store(_ quality: String, forKey key: String) {
+        UserDefaults.standard.set(quality, forKey: key)
     }
 }

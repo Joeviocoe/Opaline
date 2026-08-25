@@ -10,7 +10,10 @@ enum UserDefaultsKeys {
     }
 
     enum VideoQuality {
+        /// The Wi-Fi preference. Keeps its original name so the setting
+        /// everyone already made carries over as their Wi-Fi choice.
         static let selected = "defaultVideoQuality"
+        static let selectedCellular = "defaultVideoQualityCellular"
     }
 
     enum Downloads {

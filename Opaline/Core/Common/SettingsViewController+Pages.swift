@@ -132,10 +132,15 @@ extension SettingsViewController {
         }
         return [
             Section(
+                header: "settings.section.videoQuality".localized,
+                footer: nil,
+                rows: [.quality, .qualityCellular]
+            ),
+            Section(
                 header: nil,
                 footer: "settings.footer.playback".localized,
                 rows: [
-                    .quality, .backgroundPlayback, .pipEnabled,
+                    .backgroundPlayback, .pipEnabled,
                     .autoZoomToFill, .hideStatusBar,
                     .autoplayEnabled, .autoplayMixEnabled
                 ]
