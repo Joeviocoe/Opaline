@@ -21,12 +21,22 @@ extension VideoPlayerView {
     ) {
         // Straight to the seek, not through the buttons: those now switch
         // videos, and the gesture is the only way to seek by steps.
-        let xPosition = gesture.location(in: self).x
-        seek(direction: xPosition < bounds.width / 2 ? -1 : 1)
-        if !controlsVisible {
-            setControls(visible: true, animated: true)
+        let zone = seekZone(atX: gesture.location(in: self).x)
+        flashSeekZone(zone)
+        switch zone {
+        case .rewind:
+            seek(direction: -1)
+        case .forward:
+            seek(direction: 1)
+        case .playPause:
+            playPauseTapped()
         }
-        scheduleAutoHide()
+        // The overlay stays as it was: a double tap that pulls it up covers
+        // the video the user is seeking through, and on the middle zone it
+        // put the controls over a pause the icon already shows (#107).
+        if controlsVisible {
+            scheduleAutoHide()
+        }
     }
 
     @objc
