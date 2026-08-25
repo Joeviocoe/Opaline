@@ -57,6 +57,21 @@ extension VideoPlayerView {
         }
     }
 
+    /// A route that went away (headphone unplugged, Bluetooth disconnected)
+    /// pauses playback, and it must stay paused: playing on the speaker is
+    /// the one thing the pause is there to prevent. Marked as a user pause,
+    /// which is what the resume above checks — and it is checked again after
+    /// the delay, so the order of the two notifications does not matter.
+    @objc
+    func audioRouteChanged(_ note: Notification) {
+        let raw = note.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
+        guard raw == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+        else {
+            return
+        }
+        multitaskPause.lastUserPause = CACurrentMediaTime()
+    }
+
     private func resumeAfterSystemPause() {
         guard let player, player.rate == 0, !isPiPActive,
               CACurrentMediaTime() - multitaskPause.lastUserPause > 0.5

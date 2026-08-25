@@ -17,6 +17,7 @@ final class NowPlayingService {
     private weak var player: AVPlayer?
     private var onNextTrack: (() -> Void)?
     private var onPreviousTrack: (() -> Void)?
+    private var onRemotePause: (() -> Void)?
     private var commandTokens: [(MPRemoteCommand, Any)] = []
     private var artworkURL: URL?
     private var lastPublishedPosition: TimeInterval = -1
@@ -30,11 +31,13 @@ final class NowPlayingService {
         player: AVPlayer,
         metadata: NowPlayingMetadata,
         onNext: (() -> Void)? = nil,
-        onPrevious: (() -> Void)? = nil
+        onPrevious: (() -> Void)? = nil,
+        onPause: (() -> Void)? = nil
     ) {
         self.player = player
         onNextTrack = onNext
         onPreviousTrack = onPrevious
+        onRemotePause = onPause
         lastPublishedPosition = 0
         publishInfo(metadata: metadata, position: 0)
         registerCommands()
@@ -68,6 +71,7 @@ final class NowPlayingService {
         player = nil
         onNextTrack = nil
         onPreviousTrack = nil
+        onRemotePause = nil
         artworkURL = nil
     }
 
@@ -158,16 +162,24 @@ final class NowPlayingService {
             return .success
         }
         add(center.pauseCommand) { [weak self] _ in
-            self?.player?.pause()
+            self?.pauseFromRemote()
             return .success
         }
         add(center.togglePlayPauseCommand) { [weak self] _ in
             guard let player = self?.player else {
                 return .commandFailed
             }
-            if player.rate > 0 { player.pause() } else { player.play() }
+            if player.rate > 0 { self?.pauseFromRemote() } else { player.play() }
             return .success
         }
+    }
+
+    /// A remote pause is as deliberate as tapping our own pause button, so the
+    /// session announces it. Without that, the player reads it as a pause it
+    /// did not ask for and plays again half a second later.
+    private func pauseFromRemote() {
+        onRemotePause?()
+        player?.pause()
     }
 
     private func registerSeekCommand(

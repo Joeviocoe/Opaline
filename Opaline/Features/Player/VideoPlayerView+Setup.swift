@@ -58,6 +58,15 @@ extension VideoPlayerView {
             name: UIApplication.didEnterBackgroundNotification,
             object: nil
         )
+        // Pulling out a headphone pauses us through the audio session, with
+        // the app still frontmost — exactly what the multitasking heuristic
+        // reads as a stolen route, so it played on the speaker (#104).
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(audioRouteChanged(_:)),
+            name: AVAudioSession.routeChangeNotification,
+            object: nil
+        )
         // The PiP setting is reachable without ever leaving the player, and
         // it decides whether the controller exists at all.
         NotificationCenter.default.addObserver(

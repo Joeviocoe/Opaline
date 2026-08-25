@@ -179,6 +179,10 @@ extension WatchViewController {
             },
             onPrevious: { [weak self] in
                 self?.previousFromRemote()
+            },
+            onPause: { [weak self] in
+                self?.videoPlayerView?.multitaskPause.lastUserPause =
+                    CACurrentMediaTime()
             }
         )
     }
