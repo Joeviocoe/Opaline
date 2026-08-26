@@ -112,6 +112,8 @@
 
 "video.menu.playNext" = "Добавить в очередь";
 "video.menu.watchLater" = "Смотреть позже";
+"video.menu.feedbackTuned" = "Такие видео больше не появятся в ваших рекомендациях";
+"video.menu.feedbackRemoved" = "Удалено";
 "video.menu.watchLaterName" = "Смотреть позже";
 "video.menu.removeFrom" = "Удалить из «%1$@»";
 "video.menu.removeFromQueue" = "Удалить из очереди";

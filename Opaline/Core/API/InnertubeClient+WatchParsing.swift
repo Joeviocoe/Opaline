@@ -130,20 +130,12 @@ extension InnertubeClient {
         guard owner.channelId != nil || owner.avatarURL != nil else {
             return video
         }
-        return Video(
-            id: video.id,
-            title: video.title,
-            channelId: video.channelId ?? owner.channelId,
-            channelName: video.channelName,
-            channelAvatarURL: video.channelAvatarURL ?? owner.avatarURL,
-            thumbnailURL: video.thumbnailURL,
-            viewCount: video.viewCount,
-            publishedAt: video.publishedAt,
-            duration: video.duration,
-            isLive: video.isLive,
-            playlistId: video.playlistId,
-            isShort: video.isShort
-        )
+        // A copy, not a rebuild: a rebuild silently drops whatever the model
+        // gains next, and it already carries the renderer's feedback actions.
+        var enriched = video
+        enriched.channelId = video.channelId ?? owner.channelId
+        enriched.channelAvatarURL = video.channelAvatarURL ?? owner.avatarURL
+        return enriched
     }
 
     private static func fallbackBrowseIdChannel(

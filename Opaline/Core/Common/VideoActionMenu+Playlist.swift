@@ -2,48 +2,12 @@ import UIKit
 
 // MARK: - Playlist actions
 
-/// Watch Later and the playlist picker both fetch the same
-/// add-to-playlist option list and send back one of its ready-made
+/// The playlist picker fetches the add-to-playlist option list (Watch
+/// Later is one of its rows) and sends back one of its ready-made
 /// actions — see `InnertubeClient+PlaylistEdit.swift`. Mirrors
 /// `WatchViewController+Save.swift` without reusing its view-controller
 /// state, since this menu can be presented from anywhere.
 extension VideoActionMenu {
-    private static let watchLaterId = "WL"
-
-    static func addToWatchLater(
-        _ video: Video,
-        from presenter: UIViewController,
-        client: PlaylistService = ServiceContainer.playlists,
-        engagement: EngagementService = ServiceContainer.engagement
-    ) {
-        fetchOptions(videoId: video.id, client: client) { options in
-            guard let options else {
-                showFailed(in: presenter.view)
-                return
-            }
-            let existing = options.first { $0.id == watchLaterId }
-            if existing?.isAdded == true {
-                showSaved(title: existing?.title ?? "", in: presenter.view)
-                return
-            }
-            let actions = existing?.addActions
-                // ponytail: fallback if "WL" is absent from the response —
-                // known shape, same as WatchViewController's own toggle.
-                ?? [["action": "ACTION_ADD_VIDEO", "addedVideoId": video.id]]
-            performEdit(
-                playlistId: watchLaterId,
-                actions: actions,
-                engagement: engagement
-            ) { success in
-                if success {
-                    showSaved(title: "video.menu.watchLaterName".localized, in: presenter.view)
-                } else {
-                    showFailed(in: presenter.view)
-                }
-            }
-        }
-    }
-
     static func presentPlaylistPicker(
         for video: Video,
         from presenter: UIViewController,
@@ -167,11 +131,7 @@ extension VideoActionMenu {
         }
     }
 
-    private static func showSaved(title: String, in view: UIView) {
-        ToastView.show("player.action.savedTo".localized(with: title), in: view)
-    }
-
-    private static func showFailed(in view: UIView) {
+    static func showFailed(in view: UIView) {
         ToastView.show("player.action.saveFailed".localized, in: view, isError: true)
     }
 }

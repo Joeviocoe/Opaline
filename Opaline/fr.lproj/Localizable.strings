@@ -89,6 +89,8 @@
 
 "video.menu.playNext" = "Ajouter à la file d'attente";
 "video.menu.watchLater" = "À regarder plus tard";
+"video.menu.feedbackTuned" = "OK, nous affinerons nos recommandations en conséquence.";
+"video.menu.feedbackRemoved" = "Supprimée";
 "video.menu.watchLaterName" = "À regarder plus tard";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "Retirer de la file d'attente";

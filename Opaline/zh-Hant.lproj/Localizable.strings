@@ -93,6 +93,8 @@
 
 "video.menu.playNext" = "新增至待播清單";
 "video.menu.watchLater" = "稍後觀看";
+"video.menu.feedbackTuned" = "知道了，我們會調整推薦給你的內容。";
+"video.menu.feedbackRemoved" = "已移除";
 "video.menu.watchLaterName" = "稍後觀看";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "從待播清單中移除";

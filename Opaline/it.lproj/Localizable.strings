@@ -89,6 +89,8 @@
 
 "video.menu.playNext" = "Aggiungi alla coda";
 "video.menu.watchLater" = "Guarda dopo";
+"video.menu.feedbackTuned" = "OK. Miglioreremo i consigli che visualizzi.";
+"video.menu.feedbackRemoved" = "Rimosso";
 "video.menu.watchLaterName" = "Guarda dopo";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "Rimuovi dalla coda";

@@ -20,6 +20,10 @@ enum VideoActionMenu {
     private struct Options {
         let remove: (playlist: (id: String, title: String), onRemoved: (() -> Void)?)?
         let queue: QueueContext?
+        /// Also used on its own by the feedback actions, which drop the
+        /// video from whatever list it was opened from.
+        let onRemoved: (() -> Void)?
+        let outcome: FeedbackOutcome
     }
 
     static func present(
@@ -28,14 +32,20 @@ enum VideoActionMenu {
         anchor: UIView,
         removeFrom playlist: (id: String, title: String)? = nil,
         onRemoved: (() -> Void)? = nil,
-        queue: QueueContext? = nil
+        queue: QueueContext? = nil,
+        feedbackOutcome: FeedbackOutcome = .tunedRecommendations
     ) {
         let remove = playlist.map { (playlist: $0, onRemoved: onRemoved) }
         let items = menuItems(
             video: video,
             from: presenter,
             anchor: anchor,
-            options: Options(remove: remove, queue: queue)
+            options: Options(
+                remove: remove,
+                queue: queue,
+                onRemoved: onRemoved,
+                outcome: feedbackOutcome
+            )
         )
         let host = menuHost(presenter)
         PlayerMenuOverlay.show(
@@ -75,7 +85,12 @@ enum VideoActionMenu {
                 onRemoved: remove.onRemoved
             ))
         }
-        return items
+        return items + feedbackItems(
+            video: video,
+            from: presenter,
+            outcome: options.outcome,
+            onRemoved: options.onRemoved
+        )
     }
 
     private static func baseItems(
@@ -103,12 +118,8 @@ enum VideoActionMenu {
                 )
             })
         }
-        items.append(PlayerMenuItem(
-            title: "video.menu.watchLater".localized,
-            iconName: "icon_clock"
-        ) {
-            addToWatchLater(video, from: presenter)
-        })
+        // No "Watch later" row: "Save to playlist" right below it already
+        // offers Watch Later, and the feedback actions need the space.
         return items
             + saveAndShareItems(video: video, from: presenter, anchor: anchor)
             + DownloadMenu.items(for: video, from: presenter, anchor: anchor)

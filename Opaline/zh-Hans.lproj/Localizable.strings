@@ -93,6 +93,8 @@
 
 "video.menu.playNext" = "添加到待播列表";
 "video.menu.watchLater" = "稍后观看";
+"video.menu.feedbackTuned" = "好的。我们会努力向你推荐更符合你喜好的内容。";
+"video.menu.feedbackRemoved" = "已移除";
 "video.menu.watchLaterName" = "稍后观看";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "从队列中移除";

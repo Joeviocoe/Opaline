@@ -268,3 +268,22 @@ private extension HistoryViewController {
         cache.setHistoryFeed(updated)
     }
 }
+
+extension HistoryViewController {
+    /// Drops a video the server has just removed from the watch history.
+    /// The cache is rewritten too, or the row would come back on the next
+    /// launch from the copy on disk.
+    func removeVideoFromList(id: String) {
+        guard let index = videos.firstIndex(where: { $0.id == id }) else {
+            return
+        }
+        videos.remove(at: index)
+        tableView.deleteRows(
+            at: [IndexPath(row: index, section: 0)],
+            with: .automatic
+        )
+        cache.setHistoryFeed(
+            FeedPage(videos: videos, continuation: continuationToken)
+        )
+    }
+}

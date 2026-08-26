@@ -365,18 +365,11 @@ extension WatchViewController {
         }
         guard let chId = match?.channelId
         else { return video }
-        return Video(
-            id: video.id,
-            title: video.title,
-            channelId: chId,
-            channelName: video.channelName,
-            channelAvatarURL: video.channelAvatarURL,
-            thumbnailURL: video.thumbnailURL,
-            viewCount: video.viewCount,
-            publishedAt: video.publishedAt,
-            duration: video.duration,
-            isLive: video.isLive
-        )
+        // A copy, not a rebuild: everything the renderer came with — shorts
+        // flag, playlist id, feedback actions — has to survive the fill-in.
+        var enriched = video
+        enriched.channelId = chId
+        return enriched
     }
 }
 

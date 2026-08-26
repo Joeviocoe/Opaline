@@ -60,7 +60,14 @@ extension SearchViewController: UITableViewDataSource {
             guard let self else {
                 return
             }
-            VideoActionMenu.present(video: video, from: self, anchor: anchor)
+            VideoActionMenu.present(
+                video: video,
+                from: self,
+                anchor: anchor
+            ) { [weak self] in
+                self?.results.removeAll { $0.id == video.id }
+                self?.tableView.reloadData()
+            }
         }
     }
 

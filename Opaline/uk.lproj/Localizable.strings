@@ -73,6 +73,8 @@
 
 "video.menu.playNext" = "Додати в чергу";
 "video.menu.watchLater" = "Дивитися пізніше";
+"video.menu.feedbackTuned" = "Добре. Ми підготуємо для вас інші рекомендації.";
+"video.menu.feedbackRemoved" = "Вилучено";
 "video.menu.watchLaterName" = "Дивитися пізніше";
 "video.menu.removeFrom" = "Видалити з «%1$@»";
 "video.menu.removeFromQueue" = "Видалити з черги";

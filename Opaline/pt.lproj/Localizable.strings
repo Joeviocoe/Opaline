@@ -89,6 +89,8 @@
 
 "video.menu.playNext" = "Adicionar à fila";
 "video.menu.watchLater" = "Assistir mais tarde";
+"video.menu.feedbackTuned" = "Ok. Ajustaremos suas recomendações.";
+"video.menu.feedbackRemoved" = "Removido";
 "video.menu.watchLaterName" = "Assistir mais tarde";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "Remover da fila";

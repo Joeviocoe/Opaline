@@ -40,7 +40,29 @@ extension VideosViewController {
     }
 
     func presentVideoMenu(_ video: Video, anchor: UIView) {
-        VideoActionMenu.present(video: video, from: self, anchor: anchor)
+        VideoActionMenu.present(
+            video: video,
+            from: self,
+            anchor: anchor
+        ) { [weak self] in
+            self?.removeVideoFromList(id: video.id)
+        }
+    }
+
+    /// Drops a video the user asked not to see again. A full reload rather
+    /// than `deleteItems`: a shelf rail is one cell holding many videos, so
+    /// index paths do not line up with what was removed.
+    func removeVideoFromList(id: String) {
+        for section in sections.indices {
+            guard let index = sections[section].videos
+                .firstIndex(where: { $0.id == id })
+            else {
+                continue
+            }
+            sections[section].videos.remove(at: index)
+            collectionView?.reloadData()
+            return
+        }
     }
 
     func endRefreshing() {

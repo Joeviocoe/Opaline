@@ -93,6 +93,8 @@
 
 "video.menu.playNext" = "Sıraya ekle";
 "video.menu.watchLater" = "Daha sonra izle";
+"video.menu.feedbackTuned" = "Teşekkür ederiz. Önerilerinizde gerekli ayarlamaları yapacağız.";
+"video.menu.feedbackRemoved" = "Kaldırıldı";
 "video.menu.watchLaterName" = "Daha sonra izle";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "Sıradan kaldır";

@@ -89,6 +89,8 @@
 
 "video.menu.playNext" = "Zur Warteschlange hinzufügen";
 "video.menu.watchLater" = "Später ansehen";
+"video.menu.feedbackTuned" = "Ok, wir werden deine Empfehlungen anpassen.";
+"video.menu.feedbackRemoved" = "Entfernt";
 "video.menu.watchLaterName" = "Später ansehen";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "Aus der Wiedergabeliste entfernen";

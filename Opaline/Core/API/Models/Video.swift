@@ -24,6 +24,12 @@ struct Video: Codable {
     /// screen. A var so the feed parser can flag renderers that carry a
     /// short behind ordinary video chrome.
     var isShort: Bool
+    /// What the renderer this video was parsed from offered under its menu.
+    /// Every list keeps its own copies, so the actions a card shows are
+    /// always the ones that arrived with that card — Home can offer "Not
+    /// interested" for the same video the subscription feed offers "Hide".
+    /// Persisted with the feed so a cached list still has working rows.
+    var feedbackActions: [FeedbackAction] = []
 
     init(
         id: String,
@@ -90,6 +96,9 @@ struct Video: Codable {
         isLive = try container.decodeIfPresent(Bool.self, forKey: .isLive) ?? false
         playlistId = try container.decodeIfPresent(String.self, forKey: .playlistId)
         isShort = try container.decodeIfPresent(Bool.self, forKey: .isShort) ?? false
+        feedbackActions = try container.decodeIfPresent(
+            [FeedbackAction].self, forKey: .feedbackActions
+        ) ?? []
     }
 }
 

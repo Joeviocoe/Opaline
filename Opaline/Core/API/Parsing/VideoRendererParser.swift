@@ -48,7 +48,14 @@ enum VideoRendererParserChain {
     ]
 
     static func video(from item: [String: Any]) -> Video? {
-        parsers.lazy.compactMap { $0.video(from: item) }.first
+        guard var video = parsers.lazy.compactMap({ $0.video(from: item) }).first
+        else {
+            return nil
+        }
+        // Every list in the app funnels through here, so one hook covers
+        // History, Home and everything else that offers these actions.
+        video.feedbackActions = FeedbackActionParser.actions(in: item)
+        return video
     }
 
     /// Returns true if `item` is a YouTube Short.

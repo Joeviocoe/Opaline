@@ -93,6 +93,8 @@
 
 "video.menu.playNext" = "キューに追加";
 "video.menu.watchLater" = "後で見る";
+"video.menu.feedbackTuned" = "了解しました。ご回答に基づいておすすめの精度を向上させます。";
+"video.menu.feedbackRemoved" = "削除済み";
 "video.menu.watchLaterName" = "後で見る";
 "video.menu.removeFrom" = "Remove from %1$@";
 "video.menu.removeFromQueue" = "キューから削除";

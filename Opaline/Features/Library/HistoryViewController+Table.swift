@@ -48,7 +48,15 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
             guard let self else {
                 return
             }
-            VideoActionMenu.present(video: video, from: self, anchor: anchor)
+            VideoActionMenu.present(
+                video: video,
+                from: self,
+                anchor: anchor,
+                onRemoved: { [weak self] in
+                    self?.removeVideoFromList(id: video.id)
+                },
+                feedbackOutcome: .removed
+            )
         }
     }
 

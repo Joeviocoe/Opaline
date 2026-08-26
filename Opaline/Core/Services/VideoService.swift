@@ -264,6 +264,12 @@ protocol EngagementService: AnyObject {
         actions: [[String: Any]],
         completion: @escaping (Result<Void, Error>) -> Void
     )
+    /// Sends one of the feedback tokens a renderer offered — removing a
+    /// video from watch history, or telling the feed it missed.
+    func sendFeedback(
+        token: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    )
 }
 
 protocol SubscribedChannelsService: AnyObject {

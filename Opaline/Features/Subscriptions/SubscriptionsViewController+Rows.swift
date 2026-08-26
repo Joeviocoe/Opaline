@@ -106,7 +106,20 @@ extension SubscriptionsViewController: UITableViewDataSource {
             guard let self else {
                 return
             }
-            VideoActionMenu.present(video: video, from: self, anchor: anchor)
+            // "Hide" has to actually hide it: the server drops it from the
+            // feed, and the row goes with it rather than sitting there
+            // until the next refresh (#105, #106).
+            VideoActionMenu.present(
+                video: video,
+                from: self,
+                anchor: anchor,
+                onRemoved: { [weak self] in
+                    self?.videos.removeAll { $0.id == video.id }
+                    self?.shortsShelf.removeAll { $0.id == video.id }
+                    self?.tableView.reloadData()
+                },
+                feedbackOutcome: .removed
+            )
         }
     }
 }

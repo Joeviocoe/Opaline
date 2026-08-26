@@ -73,6 +73,8 @@
 
 "video.menu.playNext" = "Thêm vào hàng đợi";
 "video.menu.watchLater" = "Xem sau";
+"video.menu.feedbackTuned" = "Cảm ơn bạn đã thao tác! Chúng tôi sẽ điều chỉnh các nội dung đề xuất để phù hợp với bạn hơn.";
+"video.menu.feedbackRemoved" = "Đã xóa";
 "video.menu.watchLaterName" = "Xem sau";
 "video.menu.removeFrom" = "Xóa khỏi %1$@";
 "video.menu.removeFromQueue" = "Xoá khỏi hàng đợi";
