@@ -221,6 +221,9 @@
 
 /* Playback rows */
 "settings.row.defaultQuality" = "デフォルトの画質";
+"settings.section.videoQuality" = "動画の画質設定";
+"settings.row.qualityWiFi" = "Wi-Fi 接続時";
+"settings.row.qualityCellular" = "モバイル ネットワーク接続時";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
 "settings.quality.auto" = "自動";
 "settings.row.backgroundPlayback" = "バックグラウンド再生";

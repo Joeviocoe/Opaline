@@ -221,6 +221,9 @@
 
 /* Playback rows */
 "settings.row.defaultQuality" = "預設畫質";
+"settings.section.videoQuality" = "影片畫質偏好設定";
+"settings.row.qualityWiFi" = "使用 Wi-Fi 時";
+"settings.row.qualityCellular" = "使用行動網路時";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
 "settings.quality.auto" = "自動";
 "settings.row.backgroundPlayback" = "背景播放";

@@ -217,6 +217,9 @@
 
 /* Playback rows */
 "settings.row.defaultQuality" = "Qualité par défaut";
+"settings.section.videoQuality" = "Préférences de qualité vidéo";
+"settings.row.qualityWiFi" = "Via le Wi-Fi";
+"settings.row.qualityCellular" = "Via le réseau mobile";
 /* The "Auto" entry of the default-quality picker (stored value stays English) */
 "settings.quality.auto" = "Auto";
 "settings.row.backgroundPlayback" = "Lecture en arrière-plan";
