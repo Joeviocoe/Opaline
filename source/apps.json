@@ -12,6 +12,14 @@
       "subtitle": "YouTube client for iOS 12+",
       "versions": [
         {
+          "version": "1.11.0",
+          "date": "2026-08-26T14:49:46Z",
+          "localizedDescription": "**New**\n\n- Double tap to pause ([#107](https://github.com/verback2308/Opaline/issues/107)). The player is split into three zones: a quarter on each side seeks, and the half between them pauses. Nothing appears over the video when you use them.\n- Separate default quality for Wi-Fi and mobile data ([#108](https://github.com/verback2308/Opaline/issues/108)). Two rows in Settings; the quality you already picked stays as your Wi-Fi setting.\n- Remove a video from watch history ([#105](https://github.com/verback2308/Opaline/issues/105)) and tell the feed it missed ([#106](https://github.com/verback2308/Opaline/issues/106)). The video menu now shows what YouTube offers for that video — \"Not interested\", \"Don't recommend channel\", \"Hide\", \"Remove from watch history\" — and the video leaves the list.\n\n**Fixes**\n\n- Playback stays paused when headphones come out ([#104](https://github.com/verback2308/Opaline/issues/104)). The pause button on headphones, Control Center, the lock screen and CarPlay are all treated as your pause now, so nothing plays on the speaker.",
+          "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.11.0/Opaline_1.11.0.ipa",
+          "size": 6666724,
+          "minOSVersion": "12.0"
+        },
+        {
           "version": "1.10.0",
           "date": "2026-08-20T13:01:23Z",
           "localizedDescription": "The big one in this version is downloads. A video can be saved to the device and watched with no network at all. You can download subtitles, dubbed audio, comments as well. The other half of the release is playlists/mixes/jams, which now open a proper queue that does not stop after the first 20 videos.\n\n**New**\n\n- Downloads ([#54](https://github.com/verback2308/Opaline/issues/54)). Save a video to the device and watch it offline. A new Downloads screen in the Library shows what you have, and the download state appears wherever a video appears. You choose what a download brings with it, so the video page and its comments can be kept next to the file and read without a network.\n- Queue for playlists ([#73](https://github.com/verback2308/Opaline/issues/73)). Playing a playlist opens a queue panel with everything in it, and the queue continues past the first 20 videos. A strip above the comments shows what plays next.\n\n**Fixes**\n\n- Kids livestreams play again ([#83](https://github.com/verback2308/Opaline/issues/83)). They are served through the Android HLS manifest, which is the only source that answers for them.\n- The home feed stops opening on the same videos ([#100](https://github.com/verback2308/Opaline/issues/100)). The pinned first shelf is loaded deeper and shuffled, so the top of the screen changes between visits.\n- The queue panel survives an iPad rotation, and its strip no longer hides under the comments ([#101](https://github.com/verback2308/Opaline/issues/101)).\n- A downloaded video shows its real length and can be seeked on iOS 12 ([#102](https://github.com/verback2308/Opaline/issues/102)). The duration is read from the file itself instead of being asked for over the network.",
@@ -188,14 +196,14 @@
           "minOSVersion": "12.0"
         }
       ],
-      "version": "1.10.0",
-      "versionDate": "2026-08-20T13:01:23Z",
-      "versionDescription": "The big one in this version is downloads. A video can be saved to the device and watched with no network at all. You can download subtitles, dubbed audio, comments as well. The other half of the release is playlists/mixes/jams, which now open a proper queue that does not stop after the first 20 videos.\n\n**New**\n\n- Downloads ([#54](https://github.com/verback2308/Opaline/issues/54)). Save a video to the device and watch it offline. A new Downloads screen in the Library shows what you have, and the download state appears wherever a video appears. You choose what a download brings with it, so the video page and its comments can be kept next to the file and read without a network.\n- Queue for playlists ([#73](https://github.com/verback2308/Opaline/issues/73)). Playing a playlist opens a queue panel with everything in it, and the queue continues past the first 20 videos. A strip above the comments shows what plays next.\n\n**Fixes**\n\n- Kids livestreams play again ([#83](https://github.com/verback2308/Opaline/issues/83)). They are served through the Android HLS manifest, which is the only source that answers for them.\n- The home feed stops opening on the same videos ([#100](https://github.com/verback2308/Opaline/issues/100)). The pinned first shelf is loaded deeper and shuffled, so the top of the screen changes between visits.\n- The queue panel survives an iPad rotation, and its strip no longer hides under the comments ([#101](https://github.com/verback2308/Opaline/issues/101)).\n- A downloaded video shows its real length and can be seeked on iOS 12 ([#102](https://github.com/verback2308/Opaline/issues/102)). The duration is read from the file itself instead of being asked for over the network.",
-      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.10.0/Opaline_1.10.0.ipa",
+      "version": "1.11.0",
+      "versionDate": "2026-08-26T14:49:46Z",
+      "versionDescription": "**New**\n\n- Double tap to pause ([#107](https://github.com/verback2308/Opaline/issues/107)). The player is split into three zones: a quarter on each side seeks, and the half between them pauses. Nothing appears over the video when you use them.\n- Separate default quality for Wi-Fi and mobile data ([#108](https://github.com/verback2308/Opaline/issues/108)). Two rows in Settings; the quality you already picked stays as your Wi-Fi setting.\n- Remove a video from watch history ([#105](https://github.com/verback2308/Opaline/issues/105)) and tell the feed it missed ([#106](https://github.com/verback2308/Opaline/issues/106)). The video menu now shows what YouTube offers for that video — \"Not interested\", \"Don't recommend channel\", \"Hide\", \"Remove from watch history\" — and the video leaves the list.\n\n**Fixes**\n\n- Playback stays paused when headphones come out ([#104](https://github.com/verback2308/Opaline/issues/104)). The pause button on headphones, Control Center, the lock screen and CarPlay are all treated as your pause now, so nothing plays on the speaker.",
+      "downloadURL": "https://github.com/verback2308/Opaline/releases/download/1.11.0/Opaline_1.11.0.ipa",
       "localizedDescription": "A lightweight YouTube client for iOS 12+. No ads, no tracking. Features: SponsorBlock, Return YouTube Dislike, 1080p playback, background audio, PiP, subtitles, and more.",
       "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
       "tintColor": "FF0000",
-      "size": 6650280,
+      "size": 6666724,
       "category": "entertainment",
       "minOSVersion": "12.0",
       "screenshots": [
@@ -218,6 +226,15 @@
   "iconURL": "https://raw.githubusercontent.com/verback2308/YTLite/main/source/icon.png",
   "tintColor": "FF0000",
   "news": [
+    {
+      "title": "Opaline 1.11.0 - Headphone pause, tap zones, per-network quality, feedback actions",
+      "identifier": "release-1.11.0",
+      "caption": "Double tap to pause ([#107](https://github.com/verback2308/Opaline/issues/107)). The player is split into three zones…",
+      "date": "2026-08-26T14:49:46Z",
+      "tintColor": "FF0000",
+      "appID": "com.verback.YTLite",
+      "url": "https://github.com/verback2308/Opaline/releases/tag/1.11.0"
+    },
     {
       "title": "Opaline 1.10.0 - Video download, playlists/mixes/jams rework, kids livestreams fix",
       "identifier": "release-1.10.0",
