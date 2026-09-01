@@ -145,15 +145,21 @@ extension WatchViewController {
                 + " code=\(code)"
         )
         logUnderlyingError(nsError)
-        if code == -12_660
-            || domain == "CoreMediaErrorDomain" {
-            hasSeenPlaybackError = true
-            if !isRecoveringPlayback {
-                AppLog.player(
-                    "player failure — scheduling recovery"
-                )
-                recoverPlayback()
-            }
+        // Any failed item means playback is dead. The old gate matched only
+        // CoreMediaErrorDomain and -12660, so an AVFoundationErrorDomain
+        // failure — -11828 "cannot open", -11850 "not supported for asset",
+        // which is exactly what an unplayable container produces — was logged
+        // and then dropped, leaving the player hung with no fallthrough to the
+        // next source in the chain. recoverPlayback() already bails while a
+        // recovery is in flight and PlaybackFacade.recover() bounds the
+        // retries, so reacting to every failure cannot loop.
+        hasSeenPlaybackError = true
+        if !isRecoveringPlayback {
+            AppLog.player(
+                "player failure — scheduling recovery"
+                    + " (domain=\(domain) code=\(code))"
+            )
+            recoverPlayback()
         }
     }
 
