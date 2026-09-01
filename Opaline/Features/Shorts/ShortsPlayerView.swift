@@ -217,7 +217,7 @@ final class ShortsPlayerView: UIView {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        if let timeObserver {
+        if let timeObserver = timeObserver {
             player.removeTimeObserver(timeObserver)
         }
     }

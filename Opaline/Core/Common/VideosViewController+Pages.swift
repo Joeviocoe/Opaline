@@ -70,7 +70,7 @@ extension VideosViewController {
             collectionView?.reloadData()
             return
         }
-        guard let collectionView else {
+        guard let collectionView = collectionView else {
             _ = mergeIntoLastSection(&newSections)
             sections.append(contentsOf: newSections)
             return

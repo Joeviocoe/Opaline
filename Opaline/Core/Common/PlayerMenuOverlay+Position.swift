@@ -47,7 +47,7 @@ extension PlayerMenuOverlay {
         sourceRect: CGRect?,
         hasTitle: Bool
     ) -> [NSLayoutConstraint] {
-        guard let sourceRect else {
+        guard let sourceRect = sourceRect else {
             return [
                 panel.centerXAnchor.constraint(equalTo: centerXAnchor),
                 panel.centerYAnchor.constraint(equalTo: centerYAnchor)

@@ -17,7 +17,7 @@ extension WatchViewController: VideoPlayerViewDelegate {
         action: @escaping (WatchViewController) -> Void
     ) -> PlayerMenuItem {
         PlayerMenuItem(title: title) { [weak self] in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             action(self)
@@ -63,7 +63,7 @@ extension WatchViewController: VideoPlayerViewDelegate {
         let target = AudioOnlyMode.isEnabled
             ? AudioOnlyMode.videoQuality(in: source.availableQualities)
             : AudioOnlyMode.quality
-        guard let target else {
+        guard let target = target else {
             return
         }
         selectSourceQuality(target, source: source)

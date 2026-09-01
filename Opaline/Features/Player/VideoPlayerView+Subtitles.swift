@@ -22,7 +22,7 @@ extension VideoPlayerView {
             return
         }
         let cue = activeCue(at: time)
-        if let cue {
+        if let cue = cue {
             if subtitleLabel.text != cue.text {
                 subtitleLabel.text = cue.text
             }

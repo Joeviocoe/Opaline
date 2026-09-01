@@ -75,7 +75,7 @@ private extension SubscriptionsViewController {
             channelIds: ids,
             includeShorts: false
         ) { [weak self] uploads in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             self.isLoadingNewContentRSS = false
@@ -91,7 +91,7 @@ private extension SubscriptionsViewController {
         isLoadingNewContentHistory = true
         historyService.fetchHistory { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 switch result {

@@ -67,7 +67,7 @@ private extension UpdateNotificationService {
         AppLog.notifications("fetching \(url.absoluteString)")
         let request = HTTPRequest(method: .get, url: url, sendsCookies: false)
         transport.send(request, cancellationToken: nil) { [weak self] result in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             UserDefaults.standard.set(
@@ -217,7 +217,7 @@ private extension UpdateNotificationService {
                 trigger: nil
             )
             UNUserNotificationCenter.current().add(request) { error in
-                if let error {
+                if let error = error {
                     AppLog.notifications("local notification failed: \(error)")
                 }
             }

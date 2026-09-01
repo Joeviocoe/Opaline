@@ -22,7 +22,7 @@ extension SearchViewController {
             cancellationToken: cancellationToken
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 guard self.shouldApplyResult(
@@ -52,7 +52,7 @@ extension SearchViewController {
             cancellationToken: cancellationToken
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 self.isLoadingNextPage = false

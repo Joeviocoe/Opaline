@@ -67,7 +67,7 @@ extension InnertubeClient {
                 bestURL = url
             }
         }
-        if let bestURL {
+        if let bestURL = bestURL {
             return normalizeThumbnailURL(bestURL)
         }
         if let url = thumbs.last?["url"] as? String,

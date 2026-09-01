@@ -18,7 +18,7 @@ extension SignatureTimestampService {
     /// and the two cannot disagree.
     func tvSignatureTimestamp(completion: @escaping (Int?) -> Void) {
         tvPlayerPath { [weak self] jsPath in
-            guard let self, let jsPath else {
+            guard let self = self, let jsPath = jsPath else {
                 completion(nil)
                 return
             }

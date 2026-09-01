@@ -118,7 +118,7 @@ extension WatchViewController {
     }
 
     private func bufferValue(_ item: AVPlayerItem?) -> String {
-        guard let item else {
+        guard let item = item else {
             return "?"
         }
         let now = CMTimeGetSeconds(item.currentTime())
@@ -127,7 +127,7 @@ extension WatchViewController {
             .map { CMTimeGetSeconds($0.start) + CMTimeGetSeconds($0.duration) }
             .filter { $0 >= now }
             .max()
-        guard let bufferedEnd else {
+        guard let bufferedEnd = bufferedEnd else {
             return "0.0 s"
         }
         return String(format: "%.1f s", bufferedEnd - now)

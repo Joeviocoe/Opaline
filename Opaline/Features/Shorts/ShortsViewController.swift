@@ -79,7 +79,7 @@ final class ShortsViewController: UIViewController {
         self.watchService = watchService
         self.engagementService = engagementService
         self.channelViewControllerFactory = channelViewControllerFactory
-        guard let seedVideo else {
+        guard let seedVideo = seedVideo else {
             videos = []
             seed = ShortsSeed.cold
             super.init(nibName: nil, bundle: nil)
@@ -115,7 +115,7 @@ final class ShortsViewController: UIViewController {
         setupBackButton()
         setupOverlay()
         prefetcher.onReady = { [weak self] _ in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             self.queueNext(after: self.attachedIndex)

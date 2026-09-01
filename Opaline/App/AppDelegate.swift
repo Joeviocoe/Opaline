@@ -194,7 +194,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// lives (three navigation controllers, the tab icons, the feed's cache
     /// read and the first `reloadData`). Idempotent and cheap to call twice.
     private func preloadMainIfNeeded() {
-        guard preloadedMain == nil, let window else {
+        guard preloadedMain == nil, let window = window else {
             return
         }
         guard OAuthClient.shared.isSignedIn

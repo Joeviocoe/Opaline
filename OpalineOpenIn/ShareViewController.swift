@@ -36,10 +36,10 @@ final class ShareViewController: UIViewController {
             self?.finish()
         }
         loadSharedURL { [weak self] url in
-            guard let self else {
+            guard let self = self else {
                 return
             }
-            guard let url, let deepLink = self.deepLink(for: url) else {
+            guard let url = url, let deepLink = self.deepLink(for: url) else {
                 os_log(
                     "Opaline share: no video id in %{public}@",
                     log: shareLog,

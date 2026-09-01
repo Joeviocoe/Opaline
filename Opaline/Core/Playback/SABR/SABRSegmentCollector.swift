@@ -65,10 +65,10 @@ final class SABRSegmentCollector {
     /// without `xtags` takes whatever comes — single-audio videos name no
     /// track at all.
     private static func sameTrack(_ served: String?, _ wanted: String?) -> Bool {
-        guard let wanted, !wanted.isEmpty else {
+        guard let wanted = wanted, !wanted.isEmpty else {
             return true
         }
-        guard let served, !served.isEmpty else {
+        guard let served = served, !served.isEmpty else {
             return true
         }
         return served == wanted

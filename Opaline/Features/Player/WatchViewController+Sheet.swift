@@ -96,7 +96,7 @@ extension WatchViewController {
                 self.view.layoutIfNeeded()
             },
             completion: { [weak self] _ in
-                guard let self, !self.isSheetExpanded else {
+                guard let self = self, !self.isSheetExpanded else {
                     return
                 }
                 self.sheetView?.isHidden = true

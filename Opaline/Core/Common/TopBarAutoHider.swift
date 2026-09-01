@@ -70,7 +70,7 @@ final class TopBarAutoHider {
         isHidden = hidden
         owner?.visibleNavigationController?
             .setNavigationBarHidden(hidden, animated: true)
-        guard let onChange else {
+        guard let onChange = onChange else {
             return
         }
         UIView.animate(withDuration: 0.22) {

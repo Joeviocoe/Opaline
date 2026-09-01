@@ -40,7 +40,7 @@ enum AppLanguage: String, CaseIterable {
     /// The effective UI language: the override, else the closest supported
     /// match to the system language, else English.
     static var effective: AppLanguage {
-        if let override {
+        if let override = override {
             return override
         }
         let preferred = Locale.preferredLanguages.first ?? "en"

@@ -35,7 +35,7 @@ extension VideoPlayerView {
             self?.pauseAutoHide()
         }
         seekBar.onScrubEnd = { [weak self] progress in
-            guard let self,
+            guard let self = self,
                   let currentPlayer = self.player
             else {
                 return
@@ -55,7 +55,7 @@ extension VideoPlayerView {
             self.scheduleAutoHide()
         }
         seekBar.onScrubChanged = { [weak self] progress in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             self.currentTimeLabel.text = formatTime(

@@ -275,7 +275,7 @@ private extension PlayerPanelViewController {
 
     @objc
     func handleMiniPan(_ gesture: UIPanGestureRecognizer) {
-        guard !isExpanded, let miniBar else {
+        guard !isExpanded, let miniBar = miniBar else {
             return
         }
         let translationY = max(0, gesture.translation(in: miniBar).y)

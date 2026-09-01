@@ -62,7 +62,7 @@ extension SubscriptionsViewController: UITableViewDataSource {
             self?.openAllShorts()
         }
         cell.onSelect = { [weak self] index in
-            guard let self, index < shorts.count else {
+            guard let self = self, index < shorts.count else {
                 return
             }
             self.videoRouter.open(
@@ -89,7 +89,7 @@ extension SubscriptionsViewController: UITableViewDataSource {
 
     private func attachHandlers(to cell: SubscriptionVideoCell, video: Video) {
         cell.onChannelTap = { [weak self] in
-            guard let self,
+            guard let self = self,
                   let channelId = video.channelId
             else {
                 return
@@ -103,7 +103,7 @@ extension SubscriptionsViewController: UITableViewDataSource {
             )
         }
         cell.onMenuTap = { [weak self] anchor in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             // "Hide" has to actually hide it: the server drops it from the

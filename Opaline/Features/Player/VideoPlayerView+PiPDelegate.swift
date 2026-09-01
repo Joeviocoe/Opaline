@@ -32,7 +32,7 @@ extension VideoPlayerView: AVPictureInPictureControllerDelegate {
         // hands playback back to the app, and AVKit pauses on that way out,
         // so there the previous state is put back instead.
         if pipIsRestoring {
-            if wasPlayingOnResign, let player, player.rate == 0 {
+            if wasPlayingOnResign, let player = player, player.rate == 0 {
                 player.play()
             }
         } else {

@@ -26,7 +26,7 @@ extension DownloadsViewController: UITableViewDataSource, UITableViewDelegate {
             self?.openChannel(for: video)
         }
         cell.onMenuTap = { [weak self] anchor in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             VideoActionMenu.present(video: video, from: self, anchor: anchor)

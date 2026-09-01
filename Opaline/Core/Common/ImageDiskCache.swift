@@ -123,7 +123,7 @@ final class ImageDiskCache {
 
 extension UIImage {
     var memoryCost: Int {
-        guard let cgImage else {
+        guard let cgImage = cgImage else {
             return 0
         }
         return cgImage.bytesPerRow * cgImage.height

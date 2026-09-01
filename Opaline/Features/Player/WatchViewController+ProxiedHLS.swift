@@ -51,7 +51,7 @@ extension WatchViewController {
             available: playbackFacade.activeVideoSource?.availableQualities
                 .contains { $0.id == AudioOnlyMode.qualityID } ?? false
         )
-        if let resumeAt, CMTimeGetSeconds(resumeAt) > 1 {
+        if let resumeAt = resumeAt, CMTimeGetSeconds(resumeAt) > 1 {
             pendingResumeSeek = resumeAt
         }
     }

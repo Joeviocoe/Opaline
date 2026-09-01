@@ -14,7 +14,7 @@ enum NetworkType {
                 SCNetworkReachabilityCreateWithAddress(nil, $0)
             }
         }
-        guard let reachability else {
+        guard let reachability = reachability else {
             return false
         }
         var flags = SCNetworkReachabilityFlags()

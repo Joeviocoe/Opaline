@@ -11,7 +11,7 @@ extension VideoPlayerView {
     func scheduleBufferingIndicator() {
         bufferingIndicatorWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
-            guard let self,
+            guard let self = self,
                   self.player?.timeControlStatus == .waitingToPlayAtSpecifiedRate else {
                 return
             }

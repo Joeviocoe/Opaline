@@ -39,7 +39,7 @@ struct MediaHeader {
     }
 
     private static func ms(_ ticks: Int?, _ timescale: Int) -> Int {
-        guard let ticks, timescale > 0 else {
+        guard let ticks = ticks, timescale > 0 else {
             return 0
         }
         return ticks * 1_000 / timescale

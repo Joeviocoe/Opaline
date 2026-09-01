@@ -171,7 +171,7 @@ final class SABRFetcher {
     }
 
     private func apply(_ policy: SABRPolicy?) {
-        guard let policy else {
+        guard let policy = policy else {
             return
         }
         lock.lock()

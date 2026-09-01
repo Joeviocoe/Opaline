@@ -46,7 +46,7 @@ enum VideoCardHelper {
         mixBadge: UILabel? = nil
     ) {
         durationLabel.backgroundColor = ThemeManager.shared.durationBackground
-        if let mixBadge, video.playlistId != nil {
+        if let mixBadge = mixBadge, video.playlistId != nil {
             // One chip in the corner, not two: the mix label takes the
             // duration's place, the way the official app does it.
             mixBadge.isHidden = false

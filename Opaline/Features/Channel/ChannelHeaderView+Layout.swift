@@ -39,7 +39,7 @@ extension ChannelHeaderView {
     private func frameConstraints(
         _ parent: UIView
     ) -> [NSLayoutConstraint] {
-        guard let heightRef
+        guard let heightRef = heightRef
         else {
             return []
         }

@@ -14,7 +14,7 @@ extension HomeViewController {
     /// be newer than what is on screen (background refresh runs about
     /// hourly, so a quick app switch changes nothing).
     func adoptFreshCacheIfNeeded() {
-        guard let collectionView, collectionView.contentOffset.y <= 1,
+        guard let collectionView = collectionView, collectionView.contentOffset.y <= 1,
               let cachedAt = cache.feedUpdatedAt("home"),
               cachedAt > appliedFeedAt,
               let cachedPage = cache.cachedHomeFeed()
@@ -29,10 +29,10 @@ extension HomeViewController {
 
     func loadCachedOrFetchFeed() {
         cache.loadHomeFeed { [weak self] cachedPage in
-            guard let self else {
+            guard let self = self else {
                 return
             }
-            if let cachedPage {
+            if let cachedPage = cachedPage {
                 AppLog.home("cache-hit → showing \(cachedPage.videos.count) videos instantly")
                 self.isLoadingInitial = false
                 self.spinner.stopAnimating()
@@ -104,7 +104,7 @@ extension HomeViewController {
         let generation = feedGeneration
         service.fetchHomeFeed { [weak self] result in
             DispatchQueue.main.async {
-                guard let self, self.feedGeneration == generation else {
+                guard let self = self, self.feedGeneration == generation else {
                     return
                 }
                 let ms = Int(Date().timeIntervalSince(t0) * 1_000)
@@ -124,7 +124,7 @@ extension HomeViewController {
         case .success(let page):
             AppLog.home("network fetch done \(ms)ms videos=\(page.videos.count)")
             expandRecommended(page) { [weak self] expanded in
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 self.endRefreshing()
@@ -259,7 +259,7 @@ extension HomeViewController {
         }
         service.fetchNextPage(continuation: token) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self, let page = try? result.get() else {
+                guard let self = self, let page = try? result.get() else {
                     completion(videos, token)
                     return
                 }

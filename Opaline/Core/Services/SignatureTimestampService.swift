@@ -95,7 +95,7 @@ final class SignatureTimestampService {
             HTTPRequest(method: .get, url: url, isPlayback: true),
             cancellationToken: nil
         ) { [weak self] result in
-            guard let self else {
+            guard let self = self else {
                 completion(nil)
                 return
             }

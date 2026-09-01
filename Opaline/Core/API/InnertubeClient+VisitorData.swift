@@ -5,7 +5,7 @@ import Foundation
 extension InnertubeClient {
     static func extractVisitorData(from data: Data?) -> String? {
         guard
-            let data,
+            let data = data,
             let html = String(data: data, encoding: .utf8),
             let start = html.range(of: "\"VISITOR_DATA\":\""),
             let end = html[start.upperBound...].range(of: "\"")
@@ -112,7 +112,7 @@ extension InnertubeClient {
             guard cancellation?.isCancelled != true else {
                 return
             }
-            if let visitorData {
+            if let visitorData = visitorData {
                 self?.session.visitorData = visitorData
             }
             dispatch(visitorData)

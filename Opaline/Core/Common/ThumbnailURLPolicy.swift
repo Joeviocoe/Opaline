@@ -141,7 +141,7 @@ enum ThumbnailURLPolicy {
         videoId: String? = nil
     ) -> [URL] {
         let names = stems(forPixelSize: pixelSize).map { "\($0).jpg" }
-        if let videoId, !videoId.isEmpty {
+        if let videoId = videoId, !videoId.isEmpty {
             let canonical = names.compactMap {
                 URL(string: "https://i.ytimg.com/vi/\(videoId)/\($0)")
             }

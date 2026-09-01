@@ -176,7 +176,7 @@ extension OAuthClient {
     func validToken(
         completion: @escaping (Result<String, Error>) -> Void
     ) {
-        guard let tokens else {
+        guard let tokens = tokens else {
             if !isAnonymous {
                 NotificationCenter.default.post(
                     name: .authorizationRequired,

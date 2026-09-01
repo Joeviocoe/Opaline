@@ -8,7 +8,7 @@ extension WatchViewController: UICollectionViewDataSource {
         video: Video
     ) {
         cell.onChannelTap = { [weak self] in
-            guard let self,
+            guard let self = self,
                   let channelId = video.channelId
             else {
                 return
@@ -16,7 +16,7 @@ extension WatchViewController: UICollectionViewDataSource {
             videoRouter.openChannel(id: channelId, name: video.channelName)
         }
         cell.onMenuTap = { [weak self] anchor in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             VideoActionMenu.present(video: video, from: self, anchor: anchor)
@@ -77,10 +77,12 @@ extension WatchViewController: UICollectionViewDataSource {
                 for: indexPath
             ) as? PlaylistSectionHeaderView
             ?? PlaylistSectionHeaderView()
-        let title: String = if watchPage?.servedOffline ?? false {
-            "player.related.downloaded".localized
+        // Swift 5.6 has no if-expressions.
+        let title: String
+        if watchPage?.servedOffline ?? false {
+            title = "player.related.downloaded".localized
         } else {
-            "player.related.title".localized
+            title = "player.related.title".localized
         }
         header.configure(
             title: title,
@@ -219,7 +221,7 @@ extension WatchViewController: UIScrollViewDelegate {
 extension WatchViewController: PlaybackContext {
     func updateStatusLabel(_ text: String) {
         DispatchQueue.main.async { [weak self] in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             playerStatusLabel.text = text

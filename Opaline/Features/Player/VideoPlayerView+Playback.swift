@@ -101,7 +101,7 @@ extension VideoPlayerView {
     // MARK: - Periodic Observer
 
     func addPeriodicObserver() {
-        guard let player else {
+        guard let player = player else {
             return
         }
         let interval = CMTime(
@@ -126,7 +126,7 @@ extension VideoPlayerView {
     // MARK: - Player Observers
 
     func addPlayerObservers() {
-        guard let player else {
+        guard let player = player else {
             return
         }
         observeRate(on: player)
@@ -202,7 +202,7 @@ extension VideoPlayerView {
     }
 
     private func performClockResync() {
-        guard let player,
+        guard let player = player,
               player.timeControlStatus == .playing else {
             return
         }

@@ -67,7 +67,7 @@ final class ShortsOverlayView: UIView {
     /// An unknown avatar clears to the placeholder rather than keeping the
     /// previous short's — the slot is always allocated either way.
     private func setAvatar(url: String?) {
-        guard let url, let parsed = URL(string: url) else {
+        guard let url = url, let parsed = URL(string: url) else {
             avatar.cancel()
             avatar.image = nil
             return
@@ -81,7 +81,7 @@ final class ShortsOverlayView: UIView {
     }
 
     private func emit(_ action: ShortsActionRail.Action) {
-        guard let video else {
+        guard let video = video else {
             return
         }
         onAction?(action, video)

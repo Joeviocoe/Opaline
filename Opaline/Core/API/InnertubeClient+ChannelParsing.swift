@@ -202,7 +202,7 @@ private extension InnertubeClient {
             }
             .flatMap { $0["content"] as? String }
             .flatMap { $0.isEmpty ? nil : $0 }
-        if let vmDesc {
+        if let vmDesc = vmDesc {
             return vmDesc
         }
         let meta = firstRenderer(

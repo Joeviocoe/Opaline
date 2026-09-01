@@ -33,7 +33,7 @@ extension SABRDelivery {
         completion: @escaping (Data?, String) -> Void
     ) {
         let parts = path.split(separator: "/").map(String.init)
-        guard let route, parts.first == "g\(route.generation)" else {
+        guard let route = route, parts.first == "g\(route.generation)" else {
             completion(nil, "")
             return
         }
@@ -120,7 +120,7 @@ extension SABRDelivery {
         let other = route.tracks
             .first { $0.format.itag != track.format.itag }
             .map { SABRDelivery.formatInfo($0.format) }
-        guard let other else {
+        guard let other = other else {
             return nil
         }
         let format = SABRDelivery.formatInfo(track.format)
@@ -253,7 +253,7 @@ extension SABRDelivery {
         pendingStartAt = nil
         let path = "g\(generation)/master.m3u8"
         withServer { base in
-            guard let base else {
+            guard let base = base else {
                 completion(.failure(SABRError.server("local server did not come up")))
                 return
             }
@@ -277,7 +277,7 @@ extension SABRDelivery {
         let server = LocalMediaServer { [weak self] path, done in
             Self.route(path: path, route: self?.route, completion: done)
         }
-        guard let server else {
+        guard let server = server else {
             completion(nil)
             return
         }

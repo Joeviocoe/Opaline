@@ -160,7 +160,7 @@ extension InnertubeClient {
         continuation: String?
     ) -> [String: Any] {
         var body = webContext
-        if let continuation {
+        if let continuation = continuation {
             body["continuation"] = continuation
         } else {
             body["query"] = query
@@ -216,7 +216,7 @@ extension InnertubeClient {
         onEnriched: @escaping (ChannelInfo) -> Void
     ) {
         OAuthClient.shared.validToken { [weak self] token in
-            guard case .success(let tok) = token, let self else {
+            guard case .success(let tok) = token, let self = self else {
                 return
             }
             self.fetchWebChannelEnrichment(
@@ -353,7 +353,7 @@ extension InnertubeClient {
         completion: @escaping (WatchtimeURLs?) -> Void
     ) {
         OAuthClient.shared.validToken { [weak self] result in
-            guard let self,
+            guard let self = self,
                   case .success(let token) = result
             else {
                 completion(nil)
@@ -385,7 +385,7 @@ private extension InnertubeClient {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let token):
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 perform(self, token)

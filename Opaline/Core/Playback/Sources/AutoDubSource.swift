@@ -72,7 +72,7 @@ final class AutoDubSource: VideoSource {
             }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.probeDeadline) { [weak self] in
-            guard let self, !self.decided, cancellation?.isCancelled != true else {
+            guard let self = self, !self.decided, cancellation?.isCancelled != true else {
                 return
             }
             AppLog.player("autodub: probe too slow, playing without it")
@@ -104,7 +104,7 @@ final class AutoDubSource: VideoSource {
             playing.selectAudioTrack(track, resumeAt: resumeAt, completion: completion)
             return
         }
-        guard let prober, prober.availableAudioTracks.contains(track) else {
+        guard let prober = prober, prober.availableAudioTracks.contains(track) else {
             completion(.failure(Self.noTrackError))
             return
         }
@@ -159,7 +159,7 @@ private extension AutoDubSource {
         decided = true
         AppLog.player("autodub: probe found \(tracks.count) audio tracks")
         guard let target = AutoDubPreference.autoDubTrack(in: tracks),
-              let prober else {
+              let prober = prober else {
             loadWrapped(videoId: videoId, cancellation: cancellation, completion: completion)
             return
         }

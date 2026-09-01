@@ -93,7 +93,7 @@ extension UIViewController {
         // haptic only; the custom bell/avatar buttons pop as well.
         Feedback.tap()
         let searchVC = ToolbarManager.shared.searchViewControllerFactory?()
-        guard let searchVC else {
+        guard let searchVC = searchVC else {
             assertionFailure("ToolbarManager search factory is not configured")
             return
         }

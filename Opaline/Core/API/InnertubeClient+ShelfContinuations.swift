@@ -72,7 +72,7 @@ extension InnertubeClient {
         acc.shelves.append(
             FeedShelf(title: title, count: added, continuation: token)
         )
-        if let token {
+        if let token = token {
             acc.continuations.append(
                 ShelfContinuation(title: title, token: token)
             )

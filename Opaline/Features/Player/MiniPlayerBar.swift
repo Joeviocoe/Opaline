@@ -87,7 +87,7 @@ final class MiniPlayerBar: UIView {
 
     @objc
     private func appDidBecomeActive() {
-        if let player, playerLayer?.player == nil {
+        if let player = player, playerLayer?.player == nil {
             playerLayer?.player = player
         }
     }

@@ -29,7 +29,7 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
 
     private func attachHandlers(to cell: SubscriptionVideoCell, video: Video) {
         cell.onChannelTap = { [weak self] in
-            guard let self,
+            guard let self = self,
                   let channelId = video.channelId
             else {
                 return
@@ -45,7 +45,7 @@ extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
             )
         }
         cell.onMenuTap = { [weak self] anchor in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             VideoActionMenu.present(

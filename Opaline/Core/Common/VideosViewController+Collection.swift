@@ -82,7 +82,7 @@ extension VideosViewController {
     }
 
     func updateItemSize() {
-        guard let collectionView,
+        guard let collectionView = collectionView,
               let layout = collectionView
                   .collectionViewLayout
                   as? UICollectionViewFlowLayout
@@ -208,7 +208,7 @@ extension VideosViewController: UICollectionViewDataSource {
 
     private func finishRailLoad(section: Int, page: FeedPage?) {
         loadingRailSections.remove(section)
-        guard let page, section < sections.count else {
+        guard let page = page, section < sections.count else {
             return
         }
         let added = appendToRail(

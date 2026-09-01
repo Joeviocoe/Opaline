@@ -24,7 +24,7 @@ final class OfflineWatchService: WatchService {
         inner.fetchWatchPage(
             video: video, cancellationToken: cancellationToken
         ) { [weak self] result in
-            guard case .failure = result, let self else {
+            guard case .failure = result, let self = self else {
                 completion(result)
                 return
             }

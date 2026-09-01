@@ -66,7 +66,7 @@ final class FallbackChainSource: VideoSource {
         resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        guard let active else {
+        guard let active = active else {
             completion(.failure(Self.exhaustedError))
             return
         }
@@ -78,7 +78,7 @@ final class FallbackChainSource: VideoSource {
         resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        guard let active else {
+        guard let active = active else {
             completion(.failure(Self.exhaustedError))
             return
         }

@@ -110,7 +110,7 @@ struct ReelItemVideoRendererParser: VideoRendererParser {
     func video(from item: [String: Any]) -> Video? {
         let ri = item["reelItemRenderer"] as? [String: Any]
             ?? item.digDict(RendererKey.richItem, JSONKey.content, "reelItemRenderer")
-        guard let ri else {
+        guard let ri = ri else {
             return nil
         }
         return InnertubeClient.parseReelItem(ri)
@@ -127,7 +127,7 @@ struct ShortsLockupVideoParser: VideoRendererParser {
             ?? item.digDict(
                 RendererKey.richItem, JSONKey.content, "shortsLockupViewModel"
             )
-        guard let lockup else {
+        guard let lockup = lockup else {
             return nil
         }
         return InnertubeClient.parseShortsLockup(lockup)

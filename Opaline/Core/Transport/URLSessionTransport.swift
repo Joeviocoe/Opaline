@@ -49,7 +49,7 @@ final class URLSessionTransport: HTTPTransport {
         response: URLResponse?,
         error: Error?
     ) -> Result<HTTPResponse, Error> {
-        if let error {
+        if let error = error {
             return .failure(APIError.transport(error))
         }
         guard let http = response as? HTTPURLResponse else {

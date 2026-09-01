@@ -157,12 +157,15 @@ extension WatchViewController {
             + layout.sectionInset.right
         let spacing = layout.minimumInteritemSpacing
             * (cols - 1)
-        let baseWidth: CGFloat = if let containerSize {
-            isLandscape
+        // Swift 5.6 has no if-expressions; deferred initialisation keeps this
+        // a `let` without nesting a ternary inside a ternary.
+        let baseWidth: CGFloat
+        if let containerSize = containerSize {
+            baseWidth = isLandscape
                 ? (sidebarWidthConstraint?.constant ?? 0)
                 : containerSize.width
         } else {
-            relatedCollectionView.bounds.width
+            baseWidth = relatedCollectionView.bounds.width
         }
         // The collection view can still be at its pre-transition width — iOS
         // also resizes the app off-screen for the multitasking snapshot — and
@@ -263,7 +266,7 @@ extension WatchViewController {
         )
         coordinator.animate(
             alongsideTransition: { [weak self] _ in
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 // On iPhone landscape *is* fullscreen: the rotation itself

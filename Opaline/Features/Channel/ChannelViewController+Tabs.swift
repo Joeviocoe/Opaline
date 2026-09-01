@@ -94,7 +94,7 @@ extension ChannelViewController {
             params: params
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self
+                guard let self = self
                 else { return }
                 guard self.currentTab == expectedTab
                 else { return }
@@ -231,7 +231,7 @@ extension ChannelViewController {
                         from: page.playlists,
                         continuation: page.continuation
                     )
-                    if let feedPage { self?.setPage(feedPage) }
+                    if let feedPage = feedPage { self?.setPage(feedPage) }
                 case .failure(let error):
                     AppLog.channel("sort browse failed: \(error)")
                 }

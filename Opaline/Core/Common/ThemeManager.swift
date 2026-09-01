@@ -170,7 +170,7 @@ class ThemeManager {
                 )
             }
             .min()
-        guard let next else {
+        guard let next = next else {
             return
         }
         let timer = Timer(

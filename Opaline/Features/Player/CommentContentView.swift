@@ -74,7 +74,7 @@ final class CommentContentView: UIView {
     /// Re-renders with the current theme. Cheap enough to call on every
     /// theme switch: it re-runs one linkify pass for one comment.
     func applyTheme() {
-        guard let comment, let linkDelegate else {
+        guard let comment = comment, let linkDelegate = linkDelegate else {
             return
         }
         configure(comment, linkDelegate: linkDelegate, isReply: isReply)

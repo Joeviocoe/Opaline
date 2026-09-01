@@ -167,11 +167,11 @@ final class LocalMediaServer {
             minimumIncompleteLength: 1,
             maximumLength: 8 * 1_024
         ) { [weak self] chunk, _, isComplete, error in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             var buffer = buffer
-            if let chunk {
+            if let chunk = chunk {
                 buffer.append(chunk)
             }
             if let request = Self.parseRequest(in: buffer) {

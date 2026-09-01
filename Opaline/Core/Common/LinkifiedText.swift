@@ -103,7 +103,7 @@ enum LinkifiedText {
     /// handled here rather than by UIKit's default link behavior.
     @discardableResult
     static func handleTap(url: URL, seek: ((Int) -> Void)? = nil) -> Bool {
-        if let seconds = seekSeconds(from: url), let seek {
+        if let seconds = seekSeconds(from: url), let seek = seek {
             seek(seconds)
         } else {
             UIApplication.shared.open(url)

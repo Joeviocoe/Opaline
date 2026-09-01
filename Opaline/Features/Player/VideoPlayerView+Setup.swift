@@ -525,7 +525,7 @@ extension VideoPlayerView: UIGestureRecognizerDelegate {
         _ gestureRecognizer: UIGestureRecognizer,
         shouldReceive touch: UITouch
     ) -> Bool {
-        guard isFullscreen, let window else {
+        guard isFullscreen, let window = window else {
             return true
         }
         return touch.location(in: window).y > 60

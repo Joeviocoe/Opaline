@@ -108,7 +108,7 @@ extension SearchViewController {
             cancellationToken: token
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self,
+                guard let self = self,
                       self.panelMode == .suggestions,
                       self.suggestToken === token,
                       case .success(let items) = result

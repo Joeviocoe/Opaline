@@ -16,7 +16,7 @@ extension VideoActionMenu {
         engagement: EngagementService = ServiceContainer.engagement
     ) {
         fetchOptions(videoId: video.id, client: client) { options in
-            guard let options, !options.isEmpty else {
+            guard let options = options, !options.isEmpty else {
                 showFailed(in: presenter.view)
                 return
             }

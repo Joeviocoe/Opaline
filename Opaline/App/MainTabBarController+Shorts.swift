@@ -23,13 +23,13 @@ extension MainTabBarController {
         }
         var tabs = viewControllers ?? []
         let selected = selectedViewController
-        if let existing {
+        if let existing = existing {
             tabs.removeAll { $0 === existing }
         } else {
             tabs.insert(makeShortsTab(), at: min(2, tabs.count))
         }
         viewControllers = tabs
-        if let selected, let index = tabs.firstIndex(where: { $0 === selected }) {
+        if let selected = selected, let index = tabs.firstIndex(where: { $0 === selected }) {
             selectedIndex = index
         }
     }

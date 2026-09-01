@@ -133,7 +133,7 @@ extension HomeViewController {
         AppLog.home("category \(browseId) fetch start")
         service.fetchCategoryFeed(browseId: browseId) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self, self.feedGeneration == generation else {
+                guard let self = self, self.feedGeneration == generation else {
                     return
                 }
                 let ms = Int(Date().timeIntervalSince(t0) * 1_000)

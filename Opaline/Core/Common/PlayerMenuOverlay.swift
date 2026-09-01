@@ -203,7 +203,7 @@ final class PlayerMenuOverlay: UIView {
         scroll: UIScrollView
     ) -> [NSLayoutConstraint] {
         var constraints: [NSLayoutConstraint] = []
-        if let titleLabel {
+        if let titleLabel = titleLabel {
             constraints += [
                 titleLabel.topAnchor.constraint(equalTo: panel.topAnchor, constant: 14),
                 titleLabel.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 16),

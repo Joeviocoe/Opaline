@@ -32,7 +32,7 @@ enum Feedback {
     /// Scale dip + spring back. `.beginFromCurrentState` keeps repeated taps
     /// from stacking into a jitter.
     static func pop(_ view: UIView?) {
-        guard let view else {
+        guard let view = view else {
             return
         }
         view.transform = CGAffineTransform(scaleX: 0.88, y: 0.88)
@@ -58,7 +58,7 @@ enum Feedback {
     /// icon for a beat. Used on its own where a toast already carries the
     /// haptic, so the two don't fire twice.
     static func checkmark(on button: UIButton?) {
-        guard let button,
+        guard let button = button,
               let image = button.image(for: .normal),
               let check = UIImage(named: "icon_checkmark") else {
             return

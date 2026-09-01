@@ -6,7 +6,7 @@ extension WatchViewController {
     /// Built on first use — a watch screen with no queue never pays for it —
     /// and kept, so a theme change reaches it while it is off screen.
     var queuePanel: QueuePanelController {
-        if let loadedQueuePanel {
+        if let loadedQueuePanel = loadedQueuePanel {
             return loadedQueuePanel
         }
         let panel = makeQueuePanel()

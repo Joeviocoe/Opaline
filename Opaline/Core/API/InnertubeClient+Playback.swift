@@ -45,7 +45,7 @@ extension InnertubeClient {
         completion: @escaping (Result<FeedPage, Error>) -> Void
     ) {
         withWatchToken { [weak self] token in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             var body = self.tvContext
@@ -270,7 +270,7 @@ private extension InnertubeClient {
             playbackCtx["signatureTimestamp"] = sts
         }
         body["playbackContext"] = ["contentPlaybackContext": playbackCtx]
-        if let poToken, !poToken.isEmpty {
+        if let poToken = poToken, !poToken.isEmpty {
             body["serviceIntegrityDimensions"] = [
                 "poToken": poToken
             ]

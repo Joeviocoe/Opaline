@@ -223,7 +223,7 @@ extension InnertubeClient {
             "continuationCommand",
             JSONKey.token
         )
-        if let tok {
+        if let tok = tok {
             continuation = tok
         }
     }

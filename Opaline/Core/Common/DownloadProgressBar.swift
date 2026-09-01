@@ -62,7 +62,7 @@ final class DownloadProgressBar: UIView {
     @objc
     private func refresh() {
         let downloader = VideoDownloader.shared
-        guard let videoId, downloader.activeVideoId == videoId else {
+        guard let videoId = videoId, downloader.activeVideoId == videoId else {
             isHidden = true
             return
         }

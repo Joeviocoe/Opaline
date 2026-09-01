@@ -4,7 +4,7 @@ import Foundation
 
 extension HLSStreamResolver {
     static func parseRemoteSolved(data: Data?, unsolved: String) -> String? {
-        guard let data,
+        guard let data = data,
               let json = try? JSONSerialization.jsonObject(with: data)
               as? [String: Any],
               let solved = json["solved"] as? [String: Any],
@@ -46,7 +46,7 @@ extension HLSStreamResolver {
         jsPath: String?,
         completion: @escaping (String?) -> Void
     ) {
-        guard let endpoint = AppURLs.NSolver.endpoint, let jsPath else {
+        guard let endpoint = AppURLs.NSolver.endpoint, let jsPath = jsPath else {
             AppLog.player("hlsResolve: no remote solver configured")
             completion(nil)
             return

@@ -154,7 +154,7 @@ final class NotificationsViewController: UIViewController {
 
     private func refreshBanner() {
         SystemNotificationAuthorization.status { [weak self] status in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             // Opening the inbox is the first moment the user has shown
@@ -184,7 +184,7 @@ final class NotificationsViewController: UIViewController {
 
     private func handleEnableTapped() {
         SystemNotificationAuthorization.status { [weak self] status in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             if status == .notDetermined {

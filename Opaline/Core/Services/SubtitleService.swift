@@ -114,7 +114,7 @@ final class SubtitleService {
         data: Data?
     ) {
         let cues: [SubtitleCue]
-        if let data,
+        if let data = data,
            let text = String(data: data, encoding: .utf8) {
             cues = VTTParser.parse(text)
             if cues.isEmpty && !text.isEmpty {

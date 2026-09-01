@@ -270,7 +270,7 @@ extension ThumbnailLoader {
         token: CancellationToken,
         completion: ((Result<ThumbnailLoadResult, Error>) -> Void)?
     ) {
-        guard let completion else {
+        guard let completion = completion else {
             return
         }
         DispatchQueue.main.async {

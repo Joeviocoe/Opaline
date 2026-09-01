@@ -82,7 +82,7 @@ extension SignatureTimestampService {
         // beats nothing.
         // The version is scraped from the same page, so a cached path without
         // one is a half-filled cache and worth re-reading.
-        if let cached, Self.tvClientVersion != nil,
+        if let cached = cached, Self.tvClientVersion != nil,
            sts == nil || defaults.integer(forKey: Self.tvPathSTSKey) == sts {
             completion(cached)
             return

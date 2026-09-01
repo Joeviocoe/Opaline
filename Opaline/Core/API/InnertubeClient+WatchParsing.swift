@@ -197,7 +197,7 @@ private extension InnertubeClient {
             let text = simpleText(
                 from: rdr?["text"]
             )
-            if let text, !text.isEmpty,
+            if let text = text, !text.isEmpty,
                text != "•" {
                 parts.append(text)
             }

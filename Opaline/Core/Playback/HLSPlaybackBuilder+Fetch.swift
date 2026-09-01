@@ -68,7 +68,7 @@ extension HLSPlaybackBuilder {
         let task = URLSession.shared.dataTask(
             with: urlReq
         ) { _, response, error in
-            if let error {
+            if let error = error {
                 AppLog.hls(
                     "identity probe failed: \(error.localizedDescription)"
                 )
@@ -90,7 +90,7 @@ extension HLSPlaybackBuilder {
         let rv = "bytes=\(request.start)-\(request.end)"
         urlReq.setValue(rv, forHTTPHeaderField: HTTPHeader.range)
         let task = URLSession.shared.dataTask(with: urlReq) { data, response, error in
-            if let error {
+            if let error = error {
                 AppLog.hls("range fetch failed: \(error.localizedDescription)")
                 completion(nil)
                 return

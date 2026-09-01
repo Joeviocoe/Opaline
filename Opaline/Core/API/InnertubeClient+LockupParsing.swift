@@ -49,7 +49,7 @@ extension InnertubeClient {
     }
 
     static func playlistItemCount(from text: String?) -> Int? {
-        guard let text else {
+        guard let text = text else {
             return nil
         }
         let digits = text.filter { $0.isNumber }

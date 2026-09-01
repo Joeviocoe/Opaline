@@ -61,7 +61,7 @@ final class LegacyRangeDelivery: StreamDelivery {
             startAt: request.resumeAt
         )
         HLSPlaybackBuilder.build(input: input) { result in
-            guard let result else {
+            guard let result = result else {
                 completion(.failure(StreamDeliveryError.noStream))
                 return
             }

@@ -28,7 +28,7 @@ enum FeedbackActionParser {
         let itemLabel = InnertubeClient.simpleText(from: dict["text"]) ?? label
         let itemIcon = dict.digString("icon", "iconType") ?? icon
         if let token = dict.digString("feedbackEndpoint", "feedbackToken"),
-           let itemLabel {
+           let itemLabel = itemLabel {
             return [FeedbackAction(label: itemLabel, icon: itemIcon, token: token)]
         }
         return dict.values.flatMap { actions(in: $0, label: itemLabel, icon: itemIcon) }

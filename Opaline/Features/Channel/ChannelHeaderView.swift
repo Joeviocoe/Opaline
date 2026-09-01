@@ -79,7 +79,7 @@ final class ChannelHeaderView: UIView {
     /// Collapses the header as the list scrolls up. Only the height and
     /// the fade move — the inner layout stays put and is clipped away.
     func updateForScroll(_ scrollView: UIScrollView) {
-        guard let heightRef
+        guard let heightRef = heightRef
         else {
             return
         }
@@ -213,7 +213,7 @@ final class ChannelHeaderView: UIView {
         _ urlString: String?,
         into imageView: ThumbnailImageView
     ) {
-        guard let urlString, let url = URL(string: urlString)
+        guard let urlString = urlString, let url = URL(string: urlString)
         else {
             return
         }

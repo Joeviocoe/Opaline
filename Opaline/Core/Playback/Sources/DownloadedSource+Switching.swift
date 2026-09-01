@@ -11,7 +11,7 @@ extension DownloadedSource {
         resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        guard let videoId else {
+        guard let videoId = videoId else {
             completion(.failure(DownloadError.missingFile))
             return
         }
@@ -20,7 +20,7 @@ extension DownloadedSource {
             playLocal(videoId: videoId, completion: completion)
             return
         }
-        guard let network else {
+        guard let network = network else {
             completion(.failure(DownloadError.missingFile))
             return
         }
@@ -35,7 +35,7 @@ extension DownloadedSource {
         resumeAt: Double?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        guard let videoId else {
+        guard let videoId = videoId else {
             completion(.failure(DownloadError.missingFile))
             return
         }

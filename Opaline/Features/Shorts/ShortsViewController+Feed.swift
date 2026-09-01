@@ -7,7 +7,7 @@ extension ShortsViewController {
         guard !isLoading else {
             return
         }
-        guard let seed else {
+        guard let seed = seed else {
             return
         }
         isLoading = true

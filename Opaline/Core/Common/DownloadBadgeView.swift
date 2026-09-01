@@ -58,7 +58,7 @@ final class DownloadBadgeView: UIImageView {
 
     @objc
     private func refresh() {
-        guard let videoId else {
+        guard let videoId = videoId else {
             apply(.none)
             return
         }

@@ -10,7 +10,7 @@ extension VideoDownloader {
         of track: AVAssetTrack,
         trueMs: Int?
     ) -> CMTimeRange {
-        guard let trueMs, trueMs > 0 else {
+        guard let trueMs = trueMs, trueMs > 0 else {
             return track.timeRange
         }
         let stated = CMTime(value: CMTimeValue(trueMs), timescale: 1_000)

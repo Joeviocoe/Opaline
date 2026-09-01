@@ -117,7 +117,7 @@ extension SubscriptionsViewController {
             params: ChannelTabParams.videos
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self,
+                guard let self = self,
                       self.selectedChannel?.id == expectedId
                 else { return }
                 self.handleChannelVideosResult(result)
@@ -133,7 +133,7 @@ extension SubscriptionsViewController {
             continuation: continuation
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self,
+                guard let self = self,
                       self.selectedChannel?.id == channelId
                 else {
                     self?.finishLoadingMore()

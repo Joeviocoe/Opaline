@@ -104,7 +104,7 @@ extension VideoPlayerView {
     func scheduleAutoHide() {
         hideWorkItem?.cancel()
         let item = DispatchWorkItem { [weak self] in
-            guard let self,
+            guard let self = self,
                   self.player?.rate ?? 0 > 0
             else {
                 return
@@ -131,7 +131,7 @@ extension VideoPlayerView {
 extension VideoPlayerView {
     @objc
     func playPauseTapped() {
-        guard let player else {
+        guard let player = player else {
             return
         }
         if isAtEnd {
@@ -211,7 +211,7 @@ extension VideoPlayerView {
     }
 
     private func seek(direction: Int) {
-        guard let player else {
+        guard let player = player else {
             return
         }
         let now = CACurrentMediaTime()

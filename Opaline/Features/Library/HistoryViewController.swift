@@ -149,10 +149,10 @@ final class HistoryViewController: UIViewController {
     /// Show cached data immediately, then silently refresh in background.
     private func loadFromCacheThenFetch() {
         cache.loadHistoryFeed { [weak self] cached in
-            guard let self else {
+            guard let self = self else {
                 return
             }
-            if let cached, !cached.videos.isEmpty {
+            if let cached = cached, !cached.videos.isEmpty {
                 self.isLoadingInitial = false
                 self.spinner.stopAnimating()
                 self.videos = cached.videos
@@ -197,7 +197,7 @@ final class HistoryViewController: UIViewController {
         }
         isLoadingMore = true
         OAuthClient.shared.validToken { [weak self] result in
-            guard let self, case .success(let token) = result else {
+            guard let self = self, case .success(let token) = result else {
                 self?.isLoadingMore = false
                 return
             }

@@ -48,7 +48,7 @@ final class ChannelAvatarView: UIView {
         ChannelInfoStore.shared.fetch(
             channelId: channelId
         ) { [weak self] result in
-            guard let self,
+            guard let self = self,
                   self.currentChannelId == channelId,
                   case .success(let info) = result,
                   let avatarURL = info.avatarURL,

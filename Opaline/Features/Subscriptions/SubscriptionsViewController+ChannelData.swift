@@ -12,7 +12,7 @@ extension SubscriptionsViewController {
             return
         }
         cache.loadSubscribedChannels { [weak self] cached in
-            if let cached, !cached.isEmpty {
+            if let cached = cached, !cached.isEmpty {
                 self?.applyChannels(cached)
             } else {
                 self?.fetchSubscribedChannelsFromNetwork()
@@ -69,7 +69,7 @@ private extension SubscriptionsViewController {
     func fetchSubscribedChannelsFromNetwork() {
         channelsService.fetchSubscribedChannels { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 switch result {

@@ -88,7 +88,7 @@ final class PlaybackQueue {
         isShuffled = true
         videos = shuffled
         self.continuation = continuation
-        if let playing {
+        if let playing = playing {
             seekTo(videoId: playing)
         }
     }
@@ -98,7 +98,7 @@ final class PlaybackQueue {
         let playing = currentVideo?.id
         isShuffled = false
         videos = plainOrder
-        if let playing {
+        if let playing = playing {
             seekTo(videoId: playing)
         }
     }

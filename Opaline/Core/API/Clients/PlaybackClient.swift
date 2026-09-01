@@ -114,7 +114,7 @@ extension PlaybackClient {
         case .bearer:
             headers[HTTPHeader.authorization] = "Bearer \(token)"
         case .anonymous:
-            if let visitorData, !visitorData.isEmpty {
+            if let visitorData = visitorData, !visitorData.isEmpty {
                 headers[HTTPHeader.xGoogVisitorId] = visitorData
             }
         }
@@ -130,7 +130,7 @@ extension PlaybackClient {
             HTTPHeader.xYoutubeClientName: headerName,
             HTTPHeader.xYoutubeClientVersion: version
         ]
-        if let visitorData, !visitorData.isEmpty {
+        if let visitorData = visitorData, !visitorData.isEmpty {
             headers[HTTPHeader.xGoogVisitorId] = visitorData
         }
         return headers
@@ -146,7 +146,7 @@ extension PlaybackClient {
         }
         var items = components.queryItems ?? []
         items.removeAll { $0.name == "pot" || $0.name == "cver" }
-        if let poToken, !poToken.isEmpty {
+        if let poToken = poToken, !poToken.isEmpty {
             items.append(URLQueryItem(name: "pot", value: poToken))
         }
         items.append(URLQueryItem(name: "cver", value: version))

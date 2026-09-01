@@ -11,7 +11,7 @@ extension InnertubeVideoSource {
         quality: VideoQuality?,
         audio: DashFormatInfo? = nil
     ) -> String? {
-        guard let info, let quality,
+        guard let info = info, let quality = quality,
               let video = info.allDashVideoFormats.first(
                   where: { "\($0.itag)" == quality.id }
               ) else {

@@ -56,7 +56,7 @@ extension VideoDownloader {
         let fallback = info.dashAudioFormat.flatMap {
             $0.hasDirectURL && $0.codecs.hasPrefix("mp4a") ? $0 : nil
         }
-        if let dubbed {
+        if let dubbed = dubbed {
             AppLog.downloads("saving the \(dubbed.audioTrackId ?? "?") dub")
         }
         return dubbed ?? original ?? mp4.first ?? fallback

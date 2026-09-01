@@ -887,7 +887,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         let cacheIndex = sections.firstIndex {
             $0.rows.contains(.persistCache)
         }
-        if let cacheIndex {
+        if let cacheIndex = cacheIndex {
             tableView.reloadSections(
                 IndexSet(integer: cacheIndex),
                 with: .none

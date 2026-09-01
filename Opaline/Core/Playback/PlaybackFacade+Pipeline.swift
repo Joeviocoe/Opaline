@@ -12,8 +12,8 @@ extension PlaybackFacade {
         apiClient.fetchWatchtimeURLs(
             videoId: videoId
         ) { [weak self] urls in
-            guard let urls,
-                  let self
+            guard let urls = urls,
+                  let self = self
             else {
                 return
             }

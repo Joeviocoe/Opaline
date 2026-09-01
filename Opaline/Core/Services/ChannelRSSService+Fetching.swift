@@ -42,7 +42,7 @@ extension ChannelRSSService {
             let ttl = (slot?.entries.isEmpty ?? false)
                 ? ChannelRSSService.emptyCacheTTL
                 : ChannelRSSService.cacheTTL
-            if let slot, now.timeIntervalSince(slot.fetchedAt) < ttl {
+            if let slot = slot, now.timeIntervalSince(slot.fetchedAt) < ttl {
                 cached[id] = slot.entries
             } else {
                 stale.append(id)
@@ -93,7 +93,7 @@ extension ChannelRSSService {
                     entries: entries ?? [],
                     fetchedAt: Date()
                 )
-                if let entries {
+                if let entries = entries {
                     batch.results[id] = entries
                 }
                 self.startNextFetches(in: batch)
@@ -135,7 +135,7 @@ extension ChannelRSSService {
                 return
             }
             fetchFeed(url: longFormURL) { entries in
-                if let entries {
+                if let entries = entries {
                     completion(entries)
                 } else {
                     self.fetchFeed(url: fullFeedURL, completion: completion)
@@ -149,7 +149,7 @@ extension ChannelRSSService {
         url: URL?,
         completion: @escaping ([RSSVideoEntry]?) -> Void
     ) {
-        guard let url else {
+        guard let url = url else {
             completion(nil)
             return
         }

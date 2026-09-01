@@ -42,7 +42,7 @@ final class WatchtimeTracker {
         sessionStart = Date()
         sendPlaybackPing(urls: urls)
         DispatchQueue.main.async { [weak self] in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             pingTimer = Timer.scheduledTimer(
@@ -78,7 +78,7 @@ final class WatchtimeTracker {
     /// reopening the video resumes where this device left off instead
     /// of where the server's last sync thought it was.
     private func recordLocalProgress(_ position: TimeInterval) {
-        guard let videoId,
+        guard let videoId = videoId,
               let duration = durationProvider?(),
               duration > 0, position > 0
         else {
@@ -97,7 +97,7 @@ final class WatchtimeTracker {
     }
 
     private func sendWatchtimePing() {
-        guard let urls else {
+        guard let urls = urls else {
             return
         }
         let pos = currentPosition()
@@ -127,7 +127,7 @@ final class WatchtimeTracker {
     }
 
     private func sendFinalPing() {
-        guard let urls else {
+        guard let urls = urls else {
             return
         }
         let pos = currentPosition()

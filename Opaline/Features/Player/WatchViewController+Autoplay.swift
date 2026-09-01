@@ -51,7 +51,7 @@ extension WatchViewController {
         // applicationState is main-thread-only and this notification can
         // arrive off-main — read it inside the hop.
         DispatchQueue.main.async { [weak self] in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             let active = UIApplication.shared.applicationState == .active
@@ -154,7 +154,7 @@ extension WatchViewController {
     func showEndScreen(reason: String) {
         AppLog.player("playToEnd: end screen — \(reason)")
         DispatchQueue.main.async { [weak self] in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             self.updateTransportAvailability()

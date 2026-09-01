@@ -64,7 +64,7 @@ enum AppIcon: String, CaseIterable {
             return
         }
         UIApplication.shared.setAlternateIconName(alternateIconName) { error in
-            if let error {
+            if let error = error {
                 AppLog.log("Icon", "app icon \(self.rawValue) failed: \(error)")
             }
         }

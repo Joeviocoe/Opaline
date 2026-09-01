@@ -12,7 +12,7 @@ extension AppCache {
             return
         }
         diskQueue.async { [weak self] in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             let value = self.readDisk(type, key: key, ttl: ttl)
@@ -55,10 +55,10 @@ extension AppCache {
             return
         }
         loadDiskValue(FeedPage.self, key: "home", ttl: feedTTL) { [weak self] feed in
-            guard let self else {
+            guard let self = self else {
                 return
             }
-            if let feed {
+            if let feed = feed {
                 self.homeFeed = feed
                 AppLog.cache("home disk-hit videos=\(feed.videos.count)")
             } else {
@@ -96,10 +96,10 @@ extension AppCache {
             return
         }
         loadDiskValue(FeedPage.self, key: "subscriptions", ttl: feedTTL) { [weak self] feed in
-            guard let self else {
+            guard let self = self else {
                 return
             }
-            if let feed {
+            if let feed = feed {
                 self.subscriptionsFeed = feed
                 AppLog.cache("subs disk-hit videos=\(feed.videos.count)")
             } else {
@@ -139,10 +139,10 @@ extension AppCache {
             key: "subscribed_channels",
             ttl: feedTTL
         ) { [weak self] channels in
-            guard let self else {
+            guard let self = self else {
                 return
             }
-            if let channels {
+            if let channels = channels {
                 self.subscribedChannels = channels
                 AppLog.cache("subChannels disk-hit count=\(channels.count)")
             } else {
@@ -178,10 +178,10 @@ extension AppCache {
             return
         }
         loadDiskValue(FeedPage.self, key: "history", ttl: feedTTL) { [weak self] feed in
-            guard let self else {
+            guard let self = self else {
                 return
             }
-            if let feed {
+            if let feed = feed {
                 self.historyFeed = feed
             }
             completion(feed)

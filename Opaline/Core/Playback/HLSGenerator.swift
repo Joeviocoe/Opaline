@@ -98,7 +98,7 @@ enum HLSGenerator {
     /// `EXT-X-START` when there is somewhere to start, nothing when there is
     /// not — playlists differ only in whether they carry the tag.
     private static func startTag(_ startAt: Double?) -> [String] {
-        guard let startAt, startAt > 0 else {
+        guard let startAt = startAt, startAt > 0 else {
             return []
         }
         let tag = String(

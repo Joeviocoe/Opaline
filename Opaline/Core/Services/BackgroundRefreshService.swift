@@ -108,7 +108,7 @@ final class BackgroundRefreshService {
                 case .failure(let error):
                     AppLog.cache("subs fetch failed \(error)")
                 }
-                if let state {
+                if let state = state {
                     self?.finishOne(state)
                 }
                 next?()

@@ -31,7 +31,7 @@ extension VideoDownloader {
             to: videoPart,
             size: option.video.contentLength
         ) { [weak self] error in
-            if let error {
+            if let error = error {
                 self?.fail(videoId: videoId, error: error)
                 return
             }
@@ -53,7 +53,7 @@ extension VideoDownloader {
             to: parts.audio,
             size: option.audio.contentLength
         ) { [weak self] error in
-            if let error {
+            if let error = error {
                 self?.fail(videoId: videoId, error: error)
                 return
             }

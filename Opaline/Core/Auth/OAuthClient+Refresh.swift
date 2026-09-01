@@ -4,7 +4,7 @@ import Foundation
 
 extension OAuthClient {
     func tryRefreshIfNeeded() {
-        guard let tokens else {
+        guard let tokens = tokens else {
             DispatchQueue.main.async {
                 NotificationCenter.default.post(
                     name: .authorizationRequired,
@@ -46,7 +46,7 @@ extension OAuthClient {
         else {
             return
         }
-        guard let tokens else {
+        guard let tokens = tokens else {
             return
         }
         doRefresh(tokens: tokens) { [weak self] result in

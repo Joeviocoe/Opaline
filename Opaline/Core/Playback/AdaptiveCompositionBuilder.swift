@@ -24,7 +24,7 @@ enum AdaptiveCompositionBuilder {
             }
 
             let item = compose(videoAsset: videoAsset, audioAsset: audioAsset)
-            if let item {
+            if let item = item {
                 PlaybackBufferPolicy.configure(item: item)
                 AppLog.player(String(format: "ready (%.1fs)", elapsed))
             }

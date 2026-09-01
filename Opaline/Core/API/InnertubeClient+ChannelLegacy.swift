@@ -29,7 +29,7 @@ extension InnertubeClient {
         fields.subscriberCountText = c4SubCount(
             c4: c4, ch: ch
         )
-        if let ch {
+        if let ch = ch {
             applyChannelHeaderExtras(ch, into: &fields)
         }
         return buildChannelInfo(fields)
@@ -130,7 +130,7 @@ private extension InnertubeClient {
         c4: [String: Any]?,
         ch: [String: Any]?
     ) -> String {
-        if let c4 {
+        if let c4 = c4 {
             if let title = c4["title"] as? String,
                !title.isEmpty {
                 return title
@@ -141,7 +141,7 @@ private extension InnertubeClient {
                 return title
             }
         }
-        if let ch {
+        if let ch = ch {
             return simpleText(from: ch["title"])
                 ?? ch["title"] as? String
                 ?? simpleText(from: ch["headline"])
@@ -154,7 +154,7 @@ private extension InnertubeClient {
         c4: [String: Any]?,
         ch: [String: Any]?
     ) -> String? {
-        if let c4 {
+        if let c4 = c4 {
             let thumbs = (c4["avatar"]
                 as? [String: Any])?["thumbnails"]
                 as? [[String: Any]]
@@ -163,7 +163,7 @@ private extension InnertubeClient {
                 return url
             }
         }
-        if let ch {
+        if let ch = ch {
             return extractThumbnailURL(
                 from: ch["avatar"]
             ) ?? extractThumbnailURL(
@@ -179,13 +179,13 @@ private extension InnertubeClient {
         c4: [String: Any]?,
         ch: [String: Any]?
     ) -> String? {
-        if let c4,
+        if let c4 = c4,
            let text = simpleText(
             from: c4["subscriberCountText"]
            ) {
             return text
         }
-        if let ch {
+        if let ch = ch {
             return simpleText(
                 from: ch["subscriberCountText"]
             ) ?? simpleText(from: ch["metadata"])

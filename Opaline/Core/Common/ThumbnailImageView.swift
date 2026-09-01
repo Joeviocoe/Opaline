@@ -84,7 +84,7 @@ class ThumbnailImageView: UIImageView {
         currentURL = url
         currentVideoId = videoId
         hasFailed = false
-        if let fallback {
+        if let fallback = fallback {
             image = fallback
             isShowingFallback = true
         }
@@ -179,7 +179,7 @@ class ThumbnailImageView: UIImageView {
     /// `name` while loading, on failure, and when `url` is nil.
     func setAvatar(url: URL?, name: String) {
         let monogram = MonogramAvatar.image(for: name)
-        guard let url else {
+        guard let url = url else {
             cancel()
             image = monogram
             isShowingFallback = true

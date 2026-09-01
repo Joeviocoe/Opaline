@@ -23,14 +23,14 @@ final class UserProfileStore {
     func load() {
         guard OAuthClient.shared.isSignedIn, !isLoading
         else { return }
-        guard let accountService else {
+        guard let accountService = accountService else {
             assertionFailure("UserProfileStore is not configured")
             return
         }
         isLoading = true
 
         accountService.fetchAccountInfo { [weak self] result in
-            guard let self
+            guard let self = self
             else { return }
             switch result {
             case .failure(let err):
@@ -60,7 +60,7 @@ final class UserProfileStore {
             HTTPRequest(method: .get, url: avatarURL),
             cancellationToken: nil
         ) { [weak self] result in
-            guard let self
+            guard let self = self
             else { return }
             self.isLoading = false
             if let data = try? result.get().data, let img = UIImage(data: data) {

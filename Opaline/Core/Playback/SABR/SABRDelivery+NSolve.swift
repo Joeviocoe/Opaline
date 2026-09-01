@@ -37,7 +37,7 @@ extension SABRDelivery {
         }
         SignatureTimestampService.shared.tvPlayerPath { jsPath in
             resolver.solveN(unsolved: unsolved, jsPath: jsPath) { solved in
-                guard let solved else {
+                guard let solved = solved else {
                     AppLog.player("sabr: n solve failed, sending the URL as-is")
                     completion(url)
                     return

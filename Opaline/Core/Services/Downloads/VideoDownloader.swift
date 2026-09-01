@@ -191,7 +191,7 @@ final class VideoDownloader {
         progress = 0
         cancellation = nil
         DownloadStore.announceChange()
-        if let result {
+        if let result = result {
             DispatchQueue.main.async { job.completion(result) }
         }
         startNextJob()

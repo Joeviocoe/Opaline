@@ -29,7 +29,7 @@ final class InnertubeVideoSource: VideoSource {
         ) else {
             return nil
         }
-        guard let delivery, delivery.label != "range" else {
+        guard let delivery = delivery, delivery.label != "range" else {
             return line
         }
         return "\(line) [\(delivery.label)]"
@@ -108,7 +108,7 @@ final class InnertubeVideoSource: VideoSource {
     ) {
         currentVideoId = videoId
         mintingTokenIfNeeded { [weak self] poToken in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             apiClient.fetchDirectPlayback(
@@ -134,7 +134,7 @@ final class InnertubeVideoSource: VideoSource {
             selectLiveQuality(quality, completion: completion)
             return
         }
-        guard let info,
+        guard let info = info,
               let format = AudioOnlyMode.resolveFormat(
                   for: quality, info: info, current: currentQuality
               ),
@@ -258,7 +258,7 @@ private extension InnertubeVideoSource {
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         liveHLS.load(url: url, info: info) { [weak self] prepared in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             if !liveHLS.qualities.isEmpty {
@@ -273,7 +273,7 @@ private extension InnertubeVideoSource {
         _ quality: VideoQuality,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
-        guard let info,
+        guard let info = info,
               let prepared = liveHLS.prepared(for: quality, info: info) else {
             completion(.failure(Self.noStreamError))
             return

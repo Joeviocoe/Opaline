@@ -31,7 +31,7 @@ extension InnertubeClient {
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
         OAuthClient.shared.validToken { [weak self] result in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             switch result {
@@ -156,7 +156,7 @@ extension InnertubeClient {
         ) -> Void
     ) {
         OAuthClient.shared.validToken { [weak self] result in
-            guard let self,
+            guard let self = self,
                   case let .success(token) = result
             else {
                 completion(([:], [:]))

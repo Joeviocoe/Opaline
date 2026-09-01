@@ -159,7 +159,7 @@ extension VideoPlayerView {
         if willAutoPiP, !force, !isScreenLocked {
             pipTrace("auto: waiting for the system")
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                guard let self, !self.isPiPActive else {
+                guard let self = self, !self.isPiPActive else {
                     return
                 }
                 self.pipTrace("auto: system did not start, audio only")
@@ -169,14 +169,14 @@ extension VideoPlayerView {
         }
         playerLayer.player = nil
         playerNeedsRebuildForPiP = true
-        if wasPlayingOnResign, let player, player.rate == 0 {
+        if wasPlayingOnResign, let player = player, player.rate == 0 {
             player.play()
         }
     }
 
     @objc
     func appDidBecomeActive() {
-        guard let player else {
+        guard let player = player else {
             return
         }
         // While PiP runs, AVKit owns the player — rebinding it to the layer

@@ -81,13 +81,13 @@ extension HLSStreamResolver {
             return
         }
         solveOnDevice(kind: kind, unsolved: unsolved, jsPath: jsPath) { [weak self] solved in
-            if let solved {
+            if let solved = solved {
                 self?.storeSolvedN(solved, for: cacheKey)
                 completion(solved)
                 return
             }
             self?.solveRemote(kind: kind, unsolved: unsolved, jsPath: jsPath) { solved in
-                if let solved {
+                if let solved = solved {
                     self?.storeSolvedN(solved, for: cacheKey)
                 }
                 completion(solved)
@@ -106,7 +106,7 @@ extension HLSStreamResolver {
             completion(nil)
             return
         }
-        guard let jsPath, let baseURL = Self.playerJSURL(jsPath) else {
+        guard let jsPath = jsPath, let baseURL = Self.playerJSURL(jsPath) else {
             completion(nil)
             return
         }
@@ -117,7 +117,7 @@ extension HLSStreamResolver {
             return
         }
         fetchText(url: baseURL) { [weak self] result in
-            guard let self, case let .success(baseJS) = result else {
+            guard let self = self, case let .success(baseJS) = result else {
                 completion(nil)
                 return
             }
@@ -175,7 +175,7 @@ extension HLSStreamResolver {
         let result = value?.toString()
         JSGarbageCollect(context.jsGlobalContextRef)
         guard let solved = result, !solved.isEmpty, !solved.hasPrefix("ERR:") else {
-            if let result, result.hasPrefix("ERR:") {
+            if let result = result, result.hasPrefix("ERR:") {
                 AppLog.player("hlsResolve: solver \(result)")
             }
             return nil

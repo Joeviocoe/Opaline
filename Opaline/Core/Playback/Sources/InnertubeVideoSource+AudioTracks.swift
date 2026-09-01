@@ -43,7 +43,7 @@ extension InnertubeVideoSource {
         let format = startId.flatMap { id in
             info.allDashAudioFormats.first { $0.audioTrackId == id }
         } ?? info.dashAudioFormat
-        if let startId, format?.audioTrackId != startId {
+        if let startId = startId, format?.audioTrackId != startId {
             AppLog.player("\(name): start track \(startId) not in formats")
         }
         let current = tracks.first { $0.id == format?.audioTrackId }
@@ -71,7 +71,7 @@ extension InnertubeVideoSource {
         currentVideoId = videoId
         apiClient.fetchAudioTrackList(videoId: videoId) { [weak self] infos in
             DispatchQueue.main.async {
-                guard let self else {
+                guard let self = self else {
                     completion([])
                     return
                 }
@@ -114,7 +114,7 @@ extension InnertubeVideoSource {
         // Probe-only state: no `/player` response yet, so run the full load.
         // `pendingAudioTrackId` makes that first build start on the picked
         // track rather than building the original and rebuilding after.
-        guard let info else {
+        guard let info = info else {
             guard let videoId = currentVideoId else {
                 completion(.failure(Self.noTrackError))
                 return

@@ -20,7 +20,7 @@ enum PlaybackChainSettings {
         get {
             let stored = UserDefaults.standard
                 .stringArray(forKey: UserDefaultsKeys.Debug.playbackChainOrder)
-            guard let stored, !stored.isEmpty else {
+            guard let stored = stored, !stored.isEmpty else {
                 return defaultOrder
             }
             // A step added by a later version is unknown to the stored order;
@@ -38,7 +38,7 @@ enum PlaybackChainSettings {
         get {
             let stored = UserDefaults.standard
                 .stringArray(forKey: UserDefaultsKeys.Debug.playbackChainEnabled)
-            guard let stored else {
+            guard let stored = stored else {
                 return Set(defaultEnabled)
             }
             return Set(stored)

@@ -17,7 +17,7 @@ extension InnertubeClient {
         ) { json -> [Playlist]? in
             Self.parsePlaylistTabs(json)
         } completion: { [weak self] result in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             self.handlePlaylistsFetchResult(
@@ -35,7 +35,7 @@ extension InnertubeClient {
         completion: @escaping (Result<FeedPage, Error>) -> Void
     ) {
         var body = tvContext
-        if let continuation {
+        if let continuation = continuation {
             body[JSONKey.continuation] = continuation
         } else {
             body[JSONKey.browseId] = "VL\(playlistId)"
@@ -214,7 +214,7 @@ private extension InnertubeClient {
                 playlistId: playlist.id,
                 token: token
             ) { url in
-                if let url {
+                if let url = url {
                     lock.lock()
                     thumbnails[playlist.id] = url
                     lock.unlock()

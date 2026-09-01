@@ -155,7 +155,7 @@ class HomeViewController: VideosViewController {
         let generation = feedGeneration
         service.fetchNextPage(continuation: token) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self, self.feedGeneration == generation else {
+                guard let self = self, self.feedGeneration == generation else {
                     completion(nil)
                     return
                 }
@@ -186,7 +186,7 @@ class HomeViewController: VideosViewController {
         let generation = feedGeneration
         service.fetchNextPage(continuation: continuation) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self, self.feedGeneration == generation else {
+                guard let self = self, self.feedGeneration == generation else {
                     return
                 }
                 switch result {

@@ -58,7 +58,7 @@ extension WatchViewController {
         channelInfoStore.fetch(
             channelId: channelId
         ) { [weak self] result in
-            guard let self,
+            guard let self = self,
                   case let .success(info) = result,
                   let avatarStr = info.avatarURL,
                   let url = URL(string: avatarStr)
@@ -241,7 +241,7 @@ extension WatchViewController {
             videoId: videoId
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self,
+                guard let self = self,
                       self.watchPage?.video.id
                       == videoId
                 else {
@@ -262,7 +262,7 @@ extension WatchViewController {
             videoId: videoId
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self,
+                guard let self = self,
                       self.watchPage?.video.id
                       == videoId
                 else {

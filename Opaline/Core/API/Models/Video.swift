@@ -223,7 +223,7 @@ final class ChannelInfoStore {
         channelId: String,
         completion: @escaping (Result<ChannelInfo, Error>) -> Void
     ) {
-        guard let channelService else {
+        guard let channelService = channelService else {
             assertionFailure("ChannelInfoStore is not configured")
             DispatchQueue.main.async {
                 completion(.failure(APIError.invalidResponse))

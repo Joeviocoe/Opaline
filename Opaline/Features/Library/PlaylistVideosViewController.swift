@@ -163,7 +163,7 @@ final class PlaylistVideosViewController: UIViewController {
             continuation: nil
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 self.isLoading = false
@@ -186,7 +186,7 @@ final class PlaylistVideosViewController: UIViewController {
             continuation: token
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 self.isLoadingMore = false

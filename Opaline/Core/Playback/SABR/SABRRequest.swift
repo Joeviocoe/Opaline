@@ -177,7 +177,7 @@ enum SABRRequest {
         if let poToken = identity.poToken, !poToken.isEmpty {
             context += Protobuf.bytes(2, poToken)
         }
-        if let playbackCookie, !playbackCookie.isEmpty {
+        if let playbackCookie = playbackCookie, !playbackCookie.isEmpty {
             context += Protobuf.bytes(3, playbackCookie)
         }
         return context

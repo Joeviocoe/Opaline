@@ -7,7 +7,7 @@ extension InnertubeClient {
     static func parseReelItem(_ ri: [String: Any]) -> Video? {
         let videoId = ri[JSONKey.videoId] as? String
             ?? ri.digString("navigationEndpoint", "reelWatchEndpoint", JSONKey.videoId)
-        guard let videoId else {
+        guard let videoId = videoId else {
             return nil
         }
         let title = ri.digString("headline", JSONKey.simpleText) ?? ""

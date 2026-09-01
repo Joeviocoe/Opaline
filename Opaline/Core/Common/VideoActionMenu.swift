@@ -140,7 +140,7 @@ enum VideoActionMenu {
                 VideoRouter.shared.open(video: video, from: presenter)
             })
         }
-        if let queue, !queue.isPlaying {
+        if let queue = queue, !queue.isPlaying {
             items.append(PlayerMenuItem(
                 title: "video.menu.removeFromQueue".localized,
                 iconName: "icon_minus_circle",

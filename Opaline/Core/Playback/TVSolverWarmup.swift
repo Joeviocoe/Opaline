@@ -30,7 +30,7 @@ enum TVSolverWarmup {
         }
         didWarm = true
         SignatureTimestampService.shared.tvPlayerPath { jsPath in
-            guard let jsPath else {
+            guard let jsPath = jsPath else {
                 return
             }
             send(to: endpoint, jsPath: jsPath, transport: transport)

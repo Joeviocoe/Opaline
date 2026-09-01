@@ -94,7 +94,7 @@ final class NowPlayingService {
 
     private func loadArtwork(url: URL?) {
         artworkURL = url
-        guard let url else {
+        guard let url = url else {
             return
         }
         transport.send(

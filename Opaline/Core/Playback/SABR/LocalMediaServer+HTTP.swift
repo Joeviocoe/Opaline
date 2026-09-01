@@ -44,7 +44,7 @@ extension LocalMediaServer {
         body: Data?,
         contentType: String
     ) -> (head: Data, body: Data) {
-        guard let body else {
+        guard let body = body else {
             AppLog.hls("local server: 404 \(request.path)")
             return (Data(
                 "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: keep-alive\r\n\r\n".utf8

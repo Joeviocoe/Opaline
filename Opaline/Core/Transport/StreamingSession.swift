@@ -74,7 +74,7 @@ final class StreamingSession: NSObject, URLSessionDataDelegate {
         // parsing. Only the status reaches it. Any 2xx counts: a ranged
         // request answers 206, and dropping those left downloads writing
         // empty files while the transfer reported success.
-        guard let sink, (200...299).contains(sink.status) else {
+        guard let sink = sink, (200...299).contains(sink.status) else {
             return
         }
         guard sink.onChunk(data) else {
@@ -101,14 +101,14 @@ final class StreamingSession: NSObject, URLSessionDataDelegate {
             lock.unlock()
             return
         }
-        if let error {
+        if let error = error {
             finish(task.taskIdentifier, with: .failure(APIError.transport(error)))
             return
         }
         lock.lock()
         let sink = sinks[task.taskIdentifier]
         lock.unlock()
-        guard let sink else {
+        guard let sink = sink else {
             return
         }
         // The body was handed over chunk by chunk; the status is all that is

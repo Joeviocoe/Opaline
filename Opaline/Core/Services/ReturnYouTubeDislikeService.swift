@@ -124,7 +124,7 @@ extension ReturnYouTubeDislikeService {
         userId: String,
         completion: @escaping (Bool) -> Void
     ) {
-        guard let data,
+        guard let data = data,
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let challengeB64 = json["challenge"] as? String,
               let challengeData = Self.decodeBase64(challengeB64),
@@ -135,7 +135,7 @@ extension ReturnYouTubeDislikeService {
         }
         AppLog.ryd("reg puzzle difficulty=\(difficulty)")
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self,
+            guard let self = self,
                   let (solution, _) = self.solvePuzzle(
                       challenge: challengeData, difficulty: difficulty
                   )
@@ -212,7 +212,7 @@ extension ReturnYouTubeDislikeService {
         userId: String,
         videoId: String
     ) {
-        guard let data,
+        guard let data = data,
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let challengeB64 = json["challenge"] as? String,
               let challengeData = Self.decodeBase64(challengeB64),
@@ -223,7 +223,7 @@ extension ReturnYouTubeDislikeService {
         }
         AppLog.ryd("vote puzzle difficulty=\(difficulty)")
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self,
+            guard let self = self,
                   let (solution, _) = self.solvePuzzle(
                       challenge: challengeData, difficulty: difficulty
                   )

@@ -122,7 +122,7 @@ extension SubscriptionsViewController {
             continuation: continuation
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self, self.selectedChannel == nil else {
+                guard let self = self, self.selectedChannel == nil else {
                     self?.finishLoadingMore()
                     return
                 }
@@ -196,7 +196,7 @@ private extension SubscriptionsViewController {
         guard selectedChannel == nil else {
             return
         }
-        if let cachedPage {
+        if let cachedPage = cachedPage {
             AppLog.subs(
                 "cache-hit → showing "
                     + "\(cachedPage.videos.count)"

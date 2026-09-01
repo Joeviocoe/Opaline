@@ -52,7 +52,7 @@ final class VideoRouter {
             )
             return
         }
-        if let panel {
+        if let panel = panel {
             panel.watchVC.loadVideo(video)
             panel.expand(animated: true)
             return
@@ -86,7 +86,7 @@ final class VideoRouter {
         isShort: Bool = false,
         playlistId: String? = nil
     ) {
-        if let seconds {
+        if let seconds = seconds {
             WatchProgressStore.shared.setLinkStart(
                 seconds: seconds, forVideoId: videoId
             )

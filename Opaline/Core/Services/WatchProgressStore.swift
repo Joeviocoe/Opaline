@@ -131,7 +131,7 @@ final class WatchProgressStore {
         lock.lock()
         let frac = fractions[videoId]
         lock.unlock()
-        guard let frac else {
+        guard let frac = frac else {
             return nil
         }
         return WatchProgress(fraction: frac)
@@ -157,10 +157,10 @@ final class WatchProgressStore {
         lock.lock()
         let link = linkStart
         lock.unlock()
-        if let link, link.videoId == videoId {
+        if let link = link, link.videoId == videoId {
             return link.seconds
         }
-        guard let duration, duration > 0,
+        guard let duration = duration, duration > 0,
               let prog = progress(forVideoId: videoId),
               prog.shouldShow, prog.fraction < 0.97 else {
             return nil
@@ -233,7 +233,7 @@ final class WatchProgressStore {
                 return
             }
             let work = DispatchWorkItem { [weak self] in
-                guard let self else {
+                guard let self = self else {
                     return
                 }
                 self.pendingWork = nil

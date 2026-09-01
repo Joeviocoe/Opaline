@@ -44,7 +44,7 @@ final class LiveHLSPlayback {
         completion: @escaping (PreparedPlayback) -> Void
     ) {
         resolver.fetchText(url: url) { [weak self] result in
-            guard let self else {
+            guard let self = self else {
                 return
             }
             if case .success(let text) = result {
@@ -65,7 +65,7 @@ final class LiveHLSPlayback {
     func prepared(
         for quality: VideoQuality, info: DirectPlaybackInfo
     ) -> PreparedPlayback? {
-        guard let playlist else {
+        guard let playlist = playlist else {
             return nil
         }
         if quality == Self.autoQuality {
@@ -104,7 +104,7 @@ final class LiveHLSPlayback {
     /// so the first fit wins. A cap below the whole ladder takes the lowest
     /// variant rather than ignoring the setting.
     private func cappedQuality(maxHeight: Int?) -> VideoQuality? {
-        guard let maxHeight, !variants.isEmpty else {
+        guard let maxHeight = maxHeight, !variants.isEmpty else {
             return nil
         }
         let fitting = variants.first { ($0.quality.height ?? 0) <= maxHeight }
