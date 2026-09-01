@@ -28,9 +28,9 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 LOG="$LOG_DIR/build-$STAMP.log"
 ln -sfn "$LOG" "$LOG_DIR/build-latest.log"
 
-SWIFTC="${SWIFTC:-$TOOLS/swift/usr/bin/swiftc}"
-SDK="${SDK:-$TOOLS/xcode13/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS15.5.sdk}"
-TARGET="${TARGET:-armv7-apple-ios9.0}"
+SWIFTC="${SWIFTC:-$REPO/scripts/legacy/darling-swiftc}"
+SDK="${SDK:-$TOOLS/xc12/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.5.sdk}"
+TARGET="${TARGET:-armv7-apple-ios9.3}"
 MODE="${MODE:-perfile}"
 JOBS="${JOBS:-$(nproc)}"
 OPT="${OPT:--Osize}"
@@ -126,13 +126,17 @@ for lproj in "$REPO"/Opaline/*.lproj; do
     cp -R "$lproj" "$STAGING/" && printf '[%s]    %s\n' "$(ts)" "$(basename "$lproj")"
 done
 
-[ -x "$SWIFTC" ] || die "no Swift compiler at $SWIFTC (run setup-env.sh --tools, and extract Xcode 13.4.1)"
-[ -d "$SDK" ]    || die "no iOS SDK at $SDK (Phase 0 step 1: extract Xcode 13.4.1)"
+[ -x "$SWIFTC" ] || die "no Swift compiler at $SWIFTC (run setup-env.sh --tools, and extract Xcode 12.5.1)"
+[ -d "$SDK" ]    || die "no iOS SDK at $SDK (extract Xcode 12.5.1)"
 
 # ------------------------------------------------------------------ compile
 phase "compile (${#SOURCES[@]} files, mode=$MODE)"
+# -D LEGACY_IOS9 is load-bearing: the compat shims and LegacyAssets' template
+# -rendering restoration are all behind it, and without it they compile away to
+# nothing silently.  -enable-objc-interop is NOT passed -- it is frontend-only in
+# Swift 5.4 and the driver rejects it; interop is on by default for Darwin.
 COMMON=(-target "$TARGET" -sdk "$SDK" -module-name "$MODULE" "$OPT"
-        -swift-version 5 -enable-objc-interop)
+        -swift-version 5 -D LEGACY_IOS9)
 
 if [ "$MODE" = "wmo" ]; then
     log "whole-module: one frontend process over all ${#SOURCES[@]} files"

@@ -66,31 +66,31 @@ extension AppLanguage {
     var displayName: String {
         switch self {
         case .english:
-            "English"
+            return "English"
         case .russian:
-            "Русский"
+            return "Русский"
         case .ukrainian:
-            "Українська"
+            return "Українська"
         case .german:
-            "Deutsch"
+            return "Deutsch"
         case .spanish:
-            "Español"
+            return "Español"
         case .french:
-            "Français"
+            return "Français"
         case .italian:
-            "Italiano"
+            return "Italiano"
         case .japanese:
-            "日本語"
+            return "日本語"
         case .portuguese:
-            "Português"
+            return "Português"
         case .turkish:
-            "Türkçe"
+            return "Türkçe"
         case .vietnamese:
-            "Tiếng Việt"
+            return "Tiếng Việt"
         case .chineseSimplified:
-            "简体中文"
+            return "简体中文"
         case .chineseTraditional:
-            "繁體中文"
+            return "繁體中文"
         }
     }
 }

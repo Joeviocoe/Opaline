@@ -7,14 +7,14 @@ import UIKit
 private func formatVoteCount(_ count: Int) -> String {
     switch count {
     case 0 ..< 1_000:
-        "\(count)"
+        return "\(count)"
     case 1_000 ..< 1_000_000:
-        String(
+        return String(
             format: "%.1fK",
             Double(count) / 1_000
         )
     default:
-        String(
+        return String(
             format: "%.1fM",
             Double(count) / 1_000_000
         )
@@ -65,7 +65,7 @@ extension WatchViewController {
             else {
                 return
             }
-            channelAvatarView.setImage(url: url)
+            self.channelAvatarView.setImage(url: url)
         }
     }
 

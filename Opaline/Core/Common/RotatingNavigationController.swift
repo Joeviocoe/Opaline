@@ -27,6 +27,7 @@ final class RotatingNavigationController: UINavigationController {
     override var preferredStatusBarStyle: UIStatusBarStyle {
         ThemeManager.shared.statusBarStyle
     }
+    @available(iOS 11.0, *)
     override var prefersHomeIndicatorAutoHidden: Bool {
         topViewController?.prefersHomeIndicatorAutoHidden ?? super.prefersHomeIndicatorAutoHidden
     }

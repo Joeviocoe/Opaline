@@ -13,7 +13,7 @@ extension WatchViewController: UICollectionViewDataSource {
             else {
                 return
             }
-            videoRouter.openChannel(id: channelId, name: video.channelName)
+            self.videoRouter.openChannel(id: channelId, name: video.channelName)
         }
         cell.onMenuTap = { [weak self] anchor in
             guard let self = self else {
@@ -224,9 +224,9 @@ extension WatchViewController: PlaybackContext {
             guard let self = self else {
                 return
             }
-            playerStatusLabel.text = text
-            playerStatusLabel.isHidden = false
-            playerSpinner.startAnimating()
+            self.playerStatusLabel.text = text
+            self.playerStatusLabel.isHidden = false
+            self.playerSpinner.startAnimating()
         }
     }
 

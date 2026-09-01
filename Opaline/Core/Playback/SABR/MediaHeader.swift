@@ -31,13 +31,20 @@ struct MediaHeader {
         sequence = Int(clamping: fields.number(9) ?? 0)
         isInit = (fields.number(8) ?? 0) != 0
         let time = fields.data(15).map(Protobuf.parse)
-        timescale = Int(clamping: time?.number(3) ?? 1_000)
+        let scale = Int(clamping: time?.number(3) ?? 1_000)
+        timescale = scale
         // The plain millisecond fields where the server sends them, the tick
         // range where it does not.
-        startMs = fields.number(11).map { Int(clamping: $0) }
-            ?? Self.ms(time?.number(1), timescale)
-        durationMs = fields.number(12).map { Int(clamping: $0) }
-            ?? Self.ms(time?.number(2), timescale)
+        //
+        // Computed into locals first: Swift 5.4's definite-initialization pass
+        // rejects a closure in the same expression that initialises a stored
+        // constant ("captured by a closure before being initialized"), even
+        // though the closure captures nothing. Later compilers accept the
+        // direct form, so this is shape, not meaning.
+        let explicitStart = fields.number(11).map { Int(clamping: $0) }
+        let explicitDuration = fields.number(12).map { Int(clamping: $0) }
+        startMs = explicitStart ?? Self.ms(time?.number(1), scale)
+        durationMs = explicitDuration ?? Self.ms(time?.number(2), scale)
     }
 
     /// Ticks come off the wire, so scale in 64-bit and clamp: `ticks * 1_000`
@@ -62,11 +69,11 @@ enum SABRError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noInitSegment:
-            "SABR returned no init segment"
+            return "SABR returned no init segment"
         case .stalled:
-            "SABR returned no media"
+            return "SABR returned no media"
         case .server(let detail):
-            "SABR error: \(detail)"
+            return "SABR error: \(detail)"
         }
     }
 }

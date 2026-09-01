@@ -111,9 +111,9 @@ final class InnertubeVideoSource: VideoSource {
             guard let self = self else {
                 return
             }
-            apiClient.fetchDirectPlayback(
+            self.apiClient.fetchDirectPlayback(
                 videoId: videoId,
-                client: client,
+                client: self.client,
                 poToken: poToken,
                 cancellationToken: cancellation,
                 completion: completion
@@ -261,9 +261,9 @@ private extension InnertubeVideoSource {
             guard let self = self else {
                 return
             }
-            if !liveHLS.qualities.isEmpty {
-                availableQualities = liveHLS.qualities
-                currentQuality = liveHLS.startQuality
+            if !self.liveHLS.qualities.isEmpty {
+                self.availableQualities = self.liveHLS.qualities
+                self.currentQuality = self.liveHLS.startQuality
             }
             completion(.success(prepared))
         }

@@ -45,7 +45,7 @@ final class WatchtimeTracker {
             guard let self = self else {
                 return
             }
-            pingTimer = Timer.scheduledTimer(
+            self.pingTimer = Timer.scheduledTimer(
                 withTimeInterval: Self.pingInterval,
                 repeats: true
             ) { [weak self] _ in

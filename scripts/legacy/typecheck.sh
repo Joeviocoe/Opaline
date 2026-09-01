@@ -15,7 +15,7 @@ ln -sfn "$LOG" "$LOG_DIR/typecheck-latest.log"
 exec > >(stdbuf -oL -eL tee -a "$LOG") 2>&1
 
 SDK="${SDK:-$HOME/legacy-ios9/toolchain/xc12/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.5.sdk}"
-TARGET="${TARGET:-armv7-apple-ios9.0}"
+TARGET="${TARGET:-armv7-apple-ios9.3}"
 MANIFEST="$BUILD/generated/LegacyAssetManifest.swift"
 
 echo "[$(date +%H:%M:%S)] generating asset manifest"
@@ -25,11 +25,12 @@ python3 "$REPO/scripts/legacy/flatten-assets.py" \
 
 mapfile -t SOURCES < <("$REPO/scripts/legacy/build.sh" --sources)
 echo "[$(date +%H:%M:%S)] type-checking ${#SOURCES[@]} files for $TARGET"
-echo "  (one frontend process; no codegen, so this is the fast way to get the"
-echo "   full diagnostic list rather than stopping at the first bad file)"
-time "$REPO/scripts/legacy/darling-swiftc" -typecheck \
+echo "  (-wmo is required, not an optimisation: without it the driver stops"
+echo "   scheduling jobs after the first failing batch and under-reports badly"
+echo "   -- 6 errors against a true 223.)"
+time "$REPO/scripts/legacy/darling-swiftc" -typecheck -wmo \
     -target "$TARGET" -sdk "$SDK" -module-name Opaline \
-    -swift-version 5 \
+    -swift-version 5 -D LEGACY_IOS9 \
     "${SOURCES[@]}"
 RC=${PIPESTATUS[0]}
 echo "[$(date +%H:%M:%S)] typecheck exit: ${RC:-?}"

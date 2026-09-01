@@ -363,6 +363,7 @@ extension PlayerPanelViewController {
     // `refreshSupportedOrientations()` — otherwise the player comes back from
     // the mini bar deaf to rotation until the next unrelated device change.
 
+    @available(iOS 11.0, *)
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
         updateNavWrapperTop()

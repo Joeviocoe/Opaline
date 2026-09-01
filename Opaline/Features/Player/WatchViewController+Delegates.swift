@@ -118,6 +118,7 @@ extension WatchViewController {
         isPlayerFullscreen ? .lightContent : ThemeManager.shared.statusBarStyle
     }
 
+    @available(iOS 11.0, *)
     override var prefersHomeIndicatorAutoHidden: Bool {
         isPlayerFullscreen
     }

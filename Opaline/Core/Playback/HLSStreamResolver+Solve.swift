@@ -121,8 +121,8 @@ extension HLSStreamResolver {
                 completion(nil)
                 return
             }
-            storePlayerJS(baseJS, path: jsPath)
-            runSolverAsync(
+            self.storePlayerJS(baseJS, path: jsPath)
+            self.runSolverAsync(
                 baseJS: baseJS, kind: kind, unsolved: unsolved, completion: completion
             )
         }

@@ -30,7 +30,7 @@ extension SignatureTimestampService {
                     return
                 }
             }
-            fetchTVTimestamp(jsPath: jsPath, completion: completion)
+            self.fetchTVTimestamp(jsPath: jsPath, completion: completion)
         }
     }
 

@@ -19,9 +19,9 @@ extension VideoActionMenu {
         var message: String {
             switch self {
             case .tunedRecommendations:
-                "video.menu.feedbackTuned".localized
+                return "video.menu.feedbackTuned".localized
             case .removed:
-                "video.menu.feedbackRemoved".localized
+                return "video.menu.feedbackRemoved".localized
             }
         }
     }

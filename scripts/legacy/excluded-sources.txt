@@ -7,32 +7,17 @@
 #
 # build.sh fails if a path here no longer exists -- that is the early warning
 # that upstream renamed or moved something and this list needs revisiting.
+#
+# POLICY: exclude only what cannot COMPILE for iOS 9.  Code that compiles but is
+# useless at runtime (HLS-fMP4, PiP on an A5X, AV1, JS solving) stays in the
+# build and is gated where it is *chosen* -- in the playback step registry and
+# the format policy.  Excluding it instead would strand every reference to it,
+# and each of those needs a hand-written stub that upstream will then diverge
+# from.  Measured: excluding those files cost 31 dangling references, several of
+# them @objc selectors that fail at runtime rather than at compile time.
 
-# --- iOS 12+ API: Network.framework (NWListener).  The SABR *protocol* code
-# --- is kept and compiled; only this sink is replaced by the resource loader.
+# --- Network.framework (NWListener) is iOS 12.  This is the only genuine
+# --- compile blocker in the tree.  The SABR *protocol* code is unaffected and
+# --- stays compiled; only this sink is replaced by the resource loader.
 Opaline/Core/Playback/SABR/LocalMediaServer.swift
 Opaline/Core/Playback/SABR/LocalMediaServer+HTTP.swift
-
-# --- fMP4-in-HLS (#EXT-X-VERSION:7 + #EXT-X-MAP) needs iOS 10.
-Opaline/Core/Playback/HLSGenerator.swift
-Opaline/Core/Playback/HLSGenerator+Sidx.swift
-Opaline/Core/Playback/HLSPlaybackBuilder.swift
-Opaline/Core/Playback/HLSPlaybackBuilder+Diagnostics.swift
-Opaline/Core/Playback/HLSPlaybackBuilder+Fetch.swift
-Opaline/Core/Playback/HLSPlaylistLoader.swift
-Opaline/Core/Playback/LiveHLSPlayback.swift
-Opaline/Core/Playback/LiveHLSVariants.swift
-
-# --- VideoToolbox AV1 query is iOS 17.4; no AV1 hardware here regardless.
-Opaline/Core/Playback/AV1Support.swift
-
-# --- JS solving: JavaScriptCore on an A5X cannot run YouTube's base.js, and
-# --- the helper server is dropped.  Costs the MWEB client and kids content.
-Opaline/Core/Playback/WebViewHLSSolverJS.swift
-Opaline/Core/Playback/HLSStreamResolver+Solve.swift
-Opaline/Core/Playback/HLSStreamResolver+Remote.swift
-Opaline/Core/Services/PoToken/RemotePoTokenService.swift
-
-# --- AVPictureInPictureController reports unsupported on A5/A5X/A6X.
-Opaline/Features/Player/VideoPlayerView+PiP.swift
-Opaline/Features/Player/VideoPlayerView+PiPDelegate.swift

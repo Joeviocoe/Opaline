@@ -35,6 +35,7 @@ extension WatchViewController {
         ]
     }
 
+    @available(iOS 11.0, *)
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
         adjustForFloatingNavBar()

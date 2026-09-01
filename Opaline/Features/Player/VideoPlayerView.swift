@@ -262,12 +262,19 @@ final class VideoPlayerView: UIView {
     /// lag until a seek realigns the timebase (#14).
     let clockResync = ClockResyncState()
 
+    #if !LEGACY_IOS9
+    // Cannot be annotated like the other iOS 11 overrides: the compat layer
+    // supplies safeAreaInsets as a UIView extension, and Swift does not allow
+    // overriding a member declared in an extension. Guarding it out is exact
+    // here anyway -- on iOS 9 a view that is not a controller's root view has
+    // no safe-area insets, so the shim already returns .zero for this view.
     override var safeAreaInsets: UIEdgeInsets {
         if isFullscreen && !transform.isIdentity {
             return .zero
         }
         return super.safeAreaInsets
     }
+    #endif
 
     // MARK: - Init
 
