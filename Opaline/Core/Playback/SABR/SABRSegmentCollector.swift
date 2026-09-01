@@ -127,7 +127,7 @@ final class SABRSegmentCollector {
         guard let header = MediaHeader(payload) else {
             return
         }
-        let id = fields.number(1) ?? 0
+        let id = Int(clamping: fields.number(1) ?? 0)
         headers[id] = header
         // The itag alone does not name a track: every dub of a video carries
         // the same one, and only `xtags` tells them apart. A response can hold
@@ -162,21 +162,29 @@ final class SABRSegmentCollector {
 
     /// A `MEDIA` payload leads with the varint id of the header it belongs to.
     private func collect(_ payload: Data) {
+        // `id` is a raw wire varint; Int(id) traps on armv7 above 2^31.
+        // Compare in the wire's own width instead of narrowing.
         guard let (id, offset) = Protobuf.readVarint(payload, 0),
-              Int(id) == wantedHeaderId, offset < payload.count else {
+              let wanted = wantedHeaderId, wanted >= 0, id == UInt64(wanted),
+              offset < payload.count else {
             return
         }
         chunks.append(payload.suffix(from: payload.startIndex + offset))
     }
 
     private func finishIfWanted(_ payload: Data) {
-        guard let (id, _) = Protobuf.readVarint(payload, 0), Int(id) == wantedHeaderId else {
+        // Same narrowing hazard as collect(): compare in the wire width.
+        guard let (id, _) = Protobuf.readVarint(payload, 0),
+              let wanted = wantedHeaderId, wanted >= 0, id == UInt64(wanted) else {
             return
         }
         isDone = true
     }
 
     private func notePolicy(_ fields: [Int: [Protobuf.Value]]) {
-        policy = SABRPolicy(backoffMs: fields.number(4) ?? 0, playbackCookie: fields.data(7))
+        policy = SABRPolicy(
+            backoffMs: Int(clamping: fields.number(4) ?? 0),
+            playbackCookie: fields.data(7)
+        )
     }
 }

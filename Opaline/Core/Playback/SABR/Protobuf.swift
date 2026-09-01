@@ -7,7 +7,7 @@ enum Protobuf {
     /// Field number to values, flattened — repeated fields keep every value and
     /// groups (wire type 3/4, which SABR never sends) abort the parse.
     enum Value {
-        case number(Int)
+        case number(Int64)
         case data(Data)
     }
 
@@ -61,10 +61,17 @@ enum Protobuf {
             guard let (key, afterKey) = readVarint(data, offset) else {
                 break
             }
-            guard let (value, next) = readValue(data, afterKey, wire: Int(key) & 7) else {
+            // `key` is an unbounded wire varint. Narrowing it to Int traps on
+            // a 32-bit target, so mask the wire type off first and bound the
+            // field number by protobuf's own maximum of 2^29 - 1.
+            guard let (value, next) = readValue(data, afterKey, wire: Int(key & 7)) else {
                 break
             }
-            fields[Int(key) >> 3, default: []].append(value)
+            let field = key >> 3
+            guard field <= 536_870_911 else {
+                break
+            }
+            fields[Int(field), default: []].append(value)
             offset = next
         }
         return fields
@@ -80,11 +87,17 @@ enum Protobuf {
             guard let (value, next) = readVarint(data, offset) else {
                 return nil
             }
-            return (.number(Int(value)), next)
+            return (.number(Int64(bitPattern: value)), next)
         case 1:
             return slice(data, offset, count: 8).map { (.data($0.0), $0.1) }
         case 2:
             guard let (length, afterLength) = readVarint(data, offset) else {
+                return nil
+            }
+            // A length prefix is attacker-controlled: bound it against the
+            // buffer before narrowing, or Int(length) traps on 32-bit and
+            // over-allocates on 64-bit.
+            guard length <= UInt64(data.count) else {
                 return nil
             }
             return slice(data, afterLength, count: Int(length)).map { (.data($0.0), $0.1) }
@@ -121,7 +134,7 @@ enum Protobuf {
 }
 
 extension Dictionary where Key == Int, Value == [Protobuf.Value] {
-    func number(_ field: Int) -> Int? {
+    func number(_ field: Int) -> Int64? {
         guard case .number(let value)? = self[field]?.first else {
             return nil
         }

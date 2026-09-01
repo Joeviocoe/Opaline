@@ -68,12 +68,24 @@ final class UMPReader {
             return nil
         }
         // The 5-byte form drops the first byte entirely and is a plain uint32.
+        // These are part sizes, so anything that cannot index the buffer is
+        // malformed -- bound it rather than narrowing and trapping on armv7.
         guard length < 5 else {
-            return (Int(readLittleEndian(data, offset + 1, count: 4)), offset + 5)
+            let wide = readLittleEndian(data, offset + 1, count: 4)
+            guard wide <= UInt64(Int32.max) else {
+                return nil
+            }
+            return (Int(wide), offset + 5)
         }
-        let head = first & (0xFF >> length)
+        let head = UInt64(first & (0xFF >> length))
         let tail = readLittleEndian(data, offset + 1, count: length - 1)
-        return (head + Int(tail) << (8 - length), offset + length)
+        // head occupies the low 8 - length bits, so `|` is the old `+`. Stay
+        // in UInt64: the shifted product exceeds Int32 for the 4-byte form.
+        let value = head | (tail << UInt64(8 - length))
+        guard value <= UInt64(Int32.max) else {
+            return nil
+        }
+        return (Int(value), offset + length)
     }
 
     private static func readLittleEndian(

@@ -14,7 +14,7 @@ struct RSSVideoEntry {
     let title: String
     let published: Date
     /// From `media:statistics` — a snapshot, not live, but the feed's.
-    let viewCount: Int?
+    let viewCount: Int64?
 }
 
 /// Fetches the public per-channel Atom feeds (`/feeds/videos.xml`) used

@@ -164,7 +164,14 @@ enum HLSGenerator {
             guard segment.duration > 0 else {
                 return best
             }
-            return max(best, Int(Double(segment.size) * 8 / segment.duration))
+            // A near-zero duration passes the guard above and produces a
+            // Double far outside Int's range; Int(_: Double) traps on that, on
+            // every architecture. Clamp before converting.
+            let bits = Double(segment.size) * 8 / segment.duration
+            guard bits.isFinite, bits > 0 else {
+                return best
+            }
+            return max(best, Int(min(bits, Double(Int32.max))))
         }
         return peak > 0 ? peak : fallback
     }

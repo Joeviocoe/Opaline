@@ -20,29 +20,37 @@ struct MediaHeader {
 
     init?(_ payload: Data) {
         let fields = Protobuf.parse(payload)
-        guard let itag = fields.number(3) else {
+        guard let itagField = fields.number(3) else {
             return nil
         }
-        self.itag = itag
+        self.itag = Int(clamping: itagField)
         let formatId = fields.data(13).map(Protobuf.parse)
         xtags = fields.string(5)
             ?? formatId?.string(3)
-        startRange = Int64(fields.number(6) ?? 0)
-        sequence = fields.number(9) ?? 0
+        startRange = fields.number(6) ?? 0
+        sequence = Int(clamping: fields.number(9) ?? 0)
         isInit = (fields.number(8) ?? 0) != 0
         let time = fields.data(15).map(Protobuf.parse)
-        timescale = time?.number(3) ?? 1_000
+        timescale = Int(clamping: time?.number(3) ?? 1_000)
         // The plain millisecond fields where the server sends them, the tick
         // range where it does not.
-        startMs = fields.number(11) ?? Self.ms(time?.number(1), timescale)
-        durationMs = fields.number(12) ?? Self.ms(time?.number(2), timescale)
+        startMs = fields.number(11).map { Int(clamping: $0) }
+            ?? Self.ms(time?.number(1), timescale)
+        durationMs = fields.number(12).map { Int(clamping: $0) }
+            ?? Self.ms(time?.number(2), timescale)
     }
 
-    private static func ms(_ ticks: Int?, _ timescale: Int) -> Int {
+    /// Ticks come off the wire, so scale in 64-bit and clamp: `ticks * 1_000`
+    /// overflows a 32-bit Int well inside the plausible range.
+    private static func ms(_ ticks: Int64?, _ timescale: Int) -> Int {
         guard let ticks = ticks, timescale > 0 else {
             return 0
         }
-        return ticks * 1_000 / timescale
+        let scaled = ticks.multipliedReportingOverflow(by: 1_000)
+        guard !scaled.overflow else {
+            return 0
+        }
+        return Int(clamping: scaled.partialValue / Int64(timescale))
     }
 }
 

@@ -23,7 +23,7 @@ private final class FeedDelegate: NSObject, XMLParserDelegate {
     private var videoId = ""
     private var published = ""
     private var title = ""
-    private var viewCount: Int?
+    private var viewCount: Int64?
     private let dateFormatter = ISO8601DateFormatter()
 
     func parser(
@@ -41,7 +41,10 @@ private final class FeedDelegate: NSObject, XMLParserDelegate {
             viewCount = nil
         }
         if insideEntry, elementName == "media:statistics" {
-            viewCount = (attributeDict["views"]).flatMap(Int.init)
+            // Int.init(String) is failable, so on a 32-bit target a count
+            // above 2^31 silently became nil -- the number vanished for
+            // exactly the most-viewed videos. Parse as Int64.
+            viewCount = (attributeDict["views"]).flatMap(Int64.init)
         }
         currentElement = elementName
     }
