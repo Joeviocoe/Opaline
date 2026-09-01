@@ -20,7 +20,10 @@ LOG="$LOG_DIR/deb-$(date +%Y%m%d-%H%M%S).log"
 exec > >(stdbuf -oL -eL tee -a "$LOG") 2>&1
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
-APP_NAME=Opaline
+# Overridable so the same packaging path builds the armv7 toolchain gate app
+# as well as Opaline itself -- one script, so the gate really does exercise
+# the path the real package will take.
+APP_NAME="${APP_NAME:-Opaline}"
 # Distinct from upstream's com.verback.ytlite so APT never offers this armv7
 # build to an arm64 iOS 12 user -- Architecture: iphoneos-arm covers both.
 PACKAGE_ID="${PACKAGE_ID:-com.verback.ytlite.legacy}"
@@ -65,6 +68,14 @@ fi
 
 SIZE_KB=$(du -sk "$DATA" | cut -f1)
 
+# Only the real package supersedes upstream's; the gate app must not claim to.
+CONFLICTS="${CONFLICTS-Conflicts: com.verback.ytlite\nReplaces: com.verback.ytlite\n}"
+CONFLICTS=$(printf '%b' "$CONFLICTS")
+DESCRIPTION="${DESCRIPTION:-Description: Lightweight YouTube client for 32-bit iOS 9 devices
+ armv7 build for A5/A5X hardware: iPad 2/3, iPad mini 1, iPhone 4S,
+ iPod touch 5.  SponsorBlock, offline downloads, subscriptions and
+ playlists.  No ads, no tracking, no dependencies.}"
+
 cat > "$CTRL/control" <<EOF
 Package: $PACKAGE_ID
 Name: $APP_NAME (iOS 9)
@@ -73,26 +84,21 @@ Architecture: iphoneos-arm
 Section: Applications
 Priority: optional
 Depends: firmware (>= 9.0), firmware (<< 12.0)
-Conflicts: com.verback.ytlite
-Replaces: com.verback.ytlite
-Installed-Size: $SIZE_KB
+${CONFLICTS}Installed-Size: $SIZE_KB
 Maintainer: legacy-ios9 build
 Author: verback2308
 Homepage: https://github.com/verback2308/Opaline
-Description: Lightweight YouTube client for 32-bit iOS 9 devices
- armv7 build for A5/A5X hardware: iPad 2/3, iPad mini 1, iPhone 4S,
- iPod touch 5.  SponsorBlock, offline downloads, subscriptions and
- playlists.  No ads, no tracking, no dependencies.
+$DESCRIPTION
 EOF
 
 # iOS 9's uicache takes NO arguments.  Upstream runs `uicache -p ... || uicache
 # -a || true`, so on iOS 9 both branches fail, `|| true` swallows it, and the
 # icon never appears.  The bare form is the one that works here.
-cat > "$CTRL/postinst" <<'EOF'
+cat > "$CTRL/postinst" <<EOF
 #!/bin/sh
-uicache -p "/Applications/Opaline.app" 2>/dev/null \
-  || uicache -a 2>/dev/null \
-  || uicache 2>/dev/null \
+uicache -p "/Applications/$APP_NAME.app" 2>/dev/null \\
+  || uicache -a 2>/dev/null \\
+  || uicache 2>/dev/null \\
   || true
 exit 0
 EOF

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# swiftc for armv7/iOS 9, running Apple's own Swift 5.4.2 under Darling.
+#
+# Why a wrapper and not swiftc directly: Darling shows the host filesystem at
+# /Volumes/SystemRoot, so every absolute host path in the argument list has to
+# be rewritten before the Mach-O compiler ever sees it. Everything else about
+# the build is unchanged, which keeps build.sh toolchain-agnostic.
+#
+# Xcode 12.5.1 / Swift 5.4.2 is deliberate: it is the last toolchain whose
+# swift-frontend is pure C++. Swift 5.6 moved part of the compiler into Swift
+# itself, so its frontend links libswiftCore and cannot start under Darling.
+set -uo pipefail
+XC="${LEGACY_XCODE:-$HOME/legacy-ios9/toolchain/xc12/Xcode.app/Contents/Developer}"
+V=/Volumes/SystemRoot
+TC="$V${XC#/}"; TC="$V${XC}"
+BIN="$TC/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+
+args=()
+for a in "$@"; do
+    case "$a" in
+        /home/*|/tmp/*|/var/tmp/*) args+=("$V$a") ;;
+        *)                         args+=("$a")   ;;
+    esac
+done
+
+# darling shell joins its arguments and hands them to bash as a filename, so
+# `-c` does not work; env is set by invoking env(1) as the program instead.
+exec darling shell /usr/bin/env \
+    "DEVELOPER_DIR=$TC" \
+    "$BIN/swiftc" "${args[@]}"
