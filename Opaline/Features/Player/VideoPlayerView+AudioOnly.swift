@@ -60,7 +60,7 @@ extension VideoPlayerView {
         audioPlaceholderView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(audioPlaceholderView)
         let icon = UIImageView(
-            image: UIImage(named: "icon_audio_only")?
+            image: LegacyAssets.image("icon_audio_only")?
                 .withRenderingMode(.alwaysTemplate)
         )
         icon.tintColor = UIColor.white.withAlphaComponent(0.5)

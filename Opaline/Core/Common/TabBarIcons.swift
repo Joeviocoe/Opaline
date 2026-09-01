@@ -8,7 +8,7 @@ enum TabBarIcons {
 }
 
 private func icon(_ name: String, size: CGFloat) -> UIImage? {
-    guard let img = UIImage(named: name) else {
+    guard let img = LegacyAssets.image(name) else {
         return nil
     }
     let targetSize = CGSize(width: size, height: size)

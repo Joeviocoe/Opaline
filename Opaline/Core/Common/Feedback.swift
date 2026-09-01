@@ -60,7 +60,7 @@ enum Feedback {
     static func checkmark(on button: UIButton?) {
         guard let button = button,
               let image = button.image(for: .normal),
-              let check = UIImage(named: "icon_checkmark") else {
+              let check = LegacyAssets.image("icon_checkmark") else {
             return
         }
         let size = image.size

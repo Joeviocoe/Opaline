@@ -87,7 +87,7 @@ final class CommentContentView: UIView {
         authorLabel.font = UIFont.systemFont(ofSize: 12)
         authorLabel.numberOfLines = 1
         LinkifiedText.configure(contentTextView)
-        likeIcon.image = UIImage(named: "icon_thumb_up")?
+        likeIcon.image = LegacyAssets.image("icon_thumb_up")?
             .withRenderingMode(.alwaysTemplate)
         likeIcon.contentMode = .scaleAspectFit
         likeLabel.font = UIFont.systemFont(ofSize: 12)

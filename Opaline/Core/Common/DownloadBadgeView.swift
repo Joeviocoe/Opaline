@@ -12,7 +12,7 @@ final class DownloadBadgeView: UIImageView {
     private var videoId: String?
 
     init() {
-        super.init(image: UIImage(named: "icon_download")?
+        super.init(image: LegacyAssets.image("icon_download")?
             .withRenderingMode(.alwaysTemplate))
         contentMode = .scaleAspectFit
         tintColor = .white

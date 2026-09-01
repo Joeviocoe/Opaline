@@ -66,7 +66,7 @@ extension PlayerMenuOverlay {
     }
 
     private func addRowIcon(_ name: String, color: UIColor, to button: UIButton) {
-        guard let image = UIImage(named: name) else {
+        guard let image = LegacyAssets.image(name) else {
             return
         }
         let imageView = UIImageView(image: image.withRenderingMode(.alwaysTemplate))

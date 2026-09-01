@@ -21,7 +21,7 @@ final class ShortsActionButton: UIView {
     init(icon: String) {
         super.init(frame: .zero)
         button.setImage(
-            UIImage(named: icon)?.withRenderingMode(.alwaysTemplate),
+            LegacyAssets.image(icon)?.withRenderingMode(.alwaysTemplate),
             for: .normal
         )
         button.addTarget(

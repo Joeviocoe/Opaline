@@ -36,7 +36,7 @@ enum AppIcon: String, CaseIterable {
         let name = self == .auto
             ? (ThemeManager.shared.isDark ? AppIcon.dark : AppIcon.light).rawValue
             : rawValue
-        return UIImage(named: name)
+        return LegacyAssets.image(name)
     }
 
     var displayName: String {

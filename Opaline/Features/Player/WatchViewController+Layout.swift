@@ -289,7 +289,7 @@ extension WatchViewController {
         countLabel: UILabel? = nil
     )
         -> UIStackView {
-        if let img = UIImage(named: iconName) {
+        if let img = LegacyAssets.image(iconName) {
             let sz = CGSize(width: 22, height: 22)
             let rendered = UIGraphicsImageRenderer(size: sz).image { _ in
                 img.draw(in: CGRect(origin: .zero, size: sz))

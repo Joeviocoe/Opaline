@@ -77,6 +77,16 @@ for f in "${ALL[@]}"; do
     [ $skip -eq 0 ] && SOURCES+=("$REPO/$f")
 done
 
+# Assets.xcassets cannot be compiled on Linux (actool is macOS-only), so the
+# catalog is flattened into loose PNGs at build time and its template-rendering
+# names are emitted as a generated Swift manifest that LegacyAssets consults.
+# Nothing is copied into the repo, so upstream icon changes are picked up free.
+GENERATED="$BUILD/generated"
+STAGING="$BUILD/staging/Opaline.app"
+mkdir -p "$GENERATED" "$STAGING"
+MANIFEST="$GENERATED/LegacyAssetManifest.swift"
+SOURCES+=("$MANIFEST")
+
 if [ "$SOURCES_ONLY" -eq 1 ]; then
     printf '%s\n' "${SOURCES[@]}"
     exit 0
@@ -105,6 +115,16 @@ if [ "$DRY" -eq 1 ]; then
     log "total $((SECONDS - T0))s"
     exit 0
 fi
+
+phase "resources"
+python3 "$REPO/scripts/legacy/flatten-assets.py" \
+    --catalog "$REPO/Opaline/Assets.xcassets" \
+    --out "$STAGING" --manifest "$MANIFEST" || die "flattening Assets.xcassets"
+log "localisations"
+for lproj in "$REPO"/Opaline/*.lproj; do
+    [ -d "$lproj" ] || continue
+    cp -R "$lproj" "$STAGING/" && printf '[%s]    %s\n' "$(ts)" "$(basename "$lproj")"
+done
 
 [ -x "$SWIFTC" ] || die "no Swift compiler at $SWIFTC (run setup-env.sh --tools, and extract Xcode 13.4.1)"
 [ -d "$SDK" ]    || die "no iOS SDK at $SDK (Phase 0 step 1: extract Xcode 13.4.1)"

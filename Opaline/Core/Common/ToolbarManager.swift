@@ -12,7 +12,7 @@ func resizedNavBarIcon(_ name: String, size: CGFloat) -> UIImage? {
     if let cached = resizedNavBarIconCache[key] {
         return cached
     }
-    guard let img = UIImage(named: name) else {
+    guard let img = LegacyAssets.image(name) else {
         return nil
     }
     let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
@@ -213,7 +213,7 @@ final class ProfileAvatarButton: UIButton {
     }
 
     private func defaultImage() -> UIImage? {
-        if let asset = UIImage(named: "icon_person_fill") {
+        if let asset = LegacyAssets.image("icon_person_fill") {
             return asset
         }
         if #available(iOS 13, *) {

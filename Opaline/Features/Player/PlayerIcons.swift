@@ -91,7 +91,7 @@ extension PlayerIcons {
         let renderer = UIGraphicsImageRenderer(size: iconSize)
         let img = renderer.image { _ in
             UIColor.white.setFill()
-            UIImage(named: name)?.draw(
+            LegacyAssets.image(name)?.draw(
                 in: CGRect(origin: .zero, size: iconSize)
             )
         }

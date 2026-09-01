@@ -38,7 +38,7 @@ final class SplashViewController: UIViewController {
         // Drawn as-is, never as a template: the mark carries the opal gradient
         // itself, which is the whole point of it — a tint would flatten the brand
         // back into the plain triangle it used to be on the dark theme.
-        logoView.image = UIImage(named: "SplashMark")
+        logoView.image = LegacyAssets.image("SplashMark")
         logoView.contentMode = .scaleAspectFit
         logoView.translatesAutoresizingMaskIntoConstraints = false
         // Faded in rather than matched to the storyboard's own mark: iOS 12 lays
