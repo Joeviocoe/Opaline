@@ -68,28 +68,53 @@ fi
 
 SIZE_KB=$(du -sk "$DATA" | cut -f1)
 
-# Only the real package supersedes upstream's; the gate app must not claim to.
-CONFLICTS="${CONFLICTS-Conflicts: com.verback.ytlite\nReplaces: com.verback.ytlite\n}"
-CONFLICTS=$(printf '%b' "$CONFLICTS")
+# Only the real package supersedes upstream's; set CONFLICTS= to suppress.
+# A literal newline, not \n through printf: command substitution strips trailing
+# newlines, which once glued Installed-Size onto the end of the Replaces line and
+# made Cydia drop the whole repo with "Problem parsing dependency Replaces".
+DEFAULT_CONFLICTS='Conflicts: com.verback.ytlite
+Replaces: com.verback.ytlite'
+CONFLICTS="${CONFLICTS-$DEFAULT_CONFLICTS}"
 DESCRIPTION="${DESCRIPTION:-Description: Lightweight YouTube client for 32-bit iOS 9 devices
  armv7 build for A5/A5X hardware: iPad 2/3, iPad mini 1, iPhone 4S,
  iPod touch 5.  SponsorBlock, offline downloads, subscriptions and
  playlists.  No ads, no tracking, no dependencies.}"
 
-cat > "$CTRL/control" <<EOF
+{
+    cat <<EOF
 Package: $PACKAGE_ID
 Name: $APP_NAME (iOS 9)
 Version: $VERSION
 Architecture: iphoneos-arm
 Section: Applications
 Priority: optional
-Depends: firmware (>= 9.0), firmware (<< 12.0)
-${CONFLICTS}Installed-Size: $SIZE_KB
+Depends: firmware (>= 9.3), firmware (<< 12.0)
+EOF
+    [ -n "$CONFLICTS" ] && printf '%s\n' "$CONFLICTS"
+    cat <<EOF
+Installed-Size: $SIZE_KB
 Maintainer: legacy-ios9 build
 Author: verback2308
 Homepage: https://github.com/verback2308/Opaline
 $DESCRIPTION
 EOF
+} > "$CTRL/control"
+
+# A malformed control field does not fail the build -- it fails on the device,
+# by making Cydia discard the entire repository. Cheap to check here.
+python3 - "$CTRL/control" <<'CHECK' || exit 1
+import re, sys
+bad = []
+for number, line in enumerate(open(sys.argv[1]).read().splitlines(), 1):
+    if not line or line.startswith((" ", "\t")):
+        continue                      # continuation line, or the blank separator
+    if not re.match(r"^[A-Za-z][A-Za-z0-9-]*: .*$", line):
+        bad.append((number, line))
+for number, line in bad:
+    print("  malformed control line %d: %r" % (number, line), file=sys.stderr)
+sys.exit(1 if bad else 0)
+CHECK
+log "control  validated"
 
 # iOS 9's uicache takes NO arguments.  Upstream runs `uicache -p ... || uicache
 # -a || true`, so on iOS 9 both branches fail, `|| true` swallows it, and the

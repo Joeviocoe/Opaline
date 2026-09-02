@@ -148,6 +148,33 @@ extension VideoPlayerView {
     }
 
     private func observeTimeControl(on player: AVPlayer) {
+        #if LEGACY_IOS9
+        // `timeControlStatus` is iOS 10, supplied here by the compat layer as a
+        // plain Swift property. That makes it un-observable: `observe(_:)` has to
+        // turn the key path into a KVO string, and a non-@objc property makes it
+        // trap -- "Could not extract a String from KeyPath", which killed the
+        // process the moment playback started. Observe the two real, @objc
+        // properties the shim is derived from instead.
+        timeControlObservation = player.observe(
+            \.rate,
+            options: [.new]
+        ) { [weak self] observed, _ in
+            DispatchQueue.main.async {
+                self?.handleTimeControlChange(on: observed)
+            }
+        }
+        // Rate alone cannot see a mid-playback stall, where rate stays positive
+        // and only the buffer runs dry. This is the pre-iOS-10 signal for it.
+        legacyKeepUpObservation = player.currentItem?.observe(
+            \.isPlaybackLikelyToKeepUp,
+            options: [.new]
+        ) { [weak self] _, _ in
+            DispatchQueue.main.async {
+                guard let player = self?.player else { return }
+                self?.handleTimeControlChange(on: player)
+            }
+        }
+        #else
         timeControlObservation = player.observe(
             \.timeControlStatus,
             options: [.new]
@@ -156,6 +183,7 @@ extension VideoPlayerView {
                 self?.handleTimeControlChange(on: observed)
             }
         }
+        #endif
     }
 
     private func handleTimeControlChange(on player: AVPlayer) {
@@ -241,6 +269,23 @@ extension VideoPlayerView {
                     )
                     self?.refreshSponsorSeekBar()
                 }
+                #if LEGACY_IOS9
+                // The compat `timeControlStatus` is derived, not @objc, so
+                // nothing fires when the item finally becomes ready -- rate
+                // changed back at play(), while status was still .unknown. Until
+                // something re-evaluates, `scheduleBufferingIndicator` never
+                // hears `.playing`, so the spinner latches on and its
+                // `setCenter(hidden: true)` leaves the transport controls
+                // unreachable. Measured on the device: 7s between play() and
+                // ready, and the controls never came back.
+                //
+                // Duration becoming known IS the ready transition, and this
+                // observation's lifetime is already managed correctly, so it is
+                // the safe place to re-evaluate.
+                if let player = self?.player {
+                    self?.handleTimeControlChange(on: player)
+                }
+                #endif
             }
         }
     }
@@ -249,6 +294,13 @@ extension VideoPlayerView {
         rateObservation = nil
         statusObservation = nil
         timeControlObservation = nil
+        #if LEGACY_IOS9
+        // Observes the *item*, not the player, so it must go before the item is
+        // replaced. An AVPlayerItem deallocated with a KVO observer still
+        // registered raises NSInternalInconsistencyException and aborts -- which
+        // is what happened on every tap of a related video.
+        legacyKeepUpObservation = nil
+        #endif
     }
 
     // MARK: - Progress

@@ -9,9 +9,24 @@ enum PlaybackChainSettings {
     /// VisionOS first, both of its steps: it is the client googlevideo lets
     /// play past the anonymous one-minute cut-off, and TV needs an account
     /// to run at all.
+    ///
+    /// This list -- not the registry's array order -- is what `activeSteps`
+    /// walks, so it is the only place the chain order can actually be changed.
+    #if LEGACY_IOS9
+    /// iOS 9 leads with progressive. `visionos.range` is omitted because its
+    /// delivery generates fMP4 HLS (`#EXT-X-VERSION:7` plus `#EXT-X-MAP`), which
+    /// needs iOS 10: measured on the device it resolves, serves its playlists,
+    /// then fails inside AVFoundation with -11800 / -16044 after a long spinner.
+    /// SABR stays as a fallback, and progressive leads until
+    /// `CompositionDelivery` replaces the HLS path at M4.
+    static let defaultOrder = [
+        "progressive", "visionos.sabr", "tv.sabr"
+    ]
+    #else
     static let defaultOrder = [
         "visionos.range", "visionos.sabr", "tv.sabr", "progressive"
     ]
+    #endif
     /// Everything is on by default: a step that cannot run (TV without an
     /// account) already skips itself.
     static let defaultEnabled = defaultOrder

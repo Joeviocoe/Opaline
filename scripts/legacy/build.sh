@@ -24,10 +24,6 @@ LOG_DIR="${LOG_DIR:-$HOME/legacy-ios9/logs}"
 BUILD="${BUILD:-$HOME/legacy-ios9/build}"
 mkdir -p "$LOG_DIR" "$BUILD/obj" "$BUILD/logs"
 
-STAMP="$(date +%Y%m%d-%H%M%S)"
-LOG="$LOG_DIR/build-$STAMP.log"
-ln -sfn "$LOG" "$LOG_DIR/build-latest.log"
-
 SWIFTC="${SWIFTC:-$REPO/scripts/legacy/darling-swiftc}"
 SDK="${SDK:-$TOOLS/xc12/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.5.sdk}"
 TARGET="${TARGET:-armv7-apple-ios9.3}"
@@ -45,8 +41,19 @@ for a in "$@"; do
     esac
 done
 
-# Unbuffered tee so `tail -f` sees output as it happens, not in 4 KB gulps.
-exec > >(stdbuf -oL -eL tee -a "$LOG") 2>&1
+# Logging is set up only for a real build, and deliberately AFTER argument
+# parsing. --sources is a query: typecheck.sh calls it on every run, and when
+# this ran first it created an empty build-<stamp>.log and repointed
+# build-latest.log at it. Anything tailing build-latest.log -- a monitor
+# watching a build in progress -- was silently redirected to a file that never
+# received build output, and stayed quiet through the entire build.
+if [ "$SOURCES_ONLY" -eq 0 ]; then
+    STAMP="$(date +%Y%m%d-%H%M%S)"
+    LOG="$LOG_DIR/build-$STAMP.log"
+    ln -sfn "$LOG" "$LOG_DIR/build-latest.log"
+    # Unbuffered tee so `tail -f` sees output as it happens, not in 4 KB gulps.
+    exec > >(stdbuf -oL -eL tee -a "$LOG") 2>&1
+fi
 
 T0=$SECONDS
 PHASE_T=$SECONDS
@@ -173,7 +180,12 @@ fi
 # ------------------------------------------------------------------ link
 phase "link"
 log "linking ${#OBJECTS[@]} object(s)"
+# -rpath @executable_path/Frameworks is NOT optional. The driver adds only
+# /usr/lib/swift, which is the OS-resident Swift runtime introduced in iOS 12.2
+# and absent here, so without this every @rpath/libswift*.dylib fails to resolve
+# and the app dies at launch with "Library not loaded" before main() runs.
 "$SWIFTC" "${COMMON[@]}" "${OBJECTS[@]}" -o "$BUILD/$MODULE" \
+    -Xlinker -rpath -Xlinker @executable_path/Frameworks \
     || die "link"
 log "binary: $BUILD/$MODULE"
 command -v lipo >/dev/null && lipo -info "$BUILD/$MODULE"

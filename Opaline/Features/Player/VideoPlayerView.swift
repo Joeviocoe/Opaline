@@ -256,6 +256,11 @@ final class VideoPlayerView: UIView {
     var rateObservation: NSKeyValueObservation?
     var statusObservation: NSKeyValueObservation?
     var timeControlObservation: NSKeyValueObservation?
+    #if LEGACY_IOS9
+    /// Buffer-state observation standing in for the iOS 10 timeControlStatus,
+    /// which the compat layer derives and so cannot be observed directly.
+    var legacyKeepUpObservation: NSKeyValueObservation?
+    #endif
 
     /// A mid-playback rebuffer can leave the player clock behind the
     /// rendered media on older devices, so subtitles keyed to `currentTime`

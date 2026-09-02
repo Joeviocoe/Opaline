@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <!--
+    Without these, securityd refuses every Keychain call with error 34018,
+    "client has neither application-identifier nor keychain-access-groups
+    entitlements". OAuth tokens then cannot be stored, so sign-in never
+    persists and subscriptions and playlists stay empty.
+
+    Xcode normally injects them from a provisioning profile. There is none
+    here, so ldid grants them directly; amfid on a jailbroken device accepts
+    the ad-hoc signature that carries them.
+  -->
+  <key>application-identifier</key>
+  <string>com.verback.YTLite</string>
+  <key>keychain-access-groups</key>
+  <array>
+    <string>com.verback.YTLite</string>
+  </array>
+</dict></plist>

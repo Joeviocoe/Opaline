@@ -110,9 +110,19 @@ final class UMPReader {
         var parts: [UMPPart] = []
         var offset = 0
         while true {
+            // `afterSize + size` must never be formed: readVarint bounds each
+            // value to Int32.max on its own, but their SUM still overflows a
+            // 32-bit Int, and on armv7 that traps instead of wrapping. A server
+            // sending a large size field then kills the process from inside a
+            // URLSession callback. Subtracting instead keeps every intermediate
+            // inside the buffer's own size. (Measured on the device: this is the
+            // trap in UMPReader.readParts that ended every SABR playback.)
             guard let (type, afterType) = Self.readVarint(buffer, offset),
                   let (size, afterSize) = Self.readVarint(buffer, afterType),
-                  size >= 0, afterSize + size <= buffer.count
+                  size >= 0,
+                  afterSize >= 0,
+                  afterSize <= buffer.count,
+                  size <= buffer.count - afterSize
             else {
                 break
             }

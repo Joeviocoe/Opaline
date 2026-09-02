@@ -14,8 +14,17 @@ extension AVPlayer {
         guard rate != 0 else {
             return .paused
         }
-        return currentItem?.status == .readyToPlay ? .playing : .waitingToPlayAtSpecifiedRate
+        guard let item = currentItem, item.status == .readyToPlay else {
+            return .waitingToPlayAtSpecifiedRate
+        }
+        // A stall mid-playback leaves the rate positive and only empties the
+        // buffer, so status alone would report .playing right through it.
+        return item.isPlaybackLikelyToKeepUp ? .playing : .waitingToPlayAtSpecifiedRate
     }
+
+    // NOTE: this is a derived Swift property, not @objc, so it cannot be KVO-
+    // observed -- `observe(\.timeControlStatus)` traps at runtime. Observe
+    // `rate` and the item's `isPlaybackLikelyToKeepUp` instead.
 
     /// iOS 10. Before it, setting the rate is exactly "play now at this rate".
     func playImmediately(atRate rate: Float) {

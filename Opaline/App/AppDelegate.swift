@@ -20,6 +20,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         AppLog.banner()
+        #if LEGACY_IOS9
+        // Before anything else: on armv7 a missed 32-bit narrowing kills the
+        // process with no crash log, and this is the only thing that says so.
+        LegacyDiagnostics.install()
+        #endif
         configureServices(application)
         // The player has to know how the phone is held the moment it opens —
         // too late to start asking then.
@@ -115,9 +120,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if ReturnYouTubeDislikeService.enabled {
             ReturnYouTubeDislikeService.shared.prepareIfNeeded()
         }
+        #if LEGACY_IOS9
+        // On by default here: an A5X stalls the main thread where an A12 never
+        // would, so the watchdog is the bring-up's main signal rather than a
+        // debug extra. Still switchable in Settings.
+        if UserDefaults.standard.object(forKey: UserDefaultsKeys.Debug.mainThreadWatchdog) == nil
+            || UserDefaults.standard.bool(forKey: UserDefaultsKeys.Debug.mainThreadWatchdog) {
+            startMainThreadWatchdog()
+        }
+        #else
         if UserDefaults.standard.bool(forKey: UserDefaultsKeys.Debug.mainThreadWatchdog) {
             startMainThreadWatchdog()
         }
+        #endif
     }
 
     /// Once per launch: the caches only need filling before the user

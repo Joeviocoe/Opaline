@@ -22,7 +22,9 @@ struct PlaybackStep {
 /// Composed here rather than switched on anywhere: the registry is the only
 /// place that knows which clients and deliveries exist.
 struct PlaybackStepRegistry {
-    static let `default` = PlaybackStepRegistry(steps: [
+    static let `default` = PlaybackStepRegistry(steps: ordered(allSteps))
+
+    private static let allSteps: [PlaybackStep] = [
         PlaybackStep(
             id: "visionos.range",
             title: "visionOS · byte ranges",
@@ -66,7 +68,28 @@ struct PlaybackStepRegistry {
         ) { apiClient in
             ProgressiveSource(apiClient: apiClient)
         }
-    ])
+    ]
+
+    /// The order steps are offered in.
+    ///
+    /// Unchanged on a modern target. On iOS 9 the byte-range step has to lead
+    /// with progressive instead, and drop entirely: its delivery generates HLS,
+    /// and that HLS is fMP4 (`#EXT-X-VERSION:7` plus `#EXT-X-MAP`), which needs
+    /// iOS 10. Measured on the device: it resolves in 737 ms, serves its
+    /// playlists, and then fails inside AVFoundation with -11800 / -16044 after
+    /// a long spinner -- so leaving it in the chain only buys a slow failure
+    /// before the step that works. Progressive is a plain muxed MP4 and plays
+    /// today; `CompositionDelivery` replaces the HLS path properly at M4.
+    private static func ordered(_ steps: [PlaybackStep]) -> [PlaybackStep] {
+        #if LEGACY_IOS9
+        let unplayable: Set<String> = ["visionos.range"]
+        let usable = steps.filter { !unplayable.contains($0.id) }
+        return usable.filter { $0.id == "progressive" }
+            + usable.filter { $0.id != "progressive" }
+        #else
+        return steps
+        #endif
+    }
 
     let steps: [PlaybackStep]
 
