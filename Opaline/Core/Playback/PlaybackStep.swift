@@ -62,6 +62,18 @@ struct PlaybackStepRegistry {
             )
         },
         PlaybackStep(
+            id: "legacy.composition",
+            title: "Composition · separate tracks",
+            requiresSignIn: false
+        ) { apiClient in
+            innertube(
+                apiClient: apiClient,
+                client: VisionOSClient(),
+                delivery: CompositionDeliveryFactory(),
+                title: "legacy.composition"
+            )
+        },
+        PlaybackStep(
             id: "progressive",
             title: "Progressive 360p",
             requiresSignIn: false

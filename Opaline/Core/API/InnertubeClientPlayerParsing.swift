@@ -149,9 +149,22 @@ private extension InnertubeClient {
         guard mime.contains("video/mp4") else {
             return false
         }
-        return mime.contains("avc1")
+        let codecOK = mime.contains("avc1")
             || (AV1Support.isHardwareSupported
                 && mime.contains("av01"))
+        #if LEGACY_IOS9
+        // The only edit this port makes to Core/API. An A5X decodes H.264 up to
+        // High 4.1 and 720p30; the codec test alone passes 1080p avc1, which
+        // this hardware cannot play. Logic lives in LegacyFormatPolicy so the
+        // churn here stays a single call.
+        return codecOK && LegacyFormatPolicy.accepts(
+            mimeType: mime,
+            height: fmtHeight(fmt),
+            fps: fmt["fps"] as? Int
+        )
+        #else
+        return codecOK
+        #endif
     }
 
     static func selectBestVideo(

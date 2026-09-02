@@ -92,6 +92,32 @@ def build_plist(app, version):
         "UIPrerenderedIcon": False,
     }
     plist.update(partial)
+
+    # App Transport Security, for the loopback playback server.
+    #
+    # AVFoundation refuses http://127.0.0.1 otherwise: "the App Transport
+    # Security policy requires the use of a secure connection", measured on the
+    # device with the server listening and reachable. Upstream's plist sets
+    # NSAllowsLocalNetworking, but that key is iOS 10+ and is ignored here.
+    #
+    # NSAllowsArbitraryLoads is deliberate and scoped to this build. On iOS 9,
+    # exception domains for IP literals are unreliable, and the alternative is
+    # burning device rounds on ATS syntax rather than on the question being
+    # tested. Everything this app talks to is HTTPS regardless; the one
+    # plaintext endpoint is a socket on the loopback interface that only this
+    # process can reach. Worth tightening to exception domains once composition
+    # itself is settled.
+    ats = dict(plist.get("NSAppTransportSecurity") or {})
+    ats["NSAllowsArbitraryLoads"] = True
+    exceptions = dict(ats.get("NSExceptionDomains") or {})
+    for host in ("127.0.0.1", "localhost"):
+        exceptions[host] = {
+            "NSExceptionAllowsInsecureHTTPLoads": True,
+            "NSIncludesSubdomains": True,
+        }
+    ats["NSExceptionDomains"] = exceptions
+    plist["NSAppTransportSecurity"] = ats
+
     with (app / "Info.plist").open("wb") as handle:
         plistlib.dump(plist, handle)
     return icons

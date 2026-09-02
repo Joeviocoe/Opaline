@@ -20,7 +20,7 @@ enum PlaybackChainSettings {
     /// SABR stays as a fallback, and progressive leads until
     /// `CompositionDelivery` replaces the HLS path at M4.
     static let defaultOrder = [
-        "progressive", "visionos.sabr", "tv.sabr"
+        "legacy.composition", "progressive", "visionos.sabr", "tv.sabr"
     ]
     #else
     static let defaultOrder = [
