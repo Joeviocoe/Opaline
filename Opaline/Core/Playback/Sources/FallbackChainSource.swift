@@ -41,6 +41,9 @@ final class FallbackChainSource: VideoSource {
         cancellation: CancellationToken?,
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
+        #if LEGACY_IOS9
+        LegacyPlaybackTimeline.begin(videoId)
+        #endif
         attempt(
             from: 0, videoId: videoId, cancellation: cancellation, completion: completion
         )

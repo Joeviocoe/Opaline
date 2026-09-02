@@ -92,6 +92,9 @@ extension WatchViewController {
                     ?? "?"
             }
             .joined(separator: ",")
+        #if LEGACY_IOS9
+        LegacyPlaybackTimeline.mark("player item ready (decodable)")
+        #endif
         AppLog.player(
             "player item ready:"
                 + " duration=\(duration)s"

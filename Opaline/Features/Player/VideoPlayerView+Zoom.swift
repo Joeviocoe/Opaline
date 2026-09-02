@@ -62,6 +62,9 @@ extension VideoPlayerView {
             guard layer.isReadyForDisplay else {
                 return
             }
+            #if LEGACY_IOS9
+            LegacyPlaybackTimeline.mark("FIRST FRAME on screen")
+            #endif
             DispatchQueue.main.async {
                 self?.applyAutoZoomIfNeeded()
             }

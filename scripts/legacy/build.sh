@@ -55,6 +55,46 @@ if [ "$SOURCES_ONLY" -eq 0 ]; then
     exec > >(stdbuf -oL -eL tee -a "$LOG") 2>&1
 fi
 
+# ------------------------------------------------------------------ one at a time
+#
+# Two builds at once write the same $BUILD/obj/$MODULE.o and $BUILD/$MODULE, so
+# the binary becomes a mix of two source trees. Worse, killing a build does NOT
+# stop its compiler: swift-frontend runs inside Darling, owned by darlingserver,
+# so it is not in this script's process group and survives every signal sent
+# from the Linux side. It then keeps burning ~30% CPU and finishes by writing a
+# stale object over the new one.
+#
+# So: take a lock, stop any previous build, and shut the container down when a
+# previous build left a compiler behind -- that is the only thing that reliably
+# stops it.
+RUN_DIR="${RUN:-$HOME/legacy-ios9/run}"
+mkdir -p "$RUN_DIR"
+LOCK="$RUN_DIR/build.lock"
+
+if [ -f "$LOCK" ]; then
+    OLD_PID="$(sed -n 1p "$LOCK" 2>/dev/null)"
+    KILLED=0
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        OLD_PGID="$(ps -o pgid= -p "$OLD_PID" 2>/dev/null | tr -d ' ')"
+        [ -n "$OLD_PGID" ] && kill -TERM -"$OLD_PGID" 2>/dev/null
+        KILLED=1
+        sleep 2
+    fi
+    # A compiler left over from that build, or from one killed earlier.
+    if ps -eo comm | grep -q '^mldr$'; then
+        KILLED=1
+    fi
+    if [ "$KILLED" -eq 1 ]; then
+        darling shutdown >/dev/null 2>&1
+        sleep 3
+        # Its half-written object must not be linked into this build.
+        rm -f "$BUILD/obj/$MODULE.o" "$BUILD/$MODULE"
+    fi
+    rm -f "$LOCK"
+fi
+printf '%s\n' "$$" > "$LOCK"
+trap 'rm -f "$LOCK"' EXIT INT TERM
+
 T0=$SECONDS
 PHASE_T=$SECONDS
 ts()   { date +%H:%M:%S; }

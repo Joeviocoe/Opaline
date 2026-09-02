@@ -34,3 +34,16 @@ time "$REPO/scripts/legacy/darling-swiftc" -typecheck -wmo \
     "${SOURCES[@]}"
 RC=${PIPESTATUS[0]}
 echo "[$(date +%H:%M:%S)] typecheck exit: ${RC:-?}"
+
+# A clean run and a run that never happened both produce zero ": error:" lines.
+# Darling dying (killed container, "Error connecting to shellspawn") reads as
+# success unless it is checked for explicitly -- which cost a build cycle once.
+if grep -q "Error connecting to shellspawn\|darlingserver\|command not found" "$LOG"; then
+    echo "[$(date +%H:%M:%S)] !!!! THE COMPILER DID NOT RUN -- result is meaningless"
+    echo "     try: darling shutdown   (it restarts on next use)"
+    exit 2
+fi
+if [ "${RC:-1}" != "0" ] && ! grep -q ": error:" "$LOG"; then
+    echo "[$(date +%H:%M:%S)] !!!! exited $RC with no diagnostics -- treat as a failure to run"
+    exit 2
+fi
