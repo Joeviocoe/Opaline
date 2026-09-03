@@ -28,6 +28,18 @@ final class ListFocusRingView: UIView {
 
     weak var controller: ListFocusController?
 
+    /// False for a ring that should only ever take the chain through an
+    /// explicit hand-off -- `ListFocusController.claimFocus()` -- rather
+    /// than ambiently on every appearance. The subscriptions channel bar is
+    /// the one user of this: a *second* ring on a screen that already has
+    /// its own list-driven one. Left `true` for both, they raced each
+    /// other's `didMoveToWindow` for first-responder status on every fresh
+    /// appearance -- whichever lost stayed visibly on its last-focused
+    /// avatar while the other silently held the actual chain, so the
+    /// arrows did nothing until Down-then-Up forced `claimFocus()` to run
+    /// for the first time.
+    var participatesInAmbientFocus = true
+
     override var canBecomeFirstResponder: Bool { true }
 
     override var keyCommands: [UIKeyCommand]? {
@@ -80,6 +92,9 @@ final class ListFocusRingView: UIView {
             KeyboardFocusCoordinator.shared.ringDidLeaveWindow(self)
             resignFirstResponder()
             KeyboardDiagnostics.log("ring left window")
+            return
+        }
+        guard participatesInAmbientFocus else {
             return
         }
         KeyboardFocusCoordinator.shared.ringDidEnterWindow(self)

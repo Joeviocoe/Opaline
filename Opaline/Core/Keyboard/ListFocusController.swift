@@ -11,8 +11,11 @@ final class ListFocusController: NSObject {
     }
 
     /// Gap left between the focused cell and the edge of the visible area, so
-    /// a focused card never sits flush under the navigation bar.
-    private static let revealMargin: CGFloat = 12
+    /// a focused card never sits flush under the navigation bar. Internal,
+    /// not private: read from `ListFocusController+Queue.swift`, where
+    /// reveal()'s two directional halves live to keep this file inside the
+    /// 300-line lint limit.
+    static let revealMargin: CGFloat = 12
 
     let axis: Axis
     private(set) var focused: IndexPath?
@@ -230,37 +233,6 @@ extension ListFocusController {
 // MARK: - Private
 
 private extension ListFocusController {
-    /// Hand-rolled rather than `scrollToItem(at:at:animated:)`: that ignores
-    /// content insets before iOS 11, leaves no breathing room, and gives no say
-    /// over whether the move animates. A jump across a long feed should not.
-    func reveal(_ frame: CGRect, animated: Bool) {
-        guard let scrollView = geometry?.focusScrollView else {
-            return
-        }
-        let inset = scrollView.adjustedContentInset
-        let offset = scrollView.contentOffset
-        let visibleTop = offset.y + inset.top
-        let visibleBottom = offset.y + scrollView.bounds.height - inset.bottom
-        var targetY = offset.y
-        if frame.minY - Self.revealMargin < visibleTop {
-            targetY -= visibleTop - (frame.minY - Self.revealMargin)
-        } else if frame.maxY + Self.revealMargin > visibleBottom {
-            targetY += (frame.maxY + Self.revealMargin) - visibleBottom
-        } else {
-            return
-        }
-        let lowest = -inset.top
-        let highest = max(
-            lowest,
-            scrollView.contentSize.height + inset.bottom - scrollView.bounds.height
-        )
-        targetY = min(max(targetY, lowest), highest)
-        scrollView.setContentOffset(
-            CGPoint(x: offset.x, y: targetY),
-            animated: animated
-        )
-    }
-
     /// `contentSize`, deliberately, and not `bounds` — bounds changes on every
     /// scrolled frame, which would put this on the hot path for nothing.
     func observeContentSize(_ scrollView: UIScrollView) {
@@ -271,5 +243,4 @@ private extension ListFocusController {
             self?.revalidate()
         }
     }
-
 }

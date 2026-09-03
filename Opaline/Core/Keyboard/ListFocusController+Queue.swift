@@ -1,14 +1,84 @@
 import UIKit
 
 /// Queueing from a list, the index-path formatter every focus log line
-/// uses, escapeTop(), the claimFocus()/hasFocusableItem pair a same-screen
-/// handoff uses (the subscriptions channel bar and its video list), and
-/// target() itself -- all here only to keep the controller inside the
-/// 300-line file limit the linter enforces. escapeTop() and setFocus()
-/// cannot stay `private` once they are called from a different file than
-/// move() / establishFocus(): Swift's same-file cross-extension private
-/// sharing does not extend across files, so they are internal instead.
+/// uses, escapeTop(), the claimFocus()/resignFocusRing()/hasFocusableItem
+/// trio a same-screen handoff uses (the subscriptions channel bar and its
+/// video list), target(), and reveal()'s two directional halves -- all here
+/// only to keep the controller inside the 300-line file limit the linter
+/// enforces. escapeTop() and setFocus() cannot stay `private` once they are
+/// called from a different file than move() / establishFocus(): Swift's
+/// same-file cross-extension private sharing does not extend across files,
+/// so they are internal instead.
 extension ListFocusController {
+    /// Hand-rolled rather than `scrollToItem(at:at:animated:)`: that ignores
+    /// content insets before iOS 11, leaves no breathing room, and gives no
+    /// say over whether the move animates. A jump across a long feed should
+    /// not.
+    ///
+    /// `.row` is the one axis that scrolls horizontally, not vertically --
+    /// the channel bar -- so it needs the X-axis mirror of the same math,
+    /// not the Y-axis version every other axis uses. Reusing the Y version
+    /// unchanged is exactly what left an avatar past the first screenful
+    /// unreachable by keyboard: `reveal` moved the *outer* table, which does
+    /// not scroll at all in that direction, and never touched `offset.x`.
+    func reveal(_ frame: CGRect, animated: Bool) {
+        guard let scrollView = geometry?.focusScrollView else {
+            return
+        }
+        if axis == .row {
+            revealHorizontally(frame, in: scrollView, animated: animated)
+        } else {
+            revealVertically(frame, in: scrollView, animated: animated)
+        }
+    }
+
+    func revealVertically(_ frame: CGRect, in scrollView: UIScrollView, animated: Bool) {
+        let inset = scrollView.adjustedContentInset
+        let offset = scrollView.contentOffset
+        let visibleTop = offset.y + inset.top
+        let visibleBottom = offset.y + scrollView.bounds.height - inset.bottom
+        var targetY = offset.y
+        if frame.minY - Self.revealMargin < visibleTop {
+            targetY -= visibleTop - (frame.minY - Self.revealMargin)
+        } else if frame.maxY + Self.revealMargin > visibleBottom {
+            targetY += (frame.maxY + Self.revealMargin) - visibleBottom
+        } else {
+            return
+        }
+        let lowest = -inset.top
+        let highest = max(
+            lowest,
+            scrollView.contentSize.height + inset.bottom - scrollView.bounds.height
+        )
+        targetY = min(max(targetY, lowest), highest)
+        scrollView.setContentOffset(CGPoint(x: offset.x, y: targetY), animated: animated)
+    }
+
+    /// The channel bar's own mirror of the above, X for Y -- a strip of
+    /// avatars wider than the screen needs exactly the same clamped scroll,
+    /// just along the axis it actually scrolls on.
+    func revealHorizontally(_ frame: CGRect, in scrollView: UIScrollView, animated: Bool) {
+        let inset = scrollView.adjustedContentInset
+        let offset = scrollView.contentOffset
+        let visibleLeft = offset.x + inset.left
+        let visibleRight = offset.x + scrollView.bounds.width - inset.right
+        var targetX = offset.x
+        if frame.minX - Self.revealMargin < visibleLeft {
+            targetX -= visibleLeft - (frame.minX - Self.revealMargin)
+        } else if frame.maxX + Self.revealMargin > visibleRight {
+            targetX += (frame.maxX + Self.revealMargin) - visibleRight
+        } else {
+            return
+        }
+        let lowest = -inset.left
+        let highest = max(
+            lowest,
+            scrollView.contentSize.width + inset.right - scrollView.bounds.width
+        )
+        targetX = min(max(targetX, lowest), highest)
+        scrollView.setContentOffset(CGPoint(x: targetX, y: offset.y), animated: animated)
+    }
+
     func target(
         from current: IndexPath,
         direction: FocusDirection,
@@ -63,15 +133,42 @@ extension ListFocusController {
     /// item if nothing is already focused. For a handoff between two regions
     /// on one screen, where neither ring's own `didMoveToWindow` fires,
     /// since nothing here ever actually leaves the window.
+    ///
+    /// Always re-runs `setFocus` even when the index path is unchanged —
+    /// that is what re-shows the ring after `resignFocusRing()` hid it
+    /// without forgetting where it was, and re-validates the reveal in case
+    /// the scroll position moved while this controller was not the one
+    /// being driven.
+    ///
+    /// Also registers with `KeyboardFocusCoordinator` on success, the same
+    /// call `didMoveToWindow` makes -- `becomeFirstResponder()` alone does
+    /// not. Without it, `activeRing` only ever changed on a genuine window
+    /// exit/re-entry (a real tab switch), never on this same-screen
+    /// hand-off, so it could point at a ring that had not actually held the
+    /// chain in a while -- collapsing the player calls `reassert()`, which
+    /// restores whatever `activeRing` last was, and minimizing never leaves
+    /// the subscriptions screen's window at all, so that was the only
+    /// signal it had.
     func claimFocus() {
         guard let geometry = geometry else {
             return
         }
-        if focused == nil {
-            setFocus(geometry.firstFocusableIndexPath(), animated: false)
-        }
+        let target = focused ?? geometry.firstFocusableIndexPath()
+        setFocus(target, animated: false)
         let accepted = ring.becomeFirstResponder()
         KeyboardDiagnostics.logResponder("focus claimed", ring, accepted: accepted)
+        if accepted {
+            KeyboardFocusCoordinator.shared.ringDidEnterWindow(ring)
+        }
+    }
+
+    /// Hides the ring without forgetting the focused index path, so a later
+    /// `claimFocus()` shows it again at the same item rather than
+    /// restarting at the first one. For a handoff to a *different* region on
+    /// the same screen -- the channel bar handing focus down to the video
+    /// list -- which is not "nothing is focused", only "not focused here".
+    func resignFocusRing() {
+        ring.hide()
     }
 
     /// Adds the focused video to the play queue — or, if nothing is playing

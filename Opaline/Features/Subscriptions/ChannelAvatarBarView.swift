@@ -37,6 +37,12 @@ final class ChannelAvatarBarView: UIView {
         )
         cv.showsHorizontalScrollIndicator = false
         cv.backgroundColor = .clear
+        // UIScrollView's clipsToBounds defaults to false, unlike a plain
+        // UIView -- unset, a cell (or the keyboard focus ring, scrolled all
+        // the way right) can render past this collection view's own
+        // trailing edge and into the 4pt gap before the "All" button,
+        // reading as the button overlapping the last channel.
+        cv.clipsToBounds = true
         cv.dataSource = self
         cv.delegate = self
         cv.register(

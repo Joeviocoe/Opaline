@@ -32,6 +32,12 @@ extension SubscriptionsViewController {
             return existing
         }
         let controller = ListFocusController(axis: .row, geometry: channelBar.collectionView)
+        // Only ever taken through claimFocus() -- see the note on
+        // participatesInAmbientFocus for why a second, ambient-claiming ring
+        // on the same screen as the list's own left the bar's box on screen
+        // with dead arrow keys until an explicit Down-then-Up forced a
+        // hand-off to run.
+        controller.ring.participatesInAmbientFocus = false
         objc_setAssociatedObject(
             self,
             &channelBarFocusKey,
@@ -83,6 +89,9 @@ private extension SubscriptionsViewController {
             return
         }
         KeyboardDiagnostics.log("channel bar: focus -> list")
+        // Position is kept (resignFocusRing, not clearFocus) so a later Up
+        // lands back on the same avatar instead of restarting at the first.
+        channelBarFocus.resignFocusRing()
         ListFocusInstaller.controller(for: self)?.claimFocus()
     }
 

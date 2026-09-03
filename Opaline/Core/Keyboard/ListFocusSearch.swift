@@ -49,6 +49,16 @@ enum ListFocusSearch {
     /// The slice of layout worth comparing against. Two viewports is enough to
     /// step across a full-width rail cell without walking a feed that may hold
     /// thousands of items.
+    ///
+    /// Width is `origin.maxX` plus a full viewport, not `max(bounds.width,
+    /// origin.maxX)` -- the old formula capped the rect's right edge at the
+    /// focused item's *own* edge the moment origin.maxX overtook bounds.width,
+    /// so nothing further right could ever be found. Invisible on `.list` /
+    /// `.grid`, where an item's content-space maxX never exceeds the
+    /// viewport width. Not on `.row`: the channel bar scrolls its own items
+    /// horizontally past that width after only a few avatars, and every one
+    /// beyond the first screenful was silently unreachable by `→` -- not a
+    /// reveal/scroll problem, movement itself never found them.
     private static func searchRect(
         around origin: CGRect,
         geometry: FocusGeometry
@@ -58,7 +68,7 @@ enum ListFocusSearch {
         return CGRect(
             x: 0,
             y: origin.midY - margin,
-            width: max(bounds.width, origin.maxX),
+            width: origin.maxX + bounds.width,
             height: margin * 2
         )
     }
