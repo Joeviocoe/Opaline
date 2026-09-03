@@ -530,3 +530,21 @@
 "settings.row.resetIdentity" = "重設 visitor identity";
 "library.downloads.empty" = "你下載的影片會顯示在這裡";
 "player.error.noSources" = "所有播放來源都已關閉。請在「設定 → 除錯 → 播放來源」中至少開啟一個。";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "播放/暫停";
+"keyboard.seekBack" = "快退";
+"keyboard.seekForward" = "快轉";
+"keyboard.fullscreen" = "全螢幕";
+"keyboard.mute" = "靜音";
+"keyboard.next" = "下一部影片";
+"keyboard.previous" = "上一部影片";
+"keyboard.close" = "關閉";
+"keyboard.search" = "搜尋";
+"keyboard.open" = "開啟";
+"keyboard.subtitles" = "字幕";
+"keyboard.queue" = "播放佇列";
+"keyboard.tab1" = "首頁";
+"keyboard.tab2" = "訂閱";
+"keyboard.toast.queued" = "已加入播放佇列";
+"keyboard.stop" = "停止";

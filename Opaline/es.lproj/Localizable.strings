@@ -526,3 +526,21 @@
 "settings.row.resetIdentity" = "Restablecer visitor identity";
 "library.downloads.empty" = "Los videos que descargues aparecerán aquí";
 "player.error.noSources" = "Todas las fuentes de reproducción están desactivadas. Activa al menos una en «Ajustes → Depuración → Fuentes de reproducción».";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Reproducir/Pausar";
+"keyboard.seekBack" = "Retroceder";
+"keyboard.seekForward" = "Avanzar";
+"keyboard.fullscreen" = "Pantalla completa";
+"keyboard.mute" = "Silenciar";
+"keyboard.next" = "Vídeo siguiente";
+"keyboard.previous" = "Vídeo anterior";
+"keyboard.close" = "Cerrar";
+"keyboard.search" = "Buscar";
+"keyboard.open" = "Abrir";
+"keyboard.subtitles" = "Subtítulos";
+"keyboard.queue" = "Cola";
+"keyboard.tab1" = "Inicio";
+"keyboard.tab2" = "Suscripciones";
+"keyboard.toast.queued" = "Añadido a la cola";
+"keyboard.stop" = "Detener";

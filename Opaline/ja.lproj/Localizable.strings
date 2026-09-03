@@ -530,3 +530,21 @@
 "settings.row.resetIdentity" = "visitor identity をリセット";
 "library.downloads.empty" = "ダウンロードした動画がここに表示されます";
 "player.error.noSources" = "再生ソースがすべてオフになっています。「設定 → デバッグ → 再生ソース」で少なくとも 1 つオンにしてください。";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "再生/一時停止";
+"keyboard.seekBack" = "巻き戻す";
+"keyboard.seekForward" = "早送り";
+"keyboard.fullscreen" = "フルスクリーン";
+"keyboard.mute" = "ミュート";
+"keyboard.next" = "次の動画";
+"keyboard.previous" = "前の動画";
+"keyboard.close" = "閉じる";
+"keyboard.search" = "検索";
+"keyboard.open" = "開く";
+"keyboard.subtitles" = "字幕";
+"keyboard.queue" = "再生キュー";
+"keyboard.tab1" = "ホーム";
+"keyboard.tab2" = "登録チャンネル";
+"keyboard.toast.queued" = "再生キューに追加しました";
+"keyboard.stop" = "停止";

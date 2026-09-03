@@ -444,3 +444,21 @@
 "settings.row.resetIdentity" = "Đặt lại visitor identity";
 "library.downloads.empty" = "Các video bạn tải xuống sẽ xuất hiện tại đây";
 "player.error.noSources" = "Tất cả nguồn phát đều đang tắt. Hãy bật ít nhất một nguồn trong “Cài đặt → Gỡ lỗi → Nguồn phát”.";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Phát/Tạm dừng";
+"keyboard.seekBack" = "Tua lại";
+"keyboard.seekForward" = "Tua đi";
+"keyboard.fullscreen" = "Toàn màn hình";
+"keyboard.mute" = "Tắt tiếng";
+"keyboard.next" = "Video tiếp theo";
+"keyboard.previous" = "Video trước";
+"keyboard.close" = "Đóng";
+"keyboard.search" = "Tìm kiếm";
+"keyboard.open" = "Mở";
+"keyboard.subtitles" = "Phụ đề";
+"keyboard.queue" = "Hàng đợi";
+"keyboard.tab1" = "Trang chủ";
+"keyboard.tab2" = "Kênh đăng ký";
+"keyboard.toast.queued" = "Đã thêm vào hàng đợi";
+"keyboard.stop" = "Dừng";

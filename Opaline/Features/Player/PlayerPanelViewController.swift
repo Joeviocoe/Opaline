@@ -58,6 +58,7 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
 
     func expand(animated: Bool) {
         isExpanded = true
+        KeyboardFocusCoordinator.shared.playerDidExpand(watchVC)
         // Expanding is what hands the orientation over to the player — every
         // video after the first reuses this panel, so this, not the watch
         // screen's init, is the moment to keep the orientation it opened in.
@@ -89,6 +90,10 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
 
     func collapse(animated: Bool) {
         isExpanded = false
+        // Collapsing to the mini bar only applies a transform — nothing
+        // leaves the window — so no `didMoveToWindow` fires and the focus
+        // ring would never take the responder chain back on its own.
+        KeyboardFocusCoordinator.shared.playerDidCollapse(watchVC)
         refreshSupportedOrientations()
         refreshMiniBar()
         miniBar?.transform = .identity
@@ -113,6 +118,13 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
 
     func close() {
         watchVC.exitFullscreenIfNeeded()
+        // Mark it as a user pause *before* pausing. A raw pause is read by the
+        // multitasking heuristic as a stolen audio route, and it resumes half a
+        // second later — on a player whose panel is by then gone. Observed on
+        // device: "paused while active — multitasking, resuming", followed by
+        // the loopback server still serving audio with no panel to reach it,
+        // and only the media keys able to touch it.
+        watchVC.videoPlayerView?.multitaskPause.lastUserPause = CACurrentMediaTime()
         watchVC.videoPlayerView?.player?.pause()
         // Closing the player ends the queue with it — otherwise reopening the
         // same mix later picked it up mid-list, shuffle state and all.

@@ -530,3 +530,21 @@
 "settings.row.resetIdentity" = "Visitor identity’yi sıfırla";
 "library.downloads.empty" = "İndirdiğiniz videolar burada gösterilir";
 "player.error.noSources" = "Tüm oynatma kaynakları kapalı. “Ayarlar → Hata Ayıklama → Oynatma kaynakları” bölümünden en az birini açın.";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Oynat/Duraklat";
+"keyboard.seekBack" = "Geri sar";
+"keyboard.seekForward" = "İleri sar";
+"keyboard.fullscreen" = "Tam ekran";
+"keyboard.mute" = "Sessiz";
+"keyboard.next" = "Sonraki video";
+"keyboard.previous" = "Önceki video";
+"keyboard.close" = "Kapat";
+"keyboard.search" = "Ara";
+"keyboard.open" = "Aç";
+"keyboard.subtitles" = "Altyazılar";
+"keyboard.queue" = "Sıra";
+"keyboard.tab1" = "Ana sayfa";
+"keyboard.tab2" = "Abonelikler";
+"keyboard.toast.queued" = "Sıraya eklendi";
+"keyboard.stop" = "Durdur";

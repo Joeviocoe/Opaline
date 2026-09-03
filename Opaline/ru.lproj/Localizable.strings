@@ -444,3 +444,21 @@
 "settings.playbackChain.signInNeeded" = "Войдите, чтобы использовать этот источник";
 "settings.playbackChain.footer" = "Перебираются сверху вниз, пока один не заиграет. Перетащите, чтобы изменить порядок, ненужные выключите.";
 "player.error.noSources" = "Все источники воспроизведения выключены. Включите хотя бы один в «Настройки → Отладка → Источники воспроизведения».";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Воспроизведение/Пауза";
+"keyboard.seekBack" = "Назад";
+"keyboard.seekForward" = "Вперёд";
+"keyboard.fullscreen" = "Полный экран";
+"keyboard.mute" = "Без звука";
+"keyboard.next" = "Следующее видео";
+"keyboard.previous" = "Предыдущее видео";
+"keyboard.close" = "Закрыть";
+"keyboard.search" = "Поиск";
+"keyboard.open" = "Открыть";
+"keyboard.subtitles" = "Субтитры";
+"keyboard.queue" = "Очередь";
+"keyboard.tab1" = "Главная";
+"keyboard.tab2" = "Подписки";
+"keyboard.toast.queued" = "Добавлено в очередь";
+"keyboard.stop" = "Стоп";

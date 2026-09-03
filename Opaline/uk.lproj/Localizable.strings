@@ -441,3 +441,21 @@
 "downloads.error.noOptions" = "Це відео не можна завантажити";
 "player.related.downloaded" = "Також завантажені";
 "library.downloads.empty" = "Тут з’являтимуться відео, які ви завантажили";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Відтворити/Пауза";
+"keyboard.seekBack" = "Назад";
+"keyboard.seekForward" = "Вперед";
+"keyboard.fullscreen" = "На весь екран";
+"keyboard.mute" = "Без звуку";
+"keyboard.next" = "Наступне відео";
+"keyboard.previous" = "Попереднє відео";
+"keyboard.close" = "Закрити";
+"keyboard.search" = "Пошук";
+"keyboard.open" = "Відкрити";
+"keyboard.subtitles" = "Субтитри";
+"keyboard.queue" = "Черга";
+"keyboard.tab1" = "Головна";
+"keyboard.tab2" = "Підписки";
+"keyboard.toast.queued" = "Додано до черги";
+"keyboard.stop" = "Стоп";

@@ -530,3 +530,21 @@
 "settings.row.resetIdentity" = "重置 visitor identity";
 "library.downloads.empty" = "你下载的视频将显示在这里";
 "player.error.noSources" = "所有播放源都已关闭。请在「设置 → 调试 → 播放源」中至少打开一个。";
+
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "播放/暂停";
+"keyboard.seekBack" = "快退";
+"keyboard.seekForward" = "快进";
+"keyboard.fullscreen" = "全屏";
+"keyboard.mute" = "静音";
+"keyboard.next" = "下一个视频";
+"keyboard.previous" = "上一个视频";
+"keyboard.close" = "关闭";
+"keyboard.search" = "搜索";
+"keyboard.open" = "打开";
+"keyboard.subtitles" = "字幕";
+"keyboard.queue" = "播放队列";
+"keyboard.tab1" = "首页";
+"keyboard.tab2" = "订阅";
+"keyboard.toast.queued" = "已加入播放队列";
+"keyboard.stop" = "停止";

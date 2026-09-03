@@ -158,5 +158,12 @@ extension RotatingNavigationController: UINavigationControllerDelegate {
         animated: Bool
     ) {
         Self.realignChevron(of: viewController)
+        // The one place every screen in the app passes through: the four
+        // tabs, the Library's three embedded navigation controllers,
+        // pushed Search / Channel / Shorts, and the watch screen inside
+        // the player panel's wrapper. Installing keyboard focus here is
+        // what keeps it out of thirteen separate view controllers. A
+        // no-op unless the screen is a ListFocusHost, and idempotent.
+        ListFocusInstaller.install(in: viewController)
     }
 }
