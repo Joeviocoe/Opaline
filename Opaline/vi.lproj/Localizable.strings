@@ -444,3 +444,31 @@
 "settings.row.resetIdentity" = "Đặt lại visitor identity";
 "library.downloads.empty" = "Các video bạn tải xuống sẽ xuất hiện tại đây";
 "player.error.noSources" = "Tất cả nguồn phát đều đang tắt. Hãy bật ít nhất một nguồn trong “Cài đặt → Gỡ lỗi → Nguồn phát”.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Đăng ký một kênh và video của kênh đó sẽ xuất hiện ở đây";
+"video.menu.subscribeTo" = "Đăng ký %1$@";
+"video.menu.unsubscribeFrom" = "Hủy đăng ký %1$@";
+"video.menu.subscribed" = "Đã đăng ký %1$@";
+"video.menu.unsubscribed" = "Đã hủy đăng ký %1$@";
+"library.history.local.empty" = "Những video bạn xem trên thiết bị này sẽ xuất hiện ở đây";
+"library.history.clearAll" = "Xóa";
+"library.history.clearAll.confirm" = "Thao tác này sẽ xóa mọi video khỏi nhật ký xem trên thiết bị này. Không thể hoàn tác.";
+"settings.section.library" = "Thư viện";
+"settings.section.library.history" = "Nhật ký xem";
+"settings.section.library.subscriptions" = "Kênh đăng ký";
+"settings.footer.library" = "Được lưu trên thiết bị này và dùng khi bạn chưa đăng nhập. Khi đăng nhập, ứng dụng chuyển sang thư viện của tài khoản bạn — không có gì ở đây bị xóa.";
+"settings.library.counts" = "%1$d kênh · %2$d video";
+"settings.library.usedWhenSignedOut" = "dùng khi bạn chưa đăng nhập";
+"settings.row.saveLocalHistory" = "Lưu nhật ký xem trên thiết bị này";
+"settings.row.localHistoryLimit" = "Số mục được lưu";
+"settings.row.clearLocalHistory" = "Xóa nhật ký xem";
+"settings.row.clearLocalSubscriptions" = "Xóa kênh đăng ký";
+"settings.row.exportSubscriptions" = "Xuất danh sách kênh đăng ký";
+"settings.library.clearHistory.confirm" = "Thao tác này sẽ xóa mọi video khỏi nhật ký xem trên thiết bị này. Không thể hoàn tác.";
+"settings.library.clearSubscriptions.confirm" = "Thao tác này sẽ xóa mọi kênh bạn đã đăng ký trên thiết bị này. Không có bản sao nào khác — hãy xuất ra trước nếu bạn muốn giữ lại.";
+"settings.library.exportEmptyTitle" = "Không có gì để xuất";
+"settings.library.exportEmptyMessage" = "Bạn chưa đăng ký kênh nào trên thiết bị này.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "Không có video gần đây từ các kênh bạn theo dõi";

@@ -13,9 +13,10 @@ final class HistoryViewController: UIViewController {
     var continuationToken: String?
     var isLoadingMore = false
     var isLoadingInitial = true
-    private let tableView = UITableView()
-    private let spinner = UIActivityIndicatorView(style: .white)
-    private let emptyLabel = UILabel()
+    // Internal, not private: the local-history path lives in its own file.
+    let tableView = UITableView()
+    let spinner = UIActivityIndicatorView(style: .white)
+    let emptyLabel = UILabel()
     private lazy var topBarHider = TopBarAutoHider(owner: self)
 
     init(
@@ -52,7 +53,14 @@ final class HistoryViewController: UIViewController {
             name: ThemeManager.didChangeNotification,
             object: nil
         )
-        if OAuthClient.shared.isSignedIn {
+        // Three ways, not two. The local path is a genuine branch rather
+        // than a decorated service: paging takes a live OAuth token as a
+        // parameter, delete rides an opaque server-issued feedback token,
+        // and the account path writes every page into the shared cache —
+        // none of which a local entry can honour.
+        if LocalLibrary.isActive {
+            setupLocalHistory()
+        } else if OAuthClient.shared.isSignedIn {
             loadFromCacheThenFetch()
         } else {
             spinner.stopAnimating()

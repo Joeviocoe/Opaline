@@ -6,7 +6,15 @@ extension UIViewController {
     private static func performSignOut() {
         OAuthClient.shared.signOut()
         UserProfileStore.shared.clear()
+        // Every account-shaped cache, not just the home feed: the rest
+        // survived a sign-out and would be shown to the next session as if
+        // it were theirs. Harmless while signed-out screens showed nothing;
+        // load-bearing now that they show a local library.
         AppCache.shared.clearHomeFeed()
+        AppCache.shared.clearSubscriptionsFeed()
+        AppCache.shared.clearSubscribedChannels()
+        AppCache.shared.clearHistoryFeed()
+        AppLog.library("sign-out: cleared home, subs, channels, history")
         NotificationCenter.default.post(
             name: .userDidSignOut,
             object: nil

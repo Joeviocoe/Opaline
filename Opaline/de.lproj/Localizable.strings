@@ -528,3 +528,31 @@
 "settings.row.resetIdentity" = "Visitor Identity zurücksetzen";
 "library.downloads.empty" = "Videos, die du herunterlädst, werden hier angezeigt";
 "player.error.noSources" = "Alle Wiedergabequellen sind ausgeschaltet. Aktiviere mindestens eine unter „Einstellungen → Debug → Wiedergabequellen“.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Abonniere einen Kanal, dann erscheinen seine Videos hier";
+"video.menu.subscribeTo" = "%1$@ abonnieren";
+"video.menu.unsubscribeFrom" = "%1$@ nicht mehr abonnieren";
+"video.menu.subscribed" = "%1$@ abonniert";
+"video.menu.unsubscribed" = "%1$@ nicht mehr abonniert";
+"library.history.local.empty" = "Videos, die du auf diesem Gerät ansiehst, erscheinen hier";
+"library.history.clearAll" = "Löschen";
+"library.history.clearAll.confirm" = "Damit werden alle Videos aus dem Wiedergabeverlauf auf diesem Gerät entfernt. Das lässt sich nicht rückgängig machen.";
+"settings.section.library" = "Mediathek";
+"settings.section.library.history" = "Wiedergabeverlauf";
+"settings.section.library.subscriptions" = "Abos";
+"settings.footer.library" = "Wird auf diesem Gerät gespeichert und verwendet, solange du nicht angemeldet bist. Beim Anmelden wird die Mediathek deines Kontos verwendet — hier wird nichts gelöscht.";
+"settings.library.counts" = "%1$d Kanäle · %2$d Videos";
+"settings.library.usedWhenSignedOut" = "wird verwendet, wenn du nicht angemeldet bist";
+"settings.row.saveLocalHistory" = "Wiedergabeverlauf auf diesem Gerät speichern";
+"settings.row.localHistoryLimit" = "Gespeicherte Einträge";
+"settings.row.clearLocalHistory" = "Wiedergabeverlauf löschen";
+"settings.row.clearLocalSubscriptions" = "Abos löschen";
+"settings.row.exportSubscriptions" = "Abos exportieren";
+"settings.library.clearHistory.confirm" = "Damit werden alle Videos aus dem Wiedergabeverlauf auf diesem Gerät entfernt. Das lässt sich nicht rückgängig machen.";
+"settings.library.clearSubscriptions.confirm" = "Damit werden alle Kanäle entfernt, die du auf diesem Gerät abonniert hast. Es gibt keine zweite Kopie — exportiere sie vorher, wenn du sie behalten möchtest.";
+"settings.library.exportEmptyTitle" = "Nichts zu exportieren";
+"settings.library.exportEmptyMessage" = "Du hast auf diesem Gerät noch keine Kanäle abonniert.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "Keine neuen Videos von den Kanälen, denen du folgst";

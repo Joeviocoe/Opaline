@@ -530,3 +530,31 @@
 "settings.row.resetIdentity" = "Visitor identity’yi sıfırla";
 "library.downloads.empty" = "İndirdiğiniz videolar burada gösterilir";
 "player.error.noSources" = "Tüm oynatma kaynakları kapalı. “Ayarlar → Hata Ayıklama → Oynatma kaynakları” bölümünden en az birini açın.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Bir kanala abone olun, videoları burada görünsün";
+"video.menu.subscribeTo" = "%1$@ kanalına abone ol";
+"video.menu.unsubscribeFrom" = "%1$@ aboneliğinden çık";
+"video.menu.subscribed" = "%1$@ kanalına abone olundu";
+"video.menu.unsubscribed" = "%1$@ aboneliğinden çıkıldı";
+"library.history.local.empty" = "Bu cihazda izlediğiniz videolar burada görünür";
+"library.history.clearAll" = "Temizle";
+"library.history.clearAll.confirm" = "Bu cihazdaki izleme geçmişindeki tüm videolar kaldırılır. Bu işlem geri alınamaz.";
+"settings.section.library" = "Kitaplık";
+"settings.section.library.history" = "İzleme geçmişi";
+"settings.section.library.subscriptions" = "Abonelikler";
+"settings.footer.library" = "Bu cihazda saklanır ve oturum açmadığınızda kullanılır. Oturum açtığınızda hesabınızın kitaplığına geçilir; buradaki hiçbir şey silinmez.";
+"settings.library.counts" = "%1$d kanal · %2$d video";
+"settings.library.usedWhenSignedOut" = "oturum açmadığınızda kullanılır";
+"settings.row.saveLocalHistory" = "İzleme geçmişini bu cihazda sakla";
+"settings.row.localHistoryLimit" = "Saklanan kayıt sayısı";
+"settings.row.clearLocalHistory" = "İzleme geçmişini temizle";
+"settings.row.clearLocalSubscriptions" = "Abonelikleri temizle";
+"settings.row.exportSubscriptions" = "Abonelikleri dışa aktar";
+"settings.library.clearHistory.confirm" = "Bu cihazdaki izleme geçmişindeki tüm videolar kaldırılır. Bu işlem geri alınamaz.";
+"settings.library.clearSubscriptions.confirm" = "Bu cihazda abone olduğunuz tüm kanallar kaldırılır. Başka bir kopyası yok — saklamak istiyorsanız önce dışa aktarın.";
+"settings.library.exportEmptyTitle" = "Dışa aktarılacak bir şey yok";
+"settings.library.exportEmptyMessage" = "Bu cihazda henüz hiçbir kanala abone olmadınız.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "Takip ettiğiniz kanallarda yeni video yok";

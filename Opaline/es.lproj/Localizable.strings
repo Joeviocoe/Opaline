@@ -526,3 +526,31 @@
 "settings.row.resetIdentity" = "Restablecer visitor identity";
 "library.downloads.empty" = "Los videos que descargues aparecerán aquí";
 "player.error.noSources" = "Todas las fuentes de reproducción están desactivadas. Activa al menos una en «Ajustes → Depuración → Fuentes de reproducción».";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Suscríbete a un canal y sus vídeos aparecerán aquí";
+"video.menu.subscribeTo" = "Suscribirse a %1$@";
+"video.menu.unsubscribeFrom" = "Cancelar suscripción a %1$@";
+"video.menu.subscribed" = "Te has suscrito a %1$@";
+"video.menu.unsubscribed" = "Has cancelado la suscripción a %1$@";
+"library.history.local.empty" = "Los vídeos que veas en este dispositivo aparecerán aquí";
+"library.history.clearAll" = "Borrar";
+"library.history.clearAll.confirm" = "Se eliminarán todos los vídeos del historial de reproducciones de este dispositivo. No se puede deshacer.";
+"settings.section.library" = "Biblioteca";
+"settings.section.library.history" = "Historial de reproducciones";
+"settings.section.library.subscriptions" = "Suscripciones";
+"settings.footer.library" = "Se guarda en este dispositivo y se usa cuando no has iniciado sesión. Al iniciar sesión se usa la biblioteca de tu cuenta; aquí no se borra nada.";
+"settings.library.counts" = "%1$d canales · %2$d vídeos";
+"settings.library.usedWhenSignedOut" = "se usa cuando no has iniciado sesión";
+"settings.row.saveLocalHistory" = "Guardar el historial en este dispositivo";
+"settings.row.localHistoryLimit" = "Entradas guardadas";
+"settings.row.clearLocalHistory" = "Borrar historial de reproducciones";
+"settings.row.clearLocalSubscriptions" = "Borrar suscripciones";
+"settings.row.exportSubscriptions" = "Exportar suscripciones";
+"settings.library.clearHistory.confirm" = "Se eliminarán todos los vídeos del historial de reproducciones de este dispositivo. No se puede deshacer.";
+"settings.library.clearSubscriptions.confirm" = "Se eliminarán todos los canales a los que te has suscrito en este dispositivo. No hay otra copia: expórtalos antes si quieres conservarlos.";
+"settings.library.exportEmptyTitle" = "No hay nada que exportar";
+"settings.library.exportEmptyMessage" = "Todavía no te has suscrito a ningún canal en este dispositivo.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "No hay vídeos recientes de los canales que sigues";

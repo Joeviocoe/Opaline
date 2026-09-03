@@ -46,6 +46,9 @@ final class PlaybackFacade {
     /// next step instead of starting the whole ladder again.
     var activeChain: FallbackChainSource?
     let watchtimeTracker = WatchtimeTracker()
+    /// Records watch history on the device. Runs whether or not there is an
+    /// account, because the tracker above cannot start without one.
+    let localWatchRecorder = LocalWatchRecorder()
     var currentVideoId: String?
     weak var currentApiClient: WatchService?
     /// Video that already burned its one silent bot-check retry.
@@ -262,6 +265,7 @@ extension PlaybackFacade {
     func reset() {
         activeVideoSource = nil
         watchtimeTracker.stop()
+        localWatchRecorder.stop()
         currentVideoId = nil
         currentApiClient = nil
         botCheckRetriedVideoId = nil

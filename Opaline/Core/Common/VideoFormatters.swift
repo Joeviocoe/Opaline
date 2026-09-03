@@ -66,10 +66,18 @@ enum VideoFormatters {
 
     /// Formats a raw view count string ("1400000000") to a readable form ("1.4B views").
     /// If the string is already formatted (not a plain number), returns it as-is.
+    ///
+    /// `Int64`, not `Int`: on 32-bit armv7 `Int` is 32-bit, so `Int(raw)` is
+    /// nil for anything past 2,147,483,647 and a video with more than 2.1B
+    /// views rendered as a raw digit string.
     static func formatViewCount(_ raw: String) -> String {
-        guard let count = Int(raw) else {
+        guard let count = Int64(raw) else {
             return raw
         }
+        return formatViewCount(count)
+    }
+
+    static func formatViewCount(_ count: Int64) -> String {
         switch count {
         case 1_000_000_000...:
             return String(format: "%.1fB views", Double(count) / 1e9)

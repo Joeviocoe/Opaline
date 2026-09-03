@@ -102,12 +102,58 @@ extension WatchViewController {
         }
     }
 
+    /// The channel this video belongs to, from whichever source still knows.
+    ///
+    /// With no account `channelInfo` is always nil — `fetchChannelInfo` is
+    /// token-gated and answers `unauthorized` — and the anonymous watch page
+    /// can carry no channel id of its own either. The card the user opened
+    /// from is then the only thing left that has it, which is why
+    /// `initialVideo` is in this chain: without it the subscribe button was
+    /// dead signed out, which is precisely when it matters most.
+    var subscribeTargetChannel: SubscribedChannel? {
+        let ids = [
+            watchPage?.channelInfo?.id,
+            watchPage?.video.channelId,
+            initialVideo.channelId
+        ]
+        guard let id = ids.compactMap({ $0 })
+            .first(where: { !$0.isEmpty }) else {
+            return nil
+        }
+        let titles = [
+            watchPage?.channelInfo?.title,
+            watchPage?.video.channelName,
+            initialVideo.channelName
+        ]
+        let avatars = [
+            watchPage?.channelInfo?.avatarURL,
+            watchPage?.video.channelAvatarURL,
+            initialVideo.channelAvatarURL
+        ]
+        return SubscribedChannel(
+            id: id,
+            title: titles.compactMap { $0 }
+                .first(where: { !$0.isEmpty }) ?? "",
+            avatarURL: avatars.compactMap { $0 }
+                .first(where: { !$0.isEmpty })
+        )
+    }
+
     @objc
     func subscribeButtonTapped() {
-        guard let channelId = watchPage?.channelInfo?.id
-            ?? watchPage?.video.channelId else {
+        guard let channel = subscribeTargetChannel else {
+            // Never silent again: a tap that resolves no channel used to
+            // return here without a trace, which reads as a dead button.
+            AppLog.subscribe(
+                "subscribe tapped but no channel id"
+                    + " — page=\(watchPage != nil)"
+                    + " info=\(watchPage?.channelInfo?.id != nil)"
+                    + " pageVideo=\(watchPage?.video.channelId != nil)"
+                    + " initial=\(initialVideo.channelId != nil)"
+            )
             return
         }
+        let channelId = channel.id
         let wasSubscribed = isSubscribed
         isSubscribed = !wasSubscribed
         if !wasSubscribed {
@@ -122,11 +168,15 @@ extension WatchViewController {
         subscribeButton.isEnabled = false
         applyTheme()
         let handler = subscribeHandler(channelId: channelId, wasSubscribed: wasSubscribed)
-        if wasSubscribed {
-            engagementClient.unsubscribeFromChannel(channelId: channelId, completion: handler)
-        } else {
-            engagementClient.subscribeToChannel(channelId: channelId, completion: handler)
-        }
+        // Through `SubscribeAction` rather than straight to engagement: with
+        // no account the id alone is not enough to store, and this is where
+        // the name and avatar are still in hand.
+        SubscribeAction.toggle(
+            channel: channel,
+            wasSubscribed: wasSubscribed,
+            engagement: engagementClient,
+            completion: handler
+        )
     }
 
     // MARK: - Share & Navigation

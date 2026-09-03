@@ -441,3 +441,31 @@
 "downloads.error.noOptions" = "Це відео не можна завантажити";
 "player.related.downloaded" = "Також завантажені";
 "library.downloads.empty" = "Тут з’являтимуться відео, які ви завантажили";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Підпишіться на канал, і його відео з'являться тут";
+"video.menu.subscribeTo" = "Підписатися на %1$@";
+"video.menu.unsubscribeFrom" = "Відписатися від %1$@";
+"video.menu.subscribed" = "Ви підписалися на %1$@";
+"video.menu.unsubscribed" = "Ви відписалися від %1$@";
+"library.history.local.empty" = "Відео, які ви дивитеся на цьому пристрої, з'являться тут";
+"library.history.clearAll" = "Очистити";
+"library.history.clearAll.confirm" = "Усі відео буде видалено з історії переглядів на цьому пристрої. Цю дію не можна скасувати.";
+"settings.section.library" = "Бібліотека";
+"settings.section.library.history" = "Історія переглядів";
+"settings.section.library.subscriptions" = "Підписки";
+"settings.footer.library" = "Зберігається на цьому пристрої та використовується, коли ви не увійшли в обліковий запис. Після входу використовується бібліотека вашого облікового запису — тут нічого не видаляється.";
+"settings.library.counts" = "%1$d каналів · %2$d відео";
+"settings.library.usedWhenSignedOut" = "використовується, коли ви не увійшли в обліковий запис";
+"settings.row.saveLocalHistory" = "Зберігати історію переглядів на пристрої";
+"settings.row.localHistoryLimit" = "Скільки записів зберігати";
+"settings.row.clearLocalHistory" = "Очистити історію переглядів";
+"settings.row.clearLocalSubscriptions" = "Очистити підписки";
+"settings.row.exportSubscriptions" = "Експортувати підписки";
+"settings.library.clearHistory.confirm" = "Усі відео буде видалено з історії переглядів на цьому пристрої. Цю дію не можна скасувати.";
+"settings.library.clearSubscriptions.confirm" = "Усі канали, на які ви підписалися на цьому пристрої, буде видалено. Іншої копії немає — спершу експортуйте їх, якщо хочете зберегти.";
+"settings.library.exportEmptyTitle" = "Немає чого експортувати";
+"settings.library.exportEmptyMessage" = "Ви ще не підписалися на жоден канал на цьому пристрої.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "Немає нових відео з каналів, на які ви підписані";

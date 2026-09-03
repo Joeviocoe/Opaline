@@ -444,3 +444,31 @@
 "settings.playbackChain.signInNeeded" = "Войдите, чтобы использовать этот источник";
 "settings.playbackChain.footer" = "Перебираются сверху вниз, пока один не заиграет. Перетащите, чтобы изменить порядок, ненужные выключите.";
 "player.error.noSources" = "Все источники воспроизведения выключены. Включите хотя бы один в «Настройки → Отладка → Источники воспроизведения».";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Подпишитесь на канал, и его видео появятся здесь";
+"video.menu.subscribeTo" = "Подписаться на %1$@";
+"video.menu.unsubscribeFrom" = "Отписаться от %1$@";
+"video.menu.subscribed" = "Вы подписались на %1$@";
+"video.menu.unsubscribed" = "Вы отписались от %1$@";
+"library.history.local.empty" = "Видео, которые вы смотрите на этом устройстве, появятся здесь";
+"library.history.clearAll" = "Очистить";
+"library.history.clearAll.confirm" = "Все видео будут удалены из истории просмотра на этом устройстве. Это действие нельзя отменить.";
+"settings.section.library" = "Библиотека";
+"settings.section.library.history" = "История просмотра";
+"settings.section.library.subscriptions" = "Подписки";
+"settings.footer.library" = "Хранится на этом устройстве и используется, когда вы не вошли в аккаунт. После входа используется библиотека вашего аккаунта — здесь ничего не удаляется.";
+"settings.library.counts" = "%1$d каналов · %2$d видео";
+"settings.library.usedWhenSignedOut" = "используется, когда вы не вошли в аккаунт";
+"settings.row.saveLocalHistory" = "Сохранять историю просмотра на устройстве";
+"settings.row.localHistoryLimit" = "Сколько записей хранить";
+"settings.row.clearLocalHistory" = "Очистить историю просмотра";
+"settings.row.clearLocalSubscriptions" = "Очистить подписки";
+"settings.row.exportSubscriptions" = "Экспортировать подписки";
+"settings.library.clearHistory.confirm" = "Все видео будут удалены из истории просмотра на этом устройстве. Это действие нельзя отменить.";
+"settings.library.clearSubscriptions.confirm" = "Все каналы, на которые вы подписались на этом устройстве, будут удалены. Другой копии нет — сначала экспортируйте их, если хотите сохранить.";
+"settings.library.exportEmptyTitle" = "Нечего экспортировать";
+"settings.library.exportEmptyMessage" = "Вы ещё не подписались ни на один канал на этом устройстве.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "Нет новых видео с каналов, на которые вы подписаны";

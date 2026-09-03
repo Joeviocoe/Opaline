@@ -35,10 +35,14 @@ extension ChannelViewController {
             ?? (page.isSubscribed
                 ? "common.subscribed".localized
                 : "common.subscribe".localized)
+        // Subscribing no longer needs an account, so the button no longer
+        // needs to be dead without one.
         headerView.updateSubscription(
-            title: txt, isEnabled: !OAuthClient.shared.isAnonymous
+            title: txt, isEnabled: SubscribeAction.isAvailable
         )
-        isSubscribed = page.isSubscribed
+        isSubscribed = SubscribeAction.isSubscribed(
+            channelId: channelId, serverSays: page.isSubscribed
+        )
         headerView.applyTheme(isSubscribed: isSubscribed)
     }
 
@@ -60,17 +64,19 @@ extension ChannelViewController {
         isSubscribed = !wasSubscribed
         updateSubscribeUI(subscribed: isSubscribed, enabled: false)
         let handler = buildCompletion(wasSubscribed: wasSubscribed)
-        if wasSubscribed {
-            engagementClient.unsubscribeFromChannel(
-                channelId: channelId,
-                completion: handler
-            )
-        } else {
-            engagementClient.subscribeToChannel(
-                channelId: channelId,
-                completion: handler
-            )
-        }
+        // Through `SubscribeAction`, so a subscribe made here is stored with
+        // the channel's name and avatar rather than a bare id.
+        SubscribeAction.toggle(
+            channel: SubscribedChannel(
+                id: channelId,
+                title: currentChannelPage?.info.title
+                    ?? initialChannelName,
+                avatarURL: currentChannelPage?.info.avatarURL
+            ),
+            wasSubscribed: wasSubscribed,
+            engagement: engagementClient,
+            completion: handler
+        )
     }
 
     func buildCompletion(

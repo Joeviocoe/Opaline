@@ -118,6 +118,9 @@ enum VideoActionMenu {
                 )
             })
         }
+        if let subscribe = subscribeItem(video: video, from: presenter) {
+            items.append(subscribe)
+        }
         // No "Watch later" row: "Save to playlist" right below it already
         // offers Watch Later, and the feedback actions need the space.
         return items

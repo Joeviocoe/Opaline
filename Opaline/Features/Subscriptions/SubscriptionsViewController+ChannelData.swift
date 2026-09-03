@@ -4,7 +4,11 @@ import UIKit
 
 extension SubscriptionsViewController {
     func loadSubscribedChannels(force: Bool = false) {
-        guard !OAuthClient.shared.isAnonymous else {
+        // The local store answers this signed out, through the decorated
+        // service — so the avatar bar and channel filter work with no
+        // account instead of staying empty.
+        if LocalLibrary.isActive {
+            fetchSubscribedChannelsFromNetwork()
             return
         }
         if force {
@@ -30,7 +34,9 @@ extension SubscriptionsViewController {
                 secondary: subscribedChannels
             )
             applyChannels(merged)
-            cache.setSubscribedChannels(merged)
+            if !LocalLibrary.isActive {
+                cache.setSubscribedChannels(merged)
+            }
             return
         }
         guard subscribedChannels.isEmpty else {
@@ -78,7 +84,12 @@ private extension SubscriptionsViewController {
                         primary: self.subscribedChannels,
                         secondary: channels
                     )
-                    self.cache.setSubscribedChannels(merged)
+                    // Never into the account-shaped cache while the local
+                    // store is the source: it is already durable, and a
+                    // later sign-in would read these back as the account's.
+                    if !LocalLibrary.isActive {
+                        self.cache.setSubscribedChannels(merged)
+                    }
                     self.applyChannels(merged)
                 case .failure(let error):
                     AppLog.subs("channels load failed: \(error)")

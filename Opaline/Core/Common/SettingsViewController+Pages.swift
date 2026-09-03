@@ -19,7 +19,8 @@ extension SettingsViewController {
         .sponsorBlock: "settings.section.sponsorblock",
         .cache: "settings.section.cache",
         .debug: "settings.section.debug",
-        .downloads: "settings.section.downloads"
+        .downloads: "settings.section.downloads",
+        .library: "settings.section.library"
     ]
 
     private static let rowPages: [Row: Page] = [
@@ -30,7 +31,8 @@ extension SettingsViewController {
         .pageSponsorBlock: .sponsorBlock,
         .pageCache: .cache,
         .pageDownloads: .downloads,
-        .pageDebug: .debug
+        .pageDebug: .debug,
+        .pageLibrary: .library
     ]
 
     var pageTitle: String { Self.title(for: page) }
@@ -55,6 +57,8 @@ extension SettingsViewController {
             return debugSections
         case .downloads:
             return downloadsSections
+        case .library:
+            return librarySections
         }
     }
 
@@ -69,7 +73,7 @@ extension SettingsViewController {
                     .pageAppearance, .pageLanguage,
                     .pagePlayback, .pageShorts, .pageDownloads,
                     .notificationSettings, .pageSponsorBlock,
-                    .pageCache, .pageDebug
+                    .pageLibrary, .pageCache, .pageDebug
                 ]
             ),
             Section(

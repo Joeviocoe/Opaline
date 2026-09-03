@@ -526,3 +526,31 @@
 "settings.row.resetIdentity" = "Réinitialiser le visitor identity";
 "library.downloads.empty" = "Les vidéos que vous téléchargez s'afficheront ici";
 "player.error.noSources" = "Toutes les sources de lecture sont désactivées. Activez-en au moins une dans « Paramètres → Débogage → Sources de lecture ».";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Abonnez-vous à une chaîne et ses vidéos apparaîtront ici";
+"video.menu.subscribeTo" = "S'abonner à %1$@";
+"video.menu.unsubscribeFrom" = "Se désabonner de %1$@";
+"video.menu.subscribed" = "Abonné à %1$@";
+"video.menu.unsubscribed" = "Désabonné de %1$@";
+"library.history.local.empty" = "Les vidéos que vous regardez sur cet appareil apparaîtront ici";
+"library.history.clearAll" = "Effacer";
+"library.history.clearAll.confirm" = "Toutes les vidéos de l'historique des vidéos regardées sur cet appareil seront supprimées. Cette action est irréversible.";
+"settings.section.library" = "Bibliothèque";
+"settings.section.library.history" = "Historique des vidéos regardées";
+"settings.section.library.subscriptions" = "Abonnements";
+"settings.footer.library" = "Conservé sur cet appareil et utilisé lorsque vous n'êtes pas connecté. La connexion bascule sur la bibliothèque de votre compte ; rien n'est supprimé ici.";
+"settings.library.counts" = "%1$d chaînes · %2$d vidéos";
+"settings.library.usedWhenSignedOut" = "utilisé lorsque vous n'êtes pas connecté";
+"settings.row.saveLocalHistory" = "Enregistrer l'historique sur cet appareil";
+"settings.row.localHistoryLimit" = "Entrées conservées";
+"settings.row.clearLocalHistory" = "Effacer l'historique des vidéos regardées";
+"settings.row.clearLocalSubscriptions" = "Effacer les abonnements";
+"settings.row.exportSubscriptions" = "Exporter les abonnements";
+"settings.library.clearHistory.confirm" = "Toutes les vidéos de l'historique des vidéos regardées sur cet appareil seront supprimées. Cette action est irréversible.";
+"settings.library.clearSubscriptions.confirm" = "Toutes les chaînes auxquelles vous vous êtes abonné sur cet appareil seront supprimées. Il n'existe aucune autre copie — exportez-les d'abord si vous souhaitez les conserver.";
+"settings.library.exportEmptyTitle" = "Rien à exporter";
+"settings.library.exportEmptyMessage" = "Vous ne vous êtes encore abonné à aucune chaîne sur cet appareil.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "Aucune vidéo récente des chaînes que vous suivez";

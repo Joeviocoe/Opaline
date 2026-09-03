@@ -156,7 +156,9 @@ final class ChannelHeaderView: UIView {
         subscribeButton.setContentCompressionResistancePriority(
             .required, for: .horizontal
         )
-        subscribeButton.isEnabled = !OAuthClient.shared.isAnonymous
+        // As on the watch screen: born enabled, because subscribing no
+        // longer needs an account.
+        subscribeButton.isEnabled = SubscribeAction.isAvailable
         subscribeButton.translatesAutoresizingMaskIntoConstraints = false
         separatorView.translatesAutoresizingMaskIntoConstraints = false
     }

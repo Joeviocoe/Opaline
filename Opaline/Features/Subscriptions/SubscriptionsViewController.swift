@@ -39,6 +39,9 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     var stashedSeenVideoIds: Set<String> = []
     var isLoadingInitial = true
     var signInPrompt: SignInEmptyStateView?
+    /// Shown instead of the sign-in prompt when the local library is the
+    /// source and simply has nothing in it yet.
+    var localEmptyState: LocalEmptyStateView?
     lazy var topBarHider = TopBarAutoHider(owner: self)
     // New-content dots (issue #13): derived state, never persisted.
     var newContentChannelIds: Set<String> = []
@@ -102,6 +105,7 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
         )
         ToolbarManager.shared.install(in: self)
         observeTokenRefresh()
+        observeLocalSubscriptions()
         loadInitialContent()
     }
 
@@ -144,6 +148,11 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
             loadChannelVideos(channel)
             return
         }
+        if LocalLibrary.isActive {
+            refreshLocalFeed()
+            loadSubscribedChannels(force: true)
+            return
+        }
         cache.clearSubscriptionsFeed()
         cache.clearSubscribedChannels()
         loadFeed()
@@ -153,6 +162,11 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     @objc
     func handleShowShortsChange() {
         cache.clearSubscriptionsFeed()
+        // The setting decides which Atom feed each channel is read from, so
+        // the assembled local feed is stale the moment it changes.
+        if LocalLibrary.isActive {
+            cache.clearLocalSubscriptionsFeed()
+        }
         loadFeed()
         newContentUploads = [:]
         refreshNewContentDots()

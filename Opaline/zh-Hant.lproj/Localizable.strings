@@ -530,3 +530,31 @@
 "settings.row.resetIdentity" = "重設 visitor identity";
 "library.downloads.empty" = "你下載的影片會顯示在這裡";
 "player.error.noSources" = "所有播放來源都已關閉。請在「設定 → 除錯 → 播放來源」中至少開啟一個。";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "訂閱頻道後，它的影片會顯示在這裡";
+"video.menu.subscribeTo" = "訂閱 %1$@";
+"video.menu.unsubscribeFrom" = "取消訂閱 %1$@";
+"video.menu.subscribed" = "已訂閱 %1$@";
+"video.menu.unsubscribed" = "已取消訂閱 %1$@";
+"library.history.local.empty" = "你在這部裝置上觀看的影片會顯示在這裡";
+"library.history.clearAll" = "清除";
+"library.history.clearAll.confirm" = "這會從這部裝置的觀看紀錄中移除所有影片，且無法復原。";
+"settings.section.library" = "媒體庫";
+"settings.section.library.history" = "觀看紀錄";
+"settings.section.library.subscriptions" = "訂閱內容";
+"settings.footer.library" = "儲存在這部裝置上，未登入時使用。登入後會切換到你帳號的媒體庫，這裡的內容不會被刪除。";
+"settings.library.counts" = "%1$d 個頻道 · %2$d 部影片";
+"settings.library.usedWhenSignedOut" = "未登入時使用";
+"settings.row.saveLocalHistory" = "在這部裝置上儲存觀看紀錄";
+"settings.row.localHistoryLimit" = "保留筆數";
+"settings.row.clearLocalHistory" = "清除觀看紀錄";
+"settings.row.clearLocalSubscriptions" = "清除訂閱內容";
+"settings.row.exportSubscriptions" = "匯出訂閱內容";
+"settings.library.clearHistory.confirm" = "這會從這部裝置的觀看紀錄中移除所有影片，且無法復原。";
+"settings.library.clearSubscriptions.confirm" = "這會移除你在這部裝置上訂閱的所有頻道。沒有其他副本——如果想保留，請先匯出。";
+"settings.library.exportEmptyTitle" = "沒有可匯出的內容";
+"settings.library.exportEmptyMessage" = "你還沒有在這部裝置上訂閱任何頻道。";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "你關注的頻道最近沒有新影片";

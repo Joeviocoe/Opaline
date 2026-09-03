@@ -584,3 +584,31 @@
 "settings.thumbnailQuality.maximum" = "Maximum (1280×720)";
 "settings.footer.thumbnailQuality" = "Auto picks a level from the amount of memory your device has. Higher quality means larger downloads and more memory per thumbnail, which can slow scrolling on devices with little RAM.";
 "player.error.noSources" = "No playback sources are enabled. Turn one on in Settings → Debug → Playback sources.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Subscribe to a channel and its videos show up here";
+"video.menu.subscribeTo" = "Subscribe to %1$@";
+"video.menu.unsubscribeFrom" = "Unsubscribe from %1$@";
+"video.menu.subscribed" = "Subscribed to %1$@";
+"video.menu.unsubscribed" = "Unsubscribed from %1$@";
+"library.history.local.empty" = "Videos you watch on this device show up here";
+"library.history.clearAll" = "Clear";
+"library.history.clearAll.confirm" = "This removes every video from the watch history on this device. It cannot be undone.";
+"settings.section.library" = "Library";
+"settings.section.library.history" = "Watch history";
+"settings.section.library.subscriptions" = "Subscriptions";
+"settings.footer.library" = "Kept on this device and used when you are not signed in. Signing in switches to your account's library — nothing here is deleted.";
+"settings.library.counts" = "%1$d channels · %2$d videos";
+"settings.library.usedWhenSignedOut" = "used when you are not signed in";
+"settings.row.saveLocalHistory" = "Save watch history on this device";
+"settings.row.localHistoryLimit" = "Entries kept";
+"settings.row.clearLocalHistory" = "Clear watch history";
+"settings.row.clearLocalSubscriptions" = "Clear subscriptions";
+"settings.row.exportSubscriptions" = "Export subscriptions";
+"settings.library.clearHistory.confirm" = "This removes every video from the watch history on this device. It cannot be undone.";
+"settings.library.clearSubscriptions.confirm" = "This removes every channel you subscribed to on this device. There is no other copy — export them first if you want to keep them.";
+"settings.library.exportEmptyTitle" = "Nothing to export";
+"settings.library.exportEmptyMessage" = "You have not subscribed to any channels on this device yet.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "No recent videos from the channels you follow";

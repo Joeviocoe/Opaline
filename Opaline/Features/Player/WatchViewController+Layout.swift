@@ -253,7 +253,10 @@ extension WatchViewController {
         subscribeButton.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
         subscribeButton.layer.cornerRadius = 18
         subscribeButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 18, bottom: 10, right: 18)
-        subscribeButton.isEnabled = !OAuthClient.shared.isAnonymous
+        // Subscribing works with no account now, so the button must not be
+        // born disabled: a disabled UIButton never fires its action, which
+        // is why the tap did nothing *and* logged nothing.
+        subscribeButton.isEnabled = SubscribeAction.isAvailable
         let sel = #selector(subscribeButtonTapped)
         subscribeButton.addTarget(self, action: sel, for: .touchUpInside)
         subscribeButton.addTapFeedback()

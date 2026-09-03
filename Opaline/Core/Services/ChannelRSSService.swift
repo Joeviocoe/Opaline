@@ -43,6 +43,15 @@ protocol ChannelRSSFeedService: AnyObject {
         force: Bool,
         completion: @escaping ([String: [RSSVideoEntry]]) -> Void
     )
+
+    /// As above, but `force` drops the cached feeds first — what
+    /// pull-to-refresh means for a feed assembled from these.
+    func fetchRecentUploads(
+        channelIds: [String],
+        includeShorts: Bool,
+        force: Bool,
+        completion: @escaping ([String: [RSSVideoEntry]]) -> Void
+    )
 }
 
 final class ChannelRSSService: ChannelRSSFeedService {

@@ -4,10 +4,11 @@ import UIKit
 
 extension SubscriptionsViewController {
     func loadInitialContent() {
-        if OAuthClient.shared.isAnonymous {
-            AppLog.subs("anonymous → skip load")
-            spinner.stopAnimating()
-            showSignInPrompt(true)
+        // With no account this screen used to dead-end on a sign-in prompt.
+        // It now has a local library to show instead.
+        if LocalLibrary.isActive {
+            AppLog.subs("local library → assembling from RSS")
+            loadLocalInitialContent()
             return
         }
         loadSubscribedChannels()
@@ -258,7 +259,14 @@ private extension SubscriptionsViewController {
 
     func applyFeedPage(_ page: FeedPage) {
         showSignInPrompt(false)
-        cache.setSubscriptionsFeed(page)
+        // The locally assembled feed has its own cache key, written by the
+        // service. Two keys is what keeps one source's feed from ever being
+        // served to the other.
+        if LocalLibrary.isActive {
+            showLocalEmptyState(page.videos.isEmpty)
+        } else {
+            cache.setSubscriptionsFeed(page)
+        }
         if selectedChannel == nil {
             setPage(page)
         } else {

@@ -15,6 +15,10 @@ extension WatchViewController {
             let seconds = CMTimeGetSeconds(duration)
             return seconds.isFinite ? seconds : 0
         }
+        playbackFacade.localWatchRecorder.timeProvider =
+            playbackFacade.watchtimeTracker.timeProvider
+        playbackFacade.localWatchRecorder.durationProvider =
+            playbackFacade.watchtimeTracker.durationProvider
         playbackFacade.start(
             videoId: initialVideo.id,
             apiClient: client,

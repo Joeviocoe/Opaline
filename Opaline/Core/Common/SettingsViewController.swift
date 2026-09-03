@@ -7,6 +7,9 @@ final class SettingsViewController: UIViewController {
     enum Row {
         case pageAppearance, pageLanguage, pagePlayback, pageShorts
         case pageSponsorBlock, pageCache, pageDebug, pageDownloads
+        case pageLibrary
+        case saveLocalHistory, localHistoryLimit
+        case clearLocalHistory, clearLocalSubscriptions, exportSubscriptions
         case theme, autoDarkStart, autoDarkEnd, appIcon
         case appLanguage, region
         case quality, qualityCellular
@@ -32,7 +35,7 @@ final class SettingsViewController: UIViewController {
     }
     enum Page {
         case root, appearance, language, playback, shorts
-        case sponsorBlock, cache, debug, downloads
+        case sponsorBlock, cache, debug, downloads, library
     }
     struct Section {
         let header: String?
@@ -187,10 +190,17 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         if let pageCell = makePageCell(row) {
             return pageCell
         }
+        if let libraryCell = makeLibraryCell(row) {
+            return libraryCell
+        }
         switch row {
         case .pageAppearance, .pageLanguage, .pagePlayback, .pageShorts,
-             .pageSponsorBlock, .pageCache, .pageDebug, .pageDownloads:
+             .pageSponsorBlock, .pageCache, .pageDebug, .pageDownloads,
+             .pageLibrary:
             return UITableViewCell()  // unreachable: makePageCell handles these
+        case .saveLocalHistory, .localHistoryLimit, .clearLocalHistory,
+             .clearLocalSubscriptions, .exportSubscriptions:
+            return UITableViewCell()  // unreachable: makeLibraryCell handles these
         case .theme:
             return makeThemeCell()
         case .appIcon:
@@ -418,7 +428,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             handleDebugSelection, handleThemeSelection,
             handleLanguageSelection, handleAutoDubSelection,
             handleNotificationsSelection, handleAboutSelection,
-            handleDownloadSelection,
+            handleDownloadSelection, handleLibrarySelection,
             handleGeneralSelection
         ]
         _ = handlers.first { $0(row) }

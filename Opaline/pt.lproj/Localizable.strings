@@ -526,3 +526,31 @@
 "settings.row.resetIdentity" = "Redefinir visitor identity";
 "library.downloads.empty" = "Os vídeos que você fizer o download aparecerão aqui";
 "player.error.noSources" = "Todas as fontes de reprodução estão desativadas. Ative pelo menos uma em “Configurações → Depuração → Fontes de reprodução”.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.empty" = "Inscreva-se num canal e os vídeos dele aparecerão aqui";
+"video.menu.subscribeTo" = "Inscrever-se em %1$@";
+"video.menu.unsubscribeFrom" = "Cancelar inscrição em %1$@";
+"video.menu.subscribed" = "Inscrito em %1$@";
+"video.menu.unsubscribed" = "Inscrição em %1$@ cancelada";
+"library.history.local.empty" = "Os vídeos que assistir neste dispositivo aparecerão aqui";
+"library.history.clearAll" = "Limpar";
+"library.history.clearAll.confirm" = "Isto remove todos os vídeos do histórico de reprodução neste dispositivo. Não é possível desfazer.";
+"settings.section.library" = "Biblioteca";
+"settings.section.library.history" = "Histórico de reprodução";
+"settings.section.library.subscriptions" = "Inscrições";
+"settings.footer.library" = "Guardado neste dispositivo e usado quando não tem sessão iniciada. Ao iniciar sessão passa a usar a biblioteca da sua conta; nada aqui é apagado.";
+"settings.library.counts" = "%1$d canais · %2$d vídeos";
+"settings.library.usedWhenSignedOut" = "usado quando não tem sessão iniciada";
+"settings.row.saveLocalHistory" = "Guardar histórico neste dispositivo";
+"settings.row.localHistoryLimit" = "Entradas guardadas";
+"settings.row.clearLocalHistory" = "Limpar histórico de reprodução";
+"settings.row.clearLocalSubscriptions" = "Limpar inscrições";
+"settings.row.exportSubscriptions" = "Exportar inscrições";
+"settings.library.clearHistory.confirm" = "Isto remove todos os vídeos do histórico de reprodução neste dispositivo. Não é possível desfazer.";
+"settings.library.clearSubscriptions.confirm" = "Isto remove todos os canais em que se inscreveu neste dispositivo. Não existe outra cópia — exporte-os primeiro se os quiser manter.";
+"settings.library.exportEmptyTitle" = "Nada para exportar";
+"settings.library.exportEmptyMessage" = "Ainda não se inscreveu em nenhum canal neste dispositivo.";
+
+/* Local library — subscriptions and watch history with no account */
+"subscriptions.local.noVideos" = "Não há vídeos recentes dos canais que segue";

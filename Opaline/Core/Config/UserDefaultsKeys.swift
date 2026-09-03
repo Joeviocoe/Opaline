@@ -137,6 +137,13 @@ enum UserDefaultsKeys {
         static let keychainAfterFirstUnlock = "migration_keychainAfterFirstUnlock"
     }
 
+    enum LocalLibrary {
+        /// Whether watching a video signed out records a history entry.
+        static let savesHistory = "localLibrary_savesHistory"
+        /// How many history entries are kept before the oldest are dropped.
+        static let historyLimit = "localLibrary_historyLimit"
+    }
+
     enum Notifications {
         static let appUpdatesEnabled = "notifications_appUpdates"
         static let lastUpdateCheck = "notifications_lastUpdateCheck"

@@ -33,19 +33,45 @@ enum ServiceContainer {
     // Each property is typed to the narrowest protocol the caller needs — DIP in action.
     private static let client = InnertubeClient(transport: transport)
 
-    static var feed: FeedService { client }
-    static var history: HistoryService { client }
+    /// Wrapped so the subscriptions feed is assembled on the device from
+    /// each channel's Atom feed when there is no account; signed in it is
+    /// the plain client, and every other feed passes straight through.
+    static var feed: FeedService { localFeed }
+    /// Wrapped for the new-content dots, which ask for watch history
+    /// generically. The History *screen* branches to the store itself.
+    static var history: HistoryService { localHistory }
     static var search: SearchService { client }
     static var playlists: PlaylistService { client }
-    static var channel: ChannelService { client }
+    /// Wrapped so a channel page loads with no account, over the anonymous
+    /// WEB browse instead of the token-gated TV one.
+    static var channel: ChannelService { localChannel }
     static var channelTabs: ChannelTabService { client }
-    static var subscribedChannels: SubscribedChannelsService { client }
+    /// Wrapped so the avatar bar and channel filter read the local
+    /// subscription store with no account.
+    static var subscribedChannels: SubscribedChannelsService {
+        localSubscribedChannels
+    }
     /// Wrapped so a downloaded video keeps its page when the network is
     /// gone; online it is the plain client.
     static var watch: WatchService { offlineWatch }
 
     private static let offlineWatch = OfflineWatchService(wrapping: client)
-    static var engagement: EngagementService { client }
+    private static let localFeed = LocalSubscriptionFeedService(
+        wrapping: client
+    )
+    private static let localHistory = LocalHistoryService(wrapping: client)
+    private static let localSubscribedChannels =
+        LocalSubscribedChannelsService(wrapping: client)
+    private static let localEngagement = LocalEngagementService(
+        wrapping: client
+    )
+    private static let localChannel = LocalChannelService(
+        wrapping: client, anonymous: client
+    )
+    /// Wrapped so subscribing with no account writes to the local store.
+    /// Likes and feedback pass through and still fail signed out, which is
+    /// correct — there is nothing local about a like.
+    static var engagement: EngagementService { localEngagement }
     static var account: AccountService { client }
     static var shorts: ShortsService { client }
 

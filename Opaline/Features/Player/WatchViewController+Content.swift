@@ -119,6 +119,9 @@ extension WatchViewController {
             publishedAt: page.video.publishedAt
         )
         applyChannelInfo(from: page)
+        // The one place title, channel, avatar, thumbnail and duration are
+        // all correct — `initialVideo` is often a stub or an RSS card.
+        playbackFacade.localWatchRecorder.setMetadata(from: page)
         applySubscriptionState(from: page)
         applyEngagementData(from: page)
         applyTheme()
@@ -178,7 +181,19 @@ extension WatchViewController {
             buttonText,
             for: .normal
         )
-        isSubscribed = page.isSubscribed
+        // With no account the page always says false, so the local store is
+        // the only thing that knows — OR them rather than trusting either.
+        // Resolved through the same chain the button uses, or a channel
+        // subscribed to locally would still read as unsubscribed on reopen.
+        isSubscribed = SubscribeAction.isSubscribed(
+            channelId: subscribeTargetChannel?.id,
+            serverSays: page.isSubscribed
+        )
+        if isSubscribed, !page.isSubscribed {
+            subscribeButton.setTitle(
+                "common.subscribed".localized, for: .normal
+            )
+        }
         subscribeButton.isHidden = false
         descriptionText = page.description ?? ""
         applyDescriptionText()

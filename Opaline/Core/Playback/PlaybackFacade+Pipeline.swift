@@ -9,6 +9,9 @@ extension PlaybackFacade {
         else {
             return
         }
+        // Unconditional, and before the token check below: with no account
+        // `fetchWatchtimeURLs` answers nil and nothing after this point runs.
+        localWatchRecorder.start(videoId: videoId)
         apiClient.fetchWatchtimeURLs(
             videoId: videoId
         ) { [weak self] urls in

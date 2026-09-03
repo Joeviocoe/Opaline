@@ -17,7 +17,11 @@ extension SubscriptionsViewController {
     /// feed is on screen so the RSS/history burst never competes with
     /// the startup feed request.
     func refreshNewContentDots() {
-        guard !OAuthClient.shared.isAnonymous, !isLoadingInitial else {
+        // The anonymous guard used to stop this outright, which is why dots
+        // never appeared with no account. The history side now answers from
+        // the local store through the decorated service, so both halves of
+        // the comparison exist either way.
+        guard !isLoadingInitial else {
             return
         }
         refreshRSSUploads()
