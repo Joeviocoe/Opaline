@@ -42,15 +42,33 @@ enum UMPPartType: Int {
 /// UMP's own varint — unrelated to protobuf's: the byte count is encoded in the
 /// leading bits of the first byte, and the remaining bytes are little-endian.
 final class UMPReader {
-    private var buffer = Data()
+    /// The framing buffer is a plain byte array, not `Data`, and that is
+    /// deliberate.
+    ///
+    /// This build bundles Xcode 12.5.1's Swift Foundation overlay and runs it
+    /// against iOS 9.3's system Foundation. `buffer.append(chunk)` on an empty
+    /// buffer lets `Data` adopt the bridged `NSData` that URLSession handed us,
+    /// and the later `removeSubrange` then drives a representation transition
+    /// the modern overlay assumes of a much newer Foundation. Measured on the
+    /// device: a trap inside `Data._Representation.replaceSubrange`, reached
+    /// from `readParts`, on the first SABR response. An array of bytes is pure
+    /// Swift and has no bridged representation to transition.
+    private var buffer: [UInt8] = []
+
+    /// Refuses to grow without bound.
+    ///
+    /// A part is only emitted once its whole payload has arrived, so a bad size
+    /// field would otherwise buffer for ever, and a multi-megabyte contiguous
+    /// allocation is exactly what fails first on a 1 GB 32-bit device.
+    private static let bufferLimit = 32 * 1024 * 1024
 
     /// UMP varint: byte count comes from the high bits of the first byte, the
     /// low bits carry the value's head, trailing bytes are little-endian.
-    static func readVarint(_ data: Data, _ offset: Int) -> (Int, Int)? {
+    static func readVarint(_ data: [UInt8], _ offset: Int) -> (Int, Int)? {
         guard offset >= 0, offset < data.count else {
             return nil
         }
-        let first = Int(data[data.startIndex + offset])
+        let first = Int(data[offset])
         let length: Int
         switch first {
         case ..<128:
@@ -89,19 +107,19 @@ final class UMPReader {
     }
 
     private static func readLittleEndian(
-        _ data: Data,
+        _ data: [UInt8],
         _ offset: Int,
         count: Int
     ) -> UInt64 {
         var value: UInt64 = 0
         for index in 0..<count {
-            value |= UInt64(data[data.startIndex + offset + index]) << (8 * index)
+            value |= UInt64(data[offset + index]) << (8 * index)
         }
         return value
     }
 
     func append(_ chunk: Data) {
-        buffer.append(chunk)
+        buffer.append(contentsOf: chunk)
     }
 
     /// Returns every part fully present in the buffer and consumes it. A part
@@ -126,15 +144,23 @@ final class UMPReader {
             else {
                 break
             }
-            // Offsets here are relative to the buffer's contents, and Data is
-            // not always indexed from zero once bytes have been dropped off
-            // the front — so every subrange is built off startIndex.
-            let base = buffer.startIndex + afterSize
-            parts.append(UMPPart(type: type, payload: buffer.subdata(in: base..<(base + size))))
+            parts.append(UMPPart(
+                type: type,
+                payload: Data(buffer[afterSize..<(afterSize + size)])
+            ))
             offset = afterSize + size
         }
         if offset > 0 {
-            buffer.removeSubrange(buffer.startIndex..<(buffer.startIndex + offset))
+            buffer.removeFirst(offset)
+        }
+        if buffer.count > Self.bufferLimit {
+            // Loud, because silently dropping framing state desynchronises the
+            // stream and every later part is then garbage.
+            AppLog.onesie(
+                "ump: buffer reached \(buffer.count / 1024) KB with no complete"
+                    + " part; discarding — the stream is out of frame"
+            )
+            buffer.removeAll(keepingCapacity: false)
         }
         return parts
     }

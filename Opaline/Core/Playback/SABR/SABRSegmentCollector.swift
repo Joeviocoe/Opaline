@@ -77,7 +77,23 @@ final class SABRSegmentCollector {
     func append(_ chunk: Data) {
         received += chunk.count
         reader.append(chunk)
-        for part in reader.readParts() where !isDone {
+        let parts = reader.readParts()
+        // The UMP framing has crashed here once already, and a response that
+        // yields no parts looks identical to one that was never delivered.
+        // Naming the types and sizes makes the difference visible.
+        if !parts.isEmpty {
+            let shape = parts.prefix(8)
+                .map { "\(UMPPartType(rawValue: $0.type).map(String.init(describing:)) ?? String($0.type))" }
+                .joined(separator: " ")
+            let bytes = parts.reduce(0) { $0 + $1.payload.count }
+            AppLog.onesie(
+                "ump: +\(chunk.count / 1024) KB -> \(parts.count) parts,"
+                    + " \(bytes / 1024) KB payload [\(shape)]"
+            )
+        } else {
+            AppLog.onesie("ump: +\(chunk.count / 1024) KB -> no complete part yet")
+        }
+        for part in parts where !isDone {
             handle(part)
         }
     }

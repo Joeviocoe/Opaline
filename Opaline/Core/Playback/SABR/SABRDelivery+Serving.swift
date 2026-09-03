@@ -61,11 +61,16 @@ extension SABRDelivery {
         guard let track = route.tracks.first(where: { $0.path == name }) else {
             return nil
         }
+        #if LEGACY_IOS9
+        // fMP4 in HLS needs iOS 10; serve the same fragments as MPEG-TS.
+        return LegacySABRTSRoute.playlist(for: track, route: route)
+        #else
         return Data(HLSGenerator.segmentedPlaylist(
             base: "/g\(route.generation)/s/\(track.path)",
             segments: track.segments,
             startAt: route.startAt
         ).utf8)
+        #endif
     }
 
     /// Main playlist pointing at the two media playlists.
@@ -75,6 +80,9 @@ extension SABRDelivery {
               let audio = route.tracks.last else {
             return ""
         }
+        #if LEGACY_IOS9
+        return LegacySABRTSRoute.masterPlaylist(route: route)
+        #else
         let audioPeak = HLSGenerator.peakBitrate(audio.segments, fallback: audio.format.bitrate)
         let videoPeak = HLSGenerator.peakBitrate(video.segments, fallback: video.format.bitrate)
         return HLSGenerator.mainPlaylist(
@@ -86,6 +94,7 @@ extension SABRDelivery {
                 audio: "/g\(route.generation)/\(audio.path).m3u8"
             )
         )
+        #endif
     }
 
     private static func serveSegment(
@@ -94,6 +103,9 @@ extension SABRDelivery {
         route: Route,
         completion: @escaping (Data?, String) -> Void
     ) {
+        #if LEGACY_IOS9
+        LegacySABRTSRoute.serve(name, of: track, route: route, completion: completion)
+        #else
         guard let request = segmentRequest(name, of: track, route: route) else {
             completion(nil, "")
             return
@@ -107,12 +119,13 @@ extension SABRDelivery {
                 completion(nil, "")
             }
         }
+        #endif
     }
 
     /// Maps one playlist entry onto the segment the server knows: SABR counts
     /// segments from 1, and the time it is asked to stream from is where that
     /// segment starts.
-    private static func segmentRequest(
+    static func segmentRequest(
         _ name: String,
         of track: Track,
         route: Route
@@ -241,6 +254,11 @@ extension SABRDelivery {
         completion: @escaping (Result<PreparedPlayback, Error>) -> Void
     ) {
         generation += 1
+        #if LEGACY_IOS9
+        // Codec setups are cached per generation; a new one means new formats,
+        // and a stale avcC would decode the old resolution's parameter sets.
+        LegacySABRTSRoute.reset()
+        #endif
         // A quality switch replaces the fetcher behind the same server; the
         // one being replaced has nobody left to serve.
         route?.fetcher.stop()

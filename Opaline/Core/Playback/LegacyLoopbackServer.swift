@@ -104,9 +104,24 @@ final class LegacyLoopbackServer {
     /// the fragments.
     private var remuxes: [String: LegacyProgressiveRemux.Remuxed] = [:]
     private var streams: [String: Stream] = [:]
+    /// Builds a response body for a path, for callers that generate bytes
+    /// rather than proxy them. SABR needs this: its playlists and transmuxed
+    /// segments exist only in memory, so there is no upstream URL to publish.
+    typealias DynamicHandler = (
+        _ path: String,
+        _ completion: @escaping (Data?, String) -> Void
+    ) -> Void
+    private var dynamicHandler: DynamicHandler?
     /// Bytes actually served per stream, so "how much did AVFoundation demand
     /// before it would play?" is a measured number rather than a guess.
     private var served: [String: Int64] = [:]
+    /// Rolling (timestamp, cumulative bytes) samples for a recent-throughput
+    /// figure. `AVPlayerItem.accessLog()` is empty for a composition — its asset
+    /// is not something AVFoundation fetched — so stats-for-nerds reported no
+    /// speed and no transfer at all. The server knows both first-hand, and its
+    /// numbers are the real upstream rate rather than the player's estimate.
+    private var rateSamples: [(at: CFTimeInterval, bytes: Int64)] = []
+    private var servedTotal: Int64 = 0
     private let lock = NSLock()
     private var listenFD: Int32 = -1
     private(set) var port: UInt16 = 0
@@ -130,6 +145,49 @@ final class LegacyLoopbackServer {
     /// Stops serving a stream. In-flight connections notice on their next
     /// chunk and end the response, which is what stops an abandoned playback
     /// attempt from downloading in the background forever.
+    /// Total bytes this server has fetched upstream, for the stats overlay.
+    /// Registers the generated-content handler and returns the server base.
+    func publishHandler(_ handler: @escaping DynamicHandler) -> URL? {
+        guard start() else {
+            return nil
+        }
+        lock.lock()
+        dynamicHandler = handler
+        lock.unlock()
+        let base = URL(string: "http://127.0.0.1:\(port)/")
+        AppLog.player(
+            "loopback: dynamic handler registered at \(base?.absoluteString ?? "?")"
+        )
+        return base
+    }
+
+    func withdrawHandler() {
+        lock.lock()
+        dynamicHandler = nil
+        lock.unlock()
+    }
+
+    func totalBytesServed() -> Int64 {
+        lock.lock()
+        defer { lock.unlock() }
+        return servedTotal
+    }
+
+    /// Recent upstream throughput in bits per second, or nil when there is not
+    /// enough history to say.
+    func recentBitsPerSecond() -> Double? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let first = rateSamples.first, let last = rateSamples.last else {
+            return nil
+        }
+        let seconds = last.at - first.at
+        guard seconds > 0.5 else {
+            return nil
+        }
+        return Double(last.bytes - first.bytes) * 8 / seconds
+    }
+
     /// Fetched fragment headers, so the remuxer can parse what priming pulled
     /// rather than fetching it twice.
     func primedData(_ id: String) -> [Int64: Data] {
@@ -241,6 +299,74 @@ final class LegacyLoopbackServer {
 
     // MARK: - Serving one request
 
+    /// Serves a body built on demand by the dynamic handler.
+    ///
+    /// The handler is asynchronous and this runs on a socket thread, so it waits
+    /// on a semaphore. The timeout matters: without one a handler that never
+    /// calls back would hold a worker thread for the life of the app, and the
+    /// symptom would be playback that simply stops answering.
+    private func serveGenerated(
+        _ client: Int32,
+        path: String,
+        rangeHeader: String?,
+        isHead: Bool,
+        handler: @escaping DynamicHandler
+    ) {
+        let semaphore = DispatchSemaphore(value: 0)
+        var body: Data?
+        var type = ""
+        handler(path) { data, contentType in
+            body = data
+            type = contentType
+            semaphore.signal()
+        }
+        if semaphore.wait(timeout: .now() + 30) == .timedOut {
+            AppLog.player("loopback: handler timed out for \(path)")
+            _ = send(client, "HTTP/1.1 504 Gateway Timeout\r\nContent-Length: 0\r\n\r\n")
+            return
+        }
+        guard let body = body, !body.isEmpty else {
+            AppLog.player("loopback: handler had nothing for \(path)")
+            _ = send(client, "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
+            return
+        }
+        let total = Int64(body.count)
+        var start: Int64 = 0
+        var end: Int64 = total - 1
+        var partial = false
+        if let header = rangeHeader, let parsed = Self.parseRange(header, total: total) {
+            start = parsed.0
+            end = parsed.1
+            partial = true
+        }
+        guard start <= end, start < total else {
+            _ = send(client, "HTTP/1.1 416 Range Not Satisfiable\r\n"
+                + "Content-Range: bytes */\(total)\r\nContent-Length: 0\r\n\r\n")
+            return
+        }
+        var head = partial
+            ? "HTTP/1.1 206 Partial Content\r\n"
+            : "HTTP/1.1 200 OK\r\n"
+        head += "Content-Type: \(type)\r\n"
+        head += "Accept-Ranges: bytes\r\n"
+        if partial {
+            head += "Content-Range: bytes \(start)-\(end)/\(total)\r\n"
+        }
+        head += "Content-Length: \(end - start + 1)\r\n\r\n"
+        AppLog.player(
+            "loopback: \(isHead ? "HEAD" : "GET") \(path)"
+                + " -> \(end - start + 1) of \(total) bytes \(type)"
+        )
+        guard send(client, head) else { return }
+        if isHead { return }
+        let lower = body.startIndex + Int(start)
+        let upper = body.startIndex + Int(end) + 1
+        _ = sendBody(client, body.subdata(in: lower..<upper))
+        lock.lock()
+        servedTotal += end - start + 1
+        lock.unlock()
+    }
+
     private func serve(_ client: Int32) {
         guard let request = readRequest(client) else {
             return
@@ -249,7 +375,20 @@ final class LegacyLoopbackServer {
         lock.lock()
         let stream = streams[path]
         lock.unlock()
+        if stream == nil {
+            lock.lock()
+            let handler = dynamicHandler
+            lock.unlock()
+            if let handler = handler {
+                serveGenerated(
+                    client, path: path, rangeHeader: rangeHeader,
+                    isHead: isHead, handler: handler
+                )
+                return
+            }
+        }
         guard let stream = stream else {
+            AppLog.player("loopback: 404 for \(path)")
             _ = send(client, "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
             return
         }
@@ -333,6 +472,14 @@ final class LegacyLoopbackServer {
             chunk = min(chunk * 2, Self.maxChunk)
             lock.lock()
             served[path, default: 0] += Int64(data.count)
+            servedTotal += Int64(data.count)
+            let now = CACurrentMediaTime()
+            rateSamples.append((at: now, bytes: servedTotal))
+            // Five seconds of history is enough for a live rate and keeps this
+            // from growing without bound over a long video.
+            while let first = rateSamples.first, now - first.at > 5 {
+                rateSamples.removeFirst()
+            }
             lock.unlock()
             if data.isEmpty {
                 return

@@ -43,7 +43,18 @@ struct SABRDeliveryFactory: StreamDeliveryFactory {
     let label = "sabr"
 
     func canServe(_ info: DirectPlaybackInfo) -> Bool {
-        SABRDelivery.canServe(info)
+        let verdict = SABRDelivery.canServe(info)
+        #if LEGACY_IOS9
+        // Whether the server offered SABR at all. Without this a failed SABR
+        // test cannot distinguish a broken sink from a video the server never
+        // offered SABR for -- and upstream logs this only when parsing fails.
+        AppLog.player(
+            "sabr offer: url=\(info.serverAbrStreamingURL != nil)"
+                + " cfg=\(info.videoPlaybackUstreamerConfig != nil)"
+                + " -> canServe=\(verdict)"
+        )
+        #endif
+        return verdict
     }
 
     func make(
