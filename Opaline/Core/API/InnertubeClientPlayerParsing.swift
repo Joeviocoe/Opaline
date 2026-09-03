@@ -159,6 +159,7 @@ private extension InnertubeClient {
         // churn here stays a single call.
         return codecOK && LegacyFormatPolicy.accepts(
             mimeType: mime,
+            width: fmt["width"] as? Int,
             height: fmtHeight(fmt),
             fps: fmt["fps"] as? Int
         )

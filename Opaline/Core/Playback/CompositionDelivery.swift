@@ -85,7 +85,6 @@ final class CompositionDelivery: StreamDelivery {
                 + " audio itag \(request.audio.itag)"
                 + " \(request.audio.contentLength / 1_048_576) MB"
         )
-
         // Served from a loopback HTTP server, not a resource loader.
         // AVMutableComposition refuses to compose a resource-loader-backed
         // asset: the tracks load and then insertTimeRange fails with
@@ -424,7 +423,9 @@ final class CompositionDelivery: StreamDelivery {
             } else {
                 AppLog.player("composition: compose failed at \(elapsed()), read \(served())")
             }
-            completion(item)
+            // Back to main only to hand over the finished item: everything
+            // downstream touches the player and the view hierarchy.
+            DispatchQueue.main.async { completion(item) }
         }
     }
 
@@ -451,7 +452,12 @@ final class CompositionDelivery: StreamDelivery {
                 group.leave()
             }
         }
-        group.notify(queue: .main) { completion(ok) }
+        // NOT the main queue. The caller composes inside this completion, and
+        // `insertTimeRange` over 44,000 samples takes over a second on an A5X —
+        // measured as a 1183 ms / 1517 ms main-thread stall landing exactly when
+        // the player became ready, with 70-90 frames dropped. Composition is not
+        // UIKit work and has no business on the main thread.
+        group.notify(queue: .global(qos: .userInitiated)) { completion(ok) }
     }
 
     private static func compose(

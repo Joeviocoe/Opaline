@@ -41,6 +41,15 @@ extension WatchViewController {
         adjustForFloatingNavBar()
     }
 
+    #if LEGACY_IOS9
+    /// iOS 9 has no `viewSafeAreaInsetsDidChange`, so the override above is dead
+    /// code here and whatever it drove never ran. `viewDidLayoutSubviews` fires
+    /// whenever the bars change, which is the same set of moments that matter.
+    func legacyApplySafeAreaLayout() {
+        adjustForFloatingNavBar()
+    }
+    #endif
+
     func setupNavigationBar() {
         // Bar styling (appearance, tint, margins) is owned by
         // RotatingNavigationController so every bar lays out identically.

@@ -1014,10 +1014,22 @@ enum VideoQualityStore {
     /// Returns the maximum height for the selected quality. "Auto" caps at
     /// 1080p — the pre-AV1 behavior; higher tiers are explicit opt-in.
     static var maxHeight: Int? {
-        [
+        let explicit = [
             "2160p": 2_160, "1440p": 1_440, "1080p": 1_080,
             "720p": 720, "480p": 480, "360p": 360
-        ][selected] ?? 1_080
+        ][selected]
+        #if LEGACY_IOS9
+        // Auto means 720p here, not 1080p.
+        //
+        // LegacyFormatPolicy allows a 1080 short edge because the A5X's decoder
+        // is rated for it, so 1080p stays *selectable* — but it is 2.25x the
+        // pixels and ~2.3x the bytes over a ~1.2 MB/s link, and this panel gains
+        // little from it at tablet viewing distance. Smoothness is the better
+        // default; the quality menu is there for anyone who wants to trade it.
+        return explicit ?? 720
+        #else
+        return explicit ?? 1_080
+        #endif
     }
 
     /// Display text for a stored value — "Auto" is a stored constant

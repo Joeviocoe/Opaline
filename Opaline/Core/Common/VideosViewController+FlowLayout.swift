@@ -18,6 +18,12 @@ extension VideosViewController: UICollectionViewDelegateFlowLayout {
         willDisplay cell: UICollectionViewCell,
         forItemAt indexPath: IndexPath
     ) {
+        #if LEGACY_IOS9
+        // iOS 9 never calls the prefetch data source; willDisplay is the hook it
+        // does have. Without this the feed and Shorts fetch each thumbnail only
+        // as its cell appears.
+        collectionView.legacyPrefetchAhead(from: indexPath)
+        #endif
         guard !isLoadingInitial,
               !isLoadingMore,
               currentContinuation != nil,

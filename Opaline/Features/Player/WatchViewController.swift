@@ -264,6 +264,12 @@ final class WatchViewController: UIViewController {
     }
 
     override func viewDidLayoutSubviews() {
+        #if LEGACY_IOS9
+        // iOS 9 never delivers viewSafeAreaInsetsDidChange, so the layout it
+        // drives is applied here instead — this fires on the same occasions
+        // (bar visibility, rotation, first layout).
+        legacyApplySafeAreaLayout()
+        #endif
         super.viewDidLayoutSubviews()
         updateLayoutForSize()
         adjustForFloatingNavBar()

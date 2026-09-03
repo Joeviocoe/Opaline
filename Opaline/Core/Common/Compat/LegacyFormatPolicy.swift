@@ -18,11 +18,36 @@ enum LegacyFormatPolicy {
     /// A5X hardware limit. 4.1 is the ceiling; 1080p30 is level 4.0 and would
     /// pass a level check alone, which is why the height cap is separate.
     static let maxLevel = 41
-    static let maxHeight = 720
+    /// Cap on the short edge: 1080 means 1920x1080 landscape or 1080x1920
+    /// vertical.
+    ///
+    /// Raised from 720 as a measured experiment. Apple specs the iPad 3 for
+    /// H.264 up to 1080p30 High 4.1 and itag 137 is `avc1.640028` — High level
+    /// 4.0 — so this is inside the decoder's rating on paper. What is untested
+    /// is everything around it: 1080p is ~2.07M pixels against 720p's 921k, the
+    /// file is roughly 2.3x larger over a ~1.2 MB/s link, and the A5X was
+    /// notoriously stretched driving its own 2048x1536 panel.
+    ///
+    /// The evidence to judge it by is already logged: time to FIRST FRAME,
+    /// `[Perf] stall` durations during playback, and the RSS peak. If any of
+    /// those degrade materially, put this back to 720 — the panel gains little
+    /// from 1080p at normal viewing distance, and smoothness is worth more.
+    static let maxHeight = 1_080
     static let maxFPS = 30
 
-    static func accepts(mimeType: String, height: Int?, fps: Int?) -> Bool {
-        if let height = height, height > maxHeight {
+    static func accepts(mimeType: String, width: Int?, height: Int?, fps: Int?) -> Bool {
+        // The cap is on the SHORT edge, not on height.
+        //
+        // Capping height assumes landscape. A vertical Short at 720x1280 has a
+        // height of 1280, so a height cap rejected it — and 480p (480x854) and
+        // even "1080p" (1080x1920) with it, leaving 360x640 as the best format
+        // that passed. Every Short played at 360p, which is tolerable on a phone
+        // and visibly soft on a 2048x1536 panel.
+        //
+        // Decode cost tracks pixel count, not orientation: 720x1280 is the same
+        // ~921k pixels as 1280x720 and equally within H.264 level 4.1.
+        let shortEdge = [width, height].compactMap { $0 }.min()
+        if let shortEdge = shortEdge, shortEdge > maxHeight {
             return false
         }
         // 60 fps at any size is beyond this decoder, and YouTube only offers it

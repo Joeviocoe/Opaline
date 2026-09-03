@@ -17,6 +17,9 @@ enum LegacyDiagnostics {
     /// file (not async-signal-safe), so the descriptor has to exist before the
     /// crash does.
     private static var breadcrumbFD: Int32 = -1
+    /// High-water mark, so growth over a session is visible rather than inferred
+    /// from whichever sample happened to be logged last.
+    private static var peakMegabytes = 0
 
     static func install() {
         guard !started else { return }
@@ -108,7 +111,17 @@ enum LegacyDiagnostics {
     private static func startMemorySampler() {
         let timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in
             guard let megabytes = residentMegabytes() else { return }
-            AppLog.perf("rss \(megabytes) MB")
+            // Report the trend, not just the level. The plan assumed memory
+            // pressure on this 1 GB device; measurement says otherwise (76-78 MB
+            // in a long session), so the caps it called for are not justified
+            // yet. A rising high-water mark is what would justify them, and this
+            // is what would show it.
+            if megabytes > peakMegabytes {
+                peakMegabytes = megabytes
+                AppLog.perf("rss \(megabytes) MB (new peak)")
+            } else {
+                AppLog.perf("rss \(megabytes) MB (peak \(peakMegabytes) MB)")
+            }
         }
         RunLoop.main.add(timer, forMode: .common)
     }

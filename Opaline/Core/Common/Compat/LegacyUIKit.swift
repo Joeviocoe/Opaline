@@ -30,6 +30,26 @@ extension UICollectionViewDataSourcePrefetching {
 }
 
 extension UICollectionView {
+    /// Drives the prefetch shim, which iOS 9 will never call on its own.
+    ///
+    /// `UICollectionViewDataSourcePrefetching` is iOS 10. The shadowed protocol
+    /// lets the conformances compile, but nothing invokes it — so on iOS 9 the
+    /// feed and Shorts scroll with no lookahead at all, and every cell fetches
+    /// its thumbnail only once it is already on screen. Called from
+    /// `willDisplay`, this restores the behaviour using the hook iOS 9 does have.
+    func legacyPrefetchAhead(from indexPath: IndexPath, count: Int = 6) {
+        guard let source = prefetchDataSource else {
+            return
+        }
+        let items = numberOfItems(inSection: indexPath.section)
+        let upcoming = ((indexPath.item + 1)..<min(indexPath.item + 1 + count, items))
+            .map { IndexPath(item: $0, section: indexPath.section) }
+        guard !upcoming.isEmpty else {
+            return
+        }
+        source.collectionView(self, prefetchItemsAt: upcoming)
+    }
+
     private static var prefetchKey: UInt8 = 0
 
     var prefetchDataSource: UICollectionViewDataSourcePrefetching? {

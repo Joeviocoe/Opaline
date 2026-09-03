@@ -102,6 +102,14 @@ extension WatchViewController {
     }
 
     private func speedValue(_ item: AVPlayerItem?) -> String {
+        #if LEGACY_IOS9
+        // A composition's asset is not something AVFoundation fetched, so its
+        // access log is empty and this read "?" forever. The loopback server did
+        // the fetching and can answer directly.
+        if let bits = LegacyLoopbackServer.shared.recentBitsPerSecond(), bits > 0 {
+            return "\(Int(bits / 1_000)) Kbps"
+        }
+        #endif
         guard let bitrate = item?.accessLog()?.events.last?.observedBitrate,
               bitrate > 0 else {
             return "?"
@@ -110,6 +118,12 @@ extension WatchViewController {
     }
 
     private func transferredValue(_ item: AVPlayerItem?) -> String {
+        #if LEGACY_IOS9
+        let served = LegacyLoopbackServer.shared.totalBytesServed()
+        if served > 0 {
+            return String(format: "%.1f MB total", Double(served) / 1_048_576)
+        }
+        #endif
         let bytes = (item?.accessLog()?.events ?? [])
             .reduce(Int64(0)) { $0 + max(0, $1.numberOfBytesTransferred) }
         return String(

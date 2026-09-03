@@ -56,7 +56,23 @@ enum PlaybackChainSettings {
             guard let stored = stored else {
                 return Set(defaultEnabled)
             }
-            return Set(stored)
+            // A step the stored settings never knew about counts as enabled.
+            //
+            // `order` already appends unknown steps rather than dropping them;
+            // this is the same reasoning applied to the on/off set, which it was
+            // missing. Without it, anyone who had ever touched the chain screen
+            // would silently lose every step added afterwards — on this build
+            // that means `legacy.composition` disabled and playback quietly
+            // falling back to progressive 360p, with nothing in the log to say
+            // why.
+            //
+            // The stored ORDER is what distinguishes "switched off deliberately"
+            // from "did not exist yet": a step present there but absent from the
+            // enabled set was turned off on purpose and stays off.
+            let known = UserDefaults.standard
+                .stringArray(forKey: UserDefaultsKeys.Debug.playbackChainOrder) ?? []
+            let neverSeen = defaultEnabled.filter { !known.contains($0) }
+            return Set(stored).union(neverSeen)
         }
         set {
             UserDefaults.standard.set(
