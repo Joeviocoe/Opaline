@@ -579,3 +579,6 @@
 "keyboard.tab2" = "Abonelikler";
 "keyboard.toast.queued" = "Sıraya eklendi (%1$d)";
 "keyboard.stop" = "Durdur";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "Ayrıntılı günlük";

@@ -67,11 +67,21 @@ extension SubscriptionsViewController {
     /// the user: while a finger is down or the view is still decelerating,
     /// an offset past the end is an ordinary rubber-band bounce, and
     /// clamping it there would kill the bounce.
-    /// Dumps the scroll geometry when it changes, because two reasoned
-    /// guesses at the "stuck below the header" report were both wrong: the
-    /// clamp below never fired, so the offset is not past the end at all.
-    /// Stop theorising and read the actual numbers.
+    /// Offset, content height, bounds, header height, inset, bar state and
+    /// row count, printed whenever any of them changes.
+    ///
+    /// Gated by the single Settings -> Debug verbose switch like everything
+    /// else, rather than a compile-time constant — getting this data back
+    /// should cost a tap, not a four-minute rebuild and a Cydia refresh.
+    ///
+    /// It earned its keep once: it caught `insetTop=-6000` and killed two
+    /// confident-but-wrong theories about the list stranded below its header.
+    /// It was also 1247 lines for 4 useful events, which is why it is not on
+    /// by default.
     func logScrollGeometryIfChanged() {
+        guard AppLog.isVerbose else {
+            return
+        }
         let offset = Int(tableView.contentOffset.y)
         let content = Int(tableView.contentSize.height)
         let header = Int(tableView.tableHeaderView?.frame.height ?? -1)

@@ -490,3 +490,6 @@
 "keyboard.tab2" = "Підписки";
 "keyboard.toast.queued" = "Додано до черги (%1$d)";
 "keyboard.stop" = "Стоп";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "Докладний журнал";

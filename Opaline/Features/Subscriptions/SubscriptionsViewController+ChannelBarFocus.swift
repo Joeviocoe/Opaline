@@ -43,10 +43,19 @@ extension SubscriptionsViewController {
 
     /// Declining (no channels yet) lets `escapeTop()` log the usual "nothing
     /// to do" rather than silently eating the key.
+    ///
+    /// `claimFocus()` alone only reveals the focused avatar within the bar's
+    /// own horizontal scrolling -- nothing about it touches the *outer*
+    /// table, so landing focus here while scrolled down left the bar (the
+    /// table's header) sitting off the top of the screen, behind the
+    /// navigation bar, same as it would after any scroll -- a drag back to
+    /// the top is the only reason it looks fine from the touchscreen.
+    /// `scrollToTop()` is the same call a re-tap of this tab already makes.
     func listFocusDidReachTop() -> Bool {
         guard channelBarFocus.hasFocusableItem else {
             return false
         }
+        scrollToTop()
         channelBarFocus.claimFocus()
         return true
     }

@@ -633,3 +633,6 @@
 "keyboard.tab2" = "Subscriptions";
 "keyboard.toast.queued" = "Added to queue (%1$d)";
 "keyboard.stop" = "Stop";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "Verbose logging";

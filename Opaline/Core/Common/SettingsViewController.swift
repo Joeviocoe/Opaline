@@ -29,6 +29,7 @@ final class SettingsViewController: UIViewController {
         case resetIdentity
         case solverEndpoint
         case mainThreadWatchdog
+        case verboseLogging
         case shareLog
         case feedback, support
         case aboutVersion, aboutSystem, aboutModel
@@ -407,6 +408,16 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 "settings.row.solverServer".localized,
                 value: solverEndpointDisplay
             )
+        case .verboseLogging:
+            return makeToggleCell(
+                "settings.row.verboseLogging".localized,
+                isOn: AppLog.isVerbose
+            ) {
+                UserDefaults.standard.set(
+                    $0, forKey: UserDefaultsKeys.Debug.verboseLogging
+                )
+                AppLog.refreshVerbose()
+            }
         case .mainThreadWatchdog:
             let isOn = UserDefaults.standard.bool(
                 forKey: UserDefaultsKeys.Debug.mainThreadWatchdog

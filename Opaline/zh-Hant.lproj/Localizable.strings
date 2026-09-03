@@ -579,3 +579,6 @@
 "keyboard.tab2" = "訂閱";
 "keyboard.toast.queued" = "已加入播放佇列 (%1$d)";
 "keyboard.stop" = "停止";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "詳細日誌";

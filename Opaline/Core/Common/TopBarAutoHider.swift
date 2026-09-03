@@ -18,11 +18,34 @@ final class TopBarAutoHider {
     private weak var owner: UIViewController?
     private var lastOffsetY: CGFloat = 0
 
+    /// True from the moment a toggle starts until the layout it causes has
+    /// settled. Hiding the bar changes the scroll view's insets — and UIKit
+    /// adjusts the offset to match — so the toggle feeds a scroll event back
+    /// into `handleScroll`, which decides the *opposite* way and toggles
+    /// again. That is a real livelock, not a theoretical one: caught by
+    /// spindump on an iPad 3 with the main thread at 98.8% CPU, cycling
+    /// `scrollViewDidScroll -> setHidden -> setNavigationBarHidden -> layout`
+    /// for a solid minute before it broke out on its own.
+    private var isToggling = false
+    /// When the last toggle ran, so an oscillation cannot run free even if a
+    /// re-entrant path is missed.
+    private var lastToggleAt: CFTimeInterval = 0
+    /// Comfortably longer than the 0.22s bar animation below, so a toggle and
+    /// the layout it provokes are always finished before another can start.
+    private static let minimumToggleInterval: CFTimeInterval = 0.35
+
     init(owner: UIViewController) {
         self.owner = owner
     }
 
     func handleScroll(_ scrollView: UIScrollView) {
+        // Everything that moves while a toggle settles is UIKit's doing, not
+        // the user's. Track the offset so the next real gesture measures from
+        // where the content actually is, but decide nothing from it.
+        guard !isToggling else {
+            lastOffsetY = scrollView.contentOffset.y
+            return
+        }
         // Deltas use the raw offset, not the inset-adjusted position:
         // hiding the bar shrinks adjustedContentInset, which would
         // read as a fake scroll-up and pop the bar right back out.
@@ -43,8 +66,10 @@ final class TopBarAutoHider {
         }
     }
 
+    /// Never rate-limited: leaving a screen, or a programmatic scroll to the
+    /// top, must put the bar back whatever the auto-hiding was doing.
     func showBars() {
-        setHidden(false)
+        setHidden(false, force: true)
     }
 
     /// Content shorter than the viewport would still trigger hides
@@ -63,13 +88,28 @@ final class TopBarAutoHider {
             - scrollView.bounds.height
     }
 
-    private func setHidden(_ hidden: Bool) {
+    private func setHidden(_ hidden: Bool, force: Bool = false) {
         guard isHidden != hidden else {
             return
         }
+        // The state guard above stops a repeat of the same state, but not an
+        // alternation between two — which is exactly what the livelock is.
+        let now = CACurrentMediaTime()
+        guard force || now - lastToggleAt >= Self.minimumToggleInterval else {
+            return
+        }
+        lastToggleAt = now
         isHidden = hidden
+        isToggling = true
         owner?.visibleNavigationController?
             .setNavigationBarHidden(hidden, animated: true)
+        // Released a beat after the animation, on the main queue, so every
+        // layout pass the toggle provokes has been and gone first.
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Self.minimumToggleInterval
+        ) { [weak self] in
+            self?.isToggling = false
+        }
         guard let onChange = onChange else {
             return
         }

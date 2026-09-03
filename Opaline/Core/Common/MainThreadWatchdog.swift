@@ -30,6 +30,17 @@ final class MainThreadWatchdog {
     // sustained freeze coalesces into one suppressed-count line instead of
     // flooding the log.
     private let maxLogsPerSecond = 3
+    /// Floor for reporting a stall at all. **Set to 0 to restore the old
+    /// report-every-hitch behaviour** — the detection itself is unchanged,
+    /// this only decides what is worth a line.
+    ///
+    /// Raised rather than tightening the rate limit: the rate limit coalesces
+    /// a burst, but a steady drip of 33 ms hitches slips under it all day and
+    /// still fills the log.
+    private static let minimumReportedStall: CFTimeInterval = 0.25
+    /// At or above this, the stall is logged even with verbose off — it is a
+    /// freeze somebody noticed, not a hitch. 42 lines in a 9858-line sample.
+    private static let alwaysReportedStallMs: Double = 1000
     private var windowStart: CFTimeInterval = 0
     private var loggedInWindow = 0
     private var suppressedInWindow = 0
@@ -163,7 +174,14 @@ final class MainThreadWatchdog {
         // it reads 0 before then, which would make the threshold 0 and turn
         // every single tick into a reported stall.
         let frame = link.duration
-        guard frame > 0, delta > frame * 2 else {
+        // Two frames (~33 ms) reported every hitch: 1385 lines in one
+        // session, almost all of them 33-183 ms and not actionable. The
+        // stalls that have mattered on this hardware were 20-60 SECONDS, and
+        // AppLog rotates at 512 KB, so the trivia was pushing the evidence of
+        // real freezes out of the file. A quarter second is still well below
+        // anything a person would call a stall.
+        guard frame > 0, delta > frame * 2, delta >= Self.minimumReportedStall
+        else {
             return
         }
         handleStall(deltaSeconds: delta, frameDuration: frame, now: link.timestamp)
@@ -195,15 +213,22 @@ final class MainThreadWatchdog {
         }
         loggedInWindow += 1
         let frameWord = droppedFrames == 1 ? "frame" : "frames"
-        AppLog.perf(
-            String(
-                format: "stall %.0fms (%d %@ dropped) on %@",
-                ms,
-                droppedFrames,
-                frameWord,
-                screen
-            )
+        let line = String(
+            format: "stall %.0fms (%d %@ dropped) on %@",
+            ms,
+            droppedFrames,
+            frameWord,
+            screen
         )
+        // A stall this long is a freeze the user felt, so it is recorded even
+        // with verbose logging off. Without it a hang leaves no trace at all,
+        // and the silence of this file is what `hang-diag` measures a freeze
+        // by — total silence would look exactly like a healthy idle app.
+        if ms >= Self.alwaysReportedStallMs {
+            AppLog.always("Perf", line)
+        } else {
+            AppLog.perf(line)
+        }
     }
 
     private func recordTally(screen: String, ms: Double) {

@@ -493,3 +493,6 @@
 "keyboard.tab2" = "Подписки";
 "keyboard.toast.queued" = "Добавлено в очередь (%1$d)";
 "keyboard.stop" = "Стоп";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "Подробный журнал";

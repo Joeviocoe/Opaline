@@ -215,7 +215,8 @@ extension SettingsViewController {
     private var debugSections: [Section] {
         var rows: [Row] = [.playbackChain]
         rows.append(contentsOf: [
-            .resetIdentity, .solverEndpoint, .mainThreadWatchdog, .shareLog
+            .resetIdentity, .solverEndpoint, .mainThreadWatchdog,
+            .verboseLogging, .shareLog
         ])
         return [
             Section(

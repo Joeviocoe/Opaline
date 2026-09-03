@@ -575,3 +575,6 @@
 "keyboard.tab2" = "Abonnements";
 "keyboard.toast.queued" = "Ajouté à la file d'attente (%1$d)";
 "keyboard.stop" = "Arrêter";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "Journalisation détaillée";

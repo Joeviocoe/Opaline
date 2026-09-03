@@ -575,3 +575,6 @@
 "keyboard.tab2" = "Iscrizioni";
 "keyboard.toast.queued" = "Aggiunto alla coda (%1$d)";
 "keyboard.stop" = "Interrompi";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "Log dettagliato";

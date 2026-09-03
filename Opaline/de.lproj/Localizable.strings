@@ -577,3 +577,6 @@
 "keyboard.tab2" = "Abos";
 "keyboard.toast.queued" = "Zur Warteschlange hinzugefügt (%1$d)";
 "keyboard.stop" = "Stopp";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.verboseLogging" = "Ausführliche Protokollierung";

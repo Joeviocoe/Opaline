@@ -37,7 +37,50 @@ enum AppLog {
         logDirectory.appendingPathComponent("opaline.prev.log")
     }
 
+    /// Verbose logging, off unless Settings -> Debug turns it on.
+    ///
+    /// Cached rather than read per line: this is called from playback's hot
+    /// paths, where the loopback server alone produced ~1300 lines a session.
+    /// `refreshVerbose()` re-reads it when the toggle changes.
+    private static var verboseEnabled = UserDefaults.standard.bool(
+        forKey: UserDefaultsKeys.Debug.verboseLogging
+    )
+
+    static var isVerbose: Bool {
+        verboseEnabled
+    }
+
+    static func refreshVerbose() {
+        verboseEnabled = UserDefaults.standard.bool(
+            forKey: UserDefaultsKeys.Debug.verboseLogging
+        )
+        always("App", "verbose logging \(verboseEnabled ? "ON" : "OFF")")
+    }
+
+    /// Everything routes here, so switching it off silences every category at
+    /// once with no call-site changes. A normal session then writes only the
+    /// handful of `always` lines below — 62 in a 9858-line sample — which is
+    /// nowhere near the 512 KB rotation, so the history stops being destroyed
+    /// by its own noise.
     static func log(_ tag: String, _ message: String) {
+        guard verboseEnabled else {
+            return
+        }
+        write(tag, message)
+    }
+
+    /// Logged whether or not verbose is on. Deliberately tiny: the launch
+    /// banner, real failures, and stalls long enough to be a freeze.
+    ///
+    /// The stalls are the important ones. Without them a hang leaves no trace
+    /// at all, and `hang-diag` measures how long the app has been stuck from
+    /// when this file last grew — silence is the signal, so total silence
+    /// would be indistinguishable from a healthy idle app.
+    static func always(_ tag: String, _ message: String) {
+        write(tag, message)
+    }
+
+    private static func write(_ tag: String, _ message: String) {
         let ts = fmt.string(from: Date())
         let line = "[\(ts)] [\(tag)] \(message)"
         // swiftlint:disable:next no_debug_print
@@ -142,7 +185,7 @@ enum AppLog {
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         let device = UIDevice.current
-        log(
+        always(
             "App",
             "Opaline \(version) (\(build)) built \(buildTimestamp()) — \(hardwareModel())"
                 + ", \(device.systemName) \(device.systemVersion)"

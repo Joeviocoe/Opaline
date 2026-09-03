@@ -39,12 +39,12 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     var stashedSeenVideoIds: Set<String> = []
     var isLoadingInitial = true
     var signInPrompt: SignInEmptyStateView?
+    /// Last geometry printed by the (default-off) scroll-geometry diagnostic,
+    /// so it reports on change rather than on every layout pass.
+    var lastScrollSignature = ""
     /// Shown instead of the sign-in prompt when the local library is the
     /// source and simply has nothing in it yet.
     var localEmptyState: LocalEmptyStateView?
-    /// Last logged scroll geometry, so the diagnostic prints on change
-    /// rather than on every layout pass.
-    var lastScrollSignature = ""
     lazy var topBarHider = TopBarAutoHider(owner: self)
     // New-content dots (issue #13): derived state, never persisted.
     var newContentChannelIds: Set<String> = []
@@ -121,6 +121,10 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateChannelBarFrame()
+        // Before the offset clamp: that one reads the inset to work out where
+        // the top is, so a negative inset would make it compute against a
+        // boundary that should not exist.
+        clampNegativeTopInset()
         clampScrollIfPastEnd()
     }
 

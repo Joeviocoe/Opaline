@@ -131,6 +131,10 @@ enum UserDefaultsKeys {
         static let playbackChainEnabled = "debug_playbackChainEnabled"
         static let serverBaseURL = "debug_serverBaseURL"
         static let mainThreadWatchdog = "debug_mainThreadWatchdog"
+        /// Every `AppLog` category except the launch banner, real failures
+        /// and freeze-length stalls. Absent = off, so a normal session writes
+        /// almost nothing and the log never rotates away its own evidence.
+        static let verboseLogging = "debug_verboseLogging"
     }
 
     enum Migration {
