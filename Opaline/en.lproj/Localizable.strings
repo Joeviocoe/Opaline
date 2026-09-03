@@ -616,3 +616,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "Show Shorts in Subscriptions";
 "settings.footer.subscriptionsShorts" = "Off by default: Subscriptions is for the videos of channels you chose. Turning this on adds their Shorts to the list, and to a channel you filter by.";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Play/Pause";
+"keyboard.seekBack" = "Rewind";
+"keyboard.seekForward" = "Fast Forward";
+"keyboard.fullscreen" = "Full Screen";
+"keyboard.mute" = "Mute";
+"keyboard.next" = "Next Video";
+"keyboard.previous" = "Previous Video";
+"keyboard.close" = "Close";
+"keyboard.search" = "Search";
+"keyboard.open" = "Open";
+"keyboard.subtitles" = "Subtitles";
+"keyboard.queue" = "Queue";
+"keyboard.tab1" = "Home";
+"keyboard.tab2" = "Subscriptions";
+"keyboard.toast.queued" = "Added to queue (%1$d)";
+"keyboard.stop" = "Stop";

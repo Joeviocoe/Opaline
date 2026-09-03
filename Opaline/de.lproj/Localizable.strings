@@ -560,3 +560,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "Shorts in Abos anzeigen";
 "settings.footer.subscriptionsShorts" = "Standardmäßig aus: In den Abos geht es um die Videos der Kanäle, die du ausgewählt hast. Aktiviert, erscheinen deren Shorts in der Liste und bei einem gefilterten Kanal.";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Wiedergabe/Pause";
+"keyboard.seekBack" = "Zurückspulen";
+"keyboard.seekForward" = "Vorspulen";
+"keyboard.fullscreen" = "Vollbild";
+"keyboard.mute" = "Stumm";
+"keyboard.next" = "Nächstes Video";
+"keyboard.previous" = "Vorheriges Video";
+"keyboard.close" = "Schließen";
+"keyboard.search" = "Suchen";
+"keyboard.open" = "Öffnen";
+"keyboard.subtitles" = "Untertitel";
+"keyboard.queue" = "Warteschlange";
+"keyboard.tab1" = "Start";
+"keyboard.tab2" = "Abos";
+"keyboard.toast.queued" = "Zur Warteschlange hinzugefügt (%1$d)";
+"keyboard.stop" = "Stopp";

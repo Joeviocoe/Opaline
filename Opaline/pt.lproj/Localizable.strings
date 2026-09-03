@@ -558,3 +558,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "Mostrar Shorts nas Inscrições";
 "settings.footer.subscriptionsShorts" = "Desativado por predefinição: as Inscrições são para os vídeos dos canais que escolheu. Ao ativar, os Shorts deles aparecem na lista e num canal filtrado.";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Reproduzir/Pausar";
+"keyboard.seekBack" = "Retroceder";
+"keyboard.seekForward" = "Avançar";
+"keyboard.fullscreen" = "Ecrã inteiro";
+"keyboard.mute" = "Silenciar";
+"keyboard.next" = "Vídeo seguinte";
+"keyboard.previous" = "Vídeo anterior";
+"keyboard.close" = "Fechar";
+"keyboard.search" = "Pesquisar";
+"keyboard.open" = "Abrir";
+"keyboard.subtitles" = "Legendas";
+"keyboard.queue" = "Fila";
+"keyboard.tab1" = "Início";
+"keyboard.tab2" = "Subscrições";
+"keyboard.toast.queued" = "Adicionado à fila (%1$d)";
+"keyboard.stop" = "Parar";

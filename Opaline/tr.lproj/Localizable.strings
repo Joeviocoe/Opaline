@@ -562,3 +562,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "Aboneliklerde Shorts'u göster";
 "settings.footer.subscriptionsShorts" = "Varsayılan olarak kapalı: Abonelikler, seçtiğiniz kanalların videoları içindir. Açtığınızda bu kanalların Shorts videoları listeye ve filtrelediğiniz kanala eklenir.";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Oynat/Duraklat";
+"keyboard.seekBack" = "Geri sar";
+"keyboard.seekForward" = "İleri sar";
+"keyboard.fullscreen" = "Tam ekran";
+"keyboard.mute" = "Sessiz";
+"keyboard.next" = "Sonraki video";
+"keyboard.previous" = "Önceki video";
+"keyboard.close" = "Kapat";
+"keyboard.search" = "Ara";
+"keyboard.open" = "Aç";
+"keyboard.subtitles" = "Altyazılar";
+"keyboard.queue" = "Sıra";
+"keyboard.tab1" = "Ana sayfa";
+"keyboard.tab2" = "Abonelikler";
+"keyboard.toast.queued" = "Sıraya eklendi (%1$d)";
+"keyboard.stop" = "Durdur";

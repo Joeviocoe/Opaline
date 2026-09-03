@@ -473,3 +473,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "Показувати Shorts у підписках";
 "settings.footer.subscriptionsShorts" = "Типово вимкнено: розділ підписок — для відео тих каналів, які ви обрали. Якщо ввімкнути, їхні Shorts з'являться у списку та на відфільтрованому каналі.";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Відтворити/Пауза";
+"keyboard.seekBack" = "Назад";
+"keyboard.seekForward" = "Вперед";
+"keyboard.fullscreen" = "На весь екран";
+"keyboard.mute" = "Без звуку";
+"keyboard.next" = "Наступне відео";
+"keyboard.previous" = "Попереднє відео";
+"keyboard.close" = "Закрити";
+"keyboard.search" = "Пошук";
+"keyboard.open" = "Відкрити";
+"keyboard.subtitles" = "Субтитри";
+"keyboard.queue" = "Черга";
+"keyboard.tab1" = "Головна";
+"keyboard.tab2" = "Підписки";
+"keyboard.toast.queued" = "Додано до черги (%1$d)";
+"keyboard.stop" = "Стоп";

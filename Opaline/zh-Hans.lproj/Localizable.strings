@@ -562,3 +562,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "在订阅内容中显示 Shorts";
 "settings.footer.subscriptionsShorts" = "默认关闭：订阅页面用于查看你所选频道的视频。开启后，这些频道的 Shorts 会出现在列表和你筛选的频道中。";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "播放/暂停";
+"keyboard.seekBack" = "快退";
+"keyboard.seekForward" = "快进";
+"keyboard.fullscreen" = "全屏";
+"keyboard.mute" = "静音";
+"keyboard.next" = "下一个视频";
+"keyboard.previous" = "上一个视频";
+"keyboard.close" = "关闭";
+"keyboard.search" = "搜索";
+"keyboard.open" = "打开";
+"keyboard.subtitles" = "字幕";
+"keyboard.queue" = "播放队列";
+"keyboard.tab1" = "首页";
+"keyboard.tab2" = "订阅";
+"keyboard.toast.queued" = "已加入播放队列 (%1$d)";
+"keyboard.stop" = "停止";

@@ -3,7 +3,9 @@ import UIKit
 /// A vertical Shorts poster with its title and view count. Shared UI: the
 /// subscriptions shelf and the channel's Shorts grid both show this 9:16
 /// card, only the layout around it differs.
-final class ShortThumbnailCell: UICollectionViewCell {
+final class ShortThumbnailCell: UICollectionViewCell, FocusableVideoCell {
+    /// What `q` queues when the keyboard's focus ring lands on this cell.
+    var focusVideo: Video?
     static let reuseIdentifier = "ShortThumbnailCell"
     private static let titleFont = UIFont.systemFont(ofSize: 13, weight: .medium)
     private static let viewsFont = UIFont.systemFont(ofSize: 12)
@@ -43,10 +45,12 @@ final class ShortThumbnailCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         poster.cancel()
+        focusVideo = nil
         poster.image = nil
     }
 
     func configure(with video: Video) {
+        focusVideo = video
         titleLabel.text = video.title
         viewsLabel.text = video.viewCount
         // The short's own first frame — feed thumbnails are landscape and

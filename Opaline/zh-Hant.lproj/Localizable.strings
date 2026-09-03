@@ -562,3 +562,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "在訂閱內容中顯示 Shorts";
 "settings.footer.subscriptionsShorts" = "預設關閉：訂閱頁面用於查看你所選頻道的影片。開啟後，這些頻道的 Shorts 會出現在列表和你篩選的頻道中。";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "播放/暫停";
+"keyboard.seekBack" = "快退";
+"keyboard.seekForward" = "快轉";
+"keyboard.fullscreen" = "全螢幕";
+"keyboard.mute" = "靜音";
+"keyboard.next" = "下一部影片";
+"keyboard.previous" = "上一部影片";
+"keyboard.close" = "關閉";
+"keyboard.search" = "搜尋";
+"keyboard.open" = "開啟";
+"keyboard.subtitles" = "字幕";
+"keyboard.queue" = "播放佇列";
+"keyboard.tab1" = "首頁";
+"keyboard.tab2" = "訂閱";
+"keyboard.toast.queued" = "已加入播放佇列 (%1$d)";
+"keyboard.stop" = "停止";

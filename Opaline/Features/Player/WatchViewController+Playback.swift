@@ -179,10 +179,10 @@ extension WatchViewController {
                 artworkURL: URL(string: initialVideo.thumbnailURL)
             ),
             onNext: { [weak self] in
-                self?.playNextFromRemote()
+                self?.remoteNextTrack()
             },
             onPrevious: { [weak self] in
-                self?.previousFromRemote()
+                self?.remotePreviousTrack()
             },
             onPause: { [weak self] in
                 self?.videoPlayerView?.multitaskPause.lastUserPause =

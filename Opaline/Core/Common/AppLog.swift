@@ -132,6 +132,7 @@ enum AppLog {
     static func downloads(_ msg: String) { log("Downloads", msg) }
     static func perf(_ msg: String) { log("Perf", msg) }
     static func library(_ msg: String) { log("Library", msg) }
+    static func keys(_ msg: String) { log("Keys", msg) }
 
     /// First line of every session: which build is running, on what. Without
     /// it a log is ambiguous — the same symptom means different things on a

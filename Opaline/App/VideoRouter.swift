@@ -35,10 +35,18 @@ final class VideoRouter {
 
     /// - Parameter shorts: how the shorts feed continues past `video` —
     ///   see `ShortsEntry`.
+    /// - Parameter startsExpanded: false keeps a freshly created panel at the
+    ///   mini bar rather than opening full screen — for `q` on an empty
+    ///   queue, which is meant to start something playing in the background
+    ///   without pulling the screen the user was browsing out from under
+    ///   them. Only matters the first time: once a panel already exists,
+    ///   loading a new video into it always expands, same as a tap always
+    ///   has.
     func open(
         video: Video,
         from presenter: UIViewController,
-        shorts: ShortsEntry = .pool([])
+        shorts: ShortsEntry = .pool([]),
+        startsExpanded: Bool = true
     ) {
         if video.isShort,
            ShortsPlayerMode.selected == .vertical,
@@ -71,7 +79,11 @@ final class VideoRouter {
             self.panel = nil
             return
         }
-        tabBar.installPlayerPanel(newPanel)
+        // installPlayerPanel decides expand vs. collapse itself, rather than
+        // this racing a second collapse call against its own unconditional
+        // expand -- that race is what left a fresh panel's mini bar never
+        // actually shown, and watchVC first responder regardless.
+        tabBar.installPlayerPanel(newPanel, startsExpanded: startsExpanded)
     }
 
     /// Opens a video known only by id — e.g. a `ytlite://` deep link or a

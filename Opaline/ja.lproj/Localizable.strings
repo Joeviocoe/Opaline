@@ -562,3 +562,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "登録チャンネルにショートを表示";
 "settings.footer.subscriptionsShorts" = "初期設定はオフです。登録チャンネルの画面は、選んだチャンネルの動画のための場所です。オンにすると、ショートもリストと絞り込んだチャンネルに表示されます。";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "再生/一時停止";
+"keyboard.seekBack" = "巻き戻す";
+"keyboard.seekForward" = "早送り";
+"keyboard.fullscreen" = "フルスクリーン";
+"keyboard.mute" = "ミュート";
+"keyboard.next" = "次の動画";
+"keyboard.previous" = "前の動画";
+"keyboard.close" = "閉じる";
+"keyboard.search" = "検索";
+"keyboard.open" = "開く";
+"keyboard.subtitles" = "字幕";
+"keyboard.queue" = "再生キュー";
+"keyboard.tab1" = "ホーム";
+"keyboard.tab2" = "登録チャンネル";
+"keyboard.toast.queued" = "再生キューに追加しました (%1$d)";
+"keyboard.stop" = "停止";

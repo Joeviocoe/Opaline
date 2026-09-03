@@ -476,3 +476,20 @@
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "Показывать Shorts в подписках";
 "settings.footer.subscriptionsShorts" = "По умолчанию выключено: раздел подписок — для видео тех каналов, которые вы выбрали. Если включить, их Shorts появятся в списке и на отфильтрованном канале.";
+/* Hardware keyboard shortcuts (hold Command to see them) */
+"keyboard.playPause" = "Воспроизведение/Пауза";
+"keyboard.seekBack" = "Назад";
+"keyboard.seekForward" = "Вперёд";
+"keyboard.fullscreen" = "Полный экран";
+"keyboard.mute" = "Без звука";
+"keyboard.next" = "Следующее видео";
+"keyboard.previous" = "Предыдущее видео";
+"keyboard.close" = "Закрыть";
+"keyboard.search" = "Поиск";
+"keyboard.open" = "Открыть";
+"keyboard.subtitles" = "Субтитры";
+"keyboard.queue" = "Очередь";
+"keyboard.tab1" = "Главная";
+"keyboard.tab2" = "Подписки";
+"keyboard.toast.queued" = "Добавлено в очередь (%1$d)";
+"keyboard.stop" = "Стоп";

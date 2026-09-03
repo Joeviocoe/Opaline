@@ -48,6 +48,13 @@ final class PlaybackQueue {
         videos[safe: currentIndex + 1]
     }
 
+    /// The queue entry behind the one playing, symmetric with `nextVideo`.
+    /// `videos[safe:]` returns nil for the negative index at the head of the
+    /// queue rather than trapping, so this needs no bounds check of its own.
+    var previousVideo: Video? {
+        videos[safe: currentIndex - 1]
+    }
+
     private init() {}
 
     func setQueue(
