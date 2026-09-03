@@ -71,7 +71,10 @@ def build_plist(app, version):
         "CFBundlePackageType": "APPL",
         "CFBundleSignature": "????",
         "CFBundleShortVersionString": version,
-        "CFBundleVersion": version,
+        # Marketing version stays upstream's; the build number carries OUR
+        # packaging version, so a crash report names the build it came from.
+        # Five rounds of reports all said 1.11.0 and could not be told apart.
+        "CFBundleVersion": os.environ.get("BUNDLE_BUILD", version),
         "CFBundleInfoDictionaryVersion": "6.0",
         "CFBundleSupportedPlatforms": ["iPhoneOS"],
         "CFBundleIconFiles": icons,

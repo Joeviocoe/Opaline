@@ -18,6 +18,24 @@ SDK="${SDK:-$HOME/legacy-ios9/toolchain/xc12/Xcode.app/Contents/Developer/Platfo
 TARGET="${TARGET:-armv7-apple-ios9.3}"
 MANIFEST="$BUILD/generated/LegacyAssetManifest.swift"
 
+# A typecheck and a build both drive Darling, and running them together makes
+# each take far longer than either alone -- measured: a typecheck that normally
+# takes 20s hit a 180s timeout, and the build it was competing with ran 11
+# minutes against a usual 8. Wait rather than fight.
+LOCK="${RUN:-$HOME/legacy-ios9/run}/build.lock"
+if [ -f "$LOCK" ]; then
+    BUILD_PID="$(sed -n 1p "$LOCK" 2>/dev/null)"
+    if [ -n "$BUILD_PID" ] && kill -0 "$BUILD_PID" 2>/dev/null; then
+        echo "[$(date +%H:%M:%S)] a build is running (pid $BUILD_PID); waiting for it"
+        WAITED=0
+        while kill -0 "$BUILD_PID" 2>/dev/null && [ "$WAITED" -lt 900 ]; do
+            sleep 10
+            WAITED=$((WAITED + 10))
+        done
+        echo "[$(date +%H:%M:%S)] build finished after ${WAITED}s; starting typecheck"
+    fi
+fi
+
 echo "[$(date +%H:%M:%S)] generating asset manifest"
 python3 "$REPO/scripts/legacy/flatten-assets.py" \
     --catalog "$REPO/Opaline/Assets.xcassets" \

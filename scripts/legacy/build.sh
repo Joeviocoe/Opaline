@@ -15,7 +15,7 @@
 #   ./build.sh              full build
 #   ./build.sh --sources    print the resolved source list and exit
 #
-# Env: SWIFTC, SDK, TARGET, MODE=perfile|wmo, JOBS, OPT
+# Env: SWIFTC, SDK, TARGET, MODE=wmo|perfile (perfile is BROKEN), JOBS, OPT
 set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -27,7 +27,10 @@ mkdir -p "$LOG_DIR" "$BUILD/obj" "$BUILD/logs"
 SWIFTC="${SWIFTC:-$REPO/scripts/legacy/darling-swiftc}"
 SDK="${SDK:-$TOOLS/xc12/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.5.sdk}"
 TARGET="${TARGET:-armv7-apple-ios9.3}"
-MODE="${MODE:-perfile}"
+# wmo is the proven path and the only one that has ever produced a binary.
+# perfile passes -primary-file, which is a frontend-only flag the driver
+# rejects outright, so it fails on the first file every time.
+MODE="${MODE:-wmo}"
 JOBS="${JOBS:-$(nproc)}"
 OPT="${OPT:--Osize}"
 MODULE=Opaline
@@ -71,7 +74,11 @@ RUN_DIR="${RUN:-$HOME/legacy-ios9/run}"
 mkdir -p "$RUN_DIR"
 LOCK="$RUN_DIR/build.lock"
 
-if [ -f "$LOCK" ]; then
+# --sources is a QUERY, not a build, and must take no lock and stop nothing.
+# typecheck.sh calls it on every run; without this guard each typecheck saw the
+# running build's lock, killed it and ran `darling shutdown` -- the lock meant to
+# protect builds was destroying them.
+if [ "$SOURCES_ONLY" -eq 0 ] && [ -f "$LOCK" ]; then
     OLD_PID="$(sed -n 1p "$LOCK" 2>/dev/null)"
     KILLED=0
     if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
@@ -92,8 +99,10 @@ if [ -f "$LOCK" ]; then
     fi
     rm -f "$LOCK"
 fi
-printf '%s\n' "$$" > "$LOCK"
-trap 'rm -f "$LOCK"' EXIT INT TERM
+if [ "$SOURCES_ONLY" -eq 0 ]; then
+    printf '%s\n' "$$" > "$LOCK"
+    trap 'rm -f "$LOCK"' EXIT INT TERM
+fi
 
 T0=$SECONDS
 PHASE_T=$SECONDS
