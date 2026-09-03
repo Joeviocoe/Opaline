@@ -145,6 +145,9 @@ enum LegacyProgressiveRemux {
         // Defaults from tfhd, used when trun omits per-sample values.
         var defaultDuration: UInt32 = 0
         var defaultSize: UInt32 = 0
+        /// `default_sample_flags`. Nil when tfhd omits it, which is the only
+        /// case where a sample carries no sync information at all.
+        var defaultFlags: UInt32?
         if let tfhd = MP4Box.find("tfhd", in: data, from: traf.payloadStart, to: traf.payloadEnd),
            let rawFlags = MP4Box.be32(data, base + tfhd.payloadStart) {
             let flags = rawFlags & 0x00FF_FFFF
@@ -157,6 +160,10 @@ enum LegacyProgressiveRemux {
             }
             if flags & 0x10 != 0 {
                 defaultSize = MP4Box.be32(data, base + cursor) ?? 0
+                cursor += 4
+            }
+            if flags & 0x20 != 0 {
+                defaultFlags = MP4Box.be32(data, base + cursor)
                 cursor += 4
             }
         }
@@ -181,7 +188,14 @@ enum LegacyProgressiveRemux {
         let count = Int(rawCount)
         var cursor = trun.payloadStart + 8
         if trunFlags & 0x0001 != 0 { cursor += 4 } // data_offset
-        if trunFlags & 0x0004 != 0 { cursor += 4 } // first_sample_flags
+        // first_sample_flags. Skipping this was a real bug: YouTube marks the
+        // opening keyframe of every fragment here and nowhere else, so
+        // discarding it left the whole fragment looking like keyframes.
+        var firstSampleFlags: UInt32?
+        if trunFlags & 0x0004 != 0 {
+            firstSampleFlags = MP4Box.be32(data, base + cursor)
+            cursor += 4
+        }
 
         // Media follows the moof box.
         var mediaCursor = moofOrigin + Int64(moof.next)
@@ -198,7 +212,10 @@ enum LegacyProgressiveRemux {
         for index in 0..<count {
             var duration = defaultDuration
             var size = defaultSize
-            var flags: UInt32 = 0
+            // Precedence per ISO/IEC 14496-12: per-sample flags, else
+            // first_sample_flags for sample 0, else the tfhd default.
+            var flags: UInt32 = (index == 0 ? firstSampleFlags : nil)
+                ?? defaultFlags ?? 0
             if trunFlags & 0x0100 != 0 {
                 guard let value = MP4Box.be32(data, base + cursor) else {
                     truncated = true
@@ -236,11 +253,16 @@ enum LegacyProgressiveRemux {
             }
             // sample_is_non_sync_sample lives in bit 16 of the sample flags.
             let nonSync = (flags & 0x0001_0000) != 0
+            // With no per-sample flags, no first_sample_flags and no tfhd
+            // default, nothing in the fragment states sync at all; the opening
+            // sample is the only safe assumption.
+            let undeclared = trunFlags & 0x0400 == 0
+                && firstSampleFlags == nil && defaultFlags == nil
             samples.append(Sample(
                 size: size,
                 duration: duration,
                 compositionOffset: compositionOffset,
-                isSync: index == 0 ? true : !nonSync,
+                isSync: undeclared ? index == 0 : !nonSync,
                 originOffset: mediaCursor
             ))
             mediaCursor += Int64(size)
@@ -312,7 +334,7 @@ enum LegacyProgressiveRemux {
             // form costs 8 bytes and removes the question entirely.
             out.append(MP4Box.u32(1))
             out.append(contentsOf: Array("mdat".utf8))
-            var length = UInt64(mediaLength + 16)
+            let length = UInt64(mediaLength + 16)
             var big = Data()
             for shift in stride(from: 56, through: 0, by: -8) {
                 big.append(UInt8((length >> UInt64(shift)) & 0xFF))
@@ -691,6 +713,21 @@ enum LegacyProgressiveRemux {
                 var stss = MP4Box.u32(syncCount)
                 stss.append(syncs)
                 body.append(MP4Box.fullBox("stss", version: 0, flags: 0, stss))
+                let gop = samples.count / max(Int(syncCount), 1)
+                AppLog.player(
+                    "remux: stss \(syncCount) sync of \(samples.count)"
+                        + " samples, GOP ~\(gop)"
+                )
+            } else {
+                // Omitting stss declares every sample a sync sample. For video
+                // that is almost never true, and it fails only on an exact seek,
+                // which lands mid-GOP on a frame the decoder cannot start from
+                // and then starves with no error. Worth shouting about.
+                AppLog.player(
+                    "remux: WARNING no stss for video —"
+                        + " \(syncCount) sync of \(samples.count) samples;"
+                        + " exact seeks will land mid-GOP"
+                )
             }
         }
         return body
