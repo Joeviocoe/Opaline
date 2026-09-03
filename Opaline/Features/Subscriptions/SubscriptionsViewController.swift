@@ -42,6 +42,9 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     /// Shown instead of the sign-in prompt when the local library is the
     /// source and simply has nothing in it yet.
     var localEmptyState: LocalEmptyStateView?
+    /// Last logged scroll geometry, so the diagnostic prints on change
+    /// rather than on every layout pass.
+    var lastScrollSignature = ""
     lazy var topBarHider = TopBarAutoHider(owner: self)
     // New-content dots (issue #13): derived state, never persisted.
     var newContentChannelIds: Set<String> = []
@@ -103,6 +106,12 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
             name: .shortsGroupingSettingDidChange,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleShowShortsChange),
+            name: .subscriptionsShortsSettingDidChange,
+            object: nil
+        )
         ToolbarManager.shared.install(in: self)
         observeTokenRefresh()
         observeLocalSubscriptions()
@@ -112,6 +121,7 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateChannelBarFrame()
+        clampScrollIfPastEnd()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -161,6 +171,9 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
 
     @objc
     func handleShowShortsChange() {
+        // Same reason as a subscription change: the list is replaced, and a
+        // shorter one under a scrolled table strands the header off-screen.
+        resetScrollForReplacedContent()
         cache.clearSubscriptionsFeed()
         // The setting decides which Atom feed each channel is read from, so
         // the assembled local feed is stale the moment it changes.

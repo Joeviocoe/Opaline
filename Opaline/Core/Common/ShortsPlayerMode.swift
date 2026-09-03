@@ -54,8 +54,38 @@ enum ShortsGrouping {
     }
 }
 
+/// Whether the Subscriptions screen carries Shorts at all — the whole list
+/// and a single filtered channel alike.
+///
+/// Off by default, unlike the global Shorts setting. Subscriptions is the
+/// screen people go to for the videos of channels they chose, and a shelf of
+/// short-form in the middle of it is not what most of them are looking for.
+/// On this hardware it also costs the most: each short resolved for the
+/// vertical viewer builds a synthesized progressive MP4.
+enum SubscriptionsShorts {
+    static var isEnabled: Bool {
+        get {
+            UserDefaults.standard.object(
+                forKey: UserDefaultsKeys.Feed.subscriptionsShowShorts
+            ) as? Bool ?? false
+        }
+        set {
+            UserDefaults.standard.set(
+                newValue,
+                forKey: UserDefaultsKeys.Feed.subscriptionsShowShorts
+            )
+            NotificationCenter.default.post(
+                name: .subscriptionsShortsSettingDidChange, object: nil
+            )
+        }
+    }
+}
+
 extension Notification.Name {
     static let shortsGroupingSettingDidChange = Notification.Name(
         "shortsGroupingSettingDidChange"
+    )
+    static let subscriptionsShortsSettingDidChange = Notification.Name(
+        "subscriptionsShortsSettingDidChange"
     )
 }

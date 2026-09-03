@@ -472,3 +472,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "Không có video gần đây từ các kênh bạn theo dõi";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "Hiển thị Shorts trong Kênh đăng ký";
+"settings.footer.subscriptionsShorts" = "Mặc định tắt: mục Kênh đăng ký dành cho video của những kênh bạn đã chọn. Khi bật, Shorts của họ sẽ xuất hiện trong danh sách và ở kênh bạn lọc.";

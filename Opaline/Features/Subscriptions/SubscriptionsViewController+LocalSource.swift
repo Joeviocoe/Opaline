@@ -37,7 +37,78 @@ extension SubscriptionsViewController {
             isLoadingInitial = true
             spinner.startAnimating()
         }
+        resetScrollForReplacedContent()
         loadLocalInitialContent()
+    }
+
+    /// The list is about to be replaced wholesale, so put it back at the top
+    /// first.
+    ///
+    /// Not politeness — correctness. A shorter feed under a table that is
+    /// scrolled down can leave `contentOffset` past the new maximum, and iOS
+    /// 9 does not reliably clamp it until something forces a layout: the
+    /// header scrolls out of reach and the list appears stuck. Deliberately
+    /// not in `setPage`, which also runs for a background revalidation —
+    /// there, yanking the list to the top under the reader would be its own
+    /// bug.
+    func resetScrollForReplacedContent() {
+        guard tableView.contentOffset.y > 0 else {
+            return
+        }
+        topBarHider.showBars()
+        tableView.setContentOffset(.zero, animated: false)
+    }
+
+    /// Belt and braces for the same fault, at the point a clamp belongs.
+    ///
+    /// Resetting on a known replacement fixes the causes we know about; this
+    /// recovers from any we do not, including a table already stranded when
+    /// the build lands. It runs on every layout pass, so it must not fight
+    /// the user: while a finger is down or the view is still decelerating,
+    /// an offset past the end is an ordinary rubber-band bounce, and
+    /// clamping it there would kill the bounce.
+    /// Dumps the scroll geometry when it changes, because two reasoned
+    /// guesses at the "stuck below the header" report were both wrong: the
+    /// clamp below never fired, so the offset is not past the end at all.
+    /// Stop theorising and read the actual numbers.
+    func logScrollGeometryIfChanged() {
+        let offset = Int(tableView.contentOffset.y)
+        let content = Int(tableView.contentSize.height)
+        let header = Int(tableView.tableHeaderView?.frame.height ?? -1)
+        let inset = Int(tableView.adjustedContentInset.top)
+        let signature = "\(offset)/\(content)/\(header)/\(inset)"
+        guard signature != lastScrollSignature else {
+            return
+        }
+        lastScrollSignature = signature
+        AppLog.subs(
+            "scroll geom: offset=\(offset) content=\(content)"
+                + " bounds=\(Int(tableView.bounds.height))"
+                + " headerH=\(header) insetTop=\(inset)"
+                + " barHidden=\(topBarHider.isHidden)"
+                + " rows=\(rows.count)"
+        )
+    }
+
+    func clampScrollIfPastEnd() {
+        logScrollGeometryIfChanged()
+        guard !tableView.isDragging, !tableView.isDecelerating else {
+            return
+        }
+        let maxY = tableView.contentSize.height
+            + tableView.adjustedContentInset.bottom
+            - tableView.bounds.height
+        let limit = max(maxY, -tableView.adjustedContentInset.top)
+        guard tableView.contentOffset.y > limit else {
+            return
+        }
+        AppLog.subs(
+            "scroll clamped from \(Int(tableView.contentOffset.y))"
+                + " to \(Int(limit))"
+        )
+        tableView.setContentOffset(
+            CGPoint(x: 0, y: limit), animated: false
+        )
     }
 
     /// The local feed's own cached copy, kept under a separate key so a

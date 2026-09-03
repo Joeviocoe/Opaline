@@ -612,3 +612,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "No recent videos from the channels you follow";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "Show Shorts in Subscriptions";
+"settings.footer.subscriptionsShorts" = "Off by default: Subscriptions is for the videos of channels you chose. Turning this on adds their Shorts to the list, and to a channel you filter by.";

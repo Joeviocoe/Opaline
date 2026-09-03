@@ -558,3 +558,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "登録したチャンネルに最近の動画はありません";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "登録チャンネルにショートを表示";
+"settings.footer.subscriptionsShorts" = "初期設定はオフです。登録チャンネルの画面は、選んだチャンネルの動画のための場所です。オンにすると、ショートもリストと絞り込んだチャンネルに表示されます。";

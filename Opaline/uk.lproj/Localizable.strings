@@ -469,3 +469,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "Немає нових відео з каналів, на які ви підписані";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "Показувати Shorts у підписках";
+"settings.footer.subscriptionsShorts" = "Типово вимкнено: розділ підписок — для відео тих каналів, які ви обрали. Якщо ввімкнути, їхні Shorts з'являться у списку та на відфільтрованому каналі.";

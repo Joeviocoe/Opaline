@@ -554,3 +554,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "Aucune vidéo récente des chaînes que vous suivez";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "Afficher les Shorts dans Abonnements";
+"settings.footer.subscriptionsShorts" = "Désactivé par défaut : la page Abonnements est faite pour les vidéos des chaînes que vous avez choisies. Une fois activé, leurs Shorts apparaissent dans la liste et sur une chaîne filtrée.";

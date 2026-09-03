@@ -150,8 +150,13 @@ extension SubscriptionsViewController {
     }
 
     func appendPage(_ page: FeedPage) {
-        let fresh = page.videos.filter {
+        var fresh = page.videos.filter {
             seenVideoIds.insert($0.id).inserted
+        }
+        // The screen-level Shorts switch, applied before anything decides
+        // between the shelf and the list — so "off" means gone, not moved.
+        if !SubscriptionsShorts.isEnabled {
+            fresh = fresh.filter { !$0.isShort }
         }
         // With grouping on the shorts are split off into their own shelf so
         // every consumer below — row heights, taps — sees a list without

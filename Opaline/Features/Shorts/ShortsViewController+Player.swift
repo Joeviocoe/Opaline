@@ -39,11 +39,34 @@ extension ShortsViewController {
         )
     }
 
-    /// Resolves the next two shorts so the swipe has a stream waiting.
+    /// Resolves the next shorts so the swipe has a stream waiting.
     func prefetchAround(_ index: Int) {
         // Three ahead, not two: a fast swipe used to outrun the resolver and
         // fall back to a full round trip.
-        let next = Array(videos.dropFirst(index + 1).prefix(3))
+        //
+        // None on iOS 9. `ShortsPrefetcher` calls this a "resolve" and treats
+        // it as cheap, which it is upstream — an HLS URL and a manifest. Here
+        // it runs the whole of CompositionDelivery: fragment headers primed
+        // over the loopback server, a `moov` assembled from them, and that
+        // server left holding a multi-megabyte synthesized MP4 the player
+        // then fetches whole. It is not a lookup, it is most of the cost of
+        // playing the video.
+        //
+        // Measured on the iPad 3: alone, a composition resolves in ~2.6s.
+        // With a single prefetch alongside it, the short the user tapped took
+        // 6.0s to resolve and 6.9s to a first frame, and two live
+        // compositions on a 1 GB device produced a 20-SECOND main-thread
+        // freeze — the "can't even tap back" hang.
+        //
+        // So the swipe pays a fresh resolve here rather than the tap paying
+        // for a speculative one. Slower to swipe ahead, but the short you
+        // actually asked for starts.
+        #if LEGACY_IOS9
+        let lookahead = 0
+        #else
+        let lookahead = 3
+        #endif
+        let next = Array(videos.dropFirst(index + 1).prefix(lookahead))
         for video in next {
             prefetcher.prefetch(videoId: video.id)
         }

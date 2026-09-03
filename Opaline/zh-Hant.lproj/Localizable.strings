@@ -558,3 +558,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "你關注的頻道最近沒有新影片";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "在訂閱內容中顯示 Shorts";
+"settings.footer.subscriptionsShorts" = "預設關閉：訂閱頁面用於查看你所選頻道的影片。開啟後，這些頻道的 Shorts 會出現在列表和你篩選的頻道中。";

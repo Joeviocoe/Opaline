@@ -554,3 +554,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "Nessun video recente dai canali che segui";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "Mostra gli Short in Iscrizioni";
+"settings.footer.subscriptionsShorts" = "Disattivato per impostazione predefinita: Iscrizioni è per i video dei canali che hai scelto. Attivandolo, i loro Short compaiono nell'elenco e in un canale filtrato.";

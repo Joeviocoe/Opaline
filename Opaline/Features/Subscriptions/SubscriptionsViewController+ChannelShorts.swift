@@ -9,6 +9,10 @@ import Foundation
 
 extension SubscriptionsViewController {
     func loadChannelShorts(_ channel: SubscribedChannel) {
+        guard SubscriptionsShorts.isEnabled else {
+            AppLog.subs("channel shorts: off, skipping \(channel.title)")
+            return
+        }
         channelRSSService.fetchRecentShorts(
             channelIds: [channel.id],
             force: false

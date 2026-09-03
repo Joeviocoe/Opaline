@@ -15,7 +15,7 @@ final class SettingsViewController: UIViewController {
         case quality, qualityCellular
         case backgroundPlayback, pipEnabled, hideStatusBar
         case downloadQuality, downloadComments, downloadCaptions
-        case showShorts, shortsPlayer, shortsGrouping
+        case showShorts, shortsPlayer, shortsGrouping, subscriptionsShorts
         case autoZoomToFill
         case autoplayEnabled, autoplayMixEnabled
         case autoDubEnabled, autoDubLanguage, autoDubIgnoreAI
@@ -290,6 +290,13 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 isOn: ShortsGrouping.isEnabled
             ) {
                 ShortsGrouping.isEnabled = $0
+            }
+        case .subscriptionsShorts:
+            return makeToggleCell(
+                "settings.row.subscriptionsShorts".localized,
+                isOn: SubscriptionsShorts.isEnabled
+            ) {
+                SubscriptionsShorts.isEnabled = $0
             }
         case .autoplayEnabled:
             return makeToggleCell(

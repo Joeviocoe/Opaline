@@ -558,3 +558,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "Takip ettiğiniz kanallarda yeni video yok";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "Aboneliklerde Shorts'u göster";
+"settings.footer.subscriptionsShorts" = "Varsayılan olarak kapalı: Abonelikler, seçtiğiniz kanalların videoları içindir. Açtığınızda bu kanalların Shorts videoları listeye ve filtrelediğiniz kanala eklenir.";

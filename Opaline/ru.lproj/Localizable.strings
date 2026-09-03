@@ -472,3 +472,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "Нет новых видео с каналов, на которые вы подписаны";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "Показывать Shorts в подписках";
+"settings.footer.subscriptionsShorts" = "По умолчанию выключено: раздел подписок — для видео тех каналов, которые вы выбрали. Если включить, их Shorts появятся в списке и на отфильтрованном канале.";

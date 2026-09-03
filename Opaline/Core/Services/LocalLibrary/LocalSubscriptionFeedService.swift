@@ -125,9 +125,11 @@ extension LocalSubscriptionFeedService {
         force: Bool,
         completion: @escaping (Result<FeedPage, Error>) -> Void
     ) {
-        let includeShorts = UserDefaults.standard.bool(
-            forKey: UserDefaultsKeys.Feed.showShorts
-        )
+        // The Subscriptions screen's own switch, not the global one: with it
+        // off the long-form `UULF` feed is read instead of the channel's full
+        // feed, so shorts are excluded at the source rather than filtered out
+        // afterwards — fewer bytes and less parsing on the way in.
+        let includeShorts = SubscriptionsShorts.isEnabled
         let started = Date()
         let byId = Dictionary(
             channels.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }
@@ -168,7 +170,11 @@ extension LocalSubscriptionFeedService {
                 dated.append(
                     (
                         entry.published,
-                        Video(rssEntry: entry, channel: channel)
+                        Video(
+                            rssEntry: entry,
+                            channel: channel,
+                            isShort: false
+                        )
                     )
                 )
             }

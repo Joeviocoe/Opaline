@@ -172,6 +172,13 @@ extension SettingsViewController {
                 header: nil,
                 footer: "settings.footer.shorts".localized,
                 rows: rows
+            ),
+            // Its own section, and outside the switch above: Subscriptions
+            // keeps its own answer whether or not Shorts are on elsewhere.
+            Section(
+                header: "subscriptions.title".localized,
+                footer: "settings.footer.subscriptionsShorts".localized,
+                rows: [.subscriptionsShorts]
             )
         ]
     }

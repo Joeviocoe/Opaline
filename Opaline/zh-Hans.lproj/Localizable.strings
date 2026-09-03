@@ -558,3 +558,7 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "你关注的频道最近没有新视频";
+
+/* Local library — subscriptions and watch history with no account */
+"settings.row.subscriptionsShorts" = "在订阅内容中显示 Shorts";
+"settings.footer.subscriptionsShorts" = "默认关闭：订阅页面用于查看你所选频道的视频。开启后，这些频道的 Shorts 会出现在列表和你筛选的频道中。";

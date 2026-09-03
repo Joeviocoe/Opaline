@@ -61,6 +61,9 @@ enum UserDefaultsKeys {
         static let shortsPlayer = "feed_shortsPlayer"
         /// Shorts shelf in the subscriptions feed; absent = grouped.
         static let groupShorts = "feed_groupShorts"
+        /// Shorts on the Subscriptions screen, for the whole list and for a
+        /// single filtered channel alike; absent = **off**.
+        static let subscriptionsShowShorts = "feed_subscriptionsShowShorts"
         static let homeLayout = "feed_homeLayout"
         /// `DefaultTab` raw value (= tab tag); absent = Home.
         static let defaultTab = "feed_defaultTab"
