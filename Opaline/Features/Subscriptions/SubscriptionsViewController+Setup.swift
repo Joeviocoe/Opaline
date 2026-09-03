@@ -172,6 +172,12 @@ extension SubscriptionsViewController {
         continuationToken = page.continuation
         isLoadingMore = false
         tableView.reloadData()
+        // The first screenful never scrolls, so without this it would sit
+        // there without durations until the reader happened to move. Async
+        // because visible rows are only known after a layout pass.
+        DispatchQueue.main.async { [weak self] in
+            self?.enrichVisibleDurations()
+        }
     }
 
     func finishLoadingMore() {

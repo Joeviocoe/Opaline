@@ -134,6 +134,24 @@ extension SubscriptionsViewController: UITableViewDelegate {
         topBarHider.handleScroll(scrollView)
     }
 
+    // Durations are fetched when scrolling STOPS, never during it: rows that
+    // fly past a flick should cost nothing.
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard scrollView === tableView else {
+            return
+        }
+        enrichVisibleDurations()
+    }
+
+    func scrollViewDidEndDragging(
+        _ scrollView: UIScrollView, willDecelerate decelerate: Bool
+    ) {
+        guard scrollView === tableView, !decelerate else {
+            return
+        }
+        enrichVisibleDurations()
+    }
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard !isLoadingInitial,
               case let .video(video) = rows[indexPath.row]
@@ -155,7 +173,9 @@ extension SubscriptionsViewController: UITableViewDelegate {
             return ShortsShelfCell.rowHeight
         case let .video(video):
             return SubscriptionVideoCell.rowHeight(
-                forWidth: tableView.bounds.width, title: video.title
+                forWidth: tableView.bounds.width,
+                title: video.title,
+                hasDuration: video.duration?.isEmpty == false
             )
         }
     }

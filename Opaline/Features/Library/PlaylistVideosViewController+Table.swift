@@ -81,7 +81,11 @@ extension PlaylistVideosViewController: UITableViewDataSource, UITableViewDelega
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let title = isLoading ? "" : videos[indexPath.row].title
-        return SubscriptionVideoCell.rowHeight(forWidth: tableView.bounds.width, title: title)
+        let video = isLoading ? nil : videos[indexPath.row]
+        return SubscriptionVideoCell.rowHeight(
+            forWidth: tableView.bounds.width,
+            title: video?.title ?? "",
+            hasDuration: video?.duration?.isEmpty == false
+        )
     }
 }

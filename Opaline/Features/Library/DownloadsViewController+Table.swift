@@ -47,7 +47,8 @@ extension DownloadsViewController: UITableViewDataSource, UITableViewDelegate {
     ) -> CGFloat {
         SubscriptionVideoCell.rowHeight(
             forWidth: tableView.bounds.width,
-            title: videos[indexPath.row].title
+            title: videos[indexPath.row].title,
+            hasDuration: videos[indexPath.row].duration?.isEmpty == false
         )
     }
 }

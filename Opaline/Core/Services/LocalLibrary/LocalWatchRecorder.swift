@@ -53,10 +53,21 @@ final class LocalWatchRecorder {
             video.channelId = channelId
         }
         pending = video
+        AppLog.library("recorder metadata: \(video.id) '\(video.title)'")
     }
 
     func start(videoId: String) {
-        stop()
+        // Deliberately not `stop()`: that clears `pending`, and the watch
+        // page which supplies it races playback preparation which calls this.
+        // Either can win — when the page won, `start` destroyed the metadata
+        // it had just delivered and the video was never recorded, logging
+        // "watched but no metadata yet" every tick forever. Only metadata
+        // belonging to a *different* video is stale.
+        timer?.invalidate()
+        timer = nil
+        if pending?.id != videoId {
+            pending = nil
+        }
         recordedVideoId = nil
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {

@@ -71,7 +71,13 @@ class SubscriptionVideoCell: UITableViewCell, FocusableVideoCell {
         durationLabel.layer.cornerRadius = 3
         durationLabel.layer.masksToBounds = true
         durationLabel.textAlignment = .center
-        thumbnail.addSubview(durationLabel)
+        // In the content view, not the thumbnail. It was a corner overlay on
+        // the picture, so it lived inside it — which meant a frame set in
+        // content coordinates landed off the thumbnail's right edge and was
+        // clipped away. The data was arriving; the label was drawing into
+        // nowhere. It is a line of text in the text column now, so it
+        // belongs beside the other labels.
+        contentView.addSubview(durationLabel)
         downloadBadge.pin(toThumbnail: thumbnail)
         downloadBar.pin(toThumbnail: thumbnail)
     }
@@ -136,6 +142,53 @@ class SubscriptionVideoCell: UITableViewCell, FocusableVideoCell {
         contentView.showSkeleton()
     }
 
+    /// Turns the corner pill into a line of text under the meta.
+    ///
+    /// `VideoCardHelper.configureBadges` is shared with the grid cells, which
+    /// still overlay their thumbnails, so it keeps setting a pill background
+    /// and centring the text — undone here rather than branched there.
+    ///
+    /// LIVE keeps its pill: it is a state, not a measurement, and a red chip
+    /// is what makes it read as one at a glance.
+    private func styleDurationAsText(isLive: Bool) {
+        guard !isLive else {
+            durationLabel.textAlignment = .center
+            durationLabel.textColor = .white
+            durationLabel.font = UIFont.systemFont(ofSize: 11, weight: .semibold)
+            return
+        }
+        durationLabel.backgroundColor = .clear
+        durationLabel.textAlignment = .left
+        durationLabel.textColor = ThemeManager.shared.secondaryText
+        durationLabel.font = UIFont.systemFont(ofSize: 13)
+        // configureBadges pads the string for the pill; the spaces would
+        // indent the line now that it is left-aligned text.
+        durationLabel.text = durationLabel.text?
+            .trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Avatar, badges and thumbnail. Split out of `configure` so that method
+    /// stays inside the 30-line body limit — it was already two lines over
+    /// before the duration line was added.
+    private func loadImagery(for video: Video) {
+        VideoCardHelper.loadChannelAvatar(for: video, into: channelAvatarView) { [weak self] in
+            self?.representedChannelId == video.channelId
+        }
+        VideoCardHelper.configureBadges(
+            video: video,
+            durationLabel: durationLabel,
+            liveBadgeView: nil
+        )
+        styleDurationAsText(isLive: video.isLive)
+        guard let url = URL(string: video.thumbnailURL) else {
+            return
+        }
+        thumbnail.setImage(
+            url: url,
+            videoId: video.isShort ? nil : video.id
+        )
+    }
+
     func configure(with video: Video) {
         focusVideo = video
         downloadBadge.configure(videoId: video.id)
@@ -151,21 +204,7 @@ class SubscriptionVideoCell: UITableViewCell, FocusableVideoCell {
             separator: " · "
         )
 
-        VideoCardHelper.loadChannelAvatar(for: video, into: channelAvatarView) { [weak self] in
-            self?.representedChannelId == video.channelId
-        }
-        VideoCardHelper.configureBadges(
-            video: video,
-            durationLabel: durationLabel,
-            liveBadgeView: nil
-        )
-
-        if let url = URL(string: video.thumbnailURL) {
-            thumbnail.setImage(
-                url: url,
-                videoId: video.isShort ? nil : video.id
-            )
-        }
+        loadImagery(for: video)
         applyWatchProgress(videoId: video.id)
         cachedTitleHeight = 0
         setNeedsLayout()

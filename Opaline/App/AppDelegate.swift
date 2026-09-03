@@ -173,6 +173,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ChannelInfoStore.shared.configure(
             channelService: dependencies.channelService
         )
+        ChannelDurationStore.shared.configure(
+            tabService: dependencies.channelTabService
+        )
         VideoRouter.shared.channelViewControllerFactory = { [dependencies] id, name in
             dependencies.makeChannelViewController(channelId: id, channelName: name)
         }

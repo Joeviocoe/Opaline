@@ -141,7 +141,8 @@ extension SearchViewController: UITableViewDelegate {
         }
         return SubscriptionVideoCell.rowHeight(
             forWidth: tableView.bounds.width,
-            title: results[indexPath.row].title
+            title: results[indexPath.row].title,
+            hasDuration: results[indexPath.row].duration?.isEmpty == false
         )
     }
 

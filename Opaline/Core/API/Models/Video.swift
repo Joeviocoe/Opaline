@@ -17,7 +17,10 @@ struct Video: Codable {
     let thumbnailURL: String
     let viewCount: String?
     let publishedAt: String?
-    let duration: String?
+    /// A var for the same reason the channel fields above are: a card built
+    /// from a channel's Atom feed has no duration — the feed does not carry
+    /// one — and gets enriched in place from the channel tab, which does.
+    var duration: String?
     let isLive: Bool
     let playlistId: String?
     /// YouTube Short — opens in the vertical swipe viewer, not the watch
