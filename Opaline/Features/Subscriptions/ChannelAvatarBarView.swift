@@ -16,7 +16,11 @@ final class ChannelAvatarBarView: UIView {
     var onChannelTapped: ((SubscribedChannel) -> Void)?
     var onAllTapped: (() -> Void)?
 
-    private lazy var collectionView: UICollectionView = {
+    /// Setter stays private; the getter is read cross-file by the keyboard
+    /// feature, which points a second `ListFocusController` at this same
+    /// collection view rather than building a parallel focus mechanism for
+    /// what is already exactly the shape `ListFocusController` handles.
+    private(set) lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(

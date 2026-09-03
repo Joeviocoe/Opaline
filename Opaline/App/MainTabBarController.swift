@@ -179,16 +179,13 @@ class MainTabBarController: UITabBarController {
         miniPlayerBar?.applyTheme()
     }
 
-    /// `startsExpanded: false` is for opening straight to the mini bar --
-    /// `q` on an empty queue, which is meant to start something playing in
-    /// the background without pulling the screen out from under whoever
-    /// pressed it. This has to decide, not just skip a later `expand()`
-    /// call: `expand(animated:)` makes `watchVC` first responder, and that
-    /// ran regardless of what happened after it, which is why a case that
-    /// tried to immediately collapse afterward still left the arrow keys
-    /// controlling player volume instead of list focus. There is exactly
-    /// one caller, so the parameter and its default cost nothing elsewhere.
-    func installPlayerPanel(_ panel: PlayerPanelViewController, startsExpanded: Bool = true) {
+    /// `onExpanded` forwards to `expand(animated:onExpanded:)` — see there
+    /// for why a caller that needs to collapse right back has to wait for it
+    /// rather than calling both in the same breath.
+    func installPlayerPanel(
+        _ panel: PlayerPanelViewController,
+        onExpanded: (() -> Void)? = nil
+    ) {
         if let existing = playerPanel {
             removePlayerPanel(existing)
         }
@@ -225,12 +222,8 @@ class MainTabBarController: UITabBarController {
         miniPlayerBarBottomConstraint = bottomConstraint
 
         panel.miniBar = bar
-        if startsExpanded {
-            panel.view.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)
-            panel.expand(animated: true)
-        } else {
-            panel.collapse(animated: false)
-        }
+        panel.view.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)
+        panel.expand(animated: true, onExpanded: onExpanded)
     }
 
     func removePlayerPanel(_ panel: PlayerPanelViewController) {

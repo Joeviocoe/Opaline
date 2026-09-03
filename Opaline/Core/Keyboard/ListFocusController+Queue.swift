@@ -1,12 +1,79 @@
 import UIKit
 
 /// Queueing from a list, the index-path formatter every focus log line
-/// uses, and escapeTop() -- all here only to keep the controller inside the
-/// 300-line file limit the linter enforces. escapeTop() cannot stay `private`
-/// once it lives in a different file from its callers (move(),
-/// establishFocus()): Swift's same-file cross-extension private sharing
-/// does not extend across files, so it is internal here instead.
+/// uses, escapeTop(), the claimFocus()/hasFocusableItem pair a same-screen
+/// handoff uses (the subscriptions channel bar and its video list), and
+/// target() itself -- all here only to keep the controller inside the
+/// 300-line file limit the linter enforces. escapeTop() and setFocus()
+/// cannot stay `private` once they are called from a different file than
+/// move() / establishFocus(): Swift's same-file cross-extension private
+/// sharing does not extend across files, so they are internal instead.
 extension ListFocusController {
+    func target(
+        from current: IndexPath,
+        direction: FocusDirection,
+        geometry: FocusGeometry
+    ) -> IndexPath? {
+        let vertical = direction == .up || direction == .down
+        if axis == .list {
+            guard vertical else {
+                return nil
+            }
+            return ListFocusSearch.step(
+                from: current,
+                forward: direction == .down,
+                geometry: geometry
+            )
+        }
+        // A single row has nothing to step to vertically -- claiming only the
+        // geometric search, with no step() fallback, is what makes an
+        // unclaimed Down fall through the chain instead of silently landing
+        // on whichever avatar sits "below" in flattened order.
+        if axis == .row {
+            guard !vertical else {
+                return nil
+            }
+            return ListFocusSearch.next(from: current, direction: direction, geometry: geometry)
+        }
+        if let found = ListFocusSearch.next(
+            from: current,
+            direction: direction,
+            geometry: geometry
+        ) {
+            return found
+        }
+        guard vertical else {
+            return nil
+        }
+        return ListFocusSearch.step(
+            from: current,
+            forward: direction == .down,
+            geometry: geometry
+        )
+    }
+
+    /// Whether there is anything at all to focus. A handoff should only
+    /// claim the chain if it would actually land somewhere -- an empty
+    /// channel bar must not swallow Up and go nowhere.
+    var hasFocusableItem: Bool {
+        geometry?.firstFocusableIndexPath() != nil
+    }
+
+    /// Explicitly takes the responder chain, establishing focus at the first
+    /// item if nothing is already focused. For a handoff between two regions
+    /// on one screen, where neither ring's own `didMoveToWindow` fires,
+    /// since nothing here ever actually leaves the window.
+    func claimFocus() {
+        guard let geometry = geometry else {
+            return
+        }
+        if focused == nil {
+            setFocus(geometry.firstFocusableIndexPath(), animated: false)
+        }
+        let accepted = ring.becomeFirstResponder()
+        KeyboardDiagnostics.logResponder("focus claimed", ring, accepted: accepted)
+    }
+
     /// Adds the focused video to the play queue — or, if nothing is playing
     /// at all, starts it, minimized.
     ///
@@ -37,13 +104,20 @@ extension ListFocusController {
     }
 
     /// Nothing playing at all: there is no queue panel to reach until
-    /// something is playing anyway, so q replicates the one thing that
-    /// always works -- opening the video, same as a tap -- but stays
-    /// minimized, since the point of queueing from a list is to keep
-    /// browsing, not to be dropped into full screen.
+    /// something is playing anyway, so q replicates the touchscreen path
+    /// precisely -- the "..." menu's own add-to-queue opens the video same
+    /// as a tap would, full screen, and leaves minimizing to a second,
+    /// separate action. Here that second step is automatic instead of a
+    /// chevron tap, but it still only happens once the open has genuinely
+    /// finished -- collapsing in the same breath as expand is what raced
+    /// the first-responder handoff and left the arrows controlling player
+    /// volume instead of list focus.
     private func playDirectly(_ video: Video, presentingFrom host: ListFocusHost) {
-        KeyboardDiagnostics.logTimed("queue: nothing playing, opening \(video.id) minimized")
-        VideoRouter.shared.open(video: video, from: host, startsExpanded: false)
+        KeyboardDiagnostics.logTimed("queue: nothing playing, opening \(video.id)")
+        VideoRouter.shared.open(video: video, from: host) {
+            KeyboardDiagnostics.logTimed("queue: \(video.id) expanded, minimizing")
+            VideoRouter.shared.minimize()
+        }
     }
 
     /// The video already playing may not itself be a queue member -- most

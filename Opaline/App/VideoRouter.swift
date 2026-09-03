@@ -35,18 +35,16 @@ final class VideoRouter {
 
     /// - Parameter shorts: how the shorts feed continues past `video` —
     ///   see `ShortsEntry`.
-    /// - Parameter startsExpanded: false keeps a freshly created panel at the
-    ///   mini bar rather than opening full screen — for `q` on an empty
-    ///   queue, which is meant to start something playing in the background
-    ///   without pulling the screen the user was browsing out from under
-    ///   them. Only matters the first time: once a panel already exists,
-    ///   loading a new video into it always expands, same as a tap always
-    ///   has.
+    /// - Parameter onExpanded: fires once the panel has actually finished
+    ///   expanding — not for the shorts feed, which never installs a panel
+    ///   at all. `q` on an empty queue uses this to replicate the touchscreen
+    ///   "add to queue" path exactly: play, same as a tap would, then
+    ///   minimize once that has genuinely settled.
     func open(
         video: Video,
         from presenter: UIViewController,
         shorts: ShortsEntry = .pool([]),
-        startsExpanded: Bool = true
+        onExpanded: (() -> Void)? = nil
     ) {
         if video.isShort,
            ShortsPlayerMode.selected == .vertical,
@@ -62,7 +60,7 @@ final class VideoRouter {
         }
         if let panel = panel {
             panel.watchVC.loadVideo(video)
-            panel.expand(animated: true)
+            panel.expand(animated: true, onExpanded: onExpanded)
             return
         }
         guard let factory = watchViewControllerFactory else {
@@ -79,11 +77,7 @@ final class VideoRouter {
             self.panel = nil
             return
         }
-        // installPlayerPanel decides expand vs. collapse itself, rather than
-        // this racing a second collapse call against its own unconditional
-        // expand -- that race is what left a fresh panel's mini bar never
-        // actually shown, and watchVC first responder regardless.
-        tabBar.installPlayerPanel(newPanel, startsExpanded: startsExpanded)
+        tabBar.installPlayerPanel(newPanel, onExpanded: onExpanded)
     }
 
     /// Opens a video known only by id — e.g. a `ytlite://` deep link or a

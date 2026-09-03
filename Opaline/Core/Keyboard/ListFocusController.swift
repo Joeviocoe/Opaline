@@ -7,7 +7,7 @@ import UIKit
 /// tvOS. So movement, revealing and revalidation are all hand-rolled here.
 final class ListFocusController: NSObject {
     enum Axis {
-        case list, grid
+        case list, grid, row
     }
 
     /// Gap left between the focused cell and the edge of the visible area, so
@@ -17,8 +17,12 @@ final class ListFocusController: NSObject {
     let axis: Axis
     private(set) var focused: IndexPath?
 
-    private let ring = ListFocusRingView()
-    private weak var geometry: FocusGeometry?
+    // Both read (not just written) from `ListFocusController+Queue.swift` —
+    // escapeTop() and claimFocus() live there purely to keep this file inside
+    // the 300-line lint limit, and same-file `private` sharing between
+    // extensions does not extend across files.
+    let ring = ListFocusRingView()
+    private(set) weak var geometry: FocusGeometry?
     private weak var host: AnyObject?
 
     /// The screen this controller belongs to, when it is still alive.
@@ -201,42 +205,11 @@ final class ListFocusController: NSObject {
     }
 }
 
-// MARK: - Private
-
-private extension ListFocusController {
-    func target(
-        from current: IndexPath,
-        direction: FocusDirection,
-        geometry: FocusGeometry
-    ) -> IndexPath? {
-        let vertical = direction == .up || direction == .down
-        if axis == .list {
-            guard vertical else {
-                return nil
-            }
-            return ListFocusSearch.step(
-                from: current,
-                forward: direction == .down,
-                geometry: geometry
-            )
-        }
-        if let found = ListFocusSearch.next(
-            from: current,
-            direction: direction,
-            geometry: geometry
-        ) {
-            return found
-        }
-        guard vertical else {
-            return nil
-        }
-        return ListFocusSearch.step(
-            from: current,
-            forward: direction == .down,
-            geometry: geometry
-        )
-    }
-
+// Internal, not private: claimFocus() in the +Queue.swift companion file
+// needs to establish focus the same way a directional move does, and
+// same-file `private` sharing between extensions does not extend across
+// files.
+extension ListFocusController {
     func setFocus(_ indexPath: IndexPath?, animated: Bool) {
         let wasAdjusting = isAdjustingRing
         isAdjustingRing = true
@@ -252,7 +225,11 @@ private extension ListFocusController {
         ring.show(at: frame)
         reveal(frame, animated: animated)
     }
+}
 
+// MARK: - Private
+
+private extension ListFocusController {
     /// Hand-rolled rather than `scrollToItem(at:at:animated:)`: that ignores
     /// content insets before iOS 11, leaves no breathing room, and gives no say
     /// over whether the move animates. A jump across a long feed should not.

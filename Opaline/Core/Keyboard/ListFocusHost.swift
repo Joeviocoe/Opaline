@@ -144,6 +144,13 @@ enum ListFocusInstaller {
         return true
     }
 
+    /// The controller already installed on `host`, if any -- lets a screen
+    /// hand focus back to its own list without holding a second reference to
+    /// something `install(in:)` already owns.
+    static func controller(for host: ListFocusHost) -> ListFocusController? {
+        objc_getAssociatedObject(host, &listFocusControllerKey) as? ListFocusController
+    }
+
     static func install(in viewController: UIViewController) {
         claimChain(for: viewController)
         guard let host = viewController as? ListFocusHost else {

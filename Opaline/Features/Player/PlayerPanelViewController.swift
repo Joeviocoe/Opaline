@@ -56,7 +56,13 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
         view.transform = isExpanded ? .identity : collapsedTransform()
     }
 
-    func expand(animated: Bool) {
+    /// `onExpanded` fires once the panel has actually finished expanding —
+    /// not when this call returns. A caller that needs to collapse it right
+    /// back (q on an empty queue, replicating "tap to play, then tap
+    /// minimize") has to wait for that: firing collapse in the same call
+    /// stack as expand raced its first-responder handoff, which is the bug
+    /// `installPlayerPanel`'s old `startsExpanded` flag existed to dodge.
+    func expand(animated: Bool, onExpanded: (() -> Void)? = nil) {
         isExpanded = true
         KeyboardFocusCoordinator.shared.playerDidExpand(watchVC)
         // Expanding is what hands the orientation over to the player — every
@@ -72,6 +78,7 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
         }
         let completion: (Bool) -> Void = { _ in
             self.miniBar?.isHidden = true
+            onExpanded?()
         }
         if animated {
             miniBar?.isHidden = false

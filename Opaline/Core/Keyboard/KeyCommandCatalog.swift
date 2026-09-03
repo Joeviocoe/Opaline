@@ -47,6 +47,31 @@ enum KeyCommandCatalog {
 
     static let focusGridFocused: [UIKeyCommand] = focusGridIdle + focusShared
 
+    /// A single row -- the subscriptions channel bar -- claims only the
+    /// horizontal pair, ever. No paging, no sections, no jump-to-top/bottom:
+    /// none of them mean anything for a strip of avatars. Up/Down are
+    /// deliberately absent so an unclaimed one falls through to whatever
+    /// screen owns the bar, the same way a `.list` never declares left/right.
+    static let focusRowIdle: [UIKeyCommand] = [
+        KeyCommandInput.command(
+            KeyCommandInput.leftArrow,
+            action: #selector(ListFocusRingView.focusMoveLeft)
+        ),
+        KeyCommandInput.command(
+            KeyCommandInput.rightArrow,
+            action: #selector(ListFocusRingView.focusMoveRight)
+        )
+    ]
+
+    /// Just Return -- toggling a channel selection, not opening a video, so
+    /// none of `focusShared`'s queue/jump/page bindings apply here either.
+    static let focusRowFocused: [UIKeyCommand] = focusRowIdle + [
+        KeyCommandInput.command(
+            KeyCommandInput.enter,
+            action: #selector(ListFocusRingView.focusActivate)
+        )
+    ]
+
     /// While a text field holds the chain, only modified commands survive —
     /// otherwise typing "j" into the search bar seeks the player.
     // Backspace is deliberately absent here: while a text field has the chain
@@ -111,10 +136,14 @@ enum KeyCommandCatalog {
         axis: ListFocusController.Axis,
         hasFocus: Bool
     ) -> [UIKeyCommand] {
-        if axis == .grid {
+        switch axis {
+        case .grid:
             return hasFocus ? focusGridFocused : focusGridIdle
+        case .row:
+            return hasFocus ? focusRowFocused : focusRowIdle
+        case .list:
+            return hasFocus ? focusListFocused : focusListIdle
         }
-        return hasFocus ? focusListFocused : focusListIdle
     }
 }
 
