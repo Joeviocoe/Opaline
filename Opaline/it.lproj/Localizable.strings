@@ -542,5 +542,5 @@
 "keyboard.queue" = "Coda";
 "keyboard.tab1" = "Home";
 "keyboard.tab2" = "Iscrizioni";
-"keyboard.toast.queued" = "Aggiunto alla coda";
+"keyboard.toast.queued" = "Aggiunto alla coda (%1$d)";
 "keyboard.stop" = "Interrompi";

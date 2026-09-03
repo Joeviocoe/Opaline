@@ -460,5 +460,5 @@
 "keyboard.queue" = "Hàng đợi";
 "keyboard.tab1" = "Trang chủ";
 "keyboard.tab2" = "Kênh đăng ký";
-"keyboard.toast.queued" = "Đã thêm vào hàng đợi";
+"keyboard.toast.queued" = "Đã thêm vào hàng đợi (%1$d)";
 "keyboard.stop" = "Dừng";

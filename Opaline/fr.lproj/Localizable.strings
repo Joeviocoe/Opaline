@@ -542,5 +542,5 @@
 "keyboard.queue" = "File d'attente";
 "keyboard.tab1" = "Accueil";
 "keyboard.tab2" = "Abonnements";
-"keyboard.toast.queued" = "Ajouté à la file d'attente";
+"keyboard.toast.queued" = "Ajouté à la file d'attente (%1$d)";
 "keyboard.stop" = "Arrêter";

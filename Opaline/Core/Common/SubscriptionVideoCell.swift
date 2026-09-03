@@ -1,6 +1,9 @@
 import UIKit
 
-class SubscriptionVideoCell: UITableViewCell {
+class SubscriptionVideoCell: UITableViewCell, FocusableVideoCell {
+    /// What `q` queues when the keyboard's focus ring lands on this row —
+    /// set for the same duration the cell is actually showing this video.
+    var focusVideo: Video?
     static let reuseId = "SubscriptionVideoCell"
 
     let thumbnail = ThumbnailImageView(frame: .zero)
@@ -134,6 +137,7 @@ class SubscriptionVideoCell: UITableViewCell {
     }
 
     func configure(with video: Video) {
+        focusVideo = video
         downloadBadge.configure(videoId: video.id)
         downloadBar.configure(videoId: video.id)
         applyTheme()
@@ -169,6 +173,7 @@ class SubscriptionVideoCell: UITableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        focusVideo = nil
         hideSkeleton()
         representedChannelId = nil
         thumbnail.cancel()

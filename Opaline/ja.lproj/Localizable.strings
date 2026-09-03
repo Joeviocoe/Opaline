@@ -546,5 +546,5 @@
 "keyboard.queue" = "再生キュー";
 "keyboard.tab1" = "ホーム";
 "keyboard.tab2" = "登録チャンネル";
-"keyboard.toast.queued" = "再生キューに追加しました";
+"keyboard.toast.queued" = "再生キューに追加しました (%1$d)";
 "keyboard.stop" = "停止";

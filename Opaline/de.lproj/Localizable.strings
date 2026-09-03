@@ -544,5 +544,5 @@
 "keyboard.queue" = "Warteschlange";
 "keyboard.tab1" = "Start";
 "keyboard.tab2" = "Abos";
-"keyboard.toast.queued" = "Zur Warteschlange hinzugefügt";
+"keyboard.toast.queued" = "Zur Warteschlange hinzugefügt (%1$d)";
 "keyboard.stop" = "Stopp";

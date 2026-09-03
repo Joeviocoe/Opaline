@@ -181,12 +181,30 @@ extension WatchViewController {
         navigateTo(suggestion)
     }
 
-    /// Control Center / AirPods "previous": the session's own back stack
-    /// (`videoHistory`, same as the nav-bar back button). On a mix the
-    /// reloaded watch page re-syncs the queue to the earlier position.
-    /// With no history left, restart the video — the standard fallback.
+    /// Control Center / AirPods "previous".
+    ///
+    /// Queue entry first, mirroring `playNextFromRemote()` exactly — without
+    /// this, jumping straight into the middle of a hand-built queue (open B
+    /// directly, when A/B/C are all already queued) left Previous with an
+    /// empty `videoHistory` to work from, since nothing had actually been
+    /// *navigated* through yet. It fell to "restart the current video",
+    /// which looked like Previous doing nothing. `queue.previousVideo` names
+    /// A correctly because `populateQueueIfNeeded` already re-syncs
+    /// `currentIndex` to whatever the queue's own contents say -- it does
+    /// this on every load, which is exactly why Next already got this case
+    /// right and only Previous did not.
+    ///
+    /// Falls back to the session's own back stack (`videoHistory`, same as
+    /// the nav-bar back button) when there is no queue context — related
+    /// videos and autoplay populate history but are never necessarily queue
+    /// members. With neither, restart the video, the standard fallback.
     func previousFromRemote() {
         dismissAutoplayOverlay()
+        if let previous = queue.previousVideo {
+            AppLog.player("remote previous: queue \(previous.id)")
+            navigateTo(previous)
+            return
+        }
         guard videoHistory.isEmpty else {
             AppLog.player("remote previous: history back")
             goBack()

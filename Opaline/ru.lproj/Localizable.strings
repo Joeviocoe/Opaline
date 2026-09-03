@@ -460,5 +460,5 @@
 "keyboard.queue" = "Очередь";
 "keyboard.tab1" = "Главная";
 "keyboard.tab2" = "Подписки";
-"keyboard.toast.queued" = "Добавлено в очередь";
+"keyboard.toast.queued" = "Добавлено в очередь (%1$d)";
 "keyboard.stop" = "Стоп";

@@ -58,8 +58,7 @@ final class ListFocusController: NSObject {
             return
         }
         guard let current = focused else {
-            KeyboardDiagnostics.logTimed("focus establish \(direction)")
-            setFocus(geometry.firstFocusableIndexPath(), animated: true)
+            establishFocus(for: direction, geometry: geometry)
             return
         }
         let started = CACurrentMediaTime()
@@ -82,13 +81,17 @@ final class ListFocusController: NSObject {
         setFocus(next, animated: true)
     }
 
-    /// Up at the topmost item: offer it to the screen before swallowing it.
-    private func escapeTop() -> Bool {
-        guard let host = focusHost, host.listFocusDidReachTop() else {
-            return false
+    /// Up with nothing focused yet is not "establish at the top" -- it is
+    /// "leave the way I came in". Down from the search field drops into the
+    /// list with nothing highlighted, and a follow-up Up must bounce straight
+    /// back to the field. Without this, Up only ever highlighted row 0 for
+    /// the first time, and a *second* Up was needed before escapeTop() ran.
+    private func establishFocus(for direction: FocusDirection, geometry: FocusGeometry) {
+        if direction == .up, escapeTop() {
+            return
         }
-        KeyboardDiagnostics.log("focus left the top, screen took the chain")
-        return true
+        KeyboardDiagnostics.logTimed("focus establish \(direction)")
+        setFocus(geometry.firstFocusableIndexPath(), animated: true)
     }
 
     func activate() {

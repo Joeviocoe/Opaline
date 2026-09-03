@@ -1,7 +1,9 @@
 // swiftlint:disable file_length
 import UIKit
 
-class VideoCell: UICollectionViewCell {
+class VideoCell: UICollectionViewCell, FocusableVideoCell {
+    /// What `q` queues when the keyboard's focus ring lands on this cell.
+    var focusVideo: Video?
     static let reuseId = "VideoCell"
 
     private static let avatarSize: CGFloat = 32
@@ -105,6 +107,7 @@ class VideoCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        focusVideo = nil
         hideSkeleton()
         representedChannelId = nil
         thumbnail.cancel()
@@ -402,6 +405,7 @@ extension VideoCell {
     }
 
     func configure(with video: Video) {
+        focusVideo = video
         showDownloadState(of: video.id)
         hideSkeleton()
         menuButton.isHidden = false

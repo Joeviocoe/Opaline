@@ -546,5 +546,5 @@
 "keyboard.queue" = "播放队列";
 "keyboard.tab1" = "首页";
 "keyboard.tab2" = "订阅";
-"keyboard.toast.queued" = "已加入播放队列";
+"keyboard.toast.queued" = "已加入播放队列 (%1$d)";
 "keyboard.stop" = "停止";

@@ -125,9 +125,11 @@ extension VideoPlayerView {
         return time
     }
 
-    /// Shows how far the burst has moved *and* where it lands. The seek bar is
-    /// hidden while seeking from the keyboard, so without the destination there
-    /// is nothing on screen saying where you are.
+    /// Shows how far the burst has moved, centered, *and* where it lands,
+    /// trailing. The seek bar is hidden while seeking from the keyboard, so
+    /// without the destination there is nothing on screen saying where you
+    /// are -- two separate labels rather than one combined string, because
+    /// "centered" and "right-aligned" cannot both be true of one UILabel.
     private func showSeekHUD(totalOffset: Double) {
         let sign = totalOffset >= 0 ? "+" : "-"
         let magnitude = abs(totalOffset)
@@ -140,10 +142,13 @@ extension VideoPlayerView {
         } else {
             offsetText = sign + Self.clockString(magnitude)
         }
+        showHUD(text: "  \(offsetText)  ")
         let landing = seekBurst.target.isNumeric
             ? seekBurst.target.seconds
             : (player?.currentTime().seconds ?? 0)
-        showHUD(text: "  \(offsetText)   \(Self.clockString(landing))  ")
+        showPositionHUD(
+            text: "  \(Self.clockString(landing)) / \(Self.clockString(duration))  "
+        )
         hideHUD(after: 0.8)
     }
 

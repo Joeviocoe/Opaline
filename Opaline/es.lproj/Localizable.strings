@@ -542,5 +542,5 @@
 "keyboard.queue" = "Cola";
 "keyboard.tab1" = "Inicio";
 "keyboard.tab2" = "Suscripciones";
-"keyboard.toast.queued" = "Añadido a la cola";
+"keyboard.toast.queued" = "Añadido a la cola (%1$d)";
 "keyboard.stop" = "Detener";

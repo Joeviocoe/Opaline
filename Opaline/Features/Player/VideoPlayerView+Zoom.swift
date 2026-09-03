@@ -1,4 +1,5 @@
 import AVFoundation
+import ObjectiveC
 import UIKit
 
 // MARK: - Fullscreen Pinch Zoom
@@ -173,6 +174,11 @@ extension VideoPlayerView {
         let item = DispatchWorkItem { [weak self] in
             UIView.animate(withDuration: 0.2) {
                 self?.hudLabel.alpha = 0
+                // Only fade it if it was ever shown -- peeking rather than
+                // going through the lazy-create getter, so a plain zoom/
+                // volume/mute/speed HUD (which never uses the position
+                // label) does not pay to instantiate one it will never show.
+                self?.existingHudPositionLabel?.alpha = 0
             }
         }
         hudWorkItem = item
@@ -196,5 +202,61 @@ extension VideoPlayerView {
                 equalToConstant: 28
             )
         ])
+    }
+}
+
+// MARK: - Second HUD label, for the seek/scrub position
+
+private var hudPositionLabelKey: UInt8 = 0
+
+extension VideoPlayerView {
+    /// Trailing-anchored, same row as `hudLabel`, for "current / total" next
+    /// to a centered offset. A computed property backed by an associated
+    /// object rather than a stored one on the class -- VideoPlayerView.swift
+    /// is already near the linter's file-length limit, and every other
+    /// screen-scoped piece of new UI in this branch uses the same idiom
+    /// (ListFocusInstaller, KeyboardFocusCoordinator).
+    var hudPositionLabel: UILabel {
+        if let existing = existingHudPositionLabel {
+            return existing
+        }
+        let label = UILabel()
+        label.textColor = .white
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .semibold)
+        label.textAlignment = .right
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.75)
+        label.layer.cornerRadius = 4
+        label.layer.masksToBounds = true
+        label.alpha = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            label.trailingAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.trailingAnchor,
+                constant: -12
+            ),
+            label.topAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.topAnchor,
+                constant: 24
+            ),
+            label.heightAnchor.constraint(equalToConstant: 28)
+        ])
+        objc_setAssociatedObject(
+            self,
+            &hudPositionLabelKey,
+            label,
+            .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+        )
+        return label
+    }
+
+    var existingHudPositionLabel: UILabel? {
+        objc_getAssociatedObject(self, &hudPositionLabelKey) as? UILabel
+    }
+
+    func showPositionHUD(text: String) {
+        let label = hudPositionLabel
+        label.text = text
+        label.alpha = 1
     }
 }

@@ -457,5 +457,5 @@
 "keyboard.queue" = "Черга";
 "keyboard.tab1" = "Головна";
 "keyboard.tab2" = "Підписки";
-"keyboard.toast.queued" = "Додано до черги";
+"keyboard.toast.queued" = "Додано до черги (%1$d)";
 "keyboard.stop" = "Стоп";

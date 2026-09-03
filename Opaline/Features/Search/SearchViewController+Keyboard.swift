@@ -7,6 +7,13 @@ import UIKit
 /// once a query runs (`setPanel(.history)` / `.results`), so one pair of
 /// bindings covers both: Down leaves the field for the list, Up at the top of
 /// the list returns to the field.
+///
+/// No `listFocusVideo(at:)` override — results rows dequeue
+/// `SubscriptionVideoCell`, which conforms to `FocusableVideoCell`, and
+/// history/suggestion rows are a plain `UITableViewCell`, which does not.
+/// `ListFocusHost`'s generic default already tells the two apart correctly
+/// by asking whichever cell is actually on screen, with no need to check
+/// `panelMode` here at all.
 extension SearchViewController: ListFocusHost {
     override var keyCommands: [UIKeyCommand]? {
         // Ask the search bar directly rather than the global editing flag: the
@@ -21,12 +28,23 @@ extension SearchViewController: ListFocusHost {
 
     /// Up on the first row hands the chain back to the field, which is what
     /// makes the two halves of this screen feel like one list.
+    ///
+    /// No `!searchBar.isFirstResponder` guard: there is no scenario where
+    /// declining this request is correct, and `UISearchBar.isFirstResponder`
+    /// proxies through an internal `UISearchBarTextField` -- if it does not
+    /// reliably flip back to false after `resignFirstResponder()` on this
+    /// iOS version, a guard here would silently and permanently block every
+    /// request after the first field->list trip. becomeFirstResponder() on
+    /// an already-focused field is a harmless no-op either way.
+    ///
+    /// This override was unreachable through every earlier build: it only
+    /// took effect once `listFocusDidReachTop()` became a protocol
+    /// *requirement* rather than an extension-only default — see the note on
+    /// `ListFocusHost` for why that distinction is what made it dispatch at
+    /// all.
     func listFocusDidReachTop() -> Bool {
-        guard !searchBar.isFirstResponder else {
-            return false
-        }
-        KeyboardDiagnostics.log("search: focus -> field")
-        searchBar.becomeFirstResponder()
+        let accepted = searchBar.becomeFirstResponder()
+        KeyboardDiagnostics.logResponder("search: focus -> field", searchBar, accepted: accepted)
         return true
     }
 

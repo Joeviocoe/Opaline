@@ -5,16 +5,12 @@ import UIKit
 /// horizontal arrows as well — and the geometric search is what copes with the
 /// three different cell shapes this feed renders (grid cells, the taller shorts
 /// grid, and full-width rail rows) without any of them being special-cased.
+///
+/// No `listFocusVideo(at:)` override here — `ListFocusHost`'s default derives
+/// it from whichever cell (`VideoCell` or `ShortThumbnailCell`) is actually on
+/// screen, so `q` works on both cell shapes this feed uses without this file
+/// knowing which one is at a given index path.
 extension VideosViewController: ListFocusHost {
     var listFocusScrollView: UIScrollView? { collectionView }
     var listFocusAxis: ListFocusController.Axis { .grid }
-
-    func listFocusVideo(at indexPath: IndexPath) -> Video? {
-        guard indexPath.section < sections.count,
-              indexPath.item < sections[indexPath.section].videos.count
-        else {
-            return nil
-        }
-        return video(at: indexPath)
-    }
 }

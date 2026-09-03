@@ -125,7 +125,15 @@ final class PlayerPanelViewController: UIViewController, UIGestureRecognizerDele
         // the loopback server still serving audio with no panel to reach it,
         // and only the media keys able to touch it.
         watchVC.videoPlayerView?.multitaskPause.lastUserPause = CACurrentMediaTime()
-        watchVC.videoPlayerView?.player?.pause()
+        // A pause alone leaves the AVPlayer and its MPRemoteCommandCenter
+        // targets alive, so a media key could still resume what this just
+        // closed. resetPlaybackSurfaces() detaches it (player = nil) and
+        // ends the Now Playing session -- nothing left to act on.
+        watchVC.resetPlaybackSurfaces()
+        // Removing the panel's view resigns first responder implicitly but
+        // never reasserts one -- the ring stayed visibly on its cell with
+        // every arrow key dead until switching tabs incidentally fixed it.
+        KeyboardFocusCoordinator.shared.playerDidCollapse(watchVC)
         // Closing the player ends the queue with it — otherwise reopening the
         // same mix later picked it up mid-list, shuffle state and all.
         PlaybackQueue.shared.clear()

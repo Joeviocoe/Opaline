@@ -87,9 +87,16 @@ final class KeyboardFocusCoordinator {
         }
     }
 
+    /// Called whenever the player stops holding the chain, whichever way
+    /// that happens: collapsing to the mini bar (no `didMoveToWindow`, since
+    /// nothing leaves the window) or closing outright (the panel's view *is*
+    /// removed, which resigns first responder implicitly -- but implicit
+    /// resignation never runs our own reassert logic, so without this call
+    /// nothing takes the chain back and every key silently does nothing,
+    /// even though a focus ring can still be visibly sitting on a cell).
     func playerDidCollapse(_ watch: UIViewController) {
         watch.resignFirstResponder()
-        KeyboardDiagnostics.log("player collapsed, returning the chain")
+        KeyboardDiagnostics.log("player released the chain")
         reassert()
     }
 

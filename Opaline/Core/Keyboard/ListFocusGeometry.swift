@@ -19,6 +19,7 @@ protocol FocusGeometry: AnyObject {
     func focusFrame(for indexPath: IndexPath) -> CGRect?
     func focusCandidates(in rect: CGRect) -> [IndexPath]
     func focusSelect(_ indexPath: IndexPath)
+    func focusCell(at indexPath: IndexPath) -> UIView?
 }
 
 extension FocusGeometry {
@@ -67,6 +68,10 @@ extension UITableView: FocusGeometry {
             ?? indexPath
         delegate?.tableView?(self, didSelectRowAt: target)
     }
+
+    func focusCell(at indexPath: IndexPath) -> UIView? {
+        cellForRow(at: indexPath)
+    }
 }
 
 // MARK: - UICollectionView
@@ -107,5 +112,9 @@ extension UICollectionView: FocusGeometry {
             return
         }
         delegate?.collectionView?(self, didSelectItemAt: indexPath)
+    }
+
+    func focusCell(at indexPath: IndexPath) -> UIView? {
+        cellForItem(at: indexPath)
     }
 }

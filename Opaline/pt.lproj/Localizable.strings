@@ -542,5 +542,5 @@
 "keyboard.queue" = "Fila";
 "keyboard.tab1" = "Início";
 "keyboard.tab2" = "Subscrições";
-"keyboard.toast.queued" = "Adicionado à fila";
+"keyboard.toast.queued" = "Adicionado à fila (%1$d)";
 "keyboard.stop" = "Parar";

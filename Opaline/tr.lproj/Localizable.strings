@@ -546,5 +546,5 @@
 "keyboard.queue" = "Sıra";
 "keyboard.tab1" = "Ana sayfa";
 "keyboard.tab2" = "Abonelikler";
-"keyboard.toast.queued" = "Sıraya eklendi";
+"keyboard.toast.queued" = "Sıraya eklendi (%1$d)";
 "keyboard.stop" = "Durdur";
