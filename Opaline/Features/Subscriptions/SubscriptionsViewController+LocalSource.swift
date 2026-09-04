@@ -208,9 +208,14 @@ extension SubscriptionsViewController {
     }
 
     /// Pull-to-refresh has to drop the per-channel RSS caches, or it would
-    /// be a no-op for the full 30-minute TTL.
+    /// be a no-op for the full 30-minute TTL. That is what `force` does.
+    ///
+    /// The disk cache is deliberately *not* cleared here. A successful
+    /// rebuild overwrites it anyway, so clearing up front bought nothing
+    /// except a window with no fallback — and a refresh that reached no
+    /// channel would land in exactly that window, leaving the next cold
+    /// launch with nothing to paint either.
     func refreshLocalFeed() {
-        cache.clearLocalSubscriptionsFeed()
         guard let local = service as? LocalSubscriptionFeedService else {
             loadFeed()
             return
@@ -226,6 +231,15 @@ extension SubscriptionsViewController {
         spinner.stopAnimating()
         tableView.refreshControl?.endRefreshing()
         guard case .success(let page) = result else {
+            // The rebuild reached nothing. Keep what is already on screen:
+            // swapping a good feed for "No recent videos" is the one outcome
+            // that reads as data loss, and on a flaky connection it is also
+            // the likeliest. Only fall back to the empty state if there was
+            // nothing there to protect in the first place.
+            AppLog.subs(
+                "local refresh failed, keeping \(videos.count) videos"
+            )
+            showLocalEmptyState(videos.isEmpty)
             return
         }
         showLocalEmptyState(page.videos.isEmpty)

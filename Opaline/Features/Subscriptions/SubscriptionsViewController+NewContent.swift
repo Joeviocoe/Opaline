@@ -68,6 +68,15 @@ private extension SubscriptionsViewController {
     /// The service caches per channel, so calling on every appearance
     /// is cheap; only stale channels hit the network.
     func refreshRSSUploads() {
+        if LocalLibrary.isActive {
+            // The feed just walked every channel; a second fan-out here is
+            // what put ~60 requests in flight at once and got most of them
+            // throttled (`local feed: 2/15 answered`). The dots only need
+            // video ids and dates, both of which the assembled feed already
+            // holds — so derive rather than refetch.
+            deriveNewContentFromFeed()
+            return
+        }
         let ids = subscribedChannels.map { $0.id }
         guard !ids.isEmpty, !isLoadingNewContentRSS else {
             return
@@ -86,6 +95,41 @@ private extension SubscriptionsViewController {
             self.newContentUploads = uploads
             self.recomputeNewContentDots()
         }
+    }
+
+    /// Rebuilds the resolver's input from the feed on screen.
+    ///
+    /// Dates are the same approximations the feed sorts by — good to about
+    /// an hour, which is far finer than the resolver's multi-day window, so
+    /// nothing is lost by not having exact timestamps here.
+    ///
+    /// Skipped while a channel filter is active: `videos` is then one
+    /// channel's tab, and computing dots from it would clear every other
+    /// channel's.
+    func deriveNewContentFromFeed() {
+        guard selectedChannel == nil else {
+            return
+        }
+        var byChannel: [String: [RSSVideoEntry]] = [:]
+        for video in videos {
+            guard let channelId = video.channelId else {
+                continue
+            }
+            let published = video.publishedAt
+                .flatMap { VideoFormatters.approximateDate(fromRelative: $0) }
+                ?? Date.distantPast
+            byChannel[channelId, default: []].append(
+                RSSVideoEntry(
+                    videoId: video.id,
+                    title: video.title,
+                    published: published,
+                    viewCount: nil
+                )
+            )
+        }
+        newContentUploads = byChannel
+        AppLog.subs("dots: derived from feed, \(byChannel.count) channels")
+        recomputeNewContentDots()
     }
 
     func fetchHistoryForNewContent() {

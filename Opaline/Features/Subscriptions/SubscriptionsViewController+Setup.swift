@@ -7,7 +7,7 @@ extension SubscriptionsViewController {
         // With no account this screen used to dead-end on a sign-in prompt.
         // It now has a local library to show instead.
         if LocalLibrary.isActive {
-            AppLog.subs("local library → assembling from RSS")
+            AppLog.subs("local library → assembling from channel tabs")
             loadLocalInitialContent()
             return
         }
@@ -172,12 +172,6 @@ extension SubscriptionsViewController {
         continuationToken = page.continuation
         isLoadingMore = false
         tableView.reloadData()
-        // The first screenful never scrolls, so without this it would sit
-        // there without durations until the reader happened to move. Async
-        // because visible rows are only known after a layout pass.
-        DispatchQueue.main.async { [weak self] in
-            self?.enrichVisibleDurations()
-        }
     }
 
     func finishLoadingMore() {
@@ -259,6 +253,13 @@ private extension SubscriptionsViewController {
                     "network failed \(ms)ms: \(error)"
                 )
                 self.finishLoadingMore()
+                if LocalLibrary.isActive {
+                    // A local rebuild only fails when it reached nothing at
+                    // all, so keep whatever is already painted. But a cold
+                    // screen with no cache to fall back on would otherwise
+                    // sit blank and spinnerless, saying nothing.
+                    self.showLocalEmptyState(self.videos.isEmpty)
+                }
                 if case APIError.unauthorized = error {
                     self.isLoadingInitial = false
                     self.showSignInPrompt(true)

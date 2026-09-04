@@ -114,12 +114,12 @@ extension ChannelRSSService {
         variant: RSSFeedVariant,
         completion: @escaping ([RSSVideoEntry]?) -> Void
     ) {
-        let fullFeedURL = AppURLs.YouTube.channelRSSFeedURL(
-            channelId: channelId
-        )
         switch variant {
         case .all:
-            fetchFeed(url: fullFeedURL, completion: completion)
+            fetchFeed(
+                url: AppURLs.YouTube.channelRSSFeedURL(channelId: channelId),
+                completion: completion
+            )
         case .shorts:
             fetchFeed(
                 url: AppURLs.YouTube.channelShortsRSSFeedURL(
@@ -128,18 +128,40 @@ extension ChannelRSSService {
                 completion: completion
             )
         case .longForm:
-            guard let longFormURL = AppURLs.YouTube.channelLongFormRSSFeedURL(
-                channelId: channelId
-            ) else {
-                fetchFeed(url: fullFeedURL, completion: completion)
-                return
-            }
-            fetchFeed(url: longFormURL) { entries in
-                if let entries = entries {
-                    completion(entries)
-                } else {
-                    self.fetchFeed(url: fullFeedURL, completion: completion)
-                }
+            fetchLongForm(channelId, completion: completion)
+        }
+    }
+
+    /// `UULF` with the full channel feed as the fallback. Split out of
+    /// `fetchChannel` to keep that switch readable -- and because this is the
+    /// only branch with a failure path worth naming.
+    private func fetchLongForm(
+        _ channelId: String,
+        completion: @escaping ([RSSVideoEntry]?) -> Void
+    ) {
+        let fullFeedURL = AppURLs.YouTube.channelRSSFeedURL(
+            channelId: channelId
+        )
+        guard let longFormURL = AppURLs.YouTube.channelLongFormRSSFeedURL(
+            channelId: channelId
+        ) else {
+            AppLog.subs("rss \(channelId): no UULF id, full feed")
+            fetchFeed(url: fullFeedURL, completion: completion)
+            return
+        }
+        fetchFeed(url: longFormURL) { entries in
+            if let entries = entries {
+                completion(entries)
+            } else {
+                // Silent until now, and it decides whether the feed has
+                // Shorts in it: the full feed cannot exclude short-form, so
+                // every channel that lands here leaks them regardless of the
+                // Shorts switch.
+                AppLog.subs(
+                    "rss \(channelId): UULF FAILED -> full feed"
+                        + " (shorts leak in)"
+                )
+                self.fetchFeed(url: fullFeedURL, completion: completion)
             }
         }
     }

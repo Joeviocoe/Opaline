@@ -149,6 +149,14 @@ enum UserDefaultsKeys {
         static let savesHistory = "localLibrary_savesHistory"
         /// How many history entries are kept before the oldest are dropped.
         static let historyLimit = "localLibrary_historyLimit"
+        /// channelId -> newest upload date, so the channel bar can lead with
+        /// whoever posted most recently. Derived, refreshed by every feed
+        /// rebuild, and safe to lose.
+        static let channelActivity = "localLibrary_channelActivity"
+        /// videoId -> when this device first saw it. Breaks ties between
+        /// videos the feed can only date to the same hour. Derived and safe
+        /// to lose; losing it costs ordering precision, nothing else.
+        static let videoFirstSeen = "localLibrary_videoFirstSeen"
     }
 
     enum Notifications {

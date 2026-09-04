@@ -1,7 +1,12 @@
 import Foundation
 
 /// The subscriptions feed, assembled on the device from each subscribed
-/// channel's public Atom feed, when there is no account.
+/// channel's own Videos tab, when there is no account.
+///
+/// It was built on the public Atom feeds until those stopped being usable:
+/// the `UULF` long-form playlist that made the Shorts switch work now fails
+/// for every channel, and the resulting fallback doubled the request count
+/// into a burst that got most channels throttled. See `LocalChannelUploads`.
 ///
 /// It intercepts exactly two methods and passes everything else through, so
 /// `SubscriptionsViewController`'s `loadFeed`, `loadMore`, `setPage`,
@@ -15,7 +20,7 @@ final class LocalSubscriptionFeedService: FeedService {
     static let continuationPrefix = "opaline.local.subs:"
 
     private let inner: FeedService
-    private let rss: ChannelRSSFeedService
+    private let uploads: LocalChannelUploads
     private let store: LocalSubscriptionStore
     private let cache: AppCache
 
@@ -29,12 +34,12 @@ final class LocalSubscriptionFeedService: FeedService {
 
     init(
         wrapping inner: FeedService,
-        rss: ChannelRSSFeedService = ServiceContainer.channelRSS,
+        uploads: LocalChannelUploads = LocalChannelUploads(),
         store: LocalSubscriptionStore = .shared,
         cache: AppCache = .shared
     ) {
         self.inner = inner
-        self.rss = rss
+        self.uploads = uploads
         self.store = store
         self.cache = cache
     }
@@ -96,8 +101,9 @@ final class LocalSubscriptionFeedService: FeedService {
 // MARK: - Assembly
 
 extension LocalSubscriptionFeedService {
-    /// Rebuilds from RSS. `force` is pull-to-refresh: it drops the per-channel
-    /// caches so the fan-out really goes to the network.
+    /// Rebuilds from each channel's Videos tab, one channel at a time.
+    /// `force` is pull-to-refresh: it drops the per-channel cache so the walk
+    /// really goes to the network.
     func buildFeed(
         force: Bool,
         completion: @escaping (Result<FeedPage, Error>) -> Void
@@ -108,45 +114,41 @@ extension LocalSubscriptionFeedService {
             deliver(page: FeedPage(videos: [], continuation: nil), to: completion)
             return
         }
-        let withFeeds = channels.filter { $0.id.hasPrefix("UC") }
-        if withFeeds.count != channels.count {
-            // A channel id that is not a `UC` id has no Atom feed at all. It
-            // stays in the avatar bar and simply contributes nothing.
-            AppLog.library(
-                "local feed: \(channels.count - withFeeds.count) of"
-                    + " \(channels.count) channels have no RSS feed"
-            )
+        if force {
+            uploads.invalidate()
         }
-        fanOut(channels: withFeeds, force: force, completion: completion)
+        walk(channels: channels, completion: completion)
     }
 
-    private func fanOut(
+    private func walk(
         channels: [SubscribedChannel],
-        force: Bool,
         completion: @escaping (Result<FeedPage, Error>) -> Void
     ) {
-        // The Subscriptions screen's own switch, not the global one: with it
-        // off the long-form `UULF` feed is read instead of the channel's full
-        // feed, so shorts are excluded at the source rather than filtered out
-        // afterwards — fewer bytes and less parsing on the way in.
+        // The Subscriptions screen's own switch, not the global one. With it
+        // off only the Videos tab is read, which excludes Shorts by
+        // construction rather than by the `UULF` playlist trick that stopped
+        // resolving; with it on the Shorts tab is read too and everything
+        // from it is marked `isShort`.
         let includeShorts = SubscriptionsShorts.isEnabled
         let started = Date()
-        let byId = Dictionary(
-            channels.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }
-        )
-        rss.fetchRecentUploads(
+        uploads.fetch(
             channelIds: channels.map { $0.id },
-            includeShorts: includeShorts,
-            force: force
-        ) { [weak self] uploads in
+            includeShorts: includeShorts
+        ) { [weak self] byChannel in
             guard let self = self else {
                 return
             }
             let ms = Int(Date().timeIntervalSince(started) * 1_000)
-            let page = self.assemble(uploads: uploads, channels: byId)
+            guard !byChannel.isEmpty else {
+                self.reportNothingAnswered(
+                    asked: channels.count, ms: ms, to: completion
+                )
+                return
+            }
+            let page = self.assemble(uploads: byChannel, channels: channels)
             AppLog.library(
-                "local feed: \(channels.count) channels,"
-                    + " shorts=\(includeShorts) force=\(force),"
+                "local feed: \(byChannel.count)/\(channels.count) answered,"
+                    + " shorts=\(includeShorts),"
                     + " \(page.videos.count) videos in \(ms)ms"
             )
             self.cache.setLocalSubscriptionsFeed(page)
@@ -154,33 +156,41 @@ extension LocalSubscriptionFeedService {
         }
     }
 
-    /// Newest first, windowed, then cut to a page. The window matters: RSS
-    /// returns ~15 entries per channel with no date bound, so without one a
+    /// Not one channel came back with anything.
+    ///
+    /// A live channel's Atom feed effectively always has entries, so zero
+    /// across the whole fan-out is the network failing — not a library with
+    /// nothing recent in it. The two are indistinguishable by the time they
+    /// reach the screen, and guessing "empty" swaps a good feed for "No
+    /// recent videos" and writes the emptiness into the disk cache on the
+    /// way out, so the next cold launch starts with nothing too.
+    ///
+    /// Reporting failure instead leaves both the screen and the cache alone.
+    private func reportNothingAnswered(
+        asked: Int,
+        ms: Int,
+        to completion: @escaping (Result<FeedPage, Error>) -> Void
+    ) {
+        AppLog.library(
+            "local feed: none of \(asked) channels answered in \(ms)ms"
+                + " — refresh failed, keeping what we had"
+        )
+        completion(.failure(LocalFeedError.noChannelAnswered))
+    }
+
+    /// Newest first, windowed, then cut to a page. The window matters: a tab
+    /// returns ~30 videos per channel with no date bound, so without one a
     /// dormant channel turns the feed into an archive of its back catalogue.
     private func assemble(
-        uploads: [String: [RSSVideoEntry]],
-        channels: [String: SubscribedChannel]
+        uploads: [String: [Video]],
+        channels: [SubscribedChannel]
     ) -> FeedPage {
-        var dated: [(date: Date, video: Video)] = []
-        for (channelId, entries) in uploads {
-            guard let channel = channels[channelId] else {
-                continue
-            }
-            for entry in entries {
-                dated.append(
-                    (
-                        entry.published,
-                        Video(
-                            rssEntry: entry,
-                            channel: channel,
-                            isShort: false
-                        )
-                    )
-                )
-            }
-        }
-        dated.sort { $0.date > $1.date }
-        let windowed = LocalFeedWindow.apply(to: dated)
+        let entries = feedEntries(uploads: uploads, channels: channels)
+        LocalChannelActivity.record(latestUploads(in: entries))
+        let ordered = LocalFeedOrder.sorted(entries)
+        let windowed = LocalFeedWindow.apply(
+            to: ordered.map { (date: $0.date, video: $0.video) }
+        )
         generation += 1
         assembled = windowed
         let slice = Array(
@@ -191,7 +201,11 @@ extension LocalSubscriptionFeedService {
             continuation: makeContinuation(
                 offset: slice.count, total: windowed.count
             ),
-            channels: Array(channels.values)
+            // Ordered most-recent-upload first, which the store can answer
+            // because the line above just told it. Every subscription, not
+            // only the ones with an Atom feed: the bar shows them all, and
+            // the screen takes this list as primary when it merges.
+            channels: store.channels
         )
     }
 
@@ -239,4 +253,12 @@ extension LocalSubscriptionFeedService {
             completion(.success(page))
         }
     }
+}
+
+/// Why a local rebuild produced nothing. Distinguishing this from an empty
+/// feed is the whole point — an empty `FeedPage` tells the screen "you have
+/// nothing recent", which is a lie when the truth is "I could not reach
+/// anything".
+enum LocalFeedError: Error {
+    case noChannelAnswered
 }

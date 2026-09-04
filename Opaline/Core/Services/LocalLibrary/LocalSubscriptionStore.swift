@@ -32,10 +32,18 @@ final class LocalSubscriptionStore {
         return storage
     }
 
-    /// Newest first, matching how the avatar bar wants them.
+    /// Most recent upload first — the single definition of the order both
+    /// the avatar bar and the All-channels list are shown in, so the two can
+    /// never disagree. See `LocalChannelActivity.isOrderedBefore` for how a
+    /// channel with no known upload date is placed.
     var channels: [SubscribedChannel] {
-        subscriptions
-            .sorted { $0.subscribedAt > $1.subscribedAt }
+        let activity = LocalChannelActivity.all
+        return subscriptions
+            .sorted {
+                LocalChannelActivity.isOrderedBefore(
+                    $0, $1, activity: activity
+                )
+            }
             .map { $0.channel }
     }
 
@@ -91,6 +99,7 @@ final class LocalSubscriptionStore {
         }
         storage.remove(at: position)
         index.remove(channelId)
+        LocalChannelActivity.forget(channelId: channelId)
         AppLog.library(
             "unsubscribe \(channelId) total=\(storage.count)"
         )
@@ -105,6 +114,7 @@ final class LocalSubscriptionStore {
         }
         storage = []
         index = []
+        LocalChannelActivity.clear()
         AppLog.library("subscriptions cleared")
         persistAndNotify()
     }

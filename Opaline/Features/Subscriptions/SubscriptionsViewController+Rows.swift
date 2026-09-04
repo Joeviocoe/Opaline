@@ -136,22 +136,6 @@ extension SubscriptionsViewController: UITableViewDelegate {
 
     // Durations are fetched when scrolling STOPS, never during it: rows that
     // fly past a flick should cost nothing.
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        guard scrollView === tableView else {
-            return
-        }
-        enrichVisibleDurations()
-    }
-
-    func scrollViewDidEndDragging(
-        _ scrollView: UIScrollView, willDecelerate decelerate: Bool
-    ) {
-        guard scrollView === tableView, !decelerate else {
-            return
-        }
-        enrichVisibleDurations()
-    }
-
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard !isLoadingInitial,
               case let .video(video) = rows[indexPath.row]
