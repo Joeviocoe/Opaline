@@ -20,7 +20,7 @@
 set -uo pipefail
 
 STAGE="${STAGE:-$HOME/legacy-ios9/pages-repo}"
-REMOTE="${REMOTE:-https://github.com/Joeviocoe/Opaline}"
+REMOTE="${REMOTE:-git@github.com:Joeviocoe/Opaline.git}"
 BRANCH="${BRANCH:-gh-pages}"
 DRY=0
 
