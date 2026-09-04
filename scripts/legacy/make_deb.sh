@@ -27,6 +27,10 @@ APP_NAME="${APP_NAME:-Opaline}"
 # Distinct from upstream's com.verback.ytlite so APT never offers this armv7
 # build to an arm64 iOS 12 user -- Architecture: iphoneos-arm covers both.
 PACKAGE_ID="${PACKAGE_ID:-com.verback.ytlite.legacy}"
+# Cydia draws the list icon from Section, using its own bundled set in
+# /Applications/Cydia.app/Sections.  "Applications" is NOT one of those names,
+# so it renders a grey question mark; "Multimedia" gets the blue camera.
+SECTION="${SECTION:-Multimedia}"
 VERSION="${DEB_VERSION:-$(sed -n 's/.*MARKETING_VERSION = \([^;]*\);.*/\1/p' \
     "$REPO/Opaline.xcodeproj/project.pbxproj" | head -1)}"
 VERSION="${VERSION:-1.11.0}-ios9"
@@ -86,7 +90,7 @@ Package: $PACKAGE_ID
 Name: $APP_NAME (iOS 9)
 Version: $VERSION
 Architecture: iphoneos-arm
-Section: Applications
+Section: $SECTION
 Priority: optional
 Depends: firmware (>= 9.3), firmware (<< 12.0)
 EOF
