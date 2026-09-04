@@ -7,38 +7,34 @@
   <img src="source/logo.png" width="128" alt="">
 </picture>
 
-**A lightweight, native YouTube client for iOS 12+. No ads, no tracking, no dependencies.**
+**A lightweight, native YouTube client. No ads, no tracking, no dependencies.**
 
-[![Latest release](https://img.shields.io/github/v/release/verback2308/Opaline?label=release&color=blue)](https://github.com/verback2308/Opaline/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/verback2308/Opaline/total?color=brightgreen)](https://github.com/verback2308/Opaline/releases)
-![iOS 12+](https://img.shields.io/badge/iOS-12%2B-lightgrey?logo=apple)
+**This branch is the iOS 9 downport — it runs on the iPad 3.**
+
+![iOS 9.3+](https://img.shields.io/badge/iOS-9.3%2B-lightgrey?logo=apple)
+![armv7](https://img.shields.io/badge/arch-armv7-orange)
+![Branch](https://img.shields.io/badge/branch-legacy%2Fios9--integration-blueviolet)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 
 </div>
 
-> ### What happened between 14 and 17 August
+> ### What this branch is
 >
-> Over those days YouTube kept changing how it hands out video, and most
-> third-party clients stopped playing, this one among them. Playback cut out
-> about a minute in. A fix would land, and the next change would take something
-> else away: dubbed audio, content made for kids, watch history.
+> Upstream Opaline targets iOS 12. This is the downport that runs it on
+> **armv7 / iOS 9.3.5** — the iPad 3 and its A5X, hardware two major
+> architectures below anything the app was written for.
 >
-> **It plays again. Update to the latest version.**
+> It is not a cut-down version — the app is all here. A few things the
+> hardware simply cannot do are switched off; they are listed under
+> [Known Issues](#known-issues-and-limitations).
 >
-> Getting there meant rebuilding the way the app fetches video. There are
-> several sources now, listed in Settings → Playback, where you can drag them
-> into the order you want or switch off the ones you do not:
+> **Two features were added here that upstream does not have**, because the
+> hardware asks for them:
 >
-> - two fast ones, no sign-in needed, dubbed audio works
-> - one that reaches 1080p but needs you to be signed in and takes longer to
->   start
-> - one that serves a single 360p quality and starts instantly
->
-> Sources are tried from the top down until one plays. Content made for kids
-> comes only from the 1080p source or the 360p one.
->
-> Nothing to do beyond updating. Your account, settings and history are
-> untouched.
+> - **[Hardware keyboard control](#hardware-keyboard)** — the iPad 3 era is the
+>   era of the folio keyboard, and the app was entirely touch-driven
+> - **[A local library](#local-library)** — subscriptions and watch history
+>   that need no Google account, kept on the device
 >
 > <sub>Opaline was released as YTLite until August. It was renamed to avoid
 > confusion with an unrelated tweak of the same name and is not related to it.</sub>
@@ -74,14 +70,14 @@ When Google dropped support for the official YouTube app on older devices, there
 
 ## Features
 
-- **Video playback** — up to 1080p 60fps on every device; 2K/4K on hardware with AV1 decode (iPhone 15 Pro and newer, M3+ iPads)
-- **Shorts** — a native full-screen viewer with vertical swiping, likes, comments and sharing; the next short is preloaded so it opens on video rather than a poster. Tapping a short anywhere carries that list into the viewer, and the whole tab can be switched off
+- **Video playback** — up to **1080p** on the iPad 3. 1080p is watchable on an A5X with the same ~8s start as 720p, so it stays selectable while Auto clamps to 720p for bandwidth rather than for the hardware. AV1 and 2K/4K need decode hardware this era does not have
+- **Shorts** — a native full-screen viewer with vertical swiping, likes, comments and sharing. Tapping a short anywhere carries that list into the viewer, and the whole tab can be switched off. **Preloading the next short is disabled on iOS 9**: what upstream treats as a cheap resolve is a full composition build here, so a swipe pays a fresh resolve (~2.1–2.6s) instead of the tap paying ~6.0s for speculative ones
 - **Kids content** — plays videos the standard API sources refuse, via a dedicated playback source
 - **Offline downloads** — save a video to the device and watch it with no network. Its page comes along: thumbnail, description, like counts and the comments as of the moment you saved it. Settings → Downloads picks the quality, how many comments and which subtitle languages travel with it, and a video that plays dubbed in your language is saved dubbed
 - **Pinch to zoom** — fill the screen in fullscreen with a pinch, or turn on Zoom to Fill to do it automatically
 - **Background audio** — continue listening with the screen off
 - **Media controls** — play/pause and next/previous video from Control Center, the lock screen and headphones
-- **Picture-in-Picture** — watch while using other apps
+- **Picture-in-Picture** — watch while using other apps *(compiled but unavailable on an A5X — see [Known Issues](#known-issues-and-limitations))*
 - **SponsorBlock** — skip sponsored segments automatically
 - **Return YouTube Dislike** — see dislike counts again
 - **Audio tracks** — switch dubbed audio on multi-language videos, or start videos dubbed in your language automatically; AI auto-dubs are marked "(AI)"
@@ -89,13 +85,15 @@ When Google dropped support for the official YouTube app on older devices, there
 - **13 languages** — localized interface, with video titles/search/feeds following your language (see [Localization](#localization))
 - **Search & browse** — live suggestions, recent-search history, filters (sort, upload date, type, duration), channel pages, playlists
 - **Smart home feed** — endless recommendations with category chips read from your feed's shelves
-- **Subscriptions** — follow channels with a local subscription feed
+- **Subscriptions** — follow channels with a local subscription feed, **with or without a Google account** (see [Local library](#local-library))
 - **Notifications** — a bell in the top bar collects app news and new-version announcements, with the full release notes in the message; system notifications are optional and everything still collects in-app if you decline
-- **Watch history** — progress indicators, synced across devices; a video resumes where you left it the moment you reopen it, without waiting for the server to catch up
+- **Watch history** — progress indicators and resume-where-you-left-off, synced across devices when signed in and **kept on the device when not** (see [Local library](#local-library))
 - **Autoplay** — automatically play the next related video, with replay, previous and next offered when one ends
-- **Auto theme** — follows system dark mode on iOS 13+, scheduled hours on iOS 12; manual override available
-- **Made for old hardware** — thumbnails and channel details are fetched and decoded a few at a time rather than all at once, which is what keeps scrolling smooth on a dual-core A7
+- **Auto theme** — scheduled hours on iOS 9 (the system has no dark mode to follow); manual override available
+- **Made for old hardware** — thumbnails and channel details are fetched and decoded a few at a time rather than all at once, which is what keeps scrolling smooth on an A5X
 - **Your layout** — pick the tab the app opens on, force the icon light or dark, and browse settings as a nested menu instead of one long list
+- **Hardware keyboard** — drive the whole app from a folio keyboard: transport, seeking, a focus ring for every list, and search. [Full shortcut list](#hardware-keyboard)
+- **Local library** — subscriptions and watch history with no Google account, stored on the device. [What it does](#local-library)
 
 <div align="center">
 
@@ -135,60 +133,129 @@ When Google dropped support for the official YouTube app on older devices, there
 </div>
 </details>
 
+## Hardware keyboard
+
+Upstream is touch-only. On an iPad 3 the keyboard is usually attached, so the
+whole app is drivable from it — and every command is **modifier-less where it
+can be**, because a bare key still reaches an app on iOS 9.
+
+**Anywhere**
+
+| Key | Action |
+|---|---|
+| `/` · `⌘F` · `⌘/` | Search — three ways in, because which one you reach for depends on the keyboard |
+| `Space` · `K` | Play/pause whatever is playing |
+| `F` | Fullscreen, or restore a minimized player |
+| `X` | Stop the player |
+| `Esc` · `Backspace` | Close / back out |
+| `⌘1` … `⌘4` | Switch tab by visible position — Shorts is optional, so the bar renumbers itself when it is off |
+
+**In a list, grid or the channel bar** — a focus ring, so you can browse without touching the screen
+
+| Key | Action |
+|---|---|
+| `↑` `↓` (`←` `→` in a grid) | Move focus — pressing down on a fresh feed starts at the top |
+| `Return` | Open the focused item |
+| `Q` | Queue the focused video — on an empty queue it opens and starts minimized, so you can keep browsing |
+| `Tab` · `⇧Tab` | Next / previous section |
+| `⌘↑` · `⌘↓` | Jump to top / bottom |
+| `PageUp` · `PageDown` | Page through |
+
+**On the watch screen**
+
+| Key | Action |
+|---|---|
+| `Space` · `K` | Play/pause |
+| `←` `→` | Seek |
+| `J` · `L` | Seek back / forward by a fixed step |
+| `0`–`9` | Jump to that tenth of the video |
+| `↑` `↓` | Volume |
+| `N` · `]` / `P` · `[` | Next / previous video — the bracket pair sits together and leaves the media keys meaning seek |
+| `M` | Mute |
+| `F` | Fullscreen |
+| `,` · `.` | Slower / faster |
+| `Q` | Queue |
+| `Esc` · `Backspace` | Close the player |
+
+**In Shorts**: `↑` `↓` move between shorts, `Space` plays and pauses.
+
+While a text field has the keyboard, only modified commands survive — otherwise
+typing "j" into the search bar would seek the player. `Backspace` deletes a
+character there rather than dismissing the player.
+
+## Local library
+
+Everything account-shaped in upstream Opaline is a round-trip to InnerTube, so
+signed out you got an empty state and nothing else: no subscriptions feed, no
+watch history, no channel pages, and a subscribe button constructed disabled so
+it could not even be tapped. This branch gives the app a usable library with no
+Google account — **local when signed out, account when signed in**. There is no
+merging, no two-way sync and no import; the two libraries never mix.
+
+- **Subscriptions** — subscribe from any video's menu or a channel page. The
+  feed is assembled on the device from each channel's public Atom feed,
+  windowed to the last 30 days, or the newest 40 videos if that window is
+  thinner than that — a quiet subscription list should not read as an empty
+  screen. Subscribing captures the channel's name and avatar at the moment you
+  tap, because signed out there is nothing to enrich a bare channel id with
+  afterwards.
+- **Channel pages** load anonymously over the WEB browse — the same request the
+  app already made to enrich channels, read by the same parser. "Channel
+  unavailable" is retired.
+- **Watch history** is recorded from the playback path rather than the
+  watchtime tracker, which never starts without an account. That also restores
+  **resume-where-you-left-off for anonymous users**, silently broken until now.
+  History is flushed synchronously when the app goes to the background, which
+  is what makes a watch survive the jetsam an iPad 3 takes routinely while
+  suspended.
+- **Shorts are off in Subscriptions by default** — that screen is for the
+  videos of channels you chose. With it off the feed reads the channel's
+  long-form Atom feed, so short-form is excluded at the source rather than
+  filtered out afterwards. Turn it on in **Settings → Shorts**.
+
+**Settings → Library** shows what is stored (`N channels · M videos`) and lets
+you turn history recording off, cap it at 100 / 500 / 1000 entries (default
+500), clear either store, or export your subscriptions as JSON. Signing in
+switches to your account's library and deletes nothing.
+
+Both stores live in `Application Support/LocalLibrary/` behind a versioned
+envelope. The file layer distinguishes "no file" from "file present but
+undecodable" and refuses to overwrite the latter — this is your only copy.
+
 ## Installation
 
-Opaline runs on devices with **iOS 12 and above**.
+This branch has no releases — **there is no IPA to sideload**, and iOS 9 devices
+cannot run a modern sideloading client anyway. You need a **jailbroken armv7
+device on iOS 9.3.x** (developed against an iPad 3 on 9.3.5), and you install a
+package you build yourself.
 
-### Non-jailbroken devices
-
-**Option 1 — Add source (recommended)**
-
-Add the Opaline source to your sideloading app to receive automatic updates:
-
-<a href="https://stikstore.app/altdirect/?url=https://verback2308.github.io/repo/apps.json"><img src="https://github.com/StikStore/altdirect/raw/main/assets/png/AltSource_Blue.png" height="55" alt="Add Source"></a>
-
-**Option 2 — Manual install**
-
-[Download the latest IPA](https://github.com/verback2308/Opaline/releases/latest) and install via **SideStore**, **AltStore**, or **LiveContainer**.
-
-**Option 3 — Build from source**
-
-```bash
-git clone https://github.com/verback2308/Opaline.git
-cd Opaline
-cp Config/Local.xcconfig.example Config/Local.xcconfig
-./make_ipa.sh
-```
-
-### Jailbroken devices
-
-**Option 1 — Cydia/Sileo repo (recommended)**
-
-Add the repo to your package manager to install Opaline and receive automatic updates:
-
-```
-https://verback2308.github.io/repo/
-```
-
-Rootful (`iphoneos-arm`) and rootless (`iphoneos-arm64`) packages are provided; Sileo, Zebra and Cydia are supported. Every released version stays available in the repo, so you can also install or roll back to an older one (Sileo/Zebra: package page → version list).
-
-Pick one channel and stay on it — the repo package and the IPA share a bundle identifier, and having both installed leaves an app icon the Home Screen cannot delete. Already have the other one? Remove it first: the IPA from the Home Screen, the repo package from your package manager (or `dpkg -r com.verback.ytlite` over SSH).
-
-**Option 2 — Manual install**
-
-Install the `.ipa` package directly:
-- **Filza** — open the `.ipa` file → Install
-- **ReProvision** — sign and install the IPA from the app
+Building it needs a Linux machine rather than Xcode; the scripts are in
+`scripts/legacy/` and the short version is under
+[Building](#building). `deploy.sh` produces the `.deb`, serves it over USB, and
+prints the source to add in **Cydia → Sources**. Nothing is published anywhere.
 
 ## Known Issues and Limitations
 
-- Playback speeds above 2x may cause issues
-- Comments are read-only — you can browse and sort them and open replies, but not post, reply or like
-- Notification delivery is scheduled by iOS, which grants background time at its own discretion — expect news to arrive within hours of publication, not minutes, and not at all while Background App Refresh or Low Power Mode says otherwise
-- **Picture in Picture is limited by the system before iOS 15**, and no app can work around it: the window survives exactly one video, and switching to another one closes it and leaves audio playing — [the full findings are in issue #31](https://github.com/verback2308/Opaline/issues/31#issuecomment-5148224679)
-  - Before iOS 14.2 the system only starts PiP by itself from **fullscreen**. Leaving the app while the video plays inline gives background audio instead — the PiP button works in both cases
-  - Before iOS 15 background audio requires the player to give up its video layer, and the system then refuses to open PiP for that video at all. So once a video has played in the background, automatic PiP no longer starts for it — the PiP button still does, and the next video starts clean
-  - On a **jailbroken device** PiP may not start at all — confirmed on an iPad mini 2 running iOS 12.5.8 with Chimera, and likely the same on checkra1n. The jailbreak denies it, not the app; installing [ForceInPicture](https://github.com/PoomSmart/ForceInPicture) restores it
+Everything below is specific to this branch unless marked otherwise.
+
+- **Picture-in-Picture does not work on an A5X.** It is compiled in, but the
+  system will not start it on this hardware. Background audio works
+- **AV1, 2K and 4K are unavailable** — no decode hardware exists on this device.
+  1080p AVC is the ceiling, and it is a comfortable one
+- **Shorts do not preload.** A swipe to the next short pays its own resolve
+  (~2.1–2.6s). See [Features](#features) for why preloading was removed rather
+  than tuned
+- **Starting a video takes ~8 seconds** at 720p or 1080p. The stream is
+  assembled on-device into a synthesized progressive MP4 and served to
+  `AVPlayer` over a loopback HTTP server, because iOS 9's `AVPlayer` will not
+  take the formats YouTube serves directly
+- A long **main-thread freeze** (~57s) has been seen occasionally and is not
+  yet fixed
+- *(upstream)* Playback speeds above 2x may cause issues
+- *(upstream)* Comments are read-only — you can browse and sort them and open
+  replies, but not post, reply or like
+- *(upstream)* Notification delivery is scheduled by iOS at its own discretion —
+  expect news within hours of publication, not minutes
 
 ## Localization
 
@@ -212,7 +279,7 @@ The interface follows your system language by default and can be overridden in *
 
 ## Playback Helper Server
 
-Signed-in playback relies on a small companion service, and so does the Mobile Web source it falls back to. Preparing these streams requires evaluating JavaScript from YouTube's public player page — something iOS 12-era devices can't do on-device. The app delegates that single step to the helper server and receives the computed result back.
+Signed-in playback relies on a small companion service, and so does the Mobile Web source it falls back to. Preparing these streams requires evaluating JavaScript from YouTube's public player page — something devices of this era can't do on-device. The app delegates that single step to the helper server and receives the computed result back.
 
 Since 14 August this covers more than it used to. Dubbed audio and videos made for kids are prepared this way, so if the service is unreachable, dubs quietly fall back to the original audio and kids videos won't play until it's back.
 
@@ -228,25 +295,33 @@ If you encounter a bug, you can export debug logs directly from the app:
 
 This generates a log file you can attach to your GitHub issue. The log includes timestamped playback, API, and caching events that help diagnose problems.
 
+On this branch the app is installed to `/Applications` by Cydia, which makes it
+a *system* app with no sandboxed data container — so its log is **not** under
+`/var/mobile/Containers/`. It is at:
+
+```
+/var/mobile/Library/Caches/Logs/opaline.log
+```
+
 <details>
 <summary><b>For developers</b></summary>
 
 ## Building
 
+**This branch does not build in Xcode.** iOS 9 needs an old Swift compiler,
+driven on Linux under [Darling](https://www.darlinghq.org/) and targeting
+`armv7-apple-ios9.3`. Everything is in `scripts/legacy/`:
+
 ```bash
-git clone https://github.com/verback2308/Opaline.git
-cd Opaline
-cp Config/Local.xcconfig.example Config/Local.xcconfig
-open Opaline.xcodeproj
+scripts/legacy/cold-boot.sh    # one-time: set up the toolchain
+scripts/legacy/build.sh        # build
+scripts/legacy/deploy.sh       # package, serve, install from Cydia
 ```
 
-Edit `Config/Local.xcconfig` and set your own `PRODUCT_BUNDLE_IDENTIFIER`.
-`APP_MANIFEST_URL` in the same file points the update check at a release
-manifest — leave the default to follow this repository, or aim it at a file
-served from your own machine to test notifications. Release builds get the
-URL of whatever repository they are built from, written in by the workflow.
-
-Select the **Opaline** scheme, choose your device or simulator, and build (⌘B).
+Upstream files are never edited to make them compile. Two are held out of the
+build by `excluded-sources.txt`, and anything that compiles but cannot run on
+iOS 9 is left in and switched off where it is chosen — which is what keeps
+merges from upstream clean.
 
 ## Architecture
 
@@ -260,6 +335,8 @@ Opaline/
 │   ├── Transport/    HTTP abstraction + decorators
 │   ├── Playback/     VideoSource contracts, sources, HLS machinery
 │   ├── Services/     Caching, SponsorBlock, RYD, subtitles, watchtime
+│   │   └── LocalLibrary/  Account-free subscriptions & watch history
+│   ├── Keyboard/     Key command catalog, focus ring, press dispatch
 │   └── Common/       Shared UI components & utilities
 └── Features/         One vertical slice per feature
     ├── Channel/      Channel page with tabs
@@ -275,7 +352,7 @@ Opaline/
 
 - **Zero external dependencies** — Networking via a custom `HTTPTransport` abstraction over `URLSession`, images via custom `ThumbnailImageView`, playback via `AVPlayer`
 - **All UIKit, no SwiftUI** — Programmatic layout, no storyboards
-- **iOS 12+ support** — No SF Symbols, no SwiftUI, no Combine
+- **iOS 9.3+ support** on this branch — No SF Symbols, no SwiftUI, no Combine
 - **Manual JSON parsing** — `JSONSerialization` + dictionary traversal for YouTube Innertube API responses
 - **Dependency injection** — `ServiceContainer` provides services; view controllers receive dependencies via initializers
 
@@ -289,6 +366,11 @@ Playback is built on a single `VideoSource` abstraction — each way of playing 
 4. **Progressive** — Direct 360p MP4 URL for the restricted case (e.g. server-side A/B experiments).
 
 Quality selection is source-agnostic: the player UI simply renders whatever qualities the active source reports. Background audio is `AVAudioSession`-based and works across all sources.
+
+**On this branch the last step differs.** iOS 9's `AVPlayer` will not take the
+HLS playlists described above, so the selected streams are assembled on-device
+into a synthesized progressive MP4 and served to the player over a loopback HTTP
+server. That is what the ~8 second start time buys.
 
 ### Authentication
 
