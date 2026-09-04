@@ -129,7 +129,9 @@ extension VideoPlayerView {
     /// trailing. The seek bar is hidden while seeking from the keyboard, so
     /// without the destination there is nothing on screen saying where you
     /// are -- two separate labels rather than one combined string, because
-    /// "centered" and "right-aligned" cannot both be true of one UILabel.
+    /// one box cannot sit centered and against the trailing edge at once.
+    /// Both pad themselves with spaces; see `hudPositionLabel` for why that
+    /// rules out right-aligning the text inside them.
     private func showSeekHUD(totalOffset: Double) {
         let sign = totalOffset >= 0 ? "+" : "-"
         let magnitude = abs(totalOffset)

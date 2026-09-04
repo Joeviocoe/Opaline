@@ -223,7 +223,13 @@ extension VideoPlayerView {
         let label = UILabel()
         label.textColor = .white
         label.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .semibold)
-        label.textAlignment = .right
+        // Natural alignment, like `hudLabel` — deliberately *not* `.right`,
+        // which is what the trailing anchor invites. Both HUDs pad their box
+        // by wrapping the text in spaces, and text layout drops trailing
+        // whitespace when it aligns a line: right-aligned, the two spaces on
+        // the end stopped counting and the text sat flush against the right
+        // edge of its own background with all the padding piled up on the
+        // left. Left/natural just draws from the start, so both pads render.
         label.backgroundColor = UIColor.black.withAlphaComponent(0.75)
         label.layer.cornerRadius = 4
         label.layer.masksToBounds = true
