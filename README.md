@@ -1,6 +1,6 @@
 <div align="center">
 
-# Opaline
+# Opaline Legacy (iOS 9 / armv7)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="source/logo-dark.png">
