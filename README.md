@@ -9,7 +9,7 @@
 
 **A lightweight, native YouTube client. No ads, no tracking, no dependencies.**
 
-**This branch is the iOS 9 downport — it runs on the iPad 3.**
+**This branch is the iOS 9 downport — it runs on the iPad 2, iPad 3 and iPad mini.**
 
 ![iOS 9.3+](https://img.shields.io/badge/iOS-9.3%2B-lightgrey?logo=apple)
 ![armv7](https://img.shields.io/badge/arch-armv7-orange)
@@ -21,8 +21,10 @@
 > ### What this branch is
 >
 > Upstream Opaline targets iOS 12. This is the downport that runs it on
-> **armv7 / iOS 9.3.5** — the iPad 3 and its A5X, hardware two major
-> architectures below anything the app was written for.
+> **armv7 / iOS 9.3.x** — the A5 and A5X iPads, hardware two major
+> architectures below anything the app was written for. Tested on the
+> **iPad 2, iPad 3 and iPad mini**; every armv7 device on iOS 9.3.x installs
+> the same package.
 >
 > It is not a cut-down version — the app is all here. A few things the
 > hardware simply cannot do are switched off; they are listed under
@@ -31,7 +33,7 @@
 > **Two features were added here that upstream does not have**, because the
 > hardware asks for them:
 >
-> - **[Hardware keyboard control](#hardware-keyboard)** — the iPad 3 era is the
+> - **[Hardware keyboard control](#hardware-keyboard)** — this iPad era is the
 >   era of the folio keyboard, and the app was entirely touch-driven
 > - **[A local library](#local-library)** — subscriptions and watch history
 >   that need no Google account, kept on the device
@@ -77,7 +79,7 @@ When Google dropped support for the official YouTube app on older devices, there
 - **Pinch to zoom** — fill the screen in fullscreen with a pinch, or turn on Zoom to Fill to do it automatically
 - **Background audio** — continue listening with the screen off
 - **Media controls** — play/pause and next/previous video from Control Center, the lock screen and headphones
-- **Picture-in-Picture** — watch while using other apps *(compiled but unavailable on an A5X — see [Known Issues](#known-issues-and-limitations))*
+- **Picture-in-Picture** — watch while using other apps *(compiled but unavailable on this hardware — see [Known Issues](#known-issues-and-limitations))*
 - **SponsorBlock** — skip sponsored segments automatically
 - **Return YouTube Dislike** — see dislike counts again
 - **Audio tracks** — switch dubbed audio on multi-language videos, or start videos dubbed in your language automatically; AI auto-dubs are marked "(AI)"
@@ -135,9 +137,13 @@ When Google dropped support for the official YouTube app on older devices, there
 
 ## Hardware keyboard
 
-Upstream is touch-only. On an iPad 3 the keyboard is usually attached, so the
+Upstream is touch-only. On these iPads the keyboard is usually attached, so the
 whole app is drivable from it — and every command is **modifier-less where it
 can be**, because a bare key still reaches an app on iOS 9.
+
+<details>
+<summary><b>Full shortcut list</b></summary>
+<br>
 
 **Anywhere**
 
@@ -183,6 +189,8 @@ While a text field has the keyboard, only modified commands survive — otherwis
 typing "j" into the search bar would seek the player. `Backspace` deletes a
 character there rather than dismissing the player.
 
+</details>
+
 ## Local library
 
 Everything account-shaped in upstream Opaline is a round-trip to InnerTube, so
@@ -206,7 +214,7 @@ merging, no two-way sync and no import; the two libraries never mix.
   watchtime tracker, which never starts without an account. That also restores
   **resume-where-you-left-off for anonymous users**, silently broken until now.
   History is flushed synchronously when the app goes to the background, which
-  is what makes a watch survive the jetsam an iPad 3 takes routinely while
+  is what makes a watch survive the jetsam these devices take routinely while
   suspended.
 - **Shorts are off in Subscriptions by default** — that screen is for the
   videos of channels you chose. With it off the feed reads the channel's
@@ -224,22 +232,46 @@ undecodable" and refuses to overwrite the latter — this is your only copy.
 
 ## Installation
 
-This branch has no releases — **there is no IPA to sideload**, and iOS 9 devices
-cannot run a modern sideloading client anyway. You need a **jailbroken armv7
-device on iOS 9.3.x** (developed against an iPad 3 on 9.3.5), and you install a
-package you build yourself.
+Requires a **jailbroken armv7 device on iOS 9.3.x** with Cydia.
 
-Building it needs a Linux machine rather than Xcode; the scripts are in
-`scripts/legacy/` and the short version is under
-[Building](#building). `deploy.sh` produces the `.deb`, serves it over USB, and
-prints the source to add in **Cydia → Sources**. Nothing is published anywhere.
+<details>
+<summary><b>Compatible devices</b></summary>
+<br>
+
+Tested:
+
+- **iPad 2** — A5
+- **iPad 3** — A5X
+- **iPad mini** — A5
+
+Untested, and run the same armv7 package on iOS 9.3.x:
+
+- **iPad 4** — A6X
+- **iPhone 4S** — A5
+- **iPhone 5**, **iPhone 5c** — A6
+- **iPod touch 5** — A5
+
+</details>
+
+1. Open **Cydia → Sources → Edit → Add**
+2. Enter this repository URL:
+
+   ```
+   https://joeviocoe.github.io/Opaline/
+   ```
+
+3. Open the source and install **Opaline (iOS 9)**
+
+Cydia installs the app to `/Applications`, so it lands on the home screen like
+any other app. New versions published to the same source appear as ordinary
+Cydia upgrades.
 
 ## Known Issues and Limitations
 
 Everything below is specific to this branch unless marked otherwise.
 
-- **Picture-in-Picture does not work on an A5X.** It is compiled in, but the
-  system will not start it on this hardware. Background audio works
+- **Picture-in-Picture does not work.** It is compiled in, but iOS 9 will not
+  start it on armv7 hardware. Background audio works
 - **AV1, 2K and 4K are unavailable** — no decode hardware exists on this device.
   1080p AVC is the ceiling, and it is a comfortable one
 - **Shorts do not preload.** A swipe to the next short pays its own resolve
@@ -249,20 +281,15 @@ Everything below is specific to this branch unless marked otherwise.
   assembled on-device into a synthesized progressive MP4 and served to
   `AVPlayer` over a loopback HTTP server, because iOS 9's `AVPlayer` will not
   take the formats YouTube serves directly
-- A long **main-thread freeze** (~57s) has been seen occasionally and is not
-  yet fixed
-- *(upstream)* Playback speeds above 2x may cause issues
 - *(upstream)* Comments are read-only — you can browse and sort them and open
   replies, but not post, reply or like
-- *(upstream)* Notification delivery is scheduled by iOS at its own discretion —
-  expect news within hours of publication, not minutes
 
 ## Localization
 
 The interface follows your system language by default and can be overridden in **Settings → Language**. The content language (video titles, search, feeds — translated server-side by YouTube, like the official app) follows the app language; the region can be set separately.
 
 > [!NOTE]
-> Wording follows the official YouTube app's own translations wherever it has an equivalent string, but mistakes are still possible. If you spot a wrong or awkward translation — or want a language that isn't here — please [open an issue](../../issues) describing where it appears and what the correct wording should be.
+> Wording follows the official YouTube app's own translations wherever it has an equivalent string. If you spot a wrong or awkward translation — or want a language that isn't here — please [open an issue](../../issues) describing where it appears and what the correct wording should be.
 
 <details>
 <summary><b>Available in 13 languages</b></summary>
@@ -281,7 +308,7 @@ The interface follows your system language by default and can be overridden in *
 
 Signed-in playback relies on a small companion service, and so does the Mobile Web source it falls back to. Preparing these streams requires evaluating JavaScript from YouTube's public player page — something devices of this era can't do on-device. The app delegates that single step to the helper server and receives the computed result back.
 
-Since 14 August this covers more than it used to. Dubbed audio and videos made for kids are prepared this way, so if the service is unreachable, dubs quietly fall back to the original audio and kids videos won't play until it's back.
+Since 14 August this covers more than it used to: dubbed audio and videos made for kids are prepared this way.
 
 **What it sees:** no account data, no tokens, no cookies, no watch history — only the challenge strings taken from the public player code and the ID of the video being prepared. If you're inspecting traffic and wondering about requests to a non-YouTube host — that's this.
 
@@ -308,14 +335,16 @@ a *system* app with no sandboxed data container — so its log is **not** under
 
 ## Building
 
-**This branch does not build in Xcode.** iOS 9 needs an old Swift compiler,
-driven on Linux under [Darling](https://www.darlinghq.org/) and targeting
-`armv7-apple-ios9.3`. Everything is in `scripts/legacy/`:
+**This branch does not build in Xcode**, and upstream's build instructions do
+not apply: upstream opens `Opaline.xcodeproj` and builds for iOS 12 / arm64.
+iOS 9 needs an old Swift compiler, driven on Linux under
+[Darling](https://www.darlinghq.org/) and targeting `armv7-apple-ios9.3`.
+Everything is in `scripts/legacy/`:
 
 ```bash
 scripts/legacy/cold-boot.sh    # one-time: set up the toolchain
 scripts/legacy/build.sh        # build
-scripts/legacy/deploy.sh       # package, serve, install from Cydia
+scripts/legacy/deploy.sh       # package and install
 ```
 
 Upstream files are never edited to make them compile. Two are held out of the
@@ -402,7 +431,10 @@ Please follow the existing code style. SwiftLint is configured and runs as a bui
 
 ## Support
 
-If Opaline keeps your old device alive, you can support development:
+If Opaline keeps your old device alive, you can support development. The link
+below is upstream's and goes entirely to
+**[verback2308](https://github.com/verback2308)**, who writes Opaline itself —
+not to this iOS 9 downport, which asks for nothing:
 
 <a href="https://buymeacoffee.com/verback2308" target="_blank" rel="noopener noreferrer"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy me a coffee" height="45"></a>
 
