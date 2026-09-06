@@ -9,7 +9,7 @@
 
 **A lightweight, native YouTube client. No ads, no tracking, no dependencies.**
 
-**This branch is the iOS 9 downport — it runs on the iPad 2, iPad 3 and iPad mini.**
+**This fork is the iOS 9 downport — it runs on the iPad 2, iPad 3 and iPad mini.**
 
 ![iOS 9.3+](https://img.shields.io/badge/iOS-9.3%2B-lightgrey?logo=apple)
 ![armv7](https://img.shields.io/badge/arch-armv7-orange)
@@ -18,9 +18,9 @@
 
 </div>
 
-> ### What this branch is
+> ### What this fork is
 >
-> Upstream Opaline targets iOS 12. This is the downport that runs it on
+> Upstream Opaline (https://github.com/verback2308/Opaline) targets iOS 12. This is the downport that runs it on
 > **armv7 / iOS 9.3.x** — the A5 and A5X iPads, hardware two major
 > architectures below anything the app was written for. Tested on the
 > **iPad 2, iPad 3 and iPad mini**; every armv7 device on iOS 9.3.x installs
