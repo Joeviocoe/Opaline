@@ -92,50 +92,36 @@ final class VideoSeekBar: UIControl {
 
         switch gesture.state {
         case .began:
-            isScrubbing = true
-            thumbView.isHidden = false
-            UIView.animate(withDuration: 0.15) {
-                self.thumbView.transform = CGAffineTransform(
-                    scaleX: 1.3, y: 1.3
-                )
-            }
+            startScrubVisuals()
             onScrubStart?()
         case .changed:
             progress = pct
             setNeedsLayout()
             onScrubChanged?(pct)
         case .ended, .cancelled:
-            UIView.animate(withDuration: 0.15) {
-                self.thumbView.transform = .identity
-            }
-            thumbView.isHidden = true
-            isScrubbing = false
+            endScrubVisuals()
             onScrubEnd?(pct)
         default:
             break
         }
     }
 
-    /// Force-clears a stuck drag (e.g. the player detaches mid-scrub).
-    /// Does not fire `onScrubEnd` — there is no target to seek to.
-    func cancelScrubbing() {
-        guard isScrubbing else {
-            return
+    private func startScrubVisuals() {
+        isScrubbing = true
+        thumbView.isHidden = false
+        UIView.animate(withDuration: 0.15) {
+            self.thumbView.transform = CGAffineTransform(
+                scaleX: 1.3, y: 1.3
+            )
         }
-        thumbView.transform = .identity
-        thumbView.isHidden = true
-        isScrubbing = false
     }
 
-    @objc
-    private func handleTrackTap(
-        _ gesture: UITapGestureRecognizer
-    ) {
-        let px = gesture.location(in: self).x
-        let pct = max(0, min(1, Double(px / bounds.width)))
-        progress = pct
-        setNeedsLayout()
-        onScrubEnd?(pct)
+    private func endScrubVisuals() {
+        UIView.animate(withDuration: 0.15) {
+            self.thumbView.transform = .identity
+        }
+        thumbView.isHidden = true
+        isScrubbing = false
     }
 
     private func setupViews() {
@@ -222,6 +208,59 @@ final class VideoSeekBar: UIControl {
             bar.backgroundColor = seg.color
             segmentsView.addSubview(bar)
         }
+    }
+}
+
+extension VideoSeekBar {
+    // MARK: - Driven From Outside
+
+    /// The hold-anywhere scrub on the player surface (#116) runs the bar
+    /// through the same three steps a finger on the track does, so the
+    /// thumb, the paused progress ticks and the final seek stay in one
+    /// place instead of being written a second time against the player.
+    func beginExternalScrub() {
+        guard !isScrubbing else {
+            return
+        }
+        startScrubVisuals()
+        onScrubStart?()
+    }
+
+    func updateExternalScrub(to value: Double) {
+        guard isScrubbing else {
+            return
+        }
+        progress = max(0, min(1, value))
+        setNeedsLayout()
+        onScrubChanged?(progress)
+    }
+
+    func endExternalScrub() {
+        guard isScrubbing else {
+            return
+        }
+        endScrubVisuals()
+        onScrubEnd?(progress)
+    }
+
+    /// Force-clears a stuck drag (e.g. the player detaches mid-scrub).
+    /// Does not fire `onScrubEnd` — there is no target to seek to.
+    func cancelScrubbing() {
+        guard isScrubbing else {
+            return
+        }
+        endScrubVisuals()
+    }
+
+    @objc
+    private func handleTrackTap(
+        _ gesture: UITapGestureRecognizer
+    ) {
+        let px = gesture.location(in: self).x
+        let pct = max(0, min(1, Double(px / bounds.width)))
+        progress = pct
+        setNeedsLayout()
+        onScrubEnd?(pct)
     }
 }
 

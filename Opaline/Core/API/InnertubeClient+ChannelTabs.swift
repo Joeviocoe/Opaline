@@ -5,6 +5,7 @@ enum ChannelTabParams {
     static let live      = "EgdzdHJlYW1z8gYECgJ6AA=="
     static let shorts    = "EgZzaG9ydHPyBgUKA5oBAA=="
     static let playlists = "EglwbGF5bGlzdHPyBgQKAkIA"
+    static let search    = "EgZzZWFyY2jyBgQKAloA"
 }
 
 extension InnertubeClient {

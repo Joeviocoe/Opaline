@@ -260,6 +260,12 @@
 "search.title" = "Tìm kiếm";
 "search.placeholder" = "Tìm trên YouTube";
 "search.recent" = "Các tìm kiếm gần đây";
+"search.clearHistory" = "Xoá nhật ký tìm kiếm";
+/* Confirmation alert before wiping the recent-search list */
+"search.clearHistory.title" = "Xoá nhật ký tìm kiếm?";
+"search.clearHistory.message" = "Thao tác này sẽ xóa các tìm kiếm trên YouTube được thực hiện trên thiết bị này.";
+"search.clearHistory.confirm" = "Xóa nhật ký hoạt động";
+"search.noResults" = "Không có kết quả";
 "search.filters" = "Bộ lọc";
 "search.filters.active" = "Bộ lọc •";
 "search.filters.title" = "Bộ lọc tìm kiếm";
@@ -430,6 +436,10 @@
 "downloads.progress" = "Đang tải xuống %@%%";
 "downloads.muxing" = "Đang chuẩn bị";
 "downloads.cancel" = "Hủy tải xuống";
+/* Menu action that shares a downloaded video out of the app.
+   Deliberately English in every locale: the official app has no
+   equivalent string, and inventing translations is not allowed. */
+"downloads.export" = "Save to Files";
 "downloads.delete" = "Xóa khỏi danh sách video tải xuống";
 "downloads.retry" = "Tải xuống lại";
 "downloads.deleted" = "Video tải xuống đã bị xóa";

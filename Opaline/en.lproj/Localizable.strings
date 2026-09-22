@@ -155,6 +155,10 @@
 "downloads.muxing" = "Preparing";
 /* Menu action that stops a running download */
 "downloads.cancel" = "Cancel download";
+/* Menu action that shares a downloaded video out of the app.
+   Deliberately English in every locale: the official app has no
+   equivalent string, and inventing translations is not allowed. */
+"downloads.export" = "Save to Files";
 /* Menu action that deletes an already downloaded video */
 "downloads.delete" = "Delete download";
 /* Menu action offered after a download failed */
@@ -406,6 +410,14 @@
 "search.placeholder" = "Search YouTube";
 /* Header above the recent-search list */
 "search.recent" = "Recent searches";
+/* Trailing row that wipes the recent-search list */
+"search.clearHistory" = "Clear search history";
+/* Confirmation alert before wiping the recent-search list */
+"search.clearHistory.title" = "Clear Search History?";
+"search.clearHistory.message" = "This will clear YouTube searches made on this device.";
+"search.clearHistory.confirm" = "Clear history";
+/* Empty state when a search returns nothing */
+"search.noResults" = "No results";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "Filters";
 "search.filters.active" = "Filters •";

@@ -298,6 +298,12 @@
 "search.placeholder" = "Cerca su YouTube";
 /* Header above the recent-search list */
 "search.recent" = "Ricerche recenti";
+"search.clearHistory" = "Cancella cronologia delle ricerche";
+/* Confirmation alert before wiping the recent-search list */
+"search.clearHistory.title" = "Cancellare la cronologia ricerche?";
+"search.clearHistory.message" = "Vengono eliminate le ricerche eseguite su YouTube da questo dispositivo.";
+"search.clearHistory.confirm" = "Canc. cronol.";
+"search.noResults" = "Nessun risultato";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "Filtri";
 "search.filters.active" = "Filtri •";
@@ -512,6 +518,10 @@
 "downloads.progress" = "Download in corso %@%%";
 "downloads.muxing" = "Preparazione";
 "downloads.cancel" = "Annulla download";
+/* Menu action that shares a downloaded video out of the app.
+   Deliberately English in every locale: the official app has no
+   equivalent string, and inventing translations is not allowed. */
+"downloads.export" = "Save to Files";
 "downloads.delete" = "Elimina dai download";
 "downloads.retry" = "Scarica di nuovo";
 "downloads.deleted" = "Download eliminato";

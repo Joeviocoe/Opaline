@@ -302,6 +302,12 @@
 "search.placeholder" = "搜尋 YouTube";
 /* Header above the recent-search list */
 "search.recent" = "最近的搜尋";
+"search.clearHistory" = "清除搜尋記錄";
+/* Confirmation alert before wiping the recent-search list */
+"search.clearHistory.title" = "要清除搜尋記錄嗎？";
+"search.clearHistory.message" = "這項操作將會清除這個裝置上的 YouTube 搜尋記錄。";
+"search.clearHistory.confirm" = "清除搜尋記錄";
+"search.noResults" = "沒有結果";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "篩選";
 "search.filters.active" = "篩選 •";
@@ -516,6 +522,10 @@
 "downloads.progress" = "下載進度：%@%%";
 "downloads.muxing" = "正在處理";
 "downloads.cancel" = "取消下載";
+/* Menu action that shares a downloaded video out of the app.
+   Deliberately English in every locale: the official app has no
+   equivalent string, and inventing translations is not allowed. */
+"downloads.export" = "Save to Files";
 "downloads.delete" = "從已下載的內容中刪除";
 "downloads.retry" = "重新下載";
 "downloads.deleted" = "已刪除下載的內容";

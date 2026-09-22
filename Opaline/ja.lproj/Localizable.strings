@@ -302,6 +302,12 @@
 "search.placeholder" = "YouTubeを検索";
 /* Header above the recent-search list */
 "search.recent" = "最近の検索";
+"search.clearHistory" = "検索履歴を削除";
+/* Confirmation alert before wiping the recent-search list */
+"search.clearHistory.title" = "検索履歴を削除しますか？";
+"search.clearHistory.message" = "このデバイスで行った YouTube の検索履歴が削除されます。";
+"search.clearHistory.confirm" = "履歴を削除";
+"search.noResults" = "結果はありません";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "フィルタ";
 "search.filters.active" = "フィルター •";
@@ -516,6 +522,10 @@
 "downloads.progress" = "ダウンロード中（%@%%）";
 "downloads.muxing" = "準備中";
 "downloads.cancel" = "ダウンロードをキャンセル";
+/* Menu action that shares a downloaded video out of the app.
+   Deliberately English in every locale: the official app has no
+   equivalent string, and inventing translations is not allowed. */
+"downloads.export" = "Save to Files";
 "downloads.delete" = "ダウンロードから削除";
 "downloads.retry" = "もう一度ダウンロード";
 "downloads.deleted" = "ダウンロードを削除しました";

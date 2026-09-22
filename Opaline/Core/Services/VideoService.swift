@@ -158,27 +158,6 @@ struct PlaylistsPage {
     var filterChips: [ChannelFilterChip] = []
 }
 
-protocol ChannelTabService: AnyObject {
-    func fetchChannelTab(
-        channelId: String,
-        params: String,
-        completion: @escaping (Result<ChannelTabPage, Error>) -> Void
-    )
-    func fetchChannelTabNextPage(
-        continuation: String,
-        completion: @escaping (Result<FeedPage, Error>) -> Void
-    )
-    func fetchChannelPlaylists(
-        channelId: String,
-        params: String,
-        completion: @escaping (Result<PlaylistsPage, Error>) -> Void
-    )
-    func fetchChannelPlaylistsNextPage(
-        continuation: String,
-        completion: @escaping (Result<PlaylistsPage, Error>) -> Void
-    )
-}
-
 /// The endless Shorts swipe feed.
 protocol ShortsService: AnyObject {
     func fetchShortsSequence(

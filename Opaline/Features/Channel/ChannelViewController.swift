@@ -19,6 +19,15 @@ final class ChannelViewController: VideosViewController {
     var filterChips: [ChannelFilterChip] = []
     var playlistLookup: [String: Playlist] = [:]
 
+    lazy var searchBarButton: UIBarButtonItem = {
+        UIBarButtonItem(
+            image: resizedNavBarIcon("icon_Magnifyingglass", size: 22),
+            style: .plain,
+            target: self,
+            action: #selector(searchChannel)
+        )
+    }()
+
     lazy var infoBarButton: UIBarButtonItem = {
         UIBarButtonItem(
             image: resizedNavBarIcon("icon_info_circle", size: 22),
@@ -80,6 +89,7 @@ final class ChannelViewController: VideosViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = initialChannelName
+        navigationItem.rightBarButtonItem = searchBarButton
         setupLayout()
         headerView.applyTheme(isSubscribed: isSubscribed)
         tabsView.applyTheme()

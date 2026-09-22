@@ -17,19 +17,14 @@ enum DownloadMenu {
         }
         switch DownloadStatus.of(video.id) {
         case .ready:
-            return [deleteItem(video.id, from: presenter)]
+            return [
+                exportItem(video, from: presenter, anchor: anchor),
+                deleteItem(video.id, from: presenter)
+            ]
         case .queued, .running:
             return [cancelItem(video.id)]
         case .failed:
-            return [
-                downloadItem(
-                    video,
-                    from: presenter,
-                    anchor: anchor,
-                    titleKey: "downloads.retry"
-                ),
-                deleteItem(video.id, from: presenter)
-            ]
+            return failedItems(video, from: presenter, anchor: anchor)
         case .none:
             return [
                 downloadItem(
@@ -40,6 +35,24 @@ enum DownloadMenu {
                 )
             ]
         }
+    }
+
+    /// A stopped job offers both ways out: try it again, or drop what is
+    /// left of it.
+    private static func failedItems(
+        _ video: Video,
+        from presenter: UIViewController,
+        anchor: UIView
+    ) -> [PlayerMenuItem] {
+        [
+            downloadItem(
+                video,
+                from: presenter,
+                anchor: anchor,
+                titleKey: "downloads.retry"
+            ),
+            deleteItem(video.id, from: presenter)
+        ]
     }
 
     private static func downloadItem(

@@ -57,6 +57,7 @@ enum RendererKey {
     static let toggleButton         = "toggleButtonRenderer"
     static let subscribeButton      = "subscribeButtonRenderer"
     static let tab                  = "tabRenderer"
+    static let expandableTab        = "expandableTabRenderer"
     static let continuationItem     = "continuationItemRenderer"
     static let metadataBadge        = "metadataBadgeRenderer"
     static let thumbnailOverlayTimeStatus = "thumbnailOverlayTimeStatusRenderer"

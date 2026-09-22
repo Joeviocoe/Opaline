@@ -10,7 +10,10 @@ extension SearchViewController: UITableViewDataSource {
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        panelMode == .hidden ? results.count : panelItems.count
+        guard panelMode != .hidden else {
+            return results.count
+        }
+        return panelItems.count + (showsClearHistoryRow ? 1 : 0)
     }
 
     func tableView(
@@ -82,10 +85,13 @@ extension SearchViewController: UITableViewDataSource {
             reuseIdentifier: Self.panelCellId
         )
         let theme = ThemeManager.shared
+        let isClear = isClearHistoryRow(indexPath.row)
         cell.backgroundColor = theme.background
-        cell.textLabel?.textColor = theme.primaryText
+        cell.textLabel?.textColor = isClear ? theme.accent : theme.primaryText
         cell.textLabel?.font = .systemFont(ofSize: 15)
-        cell.textLabel?.text = panelItems[indexPath.row]
+        cell.textLabel?.text = isClear
+            ? "search.clearHistory".localized
+            : panelItems[indexPath.row]
         return cell
     }
 
@@ -93,7 +99,7 @@ extension SearchViewController: UITableViewDataSource {
         _ tableView: UITableView,
         canEditRowAt indexPath: IndexPath
     ) -> Bool {
-        panelMode == .history
+        panelMode == .history && !isClearHistoryRow(indexPath.row)
     }
 
     func tableView(
@@ -102,6 +108,7 @@ extension SearchViewController: UITableViewDataSource {
         forRowAt indexPath: IndexPath
     ) {
         guard panelMode == .history,
+              !isClearHistoryRow(indexPath.row),
               editingStyle == .delete else {
             return
         }
@@ -116,7 +123,11 @@ extension SearchViewController: UITableViewDelegate {
     ) {
         if panelMode != .hidden {
             tableView.deselectRow(at: indexPath, animated: true)
-            executePanelQuery(panelItems[indexPath.row])
+            if isClearHistoryRow(indexPath.row) {
+                confirmClearHistory()
+            } else {
+                executePanelQuery(panelItems[indexPath.row])
+            }
             return
         }
         let video = results[indexPath.row]

@@ -47,6 +47,19 @@ extension ChannelViewController {
     }
 
     @objc
+    func searchChannel() {
+        let controller = ChannelSearchViewController(
+            channelId: channelId,
+            service: tabsClient,
+            channelViewControllerFactory: channelViewControllerFactory,
+            videoRouter: videoRouter
+        )
+        let targetNav = navigationController?.parent?.navigationController
+            ?? navigationController
+        targetNav?.pushViewController(controller, animated: true)
+    }
+
+    @objc
     func showAbout() {
         guard let page = currentChannelPage
         else {

@@ -302,6 +302,12 @@
 "search.placeholder" = "YouTube'da ara";
 /* Header above the recent-search list */
 "search.recent" = "Son aramalar";
+"search.clearHistory" = "Arama geçmişini temizleme";
+/* Confirmation alert before wiping the recent-search list */
+"search.clearHistory.title" = "Arama Geçmişi temizlensin mi?";
+"search.clearHistory.message" = "Bu işlem, bu cihazda yapılan YouTube aramalarını temizler.";
+"search.clearHistory.confirm" = "Geçmişi temizle";
+"search.noResults" = "Sonuç yok";
 /* Filters toolbar button; the dotted variant marks active filters */
 "search.filters" = "Filtreler";
 "search.filters.active" = "Filtreler •";
@@ -516,6 +522,10 @@
 "downloads.progress" = "İndiriliyor (%%%@)";
 "downloads.muxing" = "Hazırlanıyor";
 "downloads.cancel" = "İndirmeyi iptal et";
+/* Menu action that shares a downloaded video out of the app.
+   Deliberately English in every locale: the official app has no
+   equivalent string, and inventing translations is not allowed. */
+"downloads.export" = "Save to Files";
 "downloads.delete" = "İndirilenlerden sil";
 "downloads.retry" = "Tekrar indir";
 "downloads.deleted" = "İndirilen kopya silindi";

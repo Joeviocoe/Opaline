@@ -268,6 +268,19 @@ private extension PlayerPanelViewController {
         return gesture
     }
 
+    /// A downward drift of the finger during a hold-scrub (#116) is the
+    /// tail of the scrub, not a collapse — the pan must not steal it.
+    func isHoldScrubbing(_ view: UIView?) -> Bool {
+        var current = view
+        while let candidate = current {
+            if let player = candidate as? VideoPlayerView {
+                return player.holdScrub.isActive
+            }
+            current = candidate.superview
+        }
+        return false
+    }
+
     func isControlView(_ view: UIView?) -> Bool {
         var current = view
         while let candidate = current {
@@ -340,6 +353,7 @@ extension PlayerPanelViewController {
             return abs(velocity.y) > abs(velocity.x)
                 && velocity.y > 0
                 && !isControlView(touchedView)
+                && !isHoldScrubbing(touchedView)
         }
         if gestureRecognizer === miniPanGesture {
             guard !isExpanded,

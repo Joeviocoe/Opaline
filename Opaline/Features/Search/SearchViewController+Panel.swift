@@ -22,6 +22,12 @@ extension SearchViewController {
         }
     }
 
+    /// A trailing row under the history entries, offered only when there
+    /// is something to clear.
+    var showsClearHistoryRow: Bool {
+        panelMode == .history && !searchHistory.queries.isEmpty
+    }
+
     func setPanel(_ mode: PanelMode) {
         if mode != .suggestions {
             suggestWorkItem?.cancel()
@@ -70,6 +76,34 @@ extension SearchViewController {
         searchBar.text = query
         searchBar.resignFirstResponder()
         search(query: query)
+    }
+
+    func isClearHistoryRow(_ index: Int) -> Bool {
+        showsClearHistoryRow && index == searchHistory.queries.count
+    }
+
+    /// Clearing cannot be undone, so it asks first. An alert, not a sheet:
+    /// the official app asks with one, and a sheet becomes a popover on
+    /// iPad that floats over the list with its cancel button dropped.
+    func confirmClearHistory() {
+        let alert = UIAlertController(
+            title: "search.clearHistory.title".localized,
+            message: "search.clearHistory.message".localized,
+            preferredStyle: .alert
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: "search.clearHistory.confirm".localized,
+                style: .destructive
+            ) { [weak self] _ in
+                self?.searchHistory.clear()
+                self?.setPanel(.hidden)
+            }
+        )
+        alert.addAction(
+            UIAlertAction(title: "common.cancel".localized, style: .cancel)
+        )
+        present(alert, animated: true)
     }
 
     func removeHistoryItem(at index: Int) {

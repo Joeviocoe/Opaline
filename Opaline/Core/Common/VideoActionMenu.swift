@@ -206,7 +206,7 @@ enum VideoActionMenu {
     /// iPad presents `UIActivityViewController` as a popover and crashes
     /// without an anchor — `PlayerMenuOverlay` needs no such anchor, so
     /// this is only used for the system share sheet.
-    private static func anchorPopover(_ presented: UIViewController, to anchor: UIView) {
+    static func anchorPopover(_ presented: UIViewController, to anchor: UIView) {
         guard let popover = presented.popoverPresentationController else {
             return
         }

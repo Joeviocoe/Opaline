@@ -77,6 +77,11 @@ class SearchViewController: UIViewController {
         topBarHider.showBars()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateTableBottomInset()
+    }
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         // The same table renders the suggestions panel — keep the top
         // bar while the user is picking a query.
@@ -140,10 +145,32 @@ class SearchViewController: UIViewController {
             tableView.trailingAnchor.constraint(
                 equalTo: view.trailingAnchor
             ),
+            // Deliberately view.bottomAnchor, not the safe area: the table
+            // scrolls its content *under* the tab bar, which is what makes
+            // the translucent bar look right. The cost is that the last row
+            // ends up beneath it, so the inset below puts it back in reach.
             tableView.bottomAnchor.constraint(
                 equalTo: view.bottomAnchor
             )
         ])
+    }
+
+    /// The table runs to the bottom of the view, behind the tab bar, so
+    /// without an inset its final row cannot be scrolled clear of it -- the
+    /// list just springs back. Upstream never saw this because the history
+    /// list ended well above the bar; the clear-all row added on 1.12.0 is
+    /// the first thing to sit at the very end (#121).
+    private func updateTableBottomInset() {
+        var bottom = view.safeAreaInsets.bottom
+        if let tabBar = tabBarController?.tabBar, !tabBar.isHidden {
+            let frame = view.convert(tabBar.bounds, from: tabBar)
+            bottom = max(bottom, view.bounds.maxY - frame.minY)
+        }
+        guard tableView.contentInset.bottom != bottom else {
+            return
+        }
+        tableView.contentInset.bottom = bottom
+        tableView.scrollIndicatorInsets.bottom = bottom
     }
 
     @objc

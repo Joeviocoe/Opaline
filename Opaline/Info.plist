@@ -117,6 +117,12 @@
 			</array>
 		</dict>
 	</array>
+	<!-- The system share sheet offers "Save Video", which writes to Photos.
+	     Without this key iOS kills the app the moment that item is tapped.
+	     English in every language on purpose: the official app carries no
+	     equivalent wording to take a translation from (#115). -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This lets you save a downloaded video to your photo library.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

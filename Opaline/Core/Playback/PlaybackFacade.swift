@@ -10,6 +10,12 @@ enum PlaybackBufferPolicy {
         forwardBufferDuration: TimeInterval = defaultForwardBufferDuration
     ) {
         item.preferredForwardBufferDuration = forwardBufferDuration
+        // The session runs in .moviePlayback, which lets the system spatialize
+        // even plain stereo on AirPods. Allow it only where the content really
+        // has the channels for it (#119).
+        if #available(iOS 15.0, *) {
+            item.allowedAudioSpatializationFormats = .multichannel
+        }
     }
 
     static func configure(

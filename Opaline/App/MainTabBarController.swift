@@ -82,6 +82,11 @@ class MainTabBarController: UITabBarController {
         applyTheme()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateMiniPlayerBarBottomInset()
+    }
+
     override func traitCollectionDidChange(
         _ previousTraitCollection: UITraitCollection?
     ) {
@@ -110,60 +115,6 @@ class MainTabBarController: UITabBarController {
         )
     }
 
-    private func buildTabs() -> [UIViewController] {
-        var tabs = [makeHomeTab(), makeSubscriptionsTab()]
-        // Only for users who want shorts at all — the same setting that
-        // hides them from every feed.
-        if wantsShortsTab {
-            tabs.append(makeShortsTab())
-        }
-        tabs.append(makeLibraryTab())
-        return tabs
-    }
-
-    private func makeHomeTab() -> UIViewController {
-        let home = RotatingNavigationController(
-            rootViewController: HomeViewController(
-                service: dependencies.feedService,
-                channelViewControllerFactory:
-                    dependencies.makeChannelViewController
-            )
-        )
-        home.tabBarItem = UITabBarItem(
-            title: "home.title".localized,
-            image: TabBarIcons.home(),
-            tag: DefaultTab.home.tabTag
-        )
-        return home
-    }
-
-    private func makeSubscriptionsTab() -> UIViewController {
-        let subs = RotatingNavigationController(
-            rootViewController:
-                dependencies.makeSubscriptionsViewController()
-        )
-        subs.tabBarItem = UITabBarItem(
-            title: "subscriptions.title".localized,
-            image: TabBarIcons.subscriptions(),
-            tag: DefaultTab.subscriptions.tabTag
-        )
-        return subs
-    }
-
-    private func makeLibraryTab() -> UIViewController {
-        let library = RotatingNavigationController(
-            rootViewController: LibraryViewController(
-                dependencies: dependencies
-            )
-        )
-        library.tabBarItem = UITabBarItem(
-            title: "library.title".localized,
-            image: TabBarIcons.library(),
-            tag: DefaultTab.library.tabTag
-        )
-        return library
-    }
-
     @objc
     private func applyTheme() {
         let theme = ThemeManager.shared
@@ -177,6 +128,28 @@ class MainTabBarController: UITabBarController {
             tabBar.scrollEdgeAppearance = appearance
         }
         miniPlayerBar?.applyTheme()
+    }
+
+    // The tab bar is not always a subview of ours (iPadOS gives it its own
+    // container), so constraining to `tabBar.topAnchor` can throw "no common
+    // ancestor" — measure where it lands in our coordinates instead (issue #118).
+    private func updateMiniPlayerBarBottomInset() {
+        guard let constraint = miniPlayerBarBottomConstraint else {
+            return
+        }
+        var inset = view.safeAreaInsets.bottom
+        let tabBarFrame = view.convert(tabBar.bounds, from: tabBar)
+        // midY check: iPadOS 18 can place the tab bar at the top, where
+        // "distance from its top to our bottom" would be the whole screen.
+        if !tabBar.isHidden, tabBar.window != nil, tabBar.window === view.window,
+           tabBarFrame.midY > view.bounds.midY {
+            inset = max(inset, view.bounds.maxY - tabBarFrame.minY)
+        }
+        let constant = -(inset + 12)
+        guard constraint.constant != constant else {
+            return
+        }
+        constraint.constant = constant
     }
 
     /// `onExpanded` forwards to `expand(animated:onExpanded:)` — see there
@@ -207,19 +180,17 @@ class MainTabBarController: UITabBarController {
         view.addSubview(bar)
         // Use a proportional width (1/3 of the parent) so the bar stays correctly
         // sized after device rotation without needing to recreate the constraint.
-        let bottomConstraint = bar.bottomAnchor.constraint(
-            equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-            constant: -12
-        )
+        let bottom = bar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         NSLayoutConstraint.activate([
             bar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
             bar.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1.0 / 3.0),
-            bottomConstraint
+            bottom
         ])
+        miniPlayerBarBottomConstraint = bottom
+        updateMiniPlayerBarBottomInset()
         bar.isHidden = true
         bar.alpha = 0
         miniPlayerBar = bar
-        miniPlayerBarBottomConstraint = bottomConstraint
 
         panel.miniBar = bar
         panel.view.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)

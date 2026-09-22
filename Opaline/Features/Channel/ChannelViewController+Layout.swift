@@ -105,7 +105,8 @@ extension ChannelViewController {
         let hasAbout = info.description != nil
             || info.contactInfo != nil
             || info.videoCountText != nil
-        navigationItem.rightBarButtonItem = hasAbout
-            ? infoBarButton : nil
+        navigationItem.rightBarButtonItems = hasAbout
+            ? [searchBarButton, infoBarButton]
+            : [searchBarButton]
     }
 }

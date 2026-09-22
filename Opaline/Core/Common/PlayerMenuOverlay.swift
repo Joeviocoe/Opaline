@@ -48,6 +48,10 @@ final class PlayerMenuOverlay: UIView {
 
     private(set) var items: [PlayerMenuItem] = []
     private var style: Style = .overVideo
+    /// Set only for anchored panels — the size their position was computed
+    /// for. `nil` on the centered player menus, which re-center themselves.
+    private var anchoredSize: CGSize?
+    private var isDismissing = false
     let panel = UIView()
 
     private var panelColor: UIColor {
@@ -101,7 +105,7 @@ final class PlayerMenuOverlay: UIView {
         overlay.buildContent(title: title, sourceRect: sourceRect)
         host.addSubview(overlay)
         if sourceRect != nil {
-            overlay.observeRotation()
+            overlay.anchoredSize = host.bounds.size
         }
         overlay.alpha = 0
         UIView.animate(withDuration: 0.15) {
@@ -112,20 +116,18 @@ final class PlayerMenuOverlay: UIView {
     // MARK: - Layout
 
     /// An anchored panel is pinned by a constant computed for the bounds it
-    /// was built in, so a rotation would strand it — often half offscreen.
-    /// Dismissing is what system menus do too. The centered player menus
-    /// re-center themselves and never register this.
-    private func observeRotation() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleRotation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
-    }
-
-    @objc
-    private func handleRotation() {
+    /// was built in, so a resize would strand it — often half offscreen.
+    /// Dismissing is what system menus do too.
+    ///
+    /// Our own bounds are the signal, not `UIDevice.orientationDidChange`:
+    /// that one is about the device, not the interface. It fires for face-up
+    /// and face-down, and for turns the interface refuses to follow, and each
+    /// of those used to close the menu while nothing on screen had moved (#128).
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard let anchoredSize = anchoredSize, anchoredSize != bounds.size else {
+            return
+        }
         dismiss()
     }
 
@@ -246,6 +248,10 @@ final class PlayerMenuOverlay: UIView {
     }
 
     private func dismiss() {
+        guard !isDismissing else {
+            return
+        }
+        isDismissing = true
         UIView.animate(
             withDuration: 0.15,
             animations: { self.alpha = 0 },

@@ -254,6 +254,12 @@
 "search.title" = "Пошук";
 "search.placeholder" = "Пошук на YouTube";
 "search.recent" = "Останні пошукові запити";
+"search.clearHistory" = "Очистити історію пошуку";
+/* Confirmation alert before wiping the recent-search list */
+"search.clearHistory.title" = "Очистити історію пошуку?";
+"search.clearHistory.message" = "Пошуки на YouTube, виконані на цьому пристрої, буде видалено.";
+"search.clearHistory.confirm" = "Очистити";
+"search.noResults" = "Немає результатів";
 "search.filters" = "Фільтри";
 "search.filters.active" = "Фільтри •";
 "search.filters.title" = "Фільтри пошуку";
@@ -433,6 +439,10 @@
 "downloads.progress" = "Завантажено %@%%";
 "downloads.muxing" = "Обробка";
 "downloads.cancel" = "Скасувати завантаження";
+/* Menu action that shares a downloaded video out of the app.
+   Deliberately English in every locale: the official app has no
+   equivalent string, and inventing translations is not allowed. */
+"downloads.export" = "Save to Files";
 "downloads.delete" = "Видалити із завантажень";
 "downloads.retry" = "Завантажити знову";
 "downloads.deleted" = "Завантаження видалено";

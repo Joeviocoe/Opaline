@@ -94,6 +94,8 @@ extension VideoPlayerView {
         singleTap.require(toFail: doubleTap)
         addGestureRecognizer(singleTap)
 
+        addHoldScrubGesture(blocking: [singleTap, doubleTap])
+
         let pinch = UIPinchGestureRecognizer(
             target: self,
             action: #selector(handlePinch(_:))
@@ -520,11 +522,26 @@ extension VideoPlayerView: UIGestureRecognizerDelegate {
     /// Notification Center / Control Center swipes start at the very top of
     /// the screen and can still reach the app — a swipe-down beginning there
     /// is meant for the system shade, not for exiting fullscreen. Only the
-    /// swipe-down recognizer has its delegate set to this view.
+    /// swipe-down and hold-scrub recognizers have their delegate set to
+    /// this view.
     func gestureRecognizer(
         _ gestureRecognizer: UIGestureRecognizer,
         shouldReceive touch: UITouch
     ) -> Bool {
+        if gestureRecognizer is UILongPressGestureRecognizer {
+            // Hold-scrub owns only the bare picture: a press landing on the
+            // seek bar or any button belongs to that control (#116).
+            var current = touch.view
+            while let candidate = current, candidate !== self {
+                if candidate is UIControl {
+                    return false
+                }
+                current = candidate.superview
+            }
+            return true
+        }
+        // `let window = window`, not the shorthand `let window`: that is
+        // Swift 5.7 and this downport builds on Apple Swift 5.4.2.
         guard isFullscreen, let window = window else {
             return true
         }

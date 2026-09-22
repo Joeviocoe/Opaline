@@ -90,12 +90,16 @@ extension WatchViewController {
         videoPlayerView?.keyboardToggleMute()
     }
 
+    /// `getOrCreatePlayerView()`, not `guard let videoPlayerView`: while a
+    /// video is still resolving there is no player view yet, and the old
+    /// guard made the key do nothing at exactly the point someone wants to
+    /// get the picture up. Escape already worked during this window -- it
+    /// acts on the sheet, which exists from the moment the panel opens --
+    /// so fullscreen was the odd one out. The view is created empty and the
+    /// stream attaches to it when the resolve finishes.
     @objc
     func keyboardToggleFullscreen() {
-        guard let playerView = videoPlayerView else {
-            return
-        }
-        videoPlayerViewDidTapFullscreen(playerView)
+        videoPlayerViewDidTapFullscreen(getOrCreatePlayerView())
     }
 
     @objc

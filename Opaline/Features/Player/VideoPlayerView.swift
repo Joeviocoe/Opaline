@@ -244,6 +244,9 @@ final class VideoPlayerView: UIView {
     /// into a growing step (issue: flat 10s felt painful on long videos).
     let seekBurst = SeekBurstState()
 
+    /// Press-and-drag scrubbing started anywhere on the picture (#116).
+    let holdScrub = HoldScrubState()
+
     // MARK: - State
 
     var timeObserver: Any?
