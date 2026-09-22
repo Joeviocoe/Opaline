@@ -33,14 +33,23 @@ if [ ! -d "$STAGING" ]; then
     exit 1
 fi
 
-# Version comes from the bundle itself, so the filename can never disagree
-# with what the device will report after installing it.
-read -r VERSION BUILD_NO < <(python3 - "$STAGING/Info.plist" <<'PY'
+# Version comes from the deb archive, the same way deploy.sh derives it -- NOT
+# from CFBundleShortVersionString, which is upstream's MARKETING_VERSION and
+# says 1.12.0 while the package this build actually shipped as is 1.15.36.
+# Naming the ipa after the marketing version would hand two different numbers
+# for one build to whoever is testing it.
+REPO_DIR="${REPO_DIR:-$HOME/legacy-ios9/repo}"
+VERSION="$(ls -1 "$REPO_DIR/debs"/*.deb 2>/dev/null \
+    | sed -n 's/.*_\([0-9.]*\)-ios9_.*/\1/p' | sort -V | tail -1)"
+BUILD_NO="$(python3 - "$STAGING/Info.plist" <<'PY'
 import plistlib, sys
-d = plistlib.load(open(sys.argv[1], 'rb'))
-print(d.get('CFBundleShortVersionString', '0.0.0'), d.get('CFBundleVersion', '0'))
+print(plistlib.load(open(sys.argv[1], 'rb')).get('CFBundleVersion', '0'))
 PY
-)
+)"
+if [ -z "$VERSION" ]; then
+    echo "no debs in $REPO_DIR/debs -- run deploy.sh first" >&2
+    exit 1
+fi
 
 mkdir -p "$OUT_DIR"
 IPA="$OUT_DIR/Opaline_${VERSION}-ios9.ipa"
