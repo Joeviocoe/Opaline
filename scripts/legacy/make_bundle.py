@@ -34,6 +34,13 @@ LAUNCH_IMAGES = {
     "Default-Landscape@2x~ipad.png": (2048, 1536),
     "Default-Portrait~ipad.png": (768, 1024),
     "Default-Landscape~ipad.png": (1024, 768),
+    # iPhone. Without Default-568h@2x.png specifically, iOS decides the app
+    # was never built for 4-inch screens and letterboxes it into a 320x480
+    # box with black bars -- which is what "the screen's a little pinched"
+    # describes (issue #1, iPhone 5c). The image's presence is the whole
+    # signal; iOS matches these on pixel size, so the name must be exact.
+    "Default@2x.png": (640, 960),      # 3.5-inch: iPhone 4/4S
+    "Default-568h@2x.png": (640, 1136),  # 4-inch: iPhone 5/5c/5s/SE
 }
 
 

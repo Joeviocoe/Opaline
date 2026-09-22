@@ -18,24 +18,33 @@
 # Prereqs on the device: OpenSSH from Cydia.  In Qubes, attach the iPad to this
 # VM first from dom0:  qvm-usb attach <thisvm> <backend>:<dev>
 #
-#   ./serve-repo-usb.sh            start everything, stay in foreground
+#   ./serve-repo-usb.sh            start everything, then detach and return
 #   ./serve-repo-usb.sh --check    diagnose the chain without starting anything
 set -uo pipefail
 
 REPO_DIR="${REPO_DIR:-$HOME/legacy-ios9/repo}"
 LOG_DIR="${LOG_DIR:-$HOME/legacy-ios9/logs}"
+# Same default as serve-repo.sh, so its stop/status act on the same pid files.
+RUN="${RUN:-$HOME/legacy-ios9/run}"
 SSH_PORT="${SSH_PORT:-2222}"      # local port
 DEVICE_SSH="${DEVICE_SSH:-2269}"  # sshd port on the device (OpenSSH from Cydia)
 export OPENSSL_CONF="${OPENSSL_CONF:-$HOME/openssl_legacy.cnf}"
 HTTP_PORT="${HTTP_PORT:-8080}"    # served here, and reverse-forwarded to the device
 DEVICE_USER="${DEVICE_USER:-root}"
-mkdir -p "$LOG_DIR"
+mkdir -p "$LOG_DIR" "$RUN"
 LOG="$LOG_DIR/serve-$(date +%Y%m%d-%H%M%S).log"
 exec > >(stdbuf -oL -eL tee -a "$LOG") 2>&1
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
 PIDS=()
+# Tears down a half-built chain when we bail out partway. Once the whole chain
+# is up it must NOT run: the point is to leave httpd/iproxy/tunnel serving
+# after this script exits. `DETACHED=1` disarms it at that moment. While the
+# tunnel ran in the foreground this never came up -- the script could not exit
+# without also ending the session.
+DETACHED=0
 cleanup() {
+    [ "$DETACHED" -eq 1 ] && return
     log "shutting down"
     for p in "${PIDS[@]:-}"; do [ -n "$p" ] && kill "$p" 2>/dev/null; done
 }
@@ -84,14 +93,16 @@ fi
 
 log "=== 4. http server on :$HTTP_PORT"
 ( cd "$REPO_DIR" && python3 -m http.server "$HTTP_PORT" --bind 127.0.0.1 ) >>"$LOG" 2>&1 &
-PIDS+=($!); sleep 1
+HTTPD_PID=$!
+PIDS+=($HTTPD_PID); sleep 1
 curl -sf "http://127.0.0.1:$HTTP_PORT/Packages" >/dev/null \
     && log "serving ok" || log "WARNING: local fetch failed"
 
 log "=== 5. iproxy $SSH_PORT -> device:$DEVICE_SSH (over USB)"
 # iproxy changed argument style between releases; try new form, then old.
 ( iproxy "$SSH_PORT" "$DEVICE_SSH" >>"$LOG" 2>&1 ) &
-PIDS+=($!); sleep 2
+IPROXY_PID=$!
+PIDS+=($IPROXY_PID); sleep 2
 
 log "=== 6. reverse tunnel: device 127.0.0.1:$HTTP_PORT -> here"
 log "you will be asked for the device root password (default on a fresh"
@@ -100,6 +111,13 @@ log ""
 log "    Cydia -> Sources -> Edit -> Add ->  http://127.0.0.1:$HTTP_PORT/"
 log ""
 # iOS 9's dropbear/OpenSSH only speaks legacy KEX/MAC/host-key algorithms.
+#
+# Backgrounded with & rather than ssh -f: -f forks after authentication, and
+# the PID we would record is the parent's, which exits immediately -- leaving
+# tunnel.pid pointing at nothing while the tunnel runs unowned. Keeping the
+# process ours means serve-repo.sh's stop/status find it. The password prompt
+# still reaches the terminal, because & only detaches from job control, not
+# from the tty.
 ssh -p "$SSH_PORT" -N \
     -o HostKeyAlgorithms=+ssh-rsa \
     -o PubkeyAcceptedAlgorithms=+ssh-rsa \
@@ -109,4 +127,21 @@ ssh -p "$SSH_PORT" -N \
     -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     -o ServerAliveInterval=30 \
     -R "$HTTP_PORT:127.0.0.1:$HTTP_PORT" \
-    "$DEVICE_USER@localhost"
+    "$DEVICE_USER@localhost" &
+TUNNEL_PID=$!
+echo "$TUNNEL_PID" > "$RUN/tunnel.pid"
+# The prompt is answered during this wait; only then is the tunnel real.
+sleep 8
+if kill -0 "$TUNNEL_PID" 2>/dev/null; then
+    # Hand httpd and iproxy over to serve-repo.sh's pid files too, or its
+    # stop/status would only ever know about the tunnel.
+    echo "$HTTPD_PID" > "$RUN/httpd.pid"
+    echo "$IPROXY_PID" > "$RUN/iproxy.pid"
+    DETACHED=1
+    log "tunnel up (pid $TUNNEL_PID) -- backgrounded, this shell is free"
+    log "stop it with: ~/legacy-ios9/bin/serve-repo stop"
+else
+    rm -f "$RUN/tunnel.pid"
+    log "tunnel FAILED -- wrong password, or sshd not listening on $DEVICE_SSH"
+    exit 1
+fi

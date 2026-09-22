@@ -45,6 +45,11 @@ PKGS=(
   openssl-devel libxml2-devel zlib-devel libzstd-devel bzip2-devel
   libplist libplist-devel
   libimobiledevice libimobiledevice-utils usbmuxd ideviceinstaller
+  # iproxy, for serve-repo-usb's `iproxy 2222 2269` USB->SSH forward. Wiped
+  # with /usr on every reset, and its absence shows up only at the far end:
+  # the reverse tunnel fails with "connect to localhost port 2222: Connection
+  # refused", which reads like a device problem rather than a missing package.
+  libusbmuxd-utils
   bsdtar cpio xar dpkg fakeroot
   python3 xz
 )
@@ -52,7 +57,7 @@ PKGS=(
 # tool -> what provides it, for the status report
 declare -A PROVIDER=(
   [git]=pkg [gcc]=pkg [cmake]=pkg [clang]=pkg [bsdtar]=pkg [cpio]=pkg
-  [xar]=pkg [dpkg]=pkg [fakeroot]=pkg [idevicesyslog]=pkg [ideviceinstaller]=pkg
+  [xar]=pkg [dpkg]=pkg [fakeroot]=pkg [idevicesyslog]=pkg [ideviceinstaller]=pkg [iproxy]=pkg
   [ldid]=built [lipo]=built [otool]=built [ld64]=built [vtool]=built
   [pbzx]=built [swiftc]=fetched
 )
@@ -65,7 +70,7 @@ status() {
     printf '\n    %-18s %-9s %s\n' TOOL SOURCE PATH
     for t in "${!PROVIDER[@]}"; do :; done
     for t in git gcc cmake clang bsdtar cpio xar dpkg fakeroot \
-             idevicesyslog ideviceinstaller ldid lipo otool ld64 vtool pbzx swiftc; do
+             idevicesyslog ideviceinstaller iproxy ldid lipo otool ld64 vtool pbzx swiftc; do
         p=$(command -v "$t" 2>/dev/null || true)
         # cctools tools carry the --target prefix, so a bare name never
         # resolves and they reported MISSING while sitting in $PREFIX/bin.
