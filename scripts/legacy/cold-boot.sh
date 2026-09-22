@@ -114,8 +114,18 @@ if [ "$CHECK" -eq 1 ]; then
     note "(skipped under --check)"
 else
     darling shutdown >/dev/null 2>&1 || true
-    OUT="$(timeout 60 darling shell uname -a 2>&1)"
+    # NOT `OUT="$(timeout 60 darling shell ...)"`: `darling shell` leaves
+    # processes inside the container holding the command-substitution pipe
+    # open, so $( ) keeps reading after timeout has killed darling itself and
+    # the script blocks forever in anon_pipe_read -- a hang that looks exactly
+    # like darling failing to boot, but the boot has already succeeded. Going
+    # through a file leaves no pipe to inherit; --kill-after reaps a darling
+    # that ignores SIGTERM, and </dev/null stops it waiting on stdin.
+    BOOT_OUT="$(mktemp)"
+    timeout --kill-after=10 60 darling shell uname -a </dev/null >"$BOOT_OUT" 2>&1
     RC=$?
+    OUT="$(head -1 "$BOOT_OUT")"
+    rm -f "$BOOT_OUT"
     note "darling shell uname -a -> $OUT"
     if [ $RC -ne 0 ] || [ "${OUT#Darwin}" = "$OUT" ]; then
         die "darling did not boot cleanly (expected a line starting with 'Darwin'). Re-run this script; if it repeats, see darling-reinstall-after-reset.md"

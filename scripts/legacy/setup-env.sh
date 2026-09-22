@@ -67,6 +67,13 @@ status() {
     for t in git gcc cmake clang bsdtar cpio xar dpkg fakeroot \
              idevicesyslog ideviceinstaller ldid lipo otool ld64 vtool pbzx swiftc; do
         p=$(command -v "$t" 2>/dev/null || true)
+        # cctools tools carry the --target prefix, so a bare name never
+        # resolves and they reported MISSING while sitting in $PREFIX/bin.
+        # ld64 is the one whose binary drops the "64": it installs as
+        # arm-apple-darwin11-ld.
+        c="$t"; [ "$t" = ld64 ] && c=ld
+        [ -z "$p" ] && [ -x "$PREFIX/bin/arm-apple-darwin11-$c" ] \
+            && p="$PREFIX/bin/arm-apple-darwin11-$c"
         [ -z "$p" ] && [ -x "$TOOLS/swift/usr/bin/$t" ] && p="$TOOLS/swift/usr/bin/$t"
         printf '    %-18s %-9s %s\n' "$t" "${PROVIDER[$t]:-?}" "${p:-MISSING}"
     done
@@ -94,8 +101,11 @@ build_ldid() {
     $SUDO install -m 0755 "$d/ldid" "$PREFIX/bin/ldid" && note "installed $PREFIX/bin/ldid"
 }
 
+# cctools-port installs under the --target prefix (arm-apple-darwin11-lipo,
+# never a bare `lipo`), so `command -v lipo` never matched and this rebuilt
+# on every boot -- ~67s wasted, into a $PREFIX that already persists.
 build_cctools() {
-    command -v lipo >/dev/null && { note "cctools present, skipping"; return; }
+    [ -x "$PREFIX/bin/arm-apple-darwin11-lipo" ] && { note "cctools present, skipping"; return; }
     say "building cctools-port (lipo, otool, ld64, strip, vtool for Mach-O)"
     local d="$TOOLS/src/cctools-port"
     rm -rf "$d"; mkdir -p "$d"
