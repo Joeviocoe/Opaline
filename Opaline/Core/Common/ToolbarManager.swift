@@ -186,9 +186,7 @@ final class ProfileAvatarButton: UIButton {
         imageView?.contentMode = .scaleAspectFill
         setImage(defaultImage(), for: .normal)
         tintColor = ThemeManager.shared.isDark ? .white : .darkGray
-        translatesAutoresizingMaskIntoConstraints = false
-        widthAnchor.constraint(equalToConstant: size).isActive = true
-        heightAnchor.constraint(equalToConstant: size).isActive = true
+        BarCustomView.size(self, side: size)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(refresh),

@@ -244,9 +244,27 @@ extension SubscriptionsViewController {
         guard view.window != nil else {
             return
         }
+        // A reload is a 1-2s freeze on the iPad 3, and under a moving finger
+        // that reads as the scroll hanging. Hold it until the list stops.
+        guard !tableView.isDragging, !tableView.isDecelerating else {
+            deferredPartialPage = page
+            return
+        }
+        deferredPartialPage = nil
+        let started = Date()
         spinner.stopAnimating()
         showLocalEmptyState(false)
         setPage(page)
+        let ms = Int(Date().timeIntervalSince(started) * 1_000)
+        AppLog.subs("partial repaint \(page.videos.count) videos in \(ms)ms")
+    }
+
+    /// The list came to rest: apply whatever partial page was held.
+    func applyDeferredPartialPageIfAny() {
+        guard let page = deferredPartialPage else {
+            return
+        }
+        applyLocalFeedProgress(page)
     }
 
     private func applyLocalFeedResult(_ result: Result<FeedPage, Error>) {

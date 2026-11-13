@@ -35,6 +35,9 @@ final class LocalSubscriptionFeedService: FeedService {
     /// progress can show its partial results on top of a complete feed
     /// rather than a feed that starts at one channel. See `+Progress`.
     var baselineUploads: [String: [Video]] = [:]
+    /// Video ids, in channel order, of the last partial page handed out, so
+    /// a channel that answered with nothing new does not cost a repaint.
+    var lastPartialSignature = ""
 
     init(
         wrapping inner: FeedService,
@@ -123,6 +126,7 @@ extension LocalSubscriptionFeedService {
         if force {
             uploads.invalidate()
         }
+        lastPartialSignature = ""
         walk(channels: channels, progress: progress, completion: completion)
     }
 
@@ -143,10 +147,12 @@ extension LocalSubscriptionFeedService {
             includeShorts: includeShorts,
             progress: progress.map { report in
                 { [weak self] partial in
-                    guard let self = self else {
+                    guard let self = self,
+                          let page = self.partialPage(partial, channels: channels)
+                    else {
                         return
                     }
-                    report(self.partialPage(partial, channels: channels))
+                    report(page)
                 }
             }
         ) { [weak self] byChannel in

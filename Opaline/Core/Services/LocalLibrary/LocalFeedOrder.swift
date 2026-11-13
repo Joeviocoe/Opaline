@@ -51,21 +51,38 @@ enum LocalFeedOrder {
     /// a lookup per element for something already in hand.
     static func sorted(_ entries: [Entry]) -> [Entry] {
         let seen = recordFirstSeen(entries.map { $0.video.id })
-        return entries.sorted { lhs, rhs in
-            isOrderedBefore(lhs, rhs, firstSeen: seen)
+        // Sort small keys, not the entries: a `Video` is a few dozen
+        // fields, and a sort moves its elements around many times over.
+        let keys = entries.enumerated().map { index, entry in
+            SortKey(
+                index: index,
+                date: entry.date.timeIntervalSinceReferenceDate,
+                firstSeen: seen[entry.video.id] ?? 0,
+                channelRank: entry.channelRank,
+                positionInChannel: entry.positionInChannel,
+                videoId: entry.video.id
+            )
         }
+        return keys.sorted(by: isOrderedBefore).map { entries[$0.index] }
+    }
+
+    private struct SortKey {
+        let index: Int
+        let date: TimeInterval
+        let firstSeen: Double
+        let channelRank: Int
+        let positionInChannel: Int
+        let videoId: String
     }
 
     private static func isOrderedBefore(
-        _ lhs: Entry, _ rhs: Entry, firstSeen: [String: Double]
+        _ lhs: SortKey, _ rhs: SortKey
     ) -> Bool {
         if lhs.date != rhs.date {
             return lhs.date > rhs.date
         }
-        let lhsSeen = firstSeen[lhs.video.id] ?? 0
-        let rhsSeen = firstSeen[rhs.video.id] ?? 0
-        if lhsSeen != rhsSeen {
-            return lhsSeen > rhsSeen
+        if lhs.firstSeen != rhs.firstSeen {
+            return lhs.firstSeen > rhs.firstSeen
         }
         if lhs.channelRank != rhs.channelRank {
             return lhs.channelRank < rhs.channelRank
@@ -73,7 +90,7 @@ enum LocalFeedOrder {
         if lhs.positionInChannel != rhs.positionInChannel {
             return lhs.positionInChannel < rhs.positionInChannel
         }
-        return lhs.video.id < rhs.video.id
+        return lhs.videoId < rhs.videoId
     }
 }
 

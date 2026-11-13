@@ -58,6 +58,9 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     var refreshingChannelIds: Set<String> = []
     /// Channels the current walk has finished with, for "Updating 5/17".
     var walkCompletedCount = 0
+    /// A partial page that arrived while the list was moving, to apply once
+    /// it stops. Only the latest is kept; the earlier ones are superseded.
+    var deferredPartialPage: FeedPage?
     /// Once per session — mirrors `HomeViewController`'s guard so a dead
     /// cached continuation triggers exactly one lazy revalidation.
     var didRevalidateAfterStaleToken = false

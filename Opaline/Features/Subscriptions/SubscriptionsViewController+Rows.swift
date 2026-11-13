@@ -141,6 +141,16 @@ extension SubscriptionsViewController: UITableViewDelegate {
             return
         }
         handlePullIfPastThreshold(scrollView)
+        if !decelerate {
+            applyDeferredPartialPageIfAny()
+        }
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard scrollView === tableView else {
+            return
+        }
+        applyDeferredPartialPageIfAny()
     }
 
     // Durations are fetched when scrolling STOPS, never during it: rows that

@@ -129,6 +129,41 @@ enum ContentKeywords {
     /// of `VideoFormatters.approximateDate`.
     static func approximateDate(fromRelative text: String) -> Date? {
         let lowered = text.lowercased()
+        if let cached = cachedOffset(for: lowered) {
+            return cached.map { Date() - $0 }
+        }
+        let offset = relativeOffset(lowered)
+        remember(offset, for: lowered)
+        return offset.map { Date() - $0 }
+    }
+
+    /// The scan below is every keyword of every language for each of seven
+    /// units — fine once, but the local feed asks it twice per video for a
+    /// few hundred videos on every partial page, and on the iPad 3 that was
+    /// most of a 700ms main-thread stall. The texts repeat ("3 hours ago"
+    /// is the same string on every card), so the offset is kept per text.
+    private static var offsetCache: [String: Double?] = [:]
+    private static let offsetCacheLock = NSLock()
+    private static let offsetCacheLimit = 256
+
+    private static func cachedOffset(for lowered: String) -> Double?? {
+        offsetCacheLock.lock()
+        defer { offsetCacheLock.unlock() }
+        return offsetCache[lowered]
+    }
+
+    private static func remember(_ offset: Double?, for lowered: String) {
+        offsetCacheLock.lock()
+        defer { offsetCacheLock.unlock() }
+        if offsetCache.count >= offsetCacheLimit {
+            offsetCache.removeAll(keepingCapacity: true)
+        }
+        offsetCache[lowered] = offset
+    }
+
+    /// Seconds before now that the text describes, or nil if no unit
+    /// keyword matched.
+    private static func relativeOffset(_ lowered: String) -> Double? {
         let num = lowered.components(separatedBy: .whitespaces)
             .compactMap(Int.init).first ?? 1
         // Weeks BEFORE days: the Ukrainian week "тиждень" contains the
@@ -143,7 +178,7 @@ enum ContentKeywords {
                 table[keyPath: unit].contains { lowered.contains($0) }
             }
             if matched {
-                return Date() - Double(num) * secondsPerUnit
+                return Double(num) * secondsPerUnit
             }
         }
         return nil

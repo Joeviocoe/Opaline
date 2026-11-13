@@ -20,11 +20,9 @@ final class NotificationsBellButton: UIButton {
         super.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
         setImage(resizedNavBarIcon("icon_bell", size: 22), for: .normal)
         tintColor = ThemeManager.shared.isDark ? .white : .darkGray
-        translatesAutoresizingMaskIntoConstraints = false
+        BarCustomView.size(self, side: 30)
         addSubview(dotView)
         NSLayoutConstraint.activate([
-            widthAnchor.constraint(equalToConstant: 30),
-            heightAnchor.constraint(equalToConstant: 30),
             dotView.widthAnchor.constraint(equalToConstant: NotificationsBellButton.dotSize),
             dotView.heightAnchor.constraint(equalToConstant: NotificationsBellButton.dotSize),
             dotView.topAnchor.constraint(equalTo: topAnchor, constant: 3),

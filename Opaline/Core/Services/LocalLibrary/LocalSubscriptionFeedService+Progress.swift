@@ -12,12 +12,32 @@ extension LocalSubscriptionFeedService {
     /// What the walk has so far, over the baseline for everything it has not
     /// reached yet. A pull-to-refresh drops the per-channel cache, so without
     /// the baseline its first partial page would be one channel long.
+    ///
+    /// Returns nil when the merged input is the same list as last time —
+    /// a channel that answered with exactly what the baseline already had.
+    /// Measured on the iPad 3: every page handed out costs the screen a
+    /// 1-2s main-thread stall, so the cheapest page is the one not built.
     func partialPage(
         _ partial: [String: [Video]],
         channels: [SubscribedChannel]
-    ) -> FeedPage {
+    ) -> FeedPage? {
         let merged = baselineUploads.merging(partial) { _, fresh in fresh }
-        return assemble(uploads: merged, channels: channels, final: false)
+        let signature = channels.map { channel in
+            (merged[channel.id] ?? []).map { $0.id }.joined(separator: ",")
+        }.joined(separator: ";")
+        guard signature != lastPartialSignature else {
+            AppLog.library("local feed: partial unchanged, skipped")
+            return nil
+        }
+        lastPartialSignature = signature
+        let started = Date()
+        let page = assemble(uploads: merged, channels: channels, final: false)
+        let ms = Int(Date().timeIntervalSince(started) * 1_000)
+        AppLog.library(
+            "local feed: partial page \(page.videos.count) videos"
+                + " from \(merged.count) channels assembled in \(ms)ms"
+        )
+        return page
     }
 
     /// Merges rather than replaces: a channel that failed this walk keeps
