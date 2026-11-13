@@ -1,0 +1,8 @@
+Origin: Opaline Legacy (iOS 9 / armv7)
+Label: Opaline Legacy (iOS 9 / armv7)
+Suite: stable
+Version: 1.0
+Codename: ios9
+Architectures: iphoneos-arm
+Components: main
+Description: Opaline built for 32-bit A5/A5X devices on iOS 9.3.5
