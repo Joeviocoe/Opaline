@@ -112,14 +112,19 @@ private extension SubscriptionsViewController {
 extension SubscriptionsViewController {
     func loadChannelVideos(_ channel: SubscribedChannel) {
         let expectedId = channel.id
+        setChannelRefreshing(expectedId, true)
         channelTabsService.fetchChannelTab(
             channelId: channel.id,
             params: ChannelTabParams.videos
         ) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self = self,
-                      self.selectedChannel?.id == expectedId
-                else { return }
+                guard let self = self else {
+                    return
+                }
+                self.setChannelRefreshing(expectedId, false)
+                guard self.selectedChannel?.id == expectedId else {
+                    return
+                }
                 self.handleChannelVideosResult(result)
             }
         }

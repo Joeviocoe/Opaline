@@ -5,6 +5,7 @@ final class ChannelAvatarView: UIView {
     private let imageView = ThumbnailImageView(frame: .zero)
     private let initialLabel = UILabel()
     private var currentChannelId: String?
+    private var currentAvatarURL: String?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,7 +23,17 @@ final class ChannelAvatarView: UIView {
     }
 
     func configure(with channel: SubscribedChannel) {
+        // Rebinding the same channel must be a no-op. The bar re-applies
+        // state to visible cells on every selection, dot and refresh change,
+        // and clearing the image to reload the same URL on each of those is
+        // the avatar flicker seen during a progressive refresh.
+        if currentChannelId == channel.id,
+           currentAvatarURL == channel.avatarURL,
+           imageView.image != nil {
+            return
+        }
         currentChannelId = channel.id
+        currentAvatarURL = channel.avatarURL
         let initial = channel.title.first.map(String.init)?.uppercased() ?? ""
         initialLabel.text = initial
         imageView.image = nil
@@ -37,6 +48,7 @@ final class ChannelAvatarView: UIView {
 
     func reset() {
         currentChannelId = nil
+        currentAvatarURL = nil
         imageView.cancel()
         initialLabel.text = nil
     }

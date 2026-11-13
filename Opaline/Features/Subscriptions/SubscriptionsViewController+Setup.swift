@@ -69,13 +69,17 @@ extension SubscriptionsViewController {
         tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints =
             false
-        let refresh = UIRefreshControl()
-        refresh.addTarget(
-            self,
-            action: #selector(handleRefresh),
-            for: .valueChanged
-        )
-        tableView.refreshControl = refresh
+        // The account feed keeps the control: one request, done in a
+        // second. The local walk does not — see `handlePullIfPastThreshold`.
+        if !LocalLibrary.isActive {
+            let refresh = UIRefreshControl()
+            refresh.addTarget(
+                self,
+                action: #selector(handleRefresh),
+                for: .valueChanged
+            )
+            tableView.refreshControl = refresh
+        }
         view.addSubview(tableView)
         pinToEdges(tableView, of: view)
     }
@@ -102,6 +106,17 @@ extension SubscriptionsViewController {
     func loadFeed() {
         let t0 = Date()
         AppLog.subs("network fetch start")
+        // The local source can show the walk as it goes; the account feed
+        // is one request and has nothing to show in between.
+        if LocalLibrary.isActive,
+           let local = service as? LocalSubscriptionFeedService {
+            local.buildFeed(force: false, progress: { [weak self] page in
+                self?.applyLocalFeedProgress(page)
+            }) { [weak self] result in
+                self?.handleFeedResult(result, since: t0)
+            }
+            return
+        }
         service.fetchSubscriptionFeed { [weak self] result in
             self?.handleFeedResult(result, since: t0)
         }

@@ -54,6 +54,10 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     var isLoadingNewContentHistory = false
     var isLoadingNewContentRSS = false
     var locallyWatchedVideoIds: Set<String> = []
+    /// Channels being fetched right now, mirrored onto the avatar bar.
+    var refreshingChannelIds: Set<String> = []
+    /// Channels the current walk has finished with, for "Updating 5/17".
+    var walkCompletedCount = 0
     /// Once per session — mirrors `HomeViewController`'s guard so a dead
     /// cached continuation triggers exactly one lazy revalidation.
     var didRevalidateAfterStaleToken = false
@@ -115,6 +119,7 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
         ToolbarManager.shared.install(in: self)
         observeTokenRefresh()
         observeLocalSubscriptions()
+        observeChannelRefreshProgress()
         loadInitialContent()
     }
 
@@ -131,6 +136,7 @@ class SubscriptionsViewController: UIViewController, ScrollableToTop {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshNewContentDots()
+        updateFeedStatus()
     }
 
     override func viewWillDisappear(_ animated: Bool) {

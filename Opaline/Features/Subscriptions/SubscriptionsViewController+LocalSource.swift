@@ -148,19 +148,18 @@ extension SubscriptionsViewController {
         isLoadingInitial = false
         spinner.stopAnimating()
         setPage(cached)
+        (service as? LocalSubscriptionFeedService)?.seedBaseline(from: cached)
         AppLog.library(
             "subs screen: painted \(cached.videos.count) from local cache"
         )
-        // Inside the revalidate window the cache stands on its own: a
-        // fan-out is one request per subscribed channel, which is not
-        // something to spend on a screen that already has content.
+        // Then always walk. The cache is what makes the screen instant; it
+        // is not a reason to show a two-hour-old feed as current, and the
+        // walk now paints as it goes, with each channel's avatar showing
+        // where it is, so the cost is visible rather than a frozen screen.
         let age = cache.localSubscriptionsFeedAge() ?? .greatestFiniteMagnitude
-        guard age >= AppCache.feedRevalidateAfter else {
-            AppLog.library(
-                "subs screen: cache \(Int(age))s old, skipping fan-out"
-            )
-            return
-        }
+        AppLog.library(
+            "subs screen: cache \(Int(age))s old, walking on launch"
+        )
         loadFeed()
     }
 
@@ -220,11 +219,34 @@ extension SubscriptionsViewController {
             loadFeed()
             return
         }
-        local.buildFeed(force: true) { [weak self] result in
+        local.buildFeed(force: true, progress: { [weak self] page in
+            self?.applyLocalFeedProgress(page)
+        }) { [weak self] result in
             DispatchQueue.main.async {
                 self?.applyLocalFeedResult(result)
             }
         }
+    }
+
+    /// A page built from the channels answered so far. Replaces the list
+    /// each time, rows and all — the reorder under the reader is accepted,
+    /// chosen over waiting the whole walk for the first new video. Skipped
+    /// while a channel filter is up; the final result still gets stashed
+    /// for when it is left.
+    func applyLocalFeedProgress(_ page: FeedPage) {
+        guard selectedChannel == nil, !page.videos.isEmpty else {
+            return
+        }
+        // Off screen — behind the player, or on another tab — nobody is
+        // looking, and a sort plus a table reload every second is time the
+        // iPad 3 needs for the video. The walk itself carries on; the
+        // final page lands as usual and the next partial repaints on return.
+        guard view.window != nil else {
+            return
+        }
+        spinner.stopAnimating()
+        showLocalEmptyState(false)
+        setPage(page)
     }
 
     private func applyLocalFeedResult(_ result: Result<FeedPage, Error>) {

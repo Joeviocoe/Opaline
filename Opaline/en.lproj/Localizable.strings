@@ -624,6 +624,8 @@
 
 /* Local library — subscriptions and watch history with no account */
 "subscriptions.local.noVideos" = "No recent videos from the channels you follow";
+"subscriptions.status.updating" = "Updating\n%1$d/%2$d";
+"subscriptions.status.updated" = "Updated\n%1$@";
 
 /* Local library — subscriptions and watch history with no account */
 "settings.row.subscriptionsShorts" = "Show Shorts in Subscriptions";

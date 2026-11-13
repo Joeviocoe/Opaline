@@ -134,6 +134,15 @@ extension SubscriptionsViewController: UITableViewDelegate {
         topBarHider.handleScroll(scrollView)
     }
 
+    func scrollViewDidEndDragging(
+        _ scrollView: UIScrollView, willDecelerate decelerate: Bool
+    ) {
+        guard scrollView === tableView else {
+            return
+        }
+        handlePullIfPastThreshold(scrollView)
+    }
+
     // Durations are fetched when scrolling STOPS, never during it: rows that
     // fly past a flick should cost nothing.
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

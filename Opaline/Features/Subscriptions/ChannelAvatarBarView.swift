@@ -54,10 +54,14 @@ final class ChannelAvatarBarView: UIView {
     }()
 
     private let allButton = UIButton(type: .system)
+    /// "Updated 10:52" / "Updating 5/17", tucked under the All button so it
+    /// takes no row of its own and never sits where a tap is going.
+    private let statusLabel = UILabel()
     private let separator = UIView()
     private var channels: [SubscribedChannel] = []
     private var selectedChannelId: String?
     private var newContentChannelIds: Set<String> = []
+    private var refreshingChannelIds: Set<String> = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,9 +73,17 @@ final class ChannelAvatarBarView: UIView {
         fatalError("init(coder:) is not supported")
     }
 
+    /// A list with the same channels in the same order only re-applies
+    /// state to the visible cells; a full reload re-dequeues every cell and
+    /// re-resolves every avatar, which reads as the whole bar blinking.
     func setChannels(_ channels: [SubscribedChannel]) {
+        let sameOrder = channels.map { $0.id } == self.channels.map { $0.id }
         self.channels = channels
-        collectionView.reloadData()
+        if sameOrder {
+            reloadVisibleState()
+        } else {
+            collectionView.reloadData()
+        }
     }
 
     func setSelectedChannelId(_ id: String?) {
@@ -84,11 +96,28 @@ final class ChannelAvatarBarView: UIView {
         reloadVisibleState()
     }
 
+    /// Channels whose uploads are being fetched right now; each spins an
+    /// arc around its avatar. Kept here, not on the cell, so a reused or
+    /// freshly dequeued cell picks the state up in `configure`.
+    func setRefreshingChannelIds(_ ids: Set<String>) {
+        guard ids != refreshingChannelIds else {
+            return
+        }
+        refreshingChannelIds = ids
+        reloadVisibleState()
+    }
+
+    func setStatus(_ text: String?) {
+        statusLabel.text = text
+        statusLabel.isHidden = (text ?? "").isEmpty
+    }
+
     func applyTheme() {
         let theme = ThemeManager.shared
         backgroundColor = theme.background
         separator.backgroundColor = theme.separator
-        allButton.setTitleColor(theme.accent, for: .normal)
+        allButton.tintColor = theme.accent
+        statusLabel.textColor = theme.secondaryText
         for case let cell as ChannelAvatarCell in collectionView.visibleCells {
             cell.applyTheme()
         }
@@ -99,9 +128,9 @@ final class ChannelAvatarBarView: UIView {
         onAllTapped?()
     }
 
-    /// Re-applies selection / new-content state to whatever cells are
-    /// currently on screen, without a full reload (avatars/images stay
-    /// put; only the derived state changes).
+    /// Re-applies selection / new-content / refreshing state to whatever
+    /// cells are currently on screen, without a full reload (avatars/images
+    /// stay put; only the derived state changes).
     private func reloadVisibleState() {
         for case let cell as ChannelAvatarCell in collectionView.visibleCells {
             guard let indexPath = collectionView.indexPath(for: cell) else {
@@ -117,9 +146,16 @@ final class ChannelAvatarBarView: UIView {
         }
         let channel = channels[indexPath.item]
         cell.configure(with: channel)
+        applyState(to: cell, for: channel)
+        cell.applyTheme()
+    }
+
+    private func applyState(
+        to cell: ChannelAvatarCell, for channel: SubscribedChannel
+    ) {
         cell.setSelected(channel.id == selectedChannelId)
         cell.setShowsNewContent(newContentChannelIds.contains(channel.id))
-        cell.applyTheme()
+        cell.setRefreshing(refreshingChannelIds.contains(channel.id))
     }
 
     private func setup() {
@@ -143,11 +179,14 @@ final class ChannelAvatarBarView: UIView {
         applyTheme()
     }
 
+    /// The grid glyph on top, the two-line status under it, both centred on
+    /// one column at the bar's right edge. The glyph is drawn, not a symbol:
+    /// iOS 9 has no SF Symbols, and the app's other glyphs are drawn too.
     private func setupAllButton() {
-        allButton.setTitle("subscriptions.allButton".localized, for: .normal)
-        allButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        allButton.setImage(ChannelAvatarBarView.gridGlyph(), for: .normal)
+        allButton.accessibilityLabel = "subscriptions.allButton".localized
         allButton.contentEdgeInsets = UIEdgeInsets(
-            top: 8, left: 12, bottom: 8, right: 16
+            top: 8, left: 12, bottom: 8, right: 12
         )
         allButton.addTarget(
             self,
@@ -156,10 +195,51 @@ final class ChannelAvatarBarView: UIView {
         )
         allButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(allButton)
+        statusLabel.font = .systemFont(ofSize: 10)
+        statusLabel.textAlignment = .center
+        statusLabel.numberOfLines = 2
+        statusLabel.isHidden = true
+        statusLabel.isUserInteractionEnabled = false
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(statusLabel)
         NSLayoutConstraint.activate([
-            allButton.trailingAnchor.constraint(equalTo: trailingAnchor),
-            allButton.centerYAnchor.constraint(equalTo: centerYAnchor)
+            allButton.trailingAnchor.constraint(
+                equalTo: trailingAnchor, constant: -4
+            ),
+            allButton.topAnchor.constraint(equalTo: topAnchor, constant: 6),
+            statusLabel.centerXAnchor.constraint(
+                equalTo: allButton.centerXAnchor
+            ),
+            statusLabel.topAnchor.constraint(equalTo: allButton.bottomAnchor),
+            // The status can be wider than the glyph, so the avatars stop
+            // short of it as well.
+            collectionView.trailingAnchor.constraint(
+                lessThanOrEqualTo: statusLabel.leadingAnchor, constant: -4
+            )
         ])
+    }
+
+    /// Nine dots, three by three — "all of them". Template, so the button's
+    /// tint colours it per theme.
+    private static func gridGlyph() -> UIImage {
+        let side: CGFloat = 22
+        let dot: CGFloat = 5
+        let gap = (side - dot * 3) / 2
+        let image = UIGraphicsImageRenderer(
+            size: CGSize(width: side, height: side)
+        ).image { _ in
+            UIColor.black.setFill()
+            for row in 0..<3 {
+                for column in 0..<3 {
+                    UIBezierPath(ovalIn: CGRect(
+                        x: CGFloat(column) * (dot + gap),
+                        y: CGFloat(row) * (dot + gap),
+                        width: dot, height: dot
+                    )).fill()
+                }
+            }
+        }
+        return image.withRenderingMode(.alwaysTemplate)
     }
 }
 

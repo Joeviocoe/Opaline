@@ -31,6 +31,10 @@ final class LocalSubscriptionFeedService: FeedService {
     /// an older list returns an empty page rather than dead-ending on
     /// indexes that no longer mean anything.
     private var generation = 0
+    /// Each channel's videos from the last walk that finished, so a walk in
+    /// progress can show its partial results on top of a complete feed
+    /// rather than a feed that starts at one channel. See `+Progress`.
+    var baselineUploads: [String: [Video]] = [:]
 
     init(
         wrapping inner: FeedService,
@@ -101,11 +105,13 @@ final class LocalSubscriptionFeedService: FeedService {
 // MARK: - Assembly
 
 extension LocalSubscriptionFeedService {
-    /// Rebuilds from each channel's Videos tab, one channel at a time.
+    /// Rebuilds from each channel's Videos tab, a couple at a time.
     /// `force` is pull-to-refresh: it drops the per-channel cache so the walk
-    /// really goes to the network.
+    /// really goes to the network. `progress`, if given, receives a page
+    /// each time another channel answers — see `+Progress`.
     func buildFeed(
         force: Bool,
+        progress: ((FeedPage) -> Void)? = nil,
         completion: @escaping (Result<FeedPage, Error>) -> Void
     ) {
         let channels = store.channels
@@ -117,11 +123,12 @@ extension LocalSubscriptionFeedService {
         if force {
             uploads.invalidate()
         }
-        walk(channels: channels, completion: completion)
+        walk(channels: channels, progress: progress, completion: completion)
     }
 
     private func walk(
         channels: [SubscribedChannel],
+        progress: ((FeedPage) -> Void)?,
         completion: @escaping (Result<FeedPage, Error>) -> Void
     ) {
         // The Subscriptions screen's own switch, not the global one. With it
@@ -133,12 +140,21 @@ extension LocalSubscriptionFeedService {
         let started = Date()
         uploads.fetch(
             channelIds: channels.map { $0.id },
-            includeShorts: includeShorts
+            includeShorts: includeShorts,
+            progress: progress.map { report in
+                { [weak self] partial in
+                    guard let self = self else {
+                        return
+                    }
+                    report(self.partialPage(partial, channels: channels))
+                }
+            }
         ) { [weak self] byChannel in
             guard let self = self else {
                 return
             }
             let ms = Int(Date().timeIntervalSince(started) * 1_000)
+            self.rememberBaseline(byChannel)
             guard !byChannel.isEmpty else {
                 self.reportNothingAnswered(
                     asked: channels.count, ms: ms, to: completion
@@ -181,12 +197,18 @@ extension LocalSubscriptionFeedService {
     /// Newest first, windowed, then cut to a page. The window matters: a tab
     /// returns ~30 videos per channel with no date bound, so without one a
     /// dormant channel turns the feed into an archive of its back catalogue.
-    private func assemble(
+    ///
+    /// `final` is false for a page built mid-walk: that one must not write
+    /// channel activity, which is derived from a complete walk.
+    func assemble(
         uploads: [String: [Video]],
-        channels: [SubscribedChannel]
+        channels: [SubscribedChannel],
+        final: Bool = true
     ) -> FeedPage {
         let entries = feedEntries(uploads: uploads, channels: channels)
-        LocalChannelActivity.record(latestUploads(in: entries))
+        if final {
+            LocalChannelActivity.record(latestUploads(in: entries))
+        }
         let ordered = LocalFeedOrder.sorted(entries)
         let windowed = LocalFeedWindow.apply(
             to: ordered.map { (date: $0.date, video: $0.video) }
