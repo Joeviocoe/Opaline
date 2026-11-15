@@ -44,6 +44,14 @@ enum VideoFormatters {
         ContentKeywords.approximateDate(fromRelative: text)
     }
 
+    /// Anchored variant: pass the same `now` for every element of a list
+    /// that will be sorted, so equal texts yield equal dates.
+    static func approximateDate(
+        fromRelative text: String, now: Date
+    ) -> Date? {
+        ContentKeywords.approximateDate(fromRelative: text, now: now)
+    }
+
     static func parseDuration(_ iso: String) -> String {
         var hours = 0, minutes = 0, secs = 0
         var current = ""

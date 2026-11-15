@@ -344,6 +344,8 @@
 "search.duration.short" = "4 dakikanın altında";
 "search.duration.medium" = "4-20 dakika";
 "search.duration.long" = "20 dakikanın üzerinde";
+"video.badge.members" = "ÜYELER";
+"video.badge.paid" = "ÜCRETLİ";
 
 /* ===== Home ===== */
 

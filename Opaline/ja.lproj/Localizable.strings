@@ -344,6 +344,8 @@
 "search.duration.short" = "4分未満";
 "search.duration.medium" = "4〜20分";
 "search.duration.long" = "20分以上";
+"video.badge.members" = "メンバー限定";
+"video.badge.paid" = "有料";
 
 /* ===== Home ===== */
 

@@ -340,6 +340,8 @@
 "search.duration.short" = "Moins de 4 min";
 "search.duration.medium" = "4–20 min";
 "search.duration.long" = "Plus de 20 min";
+"video.badge.members" = "MEMBRES";
+"video.badge.paid" = "PAYANT";
 
 /* ===== Home ===== */
 

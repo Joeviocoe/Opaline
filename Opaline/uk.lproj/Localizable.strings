@@ -291,6 +291,8 @@
 "search.duration.short" = "До 4 хвилин";
 "search.duration.medium" = "4–20 хвилин";
 "search.duration.long" = "Понад 20 хвилин";
+"video.badge.members" = "УЧАСНИКИ";
+"video.badge.paid" = "ПЛАТНЕ";
 
 /* ===== Home ===== */
 

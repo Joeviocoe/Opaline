@@ -344,6 +344,8 @@
 "search.duration.short" = "4分钟以下";
 "search.duration.medium" = "4–20分钟";
 "search.duration.long" = "20分钟以上";
+"video.badge.members" = "会员专享";
+"video.badge.paid" = "付费";
 
 /* ===== Home ===== */
 

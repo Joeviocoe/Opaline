@@ -55,6 +55,7 @@ enum VideoRendererParserChain {
         // Every list in the app funnels through here, so one hook covers
         // History, Home and everything else that offers these actions.
         video.feedbackActions = FeedbackActionParser.actions(in: item)
+        video.access = VideoAccessParser.access(in: item)
         return video
     }
 

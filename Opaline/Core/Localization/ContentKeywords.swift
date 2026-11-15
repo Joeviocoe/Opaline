@@ -128,13 +128,33 @@ enum ContentKeywords {
     /// checked smallest unit first — mirrors the pre-extraction behavior
     /// of `VideoFormatters.approximateDate`.
     static func approximateDate(fromRelative text: String) -> Date? {
+        approximateDate(fromRelative: text, now: Date())
+    }
+
+    /// The same, anchored to a caller-supplied `now`.
+    ///
+    /// A list sorted by these dates must pass one `now` for every element.
+    /// With a fresh `Date()` per call, two videos both labelled "3 hours
+    /// ago" come out microseconds apart, so they never compare equal and
+    /// the order inside that hour is decided by which was computed last —
+    /// which is whatever order the caller happened to enumerate in, and
+    /// that reshuffled the subscription feed on every refresh.
+    static func approximateDate(
+        fromRelative text: String, now: Date
+    ) -> Date? {
+        relativeOffset(fromRelative: text).map { now - $0 }
+    }
+
+    /// Seconds before now that the text describes, or nil if no unit
+    /// keyword matched. Cached per text.
+    static func relativeOffset(fromRelative text: String) -> TimeInterval? {
         let lowered = text.lowercased()
         if let cached = cachedOffset(for: lowered) {
-            return cached.map { Date() - $0 }
+            return cached
         }
         let offset = relativeOffset(lowered)
         remember(offset, for: lowered)
-        return offset.map { Date() - $0 }
+        return offset
     }
 
     /// The scan below is every keyword of every language for each of seven

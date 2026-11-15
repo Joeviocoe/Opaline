@@ -7,6 +7,18 @@ enum LikeStatus: String, Codable {
 }
 
 struct Video: Codable {
+    /// Who may watch. Read off the renderer's badges; see
+    /// `VideoAccessParser`.
+    enum Access: String, Codable {
+        case free
+        /// Channel membership required ("Members only" badge).
+        case membersOnly
+        /// Paid content — a rental, purchase or paid premiere.
+        case paid
+
+        var isRestricted: Bool { self != .free }
+    }
+
     let id: String
     let title: String
     // Channel fields are vars so copies can be enriched in place
@@ -33,6 +45,11 @@ struct Video: Codable {
     /// interested" for the same video the subscription feed offers "Hide".
     /// Persisted with the feed so a cached list still has working rows.
     var feedbackActions: [FeedbackAction] = []
+    /// A var so the parser chain can stamp it after whichever shape-specific
+    /// parser built the card — the badges sit in the same place for all of
+    /// them, so reading them once there beats threading a parameter through
+    /// a dozen initialiser calls. Persisted with cached feeds.
+    var access: Access = .free
 
     init(
         id: String,
@@ -102,6 +119,9 @@ struct Video: Codable {
         feedbackActions = try container.decodeIfPresent(
             [FeedbackAction].self, forKey: .feedbackActions
         ) ?? []
+        access = try container.decodeIfPresent(
+            Access.self, forKey: .access
+        ) ?? .free
     }
 }
 

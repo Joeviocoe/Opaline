@@ -344,6 +344,8 @@
 "search.duration.short" = "4分鐘以下";
 "search.duration.medium" = "4–20分鐘";
 "search.duration.long" = "20分鐘以上";
+"video.badge.members" = "會員專屬";
+"video.badge.paid" = "付費";
 
 /* ===== Home ===== */
 

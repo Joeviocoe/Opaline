@@ -298,6 +298,8 @@
 "search.duration.short" = "Dưới 4 phút";
 "search.duration.medium" = "4–20 phút";
 "search.duration.long" = "Trên 20 phút";
+"video.badge.members" = "HỘI VIÊN";
+"video.badge.paid" = "TRẢ PHÍ";
 
 /* ===== Home ===== */
 

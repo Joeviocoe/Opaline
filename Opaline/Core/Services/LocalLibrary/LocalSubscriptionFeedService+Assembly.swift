@@ -15,22 +15,30 @@ extension LocalSubscriptionFeedService {
     /// the resulting ties resolvable — see `LocalFeedOrder`. `channelRank`
     /// comes from the subscription list rather than the uploads dictionary
     /// precisely because dictionary order is not stable across launches.
+    ///
+    /// One `now` for the whole assembly. The relative texts are turned into
+    /// dates by subtracting from now, and with a fresh clock read per video
+    /// two "3 hours ago" cards differed by microseconds — never equal, so
+    /// the tie-breaks below were dead code and the bucket's order was the
+    /// enumeration order, which follows channel rank, which the activity
+    /// table rewrites after every walk. That was the reshuffle on refresh.
     func feedEntries(
         uploads: [String: [Video]],
         channels: [SubscribedChannel]
     ) -> [LocalFeedOrder.Entry] {
         var entries: [LocalFeedOrder.Entry] = []
+        let now = Date()
         for (rank, channel) in channels.enumerated() {
             guard let videos = uploads[channel.id] else {
                 continue
             }
-            let fallback = newestDate(in: videos)
+            let fallback = newestDate(in: videos, now: now)
             for (position, video) in videos.enumerated() {
                 entries.append(
                     LocalFeedOrder.Entry(
                         video: withOwner(video, channel: channel),
                         date: date(for: video, position: position,
-                                   fallback: fallback),
+                                   fallback: fallback, now: now),
                         channelRank: rank,
                         positionInChannel: position
                     )
@@ -42,10 +50,11 @@ extension LocalSubscriptionFeedService {
 
     /// The newest date this channel's videos could be dated to, used to place
     /// the ones that have no date at all.
-    private func newestDate(in videos: [Video]) -> Date? {
+    private func newestDate(in videos: [Video], now: Date) -> Date? {
         videos.compactMap { video in
-            video.publishedAt
-                .flatMap { VideoFormatters.approximateDate(fromRelative: $0) }
+            video.publishedAt.flatMap {
+                VideoFormatters.approximateDate(fromRelative: $0, now: now)
+            }
         }.max()
     }
 
@@ -66,16 +75,18 @@ extension LocalSubscriptionFeedService {
     /// the field does not exist, and "alongside that channel's recent
     /// activity" is the one that behaves sensibly.
     private func date(
-        for video: Video, position: Int, fallback: Date?
+        for video: Video, position: Int, fallback: Date?, now: Date
     ) -> Date {
         if let text = video.publishedAt,
-           let exact = VideoFormatters.approximateDate(fromRelative: text) {
+           let exact = VideoFormatters.approximateDate(
+               fromRelative: text, now: now
+           ) {
             return exact
         }
         guard let fallback = fallback else {
             // No dated video anywhere in this channel — a Shorts-only
             // channel. Anchor to now so it is not filtered away entirely.
-            return Date().addingTimeInterval(-Double(position))
+            return now.addingTimeInterval(-Double(position))
         }
         return fallback.addingTimeInterval(-Double(position + 1))
     }

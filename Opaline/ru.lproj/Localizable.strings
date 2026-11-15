@@ -335,6 +335,8 @@
 "search.duration.short" = "До 4 минут";
 "search.duration.medium" = "4–20 минут";
 "search.duration.long" = "Более 20 минут";
+"video.badge.members" = "УЧАСТНИКИ";
+"video.badge.paid" = "ПЛАТНОЕ";
 
 /* ===== Home ===== */
 

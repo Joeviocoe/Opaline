@@ -61,13 +61,30 @@ enum VideoCardHelper {
             durationLabel.isHidden = liveBadgeView != nil
             durationLabel.text = " ● LIVE "
             durationLabel.backgroundColor = ThemeManager.shared.liveBadgeBackground
-        } else if let duration = video.duration, !duration.isEmpty {
-            durationLabel.text = " \(duration) "
-            durationLabel.isHidden = false
-            liveBadgeView?.isHidden = true
-        } else {
+            return
+        }
+        liveBadgeView?.isHidden = true
+        // Members-only and paid share the duration chip — "MEMBERS · 12:34"
+        // — rather than adding a second view to every cell layout.
+        let parts = [accessText(for: video), video.duration]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+        guard !parts.isEmpty else {
             durationLabel.isHidden = true
-            liveBadgeView?.isHidden = true
+            return
+        }
+        durationLabel.text = " \(parts.joined(separator: " · ")) "
+        durationLabel.isHidden = false
+    }
+
+    private static func accessText(for video: Video) -> String? {
+        switch video.access {
+        case .free:
+            return nil
+        case .membersOnly:
+            return "video.badge.members".localized
+        case .paid:
+            return "video.badge.paid".localized
         }
     }
 

@@ -338,6 +338,8 @@
 "search.duration.short" = "Unter 4 Min.";
 "search.duration.medium" = "4–20 Min.";
 "search.duration.long" = "Über 20 Min.";
+"video.badge.members" = "MITGLIEDER";
+"video.badge.paid" = "BEZAHLT";
 
 /* ===== Home ===== */
 
