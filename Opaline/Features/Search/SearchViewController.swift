@@ -8,7 +8,7 @@ class SearchViewController: UIViewController {
     ) -> UIViewController
     let videoRouter: VideoRouter
     var results: [Video] = []
-    var filters = SearchFilters()
+    var filters = SearchFilters.stored
     let filtersButton = UIBarButtonItem(
         title: "search.filters".localized, style: .plain, target: nil, action: nil
     )

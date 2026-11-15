@@ -64,7 +64,7 @@ if [ "$CHECK" -eq 1 ]; then
 fi
 
 log "=== 1/4 bundle (also lipos + ldid-signs the Swift runtime)"
-BUNDLE_BUILD="$STAMP" python3 "$REPO/scripts/legacy/make_bundle.py" \
+BUNDLE_BUILD="$STAMP" BUNDLE_VERSION="$NEXT" python3 "$REPO/scripts/legacy/make_bundle.py" \
     >>"$LOG_DIR/deploy-$STAMP.log" 2>&1 || die "make_bundle.py failed (see $LOG_DIR/deploy-$STAMP.log)"
 [ -d "$APP" ] || die "no bundle at $APP"
 

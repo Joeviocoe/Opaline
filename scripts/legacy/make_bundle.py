@@ -78,9 +78,9 @@ def build_plist(app, version):
         "CFBundlePackageType": "APPL",
         "CFBundleSignature": "????",
         "CFBundleShortVersionString": version,
-        # Marketing version stays upstream's; the build number carries OUR
-        # packaging version, so a crash report names the build it came from.
-        # Five rounds of reports all said 1.11.0 and could not be told apart.
+        # The build number carries the packaging timestamp, so a crash report
+        # names the build it came from. Five rounds of reports all said
+        # 1.11.0 and could not be told apart.
         "CFBundleVersion": os.environ.get("BUNDLE_BUILD", version),
         "CFBundleInfoDictionaryVersion": "6.0",
         "CFBundleSupportedPlatforms": ["iPhoneOS"],
@@ -170,7 +170,9 @@ def main():
     shutil.copy2(binary, app / "Opaline")
     (app / "Opaline").chmod(0o755)
 
-    version = marketing_version()
+    # The deb version when deploy.sh drives us, so Settings > About and the
+    # Cydia listing agree; upstream's marketing version only for a bare run.
+    version = os.environ.get("BUNDLE_VERSION") or marketing_version()
     normalise_icons(app)
     icons = build_plist(app, version)
     launch = make_launch_images(app)

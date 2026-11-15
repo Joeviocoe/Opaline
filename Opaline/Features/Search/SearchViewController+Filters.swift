@@ -1,5 +1,50 @@
 import UIKit
 
+// MARK: - Persistence
+
+/// Filters survive relaunches: a user who always wants newest-first should
+/// not have to re-pick it for every query.
+extension SearchFilters {
+    static var stored: SearchFilters {
+        guard let raw = UserDefaults.standard.dictionary(
+            forKey: UserDefaultsKeys.Search.filters
+        ) as? [String: Int] else {
+            return SearchFilters()
+        }
+        var filters = SearchFilters()
+        if let value = raw["sort"].flatMap(Sort.init(rawValue:)) {
+            filters.sort = value
+        }
+        if let value = raw["date"].flatMap(UploadDate.init(rawValue:)) {
+            filters.uploadDate = value
+        }
+        if let value = raw["type"].flatMap(ContentType.init(rawValue:)) {
+            filters.type = value
+        }
+        if let value = raw["duration"].flatMap(Duration.init(rawValue:)) {
+            filters.duration = value
+        }
+        return filters
+    }
+
+    func store() {
+        let defaults = UserDefaults.standard
+        guard !isDefault else {
+            defaults.removeObject(forKey: UserDefaultsKeys.Search.filters)
+            return
+        }
+        defaults.set(
+            [
+                "sort": sort.rawValue,
+                "date": uploadDate.rawValue,
+                "type": type.rawValue,
+                "duration": duration.rawValue
+            ],
+            forKey: UserDefaultsKeys.Search.filters
+        )
+    }
+}
+
 // MARK: - Search filters UI
 
 extension SearchViewController {
@@ -156,6 +201,7 @@ extension SearchViewController {
 
     private func apply(_ change: (inout SearchFilters) -> Void) {
         change(&filters)
+        filters.store()
         updateFiltersButton()
         if !lastQuery.isEmpty {
             search(query: lastQuery)

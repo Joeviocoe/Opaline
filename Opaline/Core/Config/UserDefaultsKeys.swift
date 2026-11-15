@@ -71,6 +71,8 @@ enum UserDefaultsKeys {
 
     enum Search {
         static let history = "search_history"
+        /// Last-used `SearchFilters`, as `[field: rawValue]`; absent = defaults.
+        static let filters = "search_filters"
     }
 
     enum Localization {
