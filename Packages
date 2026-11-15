@@ -1,0 +1,22 @@
+Package: com.verback.ytlite.legacy
+Name: Opaline (iOS 9)
+Version: 1.15.49-ios9
+Architecture: iphoneos-arm
+Section: Multimedia
+Priority: optional
+Depends: firmware (>= 9.3), firmware (<< 12.0)
+Conflicts: com.verback.ytlite
+Replaces: com.verback.ytlite
+Installed-Size: 43964
+Maintainer: legacy-ios9 build
+Author: verback2308
+Homepage: https://github.com/verback2308/Opaline
+Description: Lightweight YouTube client for 32-bit iOS 9 devices
+ armv7 build for A5/A5X hardware: iPad 2/3, iPad mini 1, iPhone 4S,
+ iPod touch 5.  SponsorBlock, offline downloads, subscriptions and
+ playlists.  No ads, no tracking, no dependencies.
+Filename: ./debs/Opaline_1.15.49-ios9_iphoneos-arm.deb
+Size: 20031542
+MD5sum: a704009f385889d35e298666f8509da6
+SHA1: 80e1670ad5c2eef9e120a693a58353981bae46d2
+SHA256: 0b37d96f7fd418840a457b608158fec4bfdf567352215620619022cbc5515660
